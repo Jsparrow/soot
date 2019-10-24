@@ -26,9 +26,9 @@ import soot.Value;
 import soot.ValueBox;
 
 public interface ThrowStmt extends Stmt {
-  public ValueBox getOpBox();
+  ValueBox getOpBox();
 
-  public Value getOp();
+  Value getOp();
 
-  public void setOp(Value op);
+  void setOp(Value op);
 }

@@ -49,6 +49,8 @@ import soot.dava.internal.asg.AugmentedStmt;
 import soot.dava.toolkits.base.AST.analysis.DepthFirstAdapter;
 import soot.jimple.FieldRef;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Creates a mapping of locals and all places where they might be used
@@ -56,13 +58,14 @@ import soot.jimple.Stmt;
  *    Notice that the mapping is for SootField to uses not for FieldRef to uses
  */
 public class AllVariableUses extends DepthFirstAdapter {
-  ASTMethodNode methodNode;
+  private static final Logger logger = LoggerFactory.getLogger(AllVariableUses.class);
+
+ASTMethodNode methodNode;
 
   HashMap<Local, List> localsToUses;
   HashMap<SootField, List> fieldsToUses;
 
   public AllVariableUses(ASTMethodNode node) {
-    super();
     this.methodNode = node;
     init();
   }
@@ -74,14 +77,15 @@ public class AllVariableUses extends DepthFirstAdapter {
   }
 
   public void init() {
-    localsToUses = new HashMap<Local, List>();
-    fieldsToUses = new HashMap<SootField, List>();
+    localsToUses = new HashMap<>();
+    fieldsToUses = new HashMap<>();
   }
 
   /*
    * Notice as things stand synchblocks cant have the use of a SootField
    */
-  public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
+  @Override
+public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
     Local local = node.getLocal();
     addLocalUse(local, node);
   }
@@ -91,33 +95,31 @@ public class AllVariableUses extends DepthFirstAdapter {
    *
    * Hence the some what indirect approach
    */
-  public void inASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void inASTSwitchNode(ASTSwitchNode node) {
     Value val = node.get_Key();
-    List<Value> localUses = new ArrayList<Value>();
-    List<Value> fieldUses = new ArrayList<Value>();
+    List<Value> localUses = new ArrayList<>();
+    List<Value> fieldUses = new ArrayList<>();
 
     if (val instanceof Local) {
       localUses.add(val);
-      System.out.println("Added " + val + " to local uses for switch");
+      logger.info(new StringBuilder().append("Added ").append(val).append(" to local uses for switch").toString());
     } else if (val instanceof FieldRef) {
       fieldUses.add(val);
-      System.out.println("Added " + val + " to field uses for switch");
+      logger.info(new StringBuilder().append("Added ").append(val).append(" to field uses for switch").toString());
     } else {
       List useBoxes = val.getUseBoxes();
 
       List<Value> localsOrFieldRefs = getUsesFromBoxes(useBoxes);
-      Iterator<Value> it = localsOrFieldRefs.iterator();
-
-      while (it.hasNext()) {
-        Value temp = it.next();
+      localsOrFieldRefs.forEach(temp -> {
         if (temp instanceof Local) {
           localUses.add(temp);
-          System.out.println("Added " + temp + " to local uses for switch");
+          logger.info(new StringBuilder().append("Added ").append(temp).append(" to local uses for switch").toString());
         } else if (temp instanceof FieldRef) {
           fieldUses.add(temp);
-          System.out.println("Added " + temp + " to field uses for switch");
+          logger.info(new StringBuilder().append("Added ").append(temp).append(" to field uses for switch").toString());
         }
-      }
+      });
     }
 
     // localuses stores Locals used
@@ -138,39 +140,32 @@ public class AllVariableUses extends DepthFirstAdapter {
     } // end of going through all FieldRef uses in switch key
   }
 
-  public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
-    for (AugmentedStmt as : node.getStatements()) {
-      Stmt s = as.get_Stmt();
-      // in the case of stmtts in a stmtt sequence each stmt is considered
-      // an entity
-      // compared to the case where these stmts occur within other
-      // constructs
-      // where the node is the entity
-      checkStatementUses(s, s);
-    }
+  @Override
+public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
+    // in the case of stmtts in a stmtt sequence each stmt is considered
+	// an entity
+	// compared to the case where these stmts occur within other
+	// constructs
+	// where the node is the entity
+	node.getStatements().stream().map(AugmentedStmt::get_Stmt).forEach(s -> checkStatementUses(s, s));
   }
 
   /*
    * The init of a for loop can use a local/Sootfield The condition of a for node can use a local/SootField The update in a
    * for loop can use a local/SootField
    */
-  public void inASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void inASTForLoopNode(ASTForLoopNode node) {
 
     // checking uses in init
-    for (AugmentedStmt as : node.getInit()) {
-      Stmt s = as.get_Stmt();
-      checkStatementUses(s, node);
-    }
+	node.getInit().stream().map(AugmentedStmt::get_Stmt).forEach(s -> checkStatementUses(s, node));
 
     // checking uses in condition
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
 
     // checking uses in update
-    for (AugmentedStmt as : node.getUpdate()) {
-      Stmt s = as.get_Stmt();
-      checkStatementUses(s, node);
-    }
+	node.getUpdate().stream().map(AugmentedStmt::get_Stmt).forEach(s -> checkStatementUses(s, node));
   }
 
   public void checkStatementUses(Stmt s, Object useNodeOrStatement) {
@@ -179,9 +174,7 @@ public class AllVariableUses extends DepthFirstAdapter {
     // remeber getUsesFromBoxes returns both Locals and FieldRefs
     List<Value> uses = getUsesFromBoxes(useBoxes);
 
-    Iterator<Value> it = uses.iterator();
-    while (it.hasNext()) {
-      Value temp = it.next();
+    uses.forEach(temp -> {
       if (temp instanceof Local) {
         addLocalUse((Local) temp, useNodeOrStatement);
       } else if (temp instanceof FieldRef) {
@@ -189,7 +182,7 @@ public class AllVariableUses extends DepthFirstAdapter {
         SootField sootField = field.getField();
         addFieldUse(sootField, useNodeOrStatement);
       }
-    }
+    });
   }
 
   /*
@@ -200,10 +193,7 @@ public class AllVariableUses extends DepthFirstAdapter {
 
     // System.out.println("FOR NODE with condition:"+cond+"USE list is:"+useList);
 
-    // FOR EACH USE
-    Iterator<Value> it = useList.iterator();
-    while (it.hasNext()) {
-      Value temp = it.next();
+    useList.forEach(temp -> {
       if (temp instanceof Local) {
         addLocalUse((Local) temp, node);
       } else if (temp instanceof FieldRef) {
@@ -212,12 +202,14 @@ public class AllVariableUses extends DepthFirstAdapter {
         addFieldUse(sootField, node);
       }
     } // end of going through all locals uses in condition
+);
   }
 
   /*
    * The condition of an if node can use a local
    */
-  public void inASTIfNode(ASTIfNode node) {
+  @Override
+public void inASTIfNode(ASTIfNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }
@@ -225,7 +217,8 @@ public class AllVariableUses extends DepthFirstAdapter {
   /*
    * The condition of an ifElse node can use a local
    */
-  public void inASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void inASTIfElseNode(ASTIfElseNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }
@@ -233,7 +226,8 @@ public class AllVariableUses extends DepthFirstAdapter {
   /*
    * The condition of a while node can use a local
    */
-  public void inASTWhileNode(ASTWhileNode node) {
+  @Override
+public void inASTWhileNode(ASTWhileNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }
@@ -241,7 +235,8 @@ public class AllVariableUses extends DepthFirstAdapter {
   /*
    * The condition of a doWhile node can use a local
    */
-  public void inASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void inASTDoWhileNode(ASTDoWhileNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }
@@ -254,14 +249,14 @@ public class AllVariableUses extends DepthFirstAdapter {
    * @return a list containing all Locals and FieldRefs used in this condition
    */
   public List<Value> getUseList(ASTCondition cond) {
-    ArrayList<Value> useList = new ArrayList<Value>();
+    ArrayList<Value> useList = new ArrayList<>();
     if (cond instanceof ASTAggregatedCondition) {
       useList.addAll(getUseList(((ASTAggregatedCondition) cond).getLeftOp()));
       useList.addAll(getUseList(((ASTAggregatedCondition) cond).getRightOp()));
       return useList;
     } else if (cond instanceof ASTUnaryCondition) {
       // get uses from unary condition
-      List<Value> uses = new ArrayList<Value>();
+      List<Value> uses = new ArrayList<>();
 
       Value val = ((ASTUnaryCondition) cond).getValue();
       if (val instanceof Local || val instanceof FieldRef) {
@@ -285,7 +280,7 @@ public class AllVariableUses extends DepthFirstAdapter {
     Object temp = localsToUses.get(local);
     List<Object> uses;
     if (temp == null) {
-      uses = new ArrayList<Object>();
+      uses = new ArrayList<>();
     } else {
       uses = (ArrayList<Object>) temp;
     }
@@ -302,7 +297,7 @@ public class AllVariableUses extends DepthFirstAdapter {
     Object temp = fieldsToUses.get(field);
     List<Object> uses;
     if (temp == null) {
-      uses = new ArrayList<Object>();
+      uses = new ArrayList<>();
     } else {
       uses = (ArrayList<Object>) temp;
     }
@@ -318,7 +313,7 @@ public class AllVariableUses extends DepthFirstAdapter {
    * Method is used to strip away boxes from the actual values only those are returned which are locals or FieldRefs
    */
   private List<Value> getUsesFromBoxes(List useBoxes) {
-    ArrayList<Value> toReturn = new ArrayList<Value>();
+    ArrayList<Value> toReturn = new ArrayList<>();
     Iterator it = useBoxes.iterator();
     while (it.hasNext()) {
       Value val = ((ValueBox) it.next()).getValue();

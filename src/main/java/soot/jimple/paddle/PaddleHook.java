@@ -27,6 +27,8 @@ import java.util.Map;
 import soot.G;
 import soot.SceneTransformer;
 import soot.Singletons;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Loads the Paddle plugin.
@@ -34,50 +36,50 @@ import soot.Singletons;
  * @author Ondrej Lhotak
  */
 public class PaddleHook extends SceneTransformer {
-  public PaddleHook(Singletons.Global g) {
+  private static final Logger logger = LoggerFactory.getLogger(PaddleHook.class);
+private IPaddleTransformer paddleTransformer;
+private Object paddleG;
+
+public PaddleHook(Singletons.Global g) {
   }
 
-  public static PaddleHook v() {
+public static PaddleHook v() {
     return G.v().soot_jimple_paddle_PaddleHook();
   }
 
-  private IPaddleTransformer paddleTransformer;
-
-  public IPaddleTransformer paddleTransformer() {
+public IPaddleTransformer paddleTransformer() {
     if (paddleTransformer == null) {
       paddleTransformer = (IPaddleTransformer) instantiate("soot.jimple.paddle.PaddleTransformer");
     }
     return paddleTransformer;
   }
 
-  protected void internalTransform(String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(String phaseName, Map<String, String> options) {
     paddleTransformer().transform(phaseName, options);
   }
 
-  public Object instantiate(String className) {
+public Object instantiate(String className) {
     Object ret;
     try {
       ret = Class.forName(className).newInstance();
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException("Could not find " + className + ". Did you include Paddle on your Java classpath?");
-    } catch (InstantiationException e) {
-      throw new RuntimeException("Could not instantiate " + className + ": " + e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException("Could not instantiate " + className + ": " + e);
+      logger.error(e.getMessage(), e);
+	throw new RuntimeException(new StringBuilder().append("Could not find ").append(className).append(". Did you include Paddle on your Java classpath?").toString());
+    } catch (IllegalAccessException | InstantiationException e) {
+      throw new RuntimeException(new StringBuilder().append("Could not instantiate ").append(className).append(": ").append(e).toString());
     }
     return ret;
   }
 
-  private Object paddleG;
-
-  public Object paddleG() {
+public Object paddleG() {
     if (paddleG == null) {
       paddleG = instantiate("soot.PaddleG");
     }
     return paddleG;
   }
 
-  /**
+/**
    * This is called when Soot finishes executing all interprocedural phases. Paddle uses it to stop profiling if profiling is
    * enabled.
    */

@@ -45,26 +45,31 @@ public class JExitMonitorStmt extends AbstractOpStmt implements ExitMonitorStmt 
     super(opBox);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JExitMonitorStmt(Jimple.cloneIfNecessary(getOp()));
   }
 
-  public String toString() {
-    return Jimple.EXITMONITOR + " " + opBox.getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(Jimple.EXITMONITOR).append(" ").append(opBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.EXITMONITOR);
     up.literal(" ");
     opBox.toString(up);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseExitMonitorStmt(this);
 
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) (getOp())).convertToBaf(context, out);
 
     Unit u = Baf.v().newExitMonitorInst();
@@ -72,11 +77,13 @@ public class JExitMonitorStmt extends AbstractOpStmt implements ExitMonitorStmt 
     out.add(u);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

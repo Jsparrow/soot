@@ -45,27 +45,27 @@ import soot.util.StationaryArrayList;
 @Deprecated
 public class StronglyConnectedComponents {
   private static final Logger logger = LoggerFactory.getLogger(StronglyConnectedComponents.class);
-  private HashMap<Object, Object> nodeToColor;
-  private static final Object Visited = new Object();
-  private static final Object Black = new Object();
-  private final LinkedList<Object> finishingOrder;
-  private List<List> componentList = new ArrayList<List>();
-  private final HashMap<Object, List<Object>> nodeToComponent = new HashMap<Object, List<Object>>();
-  MutableDirectedGraph sccGraph = new HashMutableDirectedGraph();
-  private final int[] indexStack;
-  private final Object[] nodeStack;
-  private int last;
+private static final Object Visited = new Object();
+private static final Object Black = new Object();
+private HashMap<Object, Object> nodeToColor;
+private final LinkedList<Object> finishingOrder;
+private List<List> componentList = new ArrayList<>();
+private final HashMap<Object, List<Object>> nodeToComponent = new HashMap<>();
+MutableDirectedGraph sccGraph = new HashMutableDirectedGraph();
+private final int[] indexStack;
+private final Object[] nodeStack;
+private int last;
 
-  /**
+/**
    * @param g
    *          a graph for which we want to compute the strongly connected components.
    * @see DirectedGraph
    */
   public StronglyConnectedComponents(DirectedGraph g) {
-    nodeToColor = new HashMap<Object, Object>((3 * g.size()) / 2, 0.7f);
+    nodeToColor = new HashMap<>((3 * g.size()) / 2, 0.7f);
     indexStack = new int[g.size()];
     nodeStack = new Object[g.size()];
-    finishingOrder = new LinkedList<Object>();
+    finishingOrder = new LinkedList<>();
 
     // Visit each node
     {
@@ -81,25 +81,20 @@ public class StronglyConnectedComponents {
     }
 
     // Re-color all nodes white
-    nodeToColor = new HashMap<Object, Object>((3 * g.size()), 0.7f);
+    nodeToColor = new HashMap<>((3 * g.size()), 0.7f);
 
     // Visit each node via transpose edges
     {
-      Iterator<Object> revNodeIt = finishingOrder.iterator();
-      while (revNodeIt.hasNext()) {
-        Object s = revNodeIt.next();
+      finishingOrder.stream().filter(s -> nodeToColor.get(s) == null).forEach(s -> {
+	  List<Object> currentComponent = null;
 
-        if (nodeToColor.get(s) == null) {
-          List<Object> currentComponent = null;
+	  currentComponent = new StationaryArrayList();
+	  nodeToComponent.put(s, currentComponent);
+	  sccGraph.addNode(currentComponent);
+	  componentList.add(currentComponent);
 
-          currentComponent = new StationaryArrayList();
-          nodeToComponent.put(s, currentComponent);
-          sccGraph.addNode(currentComponent);
-          componentList.add(currentComponent);
-
-          visitRevNode(g, s, currentComponent);
-        }
-      }
+	  visitRevNode(g, s, currentComponent);
+	});
     }
     componentList = Collections.unmodifiableList(componentList);
 
@@ -110,7 +105,7 @@ public class StronglyConnectedComponents {
     }
   }
 
-  private void visitNode(DirectedGraph graph, Object startNode) {
+private void visitNode(DirectedGraph graph, Object startNode) {
     last = 0;
     nodeToColor.put(startNode, Visited);
 
@@ -141,7 +136,7 @@ public class StronglyConnectedComponents {
     }
   }
 
-  private void visitRevNode(DirectedGraph graph, Object startNode, List<Object> currentComponent) {
+private void visitRevNode(DirectedGraph graph, Object startNode, List<Object> currentComponent) {
     last = 0;
 
     nodeToColor.put(startNode, Visited);
@@ -181,7 +176,7 @@ public class StronglyConnectedComponents {
     }
   }
 
-  /**
+/**
    * Checks if 2 nodes are in the same strongly-connnected component.
    * 
    * @param a
@@ -194,14 +189,14 @@ public class StronglyConnectedComponents {
     return nodeToComponent.get(a) == nodeToComponent.get(b);
   }
 
-  /**
+/**
    * @return a list of the strongly-connnected components that make up the computed strongly-connnect component graph.
    */
   public List<List> getComponents() {
     return componentList;
   }
 
-  /**
+/**
    * @param a
    *          a node of the original graph.
    * @return the strongly-connnected component node to which the parameter node belongs.
@@ -210,7 +205,7 @@ public class StronglyConnectedComponents {
     return nodeToComponent.get(a);
   }
 
-  /**
+/**
    * @return the computed strongly-connnected component graph.
    * @see DirectedGraph
    */

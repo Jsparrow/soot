@@ -96,7 +96,7 @@ public class ThrowManager {
           continue;
         }
 
-        if (((SpecialInvokeExpr) ie).getBase() != throwee || !ie.getMethodRef().name().equals("<init>")) {
+        if (((SpecialInvokeExpr) ie).getBase() != throwee || !"<init>".equals(ie.getMethodRef().name())) {
           continue;
         }
 
@@ -131,9 +131,8 @@ public class ThrowManager {
     boolean canAddI = false;
     do {
       canAddI = true;
-      Iterator<Local> localIt = locals.iterator();
-      while (localIt.hasNext()) {
-        Local l = (Local) localIt.next();
+      for (Local local : locals) {
+        Local l = (Local) local;
         if (l.getName().equals("__throwee" + i)) {
           canAddI = false;
         }

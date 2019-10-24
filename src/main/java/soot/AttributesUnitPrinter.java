@@ -71,9 +71,9 @@ public class AttributesUnitPrinter {
 
   public void startValueBox(ValueBox u) {
     if (startOffsets == null) {
-      startOffsets = new Stack<Integer>();
+      startOffsets = new Stack<>();
     }
-    startOffsets.push(new Integer(output().length() - lastNewline));
+    startOffsets.push(Integer.valueOf(output().length() - lastNewline));
   }
 
   public void endValueBox(ValueBox u) {
@@ -99,12 +99,7 @@ public class AttributesUnitPrinter {
   }
 
   private boolean hasColorTag(Host h) {
-    for (Tag t : h.getTags()) {
-      if (t instanceof ColorTag) {
-        return true;
-      }
-    }
-    return false;
+    return h.getTags().stream().anyMatch(t -> t instanceof ColorTag);
   }
 
   public void setEndLn(int ln) {

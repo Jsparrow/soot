@@ -31,12 +31,13 @@ import soot.Type;
 
 public interface IInitialResolver {
 
-  public void formAst(String fullPath, List<String> locations, String className);
+  void formAst(String fullPath, List<String> locations, String className);
 
-  public Dependencies resolveFromJavaFile(SootClass sc);
+  Dependencies resolveFromJavaFile(SootClass sc);
 
   public class Dependencies {
-    public final Set<Type> typesToHierarchy, typesToSignature;
+    public final Set<Type> typesToHierarchy;
+	public final Set<Type> typesToSignature;
 
     public Dependencies() {
       typesToHierarchy = new HashSet<>();

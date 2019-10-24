@@ -58,33 +58,30 @@ import soot.options.Options;
 public class DexFileProvider {
   private static final Logger logger = LoggerFactory.getLogger(DexFileProvider.class);
 
-  private final static Comparator<DexContainer> DEFAULT_PRIORITIZER = new Comparator<DexContainer>() {
+  private static final Comparator<DexContainer> DEFAULT_PRIORITIZER = (DexContainer o1, DexContainer o2) -> {
+  String s1 = o1.getDexName();
+String s2 = o2.getDexName();
 
-    @Override
-    public int compare(DexContainer o1, DexContainer o2) {
-      String s1 = o1.getDexName(), s2 = o2.getDexName();
+  // "classes.dex" has highest priority
+  if ("classes.dex".equals(s1)) {
+    return 1;
+  } else if ("classes.dex".equals(s2)) {
+    return -1;
+  }
 
-      // "classes.dex" has highest priority
-      if (s1.equals("classes.dex")) {
-        return 1;
-      } else if (s2.equals("classes.dex")) {
-        return -1;
-      }
+  // if one of the strings starts with "classes", we give it the edge right here
+  boolean s1StartsClasses = s1.startsWith("classes");
+  boolean s2StartsClasses = s2.startsWith("classes");
 
-      // if one of the strings starts with "classes", we give it the edge right here
-      boolean s1StartsClasses = s1.startsWith("classes");
-      boolean s2StartsClasses = s2.startsWith("classes");
+  if (s1StartsClasses && !s2StartsClasses) {
+    return 1;
+  } else if (s2StartsClasses && !s1StartsClasses) {
+    return -1;
+  }
 
-      if (s1StartsClasses && !s2StartsClasses) {
-        return 1;
-      } else if (s2StartsClasses && !s1StartsClasses) {
-        return -1;
-      }
-
-      // otherwise, use natural string ordering
-      return s1.compareTo(s2);
-    }
-  };
+  // otherwise, use natural string ordering
+  return s1.compareTo(s2);
+};
   /**
    * Mapping of filesystem file (apk, dex, etc.) to mapping of dex name to dex file
    */
@@ -127,7 +124,7 @@ public class DexFileProvider {
     }
 
     if (resultList.size() > 1) {
-      Collections.sort(resultList, Collections.reverseOrder(prioritizer));
+      resultList.sort(Collections.reverseOrder(prioritizer));
     }
     return resultList;
   }
@@ -153,7 +150,7 @@ public class DexFileProvider {
       }
     }
 
-    throw new CompilationDeathException("Dex file with name '" + dexName + "' not found in " + dexSource);
+    throw new CompilationDeathException(new StringBuilder().append("Dex file with name '").append(dexName).append("' not found in ").append(dexSource).toString());
   }
 
   private List<File> allSourcesFromFile(File dexSource) throws IOException {
@@ -161,15 +158,14 @@ public class DexFileProvider {
       List<File> dexFiles = getAllDexFilesInDirectory(dexSource);
       if (dexFiles.size() > 1 && !Options.v().process_multiple_dex()) {
         File file = dexFiles.get(0);
-        logger.warn("Multiple dex files detected, only processing '" + file.getCanonicalPath()
-            + "'. Use '-process-multiple-dex' option to process them all.");
+        logger.warn(new StringBuilder().append("Multiple dex files detected, only processing '").append(file.getCanonicalPath()).append("'. Use '-process-multiple-dex' option to process them all.").toString());
         return Collections.singletonList(file);
       } else {
         return dexFiles;
       }
     } else {
       String ext = com.google.common.io.Files.getFileExtension(dexSource.getName()).toLowerCase();
-      if ((ext.equals("jar") || ext.equals("zip")) && !Options.v().search_dex_in_archives()) {
+      if (("jar".equals(ext) || "zip".equals(ext)) && !Options.v().search_dex_in_archives()) {
         return Collections.EMPTY_LIST;
       } else {
         return Collections.singletonList(dexSource);
@@ -231,13 +227,12 @@ public class DexFileProvider {
 
       if (multiple_dex) {
         dexMap.put(entryName, new DexContainer(entry, entryName, dexSourceFile));
-      } else if (dexMap.isEmpty() && (entryName.equals("classes.dex") || !entryNameIterator.hasPrevious())) {
+      } else if (dexMap.isEmpty() && ("classes.dex".equals(entryName) || !entryNameIterator.hasPrevious())) {
         // We prefer to have classes.dex in single dex mode.
         // If we haven't found a classes.dex until the last element, take the last!
         dexMap = Collections.singletonMap(entryName, new DexContainer(entry, entryName, dexSourceFile));
         if (dexFileCount > 1) {
-          logger.warn("Multiple dex files detected, only processing '" + entryName
-              + "'. Use '-process-multiple-dex' option to process them all.");
+          logger.warn(new StringBuilder().append("Multiple dex files detected, only processing '").append(entryName).append("'. Use '-process-multiple-dex' option to process them all.").toString());
         }
       }
     }
@@ -249,9 +244,9 @@ public class DexFileProvider {
   }
 
   private List<File> getAllDexFilesInDirectory(File path) {
-    Queue<File> toVisit = new ArrayDeque<File>();
-    Set<File> visited = new HashSet<File>();
-    List<File> ret = new ArrayList<File>();
+    Queue<File> toVisit = new ArrayDeque<>();
+    Set<File> visited = new HashSet<>();
+    List<File> ret = new ArrayList<>();
     toVisit.add(path);
     while (!toVisit.isEmpty()) {
       File cur = toVisit.poll();

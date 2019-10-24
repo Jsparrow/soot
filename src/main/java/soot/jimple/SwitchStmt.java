@@ -30,23 +30,23 @@ import soot.Value;
 import soot.ValueBox;
 
 public interface SwitchStmt extends Stmt {
-  public Unit getDefaultTarget();
+  Unit getDefaultTarget();
 
-  public void setDefaultTarget(Unit defaultTarget);
+  void setDefaultTarget(Unit defaultTarget);
 
-  public UnitBox getDefaultTargetBox();
+  UnitBox getDefaultTargetBox();
 
-  public Value getKey();
+  Value getKey();
 
-  public void setKey(Value key);
+  void setKey(Value key);
 
-  public ValueBox getKeyBox();
+  ValueBox getKeyBox();
 
-  public List<Unit> getTargets();
+  List<Unit> getTargets();
 
-  public Unit getTarget(int index);
+  Unit getTarget(int index);
 
-  public void setTarget(int index, Unit target);
+  void setTarget(int index, Unit target);
 
-  public UnitBox getTargetBox(int index);
+  UnitBox getTargetBox(int index);
 }

@@ -44,20 +44,17 @@ import soot.toolkits.graph.pdg.MHGDominatorTree;
 public class TestDominance {
 
     public Set<Integer> kid_ids(DominatorNode<Node> dn) {
-        Set<Integer> kids = new HashSet<Integer>();
-        for (DominatorNode<Node> dkid : dn.getChildren()) {
-            Node kid = dkid.getGode();
-            kids.add(kid.id);
-        }
+        Set<Integer> kids = new HashSet<>();
+        dn.getChildren().stream().map(DominatorNode::getGode).forEach(kid -> kids.add(kid.id));
         return kids;
     }
 
     public Map<Integer,DominatorNode<Node>> kid_map(DominatorNode<Node> dn) {
-        Map<Integer,DominatorNode<Node>> kids = new HashMap<Integer,DominatorNode<Node>>();
-        for (DominatorNode<Node> dkid : dn.getChildren()) {
+        Map<Integer,DominatorNode<Node>> kids = new HashMap<>();
+        dn.getChildren().forEach(dkid -> {
             Node kid = dkid.getGode();
             kids.put(kid.id, dkid);
-        }
+        });
         return kids;
     }
 
@@ -66,8 +63,8 @@ public class TestDominance {
         Node x = new Node(4);
         Node n = new Node(1).addkid((new Node(2)).addkid(x)).addkid((new Node(3)).addkid(x));
         Graph g = new Graph(n);
-        MHGDominatorsFinder<Node> finder = new MHGDominatorsFinder<Node>(g);
-        DominatorTree<Node> tree = new DominatorTree<Node>(finder);
+        MHGDominatorsFinder<Node> finder = new MHGDominatorsFinder<>(g);
+        DominatorTree<Node> tree = new DominatorTree<>(finder);
         assertThat(tree.getHeads().size(), is(1));
 
         DominatorNode<Node> head = tree.getHeads().get(0);
@@ -103,8 +100,8 @@ public class TestDominance {
         n10.addkid(n11);
         Graph g = new Graph(n1);
 
-        MHGDominatorsFinder<Node> finder = new MHGDominatorsFinder<Node>(g);
-        DominatorTree<Node> tree = new DominatorTree<Node>(finder);
+        MHGDominatorsFinder<Node> finder = new MHGDominatorsFinder<>(g);
+        DominatorTree<Node> tree = new DominatorTree<>(finder);
         assertThat(tree.getHeads().size(), is(1));
 
         DominatorNode<Node> n = tree.getHeads().get(0);
@@ -175,8 +172,8 @@ public class TestDominance {
         n5.addkid(n6);
         Graph g = new Graph(n1);
 
-        MHGDominatorsFinder<Node> finder = new MHGDominatorsFinder<Node>(g);
-        MHGDominatorTree<Node> tree = new MHGDominatorTree<Node>(finder);
+        MHGDominatorsFinder<Node> finder = new MHGDominatorsFinder<>(g);
+        MHGDominatorTree<Node> tree = new MHGDominatorTree<>(finder);
         assertThat(tree.getHeads().size(), is(1));
 
         DominatorNode<Node> n = tree.getHeads().get(0);
@@ -210,14 +207,14 @@ public class TestDominance {
 
         // ---------- now post-dom --------------
 
-        MHGPostDominatorsFinder<Node> pfinder = new MHGPostDominatorsFinder<Node>(g);
-        tree = new MHGDominatorTree<Node>(pfinder);
+        MHGPostDominatorsFinder<Node> pfinder = new MHGPostDominatorsFinder<>(g);
+        tree = new MHGDominatorTree<>(pfinder);
 
-        Map<Integer,DominatorNode<Node>> heads = new HashMap<Integer,DominatorNode<Node>>();
-        for (DominatorNode<Node> dhead : tree.getHeads()) {
+        Map<Integer,DominatorNode<Node>> heads = new HashMap<>();
+        tree.getHeads().forEach(dhead -> {
             Node head = dhead.getGode();
             heads.put(head.id, dhead);
-        }
+        });
 
         Set<Integer> head_ids = heads.keySet();
         assertThat(head_ids.size(), is(3));
@@ -255,7 +252,7 @@ class Graph implements DirectedGraph<Node> {
 
     Node root;
     List<Node> nodes;
-    List<Node> tails = new ArrayList<Node>();
+    List<Node> tails = new ArrayList<>();
 
     public Graph(Node root) {
         this.root = root;
@@ -269,33 +266,38 @@ class Graph implements DirectedGraph<Node> {
     /** 
      *  Returns a list of entry points for this graph.
      */
-    public List<Node> getHeads() {
+    @Override
+	public List<Node> getHeads() {
         return Collections.singletonList(this.root);
     }
 
     /** Returns a list of exit points for this graph. */
-    public List<Node> getTails() {
+    @Override
+	public List<Node> getTails() {
         return tails;
     }
 
     /** 
      *  Returns a list of predecessors for the given node in the graph.
      */
-    public List<Node> getPredsOf(Node s){
+    @Override
+	public List<Node> getPredsOf(Node s){
         return ((Node)s).preds;
     }
 
     /**
      *  Returns a list of successors for the given node in the graph.
      */
-    public List<Node> getSuccsOf(Node s) {
+    @Override
+	public List<Node> getSuccsOf(Node s) {
         return ((Node)s).succs;
     }
 
     /**
      *  Returns the node count for this graph.
      */
-    public int size() {
+    @Override
+	public int size() {
         if (this.nodes == null) {
              this.nodes = this.dfs(this.root);
         }
@@ -306,7 +308,8 @@ class Graph implements DirectedGraph<Node> {
      *  Returns an iterator for the nodes in this graph. No specific ordering
      *  of the nodes is guaranteed.
      */
-    public Iterator<Node> iterator() {
+    @Override
+	public Iterator<Node> iterator() {
         if (this.nodes == null) {
              this.nodes = this.dfs(this.root);
         }
@@ -315,8 +318,8 @@ class Graph implements DirectedGraph<Node> {
     }
 
     public List<Node> dfs(Node root) {
-        List<Node> list = new ArrayList<Node>();
-        Set<Node> seen = new HashSet<Node>();
+        List<Node> list = new ArrayList<>();
+        Set<Node> seen = new HashSet<>();
         dfs_visit(root, seen, list);
         return list;
     }
@@ -324,24 +327,16 @@ class Graph implements DirectedGraph<Node> {
     void dfs_visit(Node node, Set<Node> seen, List<Node> list) {
         seen.add(node);
         list.add(node);
-        for (Node kid : node.succs) {
-            if (!seen.contains(kid)) {
-                dfs_visit(kid, seen, list);
-            }
-        }
-        for (Node parent : node.preds) {
-            if (!seen.contains(parent)) {
-                dfs_visit(parent, seen, list);
-            }
-        }
+        node.succs.stream().filter(kid -> !seen.contains(kid)).forEach(kid -> dfs_visit(kid, seen, list));
+        node.preds.stream().filter(parent -> !seen.contains(parent)).forEach(parent -> dfs_visit(parent, seen, list));
     }
 }
 
 class Node {
 
     int id;
-    List<Node> preds = new ArrayList<Node>();
-    List<Node> succs = new ArrayList<Node>();
+    List<Node> preds = new ArrayList<>();
+    List<Node> succs = new ArrayList<>();
 
     public Node(int id) {
         this.id = id;
@@ -353,7 +348,8 @@ class Node {
         return this;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return this.id;
     }
 

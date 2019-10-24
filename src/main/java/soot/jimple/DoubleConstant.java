@@ -157,7 +157,7 @@ public class DoubleConstant extends RealConstant {
   public String toString() {
     String doubleString = Double.toString(value);
 
-    if (doubleString.equals("NaN") || doubleString.equals("Infinity") || doubleString.equals("-Infinity")) {
+    if ("NaN".equals(doubleString) || "Infinity".equals(doubleString) || "-Infinity".equals(doubleString)) {
       return "#" + doubleString;
     } else {
       return doubleString;

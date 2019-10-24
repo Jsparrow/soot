@@ -211,196 +211,200 @@ import soot.toolkits.exceptions.ThrowableSet.Pair;
  */
 public class UnitThrowAnalysis extends AbstractThrowAnalysis {
 
-  protected final ThrowableSet.Manager mgr = ThrowableSet.Manager.v();
-
-  // Cache the response to mightThrowImplicitly():
-  private final ThrowableSet implicitThrowExceptions = ThrowableSet.Manager.v().VM_ERRORS
-      .add(ThrowableSet.Manager.v().NULL_POINTER_EXCEPTION).add(ThrowableSet.Manager.v().ILLEGAL_MONITOR_STATE_EXCEPTION);
-
-  /**
-   * Constructs a <code>UnitThrowAnalysis</code> for inclusion in Soot's global variable manager, {@link G}.
-   *
-   * @param g
-   *          guarantees that the constructor may only be called from {@link Singletons}.
-   */
-  public UnitThrowAnalysis(Singletons.Global g) {
-    this(false);
-  }
-
-  /**
-   * A protected constructor for use by unit tests.
-   */
-  protected UnitThrowAnalysis() {
-    this(false);
-  }
-
-  /**
-   * Returns the single instance of <code>UnitThrowAnalysis</code>.
-   *
-   * @return Soot's <code>UnitThrowAnalysis</code>.
-   */
-  public static UnitThrowAnalysis v() {
-    return G.v().soot_toolkits_exceptions_UnitThrowAnalysis();
-  }
-
-  protected final boolean isInterproc;
-
-  protected UnitThrowAnalysis(boolean isInterproc) {
-    this.isInterproc = isInterproc;
-  }
-
   public static UnitThrowAnalysis interproceduralAnalysis = null;
 
-  public static UnitThrowAnalysis interproc() {
-    if (interproceduralAnalysis == null) {
-      interproceduralAnalysis = new UnitThrowAnalysis(true);
-    }
-    return interproceduralAnalysis;
-  }
+	private static final IntConstant INT_CONSTANT_ZERO = IntConstant.v(0);
 
-  protected ThrowableSet defaultResult() {
-    return mgr.VM_ERRORS;
-  }
+	private static final LongConstant LONG_CONSTANT_ZERO = LongConstant.v(0);
 
-  protected UnitSwitch unitSwitch() {
-    return new UnitSwitch();
-  }
+	protected final ThrowableSet.Manager mgr = ThrowableSet.Manager.v();
 
-  protected ValueSwitch valueSwitch() {
-    return new ValueSwitch();
-  }
+	// Cache the response to mightThrowImplicitly():
+	  private final ThrowableSet implicitThrowExceptions = ThrowableSet.Manager.v().VM_ERRORS
+	      .add(ThrowableSet.Manager.v().NULL_POINTER_EXCEPTION).add(ThrowableSet.Manager.v().ILLEGAL_MONITOR_STATE_EXCEPTION);
 
-  public ThrowableSet mightThrow(Unit u) {
-    UnitSwitch sw = unitSwitch();
-    u.apply(sw);
-    return sw.getResult();
-  }
+	protected final boolean isInterproc;
 
-  public ThrowableSet mightThrowImplicitly(ThrowInst t) {
-    return implicitThrowExceptions;
-  }
+	protected final LoadingCache<SootMethod, ThrowableSet> methodToThrowSet
+	      = IDESolver.DEFAULT_CACHE_BUILDER.build(new CacheLoader<SootMethod, ThrowableSet>() {
+	        @Override
+	        public ThrowableSet load(SootMethod sm) throws Exception {
+	          return mightThrow(sm, new HashSet<>());
+	        }
+	      });
 
-  public ThrowableSet mightThrowImplicitly(ThrowStmt t) {
-    return implicitThrowExceptions;
-  }
+	/**
+	   * Constructs a <code>UnitThrowAnalysis</code> for inclusion in Soot's global variable manager, {@link G}.
+	   *
+	   * @param g
+	   *          guarantees that the constructor may only be called from {@link Singletons}.
+	   */
+	  public UnitThrowAnalysis(Singletons.Global g) {
+	    this(false);
+	  }
 
-  protected ThrowableSet mightThrow(Value v) {
-    ValueSwitch sw = valueSwitch();
-    v.apply(sw);
-    return sw.getResult();
-  }
+	/**
+	   * A protected constructor for use by unit tests.
+	   */
+	  protected UnitThrowAnalysis() {
+	    this(false);
+	  }
 
-  protected ThrowableSet mightThrow(SootMethodRef m) {
-    // The throw analysis is used in the front-ends. Conseqeuently, some
-    // methods might not yet be loaded. If this is the case, we make
-    // conservative assumptions.
-    SootMethod sm = m.tryResolve();
-    if (sm != null) {
-      return mightThrow(sm);
-    } else {
-      return mgr.ALL_THROWABLES;
-    }
-  }
+	protected UnitThrowAnalysis(boolean isInterproc) {
+	    this.isInterproc = isInterproc;
+	  }
 
-  /**
-   * Returns the set of types that might be thrown as a result of calling the specified method.
-   *
-   * @param sm
-   *          method whose exceptions are to be returned.
-   *
-   * @return a representation of the set of {@link java.lang.Throwable Throwable} types that <code>m</code> might throw.
-   */
-  protected ThrowableSet mightThrow(SootMethod sm) {
-    if (!isInterproc) {
-      return ThrowableSet.Manager.v().ALL_THROWABLES;
-    }
-    return methodToThrowSet.getUnchecked(sm);
-  }
+	/**
+	   * Returns the single instance of <code>UnitThrowAnalysis</code>.
+	   *
+	   * @return Soot's <code>UnitThrowAnalysis</code>.
+	   */
+	  public static UnitThrowAnalysis v() {
+	    return G.v().soot_toolkits_exceptions_UnitThrowAnalysis();
+	  }
 
-  protected final LoadingCache<SootMethod, ThrowableSet> methodToThrowSet
-      = IDESolver.DEFAULT_CACHE_BUILDER.build(new CacheLoader<SootMethod, ThrowableSet>() {
-        @Override
-        public ThrowableSet load(SootMethod sm) throws Exception {
-          return mightThrow(sm, new HashSet<SootMethod>());
-        }
-      });
+	public static UnitThrowAnalysis interproc() {
+	    if (interproceduralAnalysis == null) {
+	      interproceduralAnalysis = new UnitThrowAnalysis(true);
+	    }
+	    return interproceduralAnalysis;
+	  }
 
-  /**
-   * Returns the set of types that might be thrown as a result of calling the specified method.
-   *
-   * @param sm
-   *          method whose exceptions are to be returned.
-   * @param doneSet
-   *          The set of methods that were already processed
-   *
-   * @return a representation of the set of {@link java.lang.Throwable Throwable} types that <code>m</code> might throw.
-   */
-  private ThrowableSet mightThrow(SootMethod sm, Set<SootMethod> doneSet) {
-    // Do not run in loops
-    if (!doneSet.add(sm)) {
-      return ThrowableSet.Manager.v().EMPTY;
-    }
+	protected ThrowableSet defaultResult() {
+	    return mgr.VM_ERRORS;
+	  }
 
-    // If we don't have body, we silently ignore the method. This is
-    // unsound, but would otherwise always bloat our result set.
-    if (!sm.hasActiveBody()) {
-      return ThrowableSet.Manager.v().EMPTY;
-    }
+	protected UnitSwitch unitSwitch() {
+	    return new UnitSwitch();
+	  }
 
-    // We need a mapping between unit and exception
-    final PatchingChain<Unit> units = sm.getActiveBody().getUnits();
-    Map<Unit, Collection<Trap>> unitToTraps
-        = sm.getActiveBody().getTraps().isEmpty() ? null : new HashMap<Unit, Collection<Trap>>();
-    for (Trap t : sm.getActiveBody().getTraps()) {
-      for (Iterator<Unit> unitIt = units.iterator(t.getBeginUnit(), units.getPredOf(t.getEndUnit())); unitIt.hasNext();) {
-        Unit unit = unitIt.next();
+	protected ValueSwitch valueSwitch() {
+	    return new ValueSwitch();
+	  }
 
-        Collection<Trap> unitsForTrap = unitToTraps.get(unit);
-        if (unitsForTrap == null) {
-          unitsForTrap = new ArrayList<Trap>();
-          unitToTraps.put(unit, unitsForTrap);
-        }
-        unitsForTrap.add(t);
-      }
-    }
+	@Override
+	public ThrowableSet mightThrow(Unit u) {
+	    UnitSwitch sw = unitSwitch();
+	    u.apply(sw);
+	    return sw.getResult();
+	  }
 
-    ThrowableSet methodSet = ThrowableSet.Manager.v().EMPTY;
-    if (sm.hasActiveBody()) {
-      Body methodBody = sm.getActiveBody();
+	@Override
+	public ThrowableSet mightThrowImplicitly(ThrowInst t) {
+	    return implicitThrowExceptions;
+	  }
 
-      for (Unit u : methodBody.getUnits()) {
-        if (u instanceof Stmt) {
-          Stmt stmt = (Stmt) u;
-          ThrowableSet curStmtSet;
-          if (stmt.containsInvokeExpr()) {
-            InvokeExpr inv = stmt.getInvokeExpr();
-            curStmtSet = mightThrow(inv.getMethod(), doneSet);
-          } else {
-            curStmtSet = mightThrow(u);
-          }
+	@Override
+	public ThrowableSet mightThrowImplicitly(ThrowStmt t) {
+	    return implicitThrowExceptions;
+	  }
 
-          // The exception might be caught along the way
-          if (unitToTraps != null) {
-            Collection<Trap> trapsForUnit = unitToTraps.get(stmt);
-            if (trapsForUnit != null) {
-              for (Trap t : trapsForUnit) {
-                Pair p = curStmtSet.whichCatchableAs(t.getException().getType());
-                curStmtSet = curStmtSet.remove(p.getCaught());
-              }
-            }
-          }
+	protected ThrowableSet mightThrow(Value v) {
+	    ValueSwitch sw = valueSwitch();
+	    v.apply(sw);
+	    return sw.getResult();
+	  }
 
-          methodSet = methodSet.add(curStmtSet);
-        }
-      }
-    }
-    return methodSet;
-  }
+	protected ThrowableSet mightThrow(SootMethodRef m) {
+	    // The throw analysis is used in the front-ends. Conseqeuently, some
+	    // methods might not yet be loaded. If this is the case, we make
+	    // conservative assumptions.
+	    SootMethod sm = m.tryResolve();
+	    if (sm != null) {
+	      return mightThrow(sm);
+	    } else {
+	      return mgr.ALL_THROWABLES;
+	    }
+	  }
 
-  private static final IntConstant INT_CONSTANT_ZERO = IntConstant.v(0);
-  private static final LongConstant LONG_CONSTANT_ZERO = LongConstant.v(0);
+	/**
+	   * Returns the set of types that might be thrown as a result of calling the specified method.
+	   *
+	   * @param sm
+	   *          method whose exceptions are to be returned.
+	   *
+	   * @return a representation of the set of {@link java.lang.Throwable Throwable} types that <code>m</code> might throw.
+	   */
+	  protected ThrowableSet mightThrow(SootMethod sm) {
+	    if (!isInterproc) {
+	      return ThrowableSet.Manager.v().ALL_THROWABLES;
+	    }
+	    return methodToThrowSet.getUnchecked(sm);
+	  }
 
-  protected class UnitSwitch implements InstSwitch, StmtSwitch {
+	/**
+	   * Returns the set of types that might be thrown as a result of calling the specified method.
+	   *
+	   * @param sm
+	   *          method whose exceptions are to be returned.
+	   * @param doneSet
+	   *          The set of methods that were already processed
+	   *
+	   * @return a representation of the set of {@link java.lang.Throwable Throwable} types that <code>m</code> might throw.
+	   */
+	  private ThrowableSet mightThrow(SootMethod sm, Set<SootMethod> doneSet) {
+	    // Do not run in loops
+	    if (!doneSet.add(sm)) {
+	      return ThrowableSet.Manager.v().EMPTY;
+	    }
+	
+	    // If we don't have body, we silently ignore the method. This is
+	    // unsound, but would otherwise always bloat our result set.
+	    if (!sm.hasActiveBody()) {
+	      return ThrowableSet.Manager.v().EMPTY;
+	    }
+	
+	    // We need a mapping between unit and exception
+	    final PatchingChain<Unit> units = sm.getActiveBody().getUnits();
+	    Map<Unit, Collection<Trap>> unitToTraps
+	        = sm.getActiveBody().getTraps().isEmpty() ? null : new HashMap<Unit, Collection<Trap>>();
+	    sm.getActiveBody().getTraps().forEach(t -> {
+	      for (Iterator<Unit> unitIt = units.iterator(t.getBeginUnit(), units.getPredOf(t.getEndUnit())); unitIt.hasNext();) {
+	        Unit unit = unitIt.next();
+	
+	        Collection<Trap> unitsForTrap = unitToTraps.get(unit);
+	        if (unitsForTrap == null) {
+	          unitsForTrap = new ArrayList<>();
+	          unitToTraps.put(unit, unitsForTrap);
+	        }
+	        unitsForTrap.add(t);
+	      }
+	    });
+	
+	    ThrowableSet methodSet = ThrowableSet.Manager.v().EMPTY;
+	    if (sm.hasActiveBody()) {
+	      Body methodBody = sm.getActiveBody();
+	
+	      for (Unit u : methodBody.getUnits()) {
+	        if (u instanceof Stmt) {
+	          Stmt stmt = (Stmt) u;
+	          ThrowableSet curStmtSet;
+	          if (stmt.containsInvokeExpr()) {
+	            InvokeExpr inv = stmt.getInvokeExpr();
+	            curStmtSet = mightThrow(inv.getMethod(), doneSet);
+	          } else {
+	            curStmtSet = mightThrow(u);
+	          }
+	
+	          // The exception might be caught along the way
+	          if (unitToTraps != null) {
+	            Collection<Trap> trapsForUnit = unitToTraps.get(stmt);
+	            if (trapsForUnit != null) {
+	              for (Trap t : trapsForUnit) {
+	                Pair p = curStmtSet.whichCatchableAs(t.getException().getType());
+	                curStmtSet = curStmtSet.remove(p.getCaught());
+	              }
+	            }
+	          }
+	
+	          methodSet = methodSet.add(curStmtSet);
+	        }
+	      }
+	    }
+	    return methodSet;
+	  }
+
+protected class UnitSwitch implements InstSwitch, StmtSwitch {
 
     // Asynchronous errors are always possible:
     protected ThrowableSet result = defaultResult();
@@ -841,124 +845,156 @@ public class UnitThrowAnalysis extends AbstractThrowAnalysis {
 
     // Declared by ConstantSwitch interface:
 
-    public void caseDoubleConstant(DoubleConstant c) {
+    @Override
+	public void caseDoubleConstant(DoubleConstant c) {
     }
 
-    public void caseFloatConstant(FloatConstant c) {
+    @Override
+	public void caseFloatConstant(FloatConstant c) {
     }
 
-    public void caseIntConstant(IntConstant c) {
+    @Override
+	public void caseIntConstant(IntConstant c) {
     }
 
-    public void caseLongConstant(LongConstant c) {
+    @Override
+	public void caseLongConstant(LongConstant c) {
     }
 
-    public void caseNullConstant(NullConstant c) {
+    @Override
+	public void caseNullConstant(NullConstant c) {
     }
 
-    public void caseStringConstant(StringConstant c) {
+    @Override
+	public void caseStringConstant(StringConstant c) {
     }
 
-    public void caseClassConstant(ClassConstant c) {
+    @Override
+	public void caseClassConstant(ClassConstant c) {
     }
 
-    public void caseMethodHandle(MethodHandle handle) {
+    @Override
+	public void caseMethodHandle(MethodHandle handle) {
     }
     
-    public void caseMethodType(MethodType type) {
+    @Override
+	public void caseMethodType(MethodType type) {
     }
     
     // Declared by ExprSwitch interface:
 
-    public void caseAddExpr(AddExpr expr) {
+    @Override
+	public void caseAddExpr(AddExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseAndExpr(AndExpr expr) {
+    @Override
+	public void caseAndExpr(AndExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseCmpExpr(CmpExpr expr) {
+    @Override
+	public void caseCmpExpr(CmpExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseCmpgExpr(CmpgExpr expr) {
+    @Override
+	public void caseCmpgExpr(CmpgExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseCmplExpr(CmplExpr expr) {
+    @Override
+	public void caseCmplExpr(CmplExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseDivExpr(DivExpr expr) {
+    @Override
+	public void caseDivExpr(DivExpr expr) {
       caseBinopDivExpr(expr);
     }
 
-    public void caseEqExpr(EqExpr expr) {
+    @Override
+	public void caseEqExpr(EqExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseNeExpr(NeExpr expr) {
+    @Override
+	public void caseNeExpr(NeExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseGeExpr(GeExpr expr) {
+    @Override
+	public void caseGeExpr(GeExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseGtExpr(GtExpr expr) {
+    @Override
+	public void caseGtExpr(GtExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseLeExpr(LeExpr expr) {
+    @Override
+	public void caseLeExpr(LeExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseLtExpr(LtExpr expr) {
+    @Override
+	public void caseLtExpr(LtExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseMulExpr(MulExpr expr) {
+    @Override
+	public void caseMulExpr(MulExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseOrExpr(OrExpr expr) {
+    @Override
+	public void caseOrExpr(OrExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseRemExpr(RemExpr expr) {
+    @Override
+	public void caseRemExpr(RemExpr expr) {
       caseBinopDivExpr(expr);
     }
 
-    public void caseShlExpr(ShlExpr expr) {
+    @Override
+	public void caseShlExpr(ShlExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseShrExpr(ShrExpr expr) {
+    @Override
+	public void caseShrExpr(ShrExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseUshrExpr(UshrExpr expr) {
+    @Override
+	public void caseUshrExpr(UshrExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseSubExpr(SubExpr expr) {
+    @Override
+	public void caseSubExpr(SubExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseXorExpr(XorExpr expr) {
+    @Override
+	public void caseXorExpr(XorExpr expr) {
       caseBinopExpr(expr);
     }
 
-    public void caseInterfaceInvokeExpr(InterfaceInvokeExpr expr) {
+    @Override
+	public void caseInterfaceInvokeExpr(InterfaceInvokeExpr expr) {
       caseInstanceInvokeExpr(expr);
     }
 
-    public void caseSpecialInvokeExpr(SpecialInvokeExpr expr) {
+    @Override
+	public void caseSpecialInvokeExpr(SpecialInvokeExpr expr) {
       caseInstanceInvokeExpr(expr);
     }
 
-    public void caseStaticInvokeExpr(StaticInvokeExpr expr) {
+    @Override
+	public void caseStaticInvokeExpr(StaticInvokeExpr expr) {
       result = result.add(mgr.INITIALIZATION_ERRORS);
       for (int i = 0; i < expr.getArgCount(); i++) {
         result = result.add(mightThrow(expr.getArg(i)));
@@ -966,16 +1002,19 @@ public class UnitThrowAnalysis extends AbstractThrowAnalysis {
       result = result.add(mightThrow(expr.getMethodRef()));
     }
 
-    public void caseVirtualInvokeExpr(VirtualInvokeExpr expr) {
+    @Override
+	public void caseVirtualInvokeExpr(VirtualInvokeExpr expr) {
       caseInstanceInvokeExpr(expr);
     }
 
     // INSERTED for invokedynamic UnitThrowAnalysis.java
-    public void caseDynamicInvokeExpr(DynamicInvokeExpr expr) {
+    @Override
+	public void caseDynamicInvokeExpr(DynamicInvokeExpr expr) {
       // caseInstanceInvokeExpr(expr);
     }
 
-    public void caseCastExpr(CastExpr expr) {
+    @Override
+	public void caseCastExpr(CastExpr expr) {
       result = result.add(mgr.RESOLVE_CLASS_ERRORS);
       Type fromType = expr.getOp().getType();
       Type toType = expr.getCastType();
@@ -991,12 +1030,14 @@ public class UnitThrowAnalysis extends AbstractThrowAnalysis {
       result = result.add(mightThrow(expr.getOp()));
     }
 
-    public void caseInstanceOfExpr(InstanceOfExpr expr) {
+    @Override
+	public void caseInstanceOfExpr(InstanceOfExpr expr) {
       result = result.add(mgr.RESOLVE_CLASS_ERRORS);
       result = result.add(mightThrow(expr.getOp()));
     }
 
-    public void caseNewArrayExpr(NewArrayExpr expr) {
+    @Override
+	public void caseNewArrayExpr(NewArrayExpr expr) {
       if (expr.getBaseType() instanceof RefLikeType) {
         result = result.add(mgr.RESOLVE_CLASS_ERRORS);
       }
@@ -1008,7 +1049,8 @@ public class UnitThrowAnalysis extends AbstractThrowAnalysis {
       result = result.add(mightThrow(count));
     }
 
-    public void caseNewMultiArrayExpr(NewMultiArrayExpr expr) {
+    @Override
+	public void caseNewMultiArrayExpr(NewMultiArrayExpr expr) {
       result = result.add(mgr.RESOLVE_CLASS_ERRORS);
       for (int i = 0; i < expr.getSizeCount(); i++) {
         Value count = expr.getSize(i);
@@ -1020,7 +1062,8 @@ public class UnitThrowAnalysis extends AbstractThrowAnalysis {
       }
     }
 
-    @SuppressWarnings("rawtypes")
+    @Override
+	@SuppressWarnings("rawtypes")
     public void caseNewExpr(NewExpr expr) {
       result = result.add(mgr.INITIALIZATION_ERRORS);
       for (Iterator i = expr.getUseBoxes().iterator(); i.hasNext();) {
@@ -1029,51 +1072,62 @@ public class UnitThrowAnalysis extends AbstractThrowAnalysis {
       }
     }
 
-    public void caseLengthExpr(LengthExpr expr) {
+    @Override
+	public void caseLengthExpr(LengthExpr expr) {
       result = result.add(mgr.NULL_POINTER_EXCEPTION);
       result = result.add(mightThrow(expr.getOp()));
     }
 
-    public void caseNegExpr(NegExpr expr) {
+    @Override
+	public void caseNegExpr(NegExpr expr) {
       result = result.add(mightThrow(expr.getOp()));
     }
 
     // Declared by RefSwitch interface:
 
-    public void caseArrayRef(ArrayRef ref) {
+    @Override
+	public void caseArrayRef(ArrayRef ref) {
       result = result.add(mgr.NULL_POINTER_EXCEPTION);
       result = result.add(mgr.ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION);
       result = result.add(mightThrow(ref.getBase()));
       result = result.add(mightThrow(ref.getIndex()));
     }
 
-    public void caseStaticFieldRef(StaticFieldRef ref) {
+    @Override
+	public void caseStaticFieldRef(StaticFieldRef ref) {
       result = result.add(mgr.INITIALIZATION_ERRORS);
     }
 
-    public void caseInstanceFieldRef(InstanceFieldRef ref) {
+    @Override
+	public void caseInstanceFieldRef(InstanceFieldRef ref) {
       result = result.add(mgr.RESOLVE_FIELD_ERRORS);
       result = result.add(mgr.NULL_POINTER_EXCEPTION);
       result = result.add(mightThrow(ref.getBase()));
     }
 
-    public void caseParameterRef(ParameterRef v) {
+    @Override
+	public void caseParameterRef(ParameterRef v) {
     }
 
-    public void caseCaughtExceptionRef(CaughtExceptionRef v) {
+    @Override
+	public void caseCaughtExceptionRef(CaughtExceptionRef v) {
     }
 
-    public void caseThisRef(ThisRef v) {
+    @Override
+	public void caseThisRef(ThisRef v) {
     }
 
-    public void caseLocal(Local l) {
+    @Override
+	public void caseLocal(Local l) {
     }
 
-    public void caseNewInvokeExpr(NewInvokeExpr e) {
+    @Override
+	public void caseNewInvokeExpr(NewInvokeExpr e) {
       caseStaticInvokeExpr(e);
     }
 
-    @SuppressWarnings("rawtypes")
+    @Override
+	@SuppressWarnings("rawtypes")
     public void casePhiExpr(PhiExpr e) {
       for (Iterator i = e.getUseBoxes().iterator(); i.hasNext();) {
         ValueBox box = (ValueBox) i.next();
@@ -1081,7 +1135,8 @@ public class UnitThrowAnalysis extends AbstractThrowAnalysis {
       }
     }
 
-    public void defaultCase(Object obj) {
+    @Override
+	public void defaultCase(Object obj) {
     }
 
     // The remaining cases are not declared by GrimpValueSwitch,

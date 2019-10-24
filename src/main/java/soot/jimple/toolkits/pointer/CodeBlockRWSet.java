@@ -36,7 +36,8 @@ import soot.jimple.spark.sets.P2SetVisitor;
 import soot.jimple.spark.sets.PointsToSetInternal;
 
 public class CodeBlockRWSet extends MethodRWSet {
-  public int size() {
+  @Override
+public int size() {
     if (globals == null) {
       if (fields == null) {
         return 0;
@@ -52,13 +53,14 @@ public class CodeBlockRWSet extends MethodRWSet {
     }
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     boolean empty = true;
-    final StringBuffer ret = new StringBuffer();
+    StringBuilder ret = new StringBuilder();
     if (fields != null) {
       for (Object element : fields.keySet()) {
         final Object field = element;
-        ret.append("[Field: " + field + " ");
+        ret.append(new StringBuilder().append("[Field: ").append(field).append(" ").toString());
         Object baseObj = fields.get(field);
         if (baseObj instanceof PointsToSetInternal) {
           /*
@@ -76,7 +78,7 @@ public class CodeBlockRWSet extends MethodRWSet {
     if (globals != null) {
       for (Iterator globalIt = globals.iterator(); globalIt.hasNext();) {
         final Object global = globalIt.next();
-        ret.append("[Global: " + global + "]\n");
+        ret.append(new StringBuilder().append("[Global: ").append(global).append("]\n").toString());
         empty = false;
       }
     }
@@ -87,7 +89,8 @@ public class CodeBlockRWSet extends MethodRWSet {
   }
 
   /** Adds the RWSet other into this set. */
-  public boolean union(RWSet other) {
+  @Override
+public boolean union(RWSet other) {
     if (other == null) {
       return false;
     }
@@ -105,7 +108,7 @@ public class CodeBlockRWSet extends MethodRWSet {
         ret = !isFull | ret;
         isFull = true;
         if (true) {
-          throw new RuntimeException("attempt to add full set " + o + " into " + this);
+          throw new RuntimeException(new StringBuilder().append("attempt to add full set ").append(o).append(" into ").append(this).toString());
         }
         globals = null;
         fields = null;
@@ -119,7 +122,7 @@ public class CodeBlockRWSet extends MethodRWSet {
         if (globals.size() > MAX_SIZE) {
           globals = null;
           isFull = true;
-          throw new RuntimeException("attempt to add full set " + o + " into " + this);
+          throw new RuntimeException(new StringBuilder().append("attempt to add full set ").append(o).append(" into ").append(this).toString());
         }
       }
       if (o.fields != null) {
@@ -138,15 +141,13 @@ public class CodeBlockRWSet extends MethodRWSet {
       }
     } else if (other instanceof SiteRWSet) {
       SiteRWSet oth = (SiteRWSet) other;
-      for (RWSet set : oth.sets) {
-        this.union(set);
-      }
+      oth.sets.forEach(this::union);
     }
-    if (!getCallsNative() && other.getCallsNative()) {
-      setCallsNative();
-      return true;
-    }
-    return ret;
+    if (!(!getCallsNative() && other.getCallsNative())) {
+		return ret;
+	}
+	setCallsNative();
+	return true;
   }
 
   public boolean containsField(Object field) {
@@ -174,10 +175,8 @@ public class CodeBlockRWSet extends MethodRWSet {
     }
 
     if (fields != null && other.fields != null && !fields.isEmpty() && !other.fields.isEmpty()) {
-      for (Object element : other.fields.keySet()) {
-        final Object field = element;
-
-        if (fields.containsKey(field)) {
+      other.fields.keySet().stream().map(element -> element).forEach(field -> {
+		if (fields.containsKey(field)) {
           PointsToSet pts1 = getBaseForField(field);
           PointsToSet pts2 = other.getBaseForField(field);
           if (pts1 instanceof FullObjectSet) {
@@ -191,7 +190,8 @@ public class CodeBlockRWSet extends MethodRWSet {
               final PointsToSetInternal newpti = new HashPointsToSet(pti1.getType(), (PAG) Scene.v().getPointsToAnalysis());
 
               pti1.forall(new P2SetVisitor() {
-                public void visit(Node n) {
+                @Override
+				public void visit(Node n) {
                   if (pti2.contains(n)) {
                     newpti.add(n);
                   }
@@ -202,12 +202,13 @@ public class CodeBlockRWSet extends MethodRWSet {
             }
           }
         }
-      }
+	});
     }
     return ret;
   }
 
-  public boolean addFieldRef(PointsToSet otherBase, Object field) {
+  @Override
+public boolean addFieldRef(PointsToSet otherBase, Object field) {
     boolean ret = false;
     if (fields == null) {
       fields = new HashMap();

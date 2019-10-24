@@ -50,7 +50,7 @@ public class AgetInstruction extends DexlibAbstractInstruction {
   }
 
   @Override
-  public void jimplify(DexBody body) throws InvalidDalvikBytecodeException {
+  public void jimplify(DexBody body) {
     if (!(instruction instanceof Instruction23x)) {
       throw new IllegalArgumentException("Expected Instruction23x but got: " + instruction.getClass());
     }
@@ -73,10 +73,11 @@ public class AgetInstruction extends DexlibAbstractInstruction {
     addTags(assign);
     body.add(assign);
 
-    if (IDalvikTyper.ENABLE_DVKTYPER) {
-      DalvikTyper.v().addConstraint(assign.getLeftOpBox(), assign.getRightOpBox());
-      DalvikTyper.v().setType(arrayRef.getIndexBox(), IntType.v(), true);
-    }
+    if (!(IDalvikTyper.ENABLE_DVKTYPER)) {
+		return;
+	}
+	DalvikTyper.v().addConstraint(assign.getLeftOpBox(), assign.getRightOpBox());
+	DalvikTyper.v().setType(arrayRef.getIndexBox(), IntType.v(), true);
   }
 
   @Override

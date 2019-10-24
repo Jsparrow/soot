@@ -51,38 +51,43 @@ public abstract class AbstractInterfaceInvokeExpr extends AbstractInstanceInvoke
     }
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof AbstractInterfaceInvokeExpr) {
-      AbstractInterfaceInvokeExpr ie = (AbstractInterfaceInvokeExpr) o;
-      if (!(baseBox.getValue().equivTo(ie.baseBox.getValue()) && getMethod().equals(ie.getMethod())
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof AbstractInterfaceInvokeExpr)) {
+		return false;
+	}
+	AbstractInterfaceInvokeExpr ie = (AbstractInterfaceInvokeExpr) o;
+	if (!(baseBox.getValue().equivTo(ie.baseBox.getValue()) && getMethod().equals(ie.getMethod())
           && (argBoxes == null ? 0 : argBoxes.length) == (ie.argBoxes == null ? 0 : ie.argBoxes.length))) {
         return false;
       }
-      if (argBoxes != null) {
+	if (argBoxes != null) {
         for (int i = 0; i < argBoxes.length; i++) {
           if (!(argBoxes[i]).getValue().equivTo(ie.argBoxes[i].getValue())) {
             return false;
           }
         }
       }
-      return true;
-    }
-    return false;
+	return true;
   }
 
   /**
    * Returns a hash code for this object, consistent with structural equality.
    */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return baseBox.getValue().equivHashCode() * 101 + getMethod().equivHashCode() * 17;
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
-    buffer.append(Jimple.INTERFACEINVOKE + " " + baseBox.getValue().toString() + "." + methodRef.getSignature() + "(");
+    buffer.append(new StringBuilder().append(Jimple.INTERFACEINVOKE).append(" ").append(baseBox.getValue().toString()).append(".").append(methodRef.getSignature()).append("(")
+			.toString());
 
     if (argBoxes != null) {
       for (int i = 0; i < argBoxes.length; i++) {
@@ -99,7 +104,8 @@ public abstract class AbstractInterfaceInvokeExpr extends AbstractInstanceInvoke
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.INTERFACEINVOKE);
     up.literal(" ");
     baseBox.toString(up);
@@ -120,7 +126,8 @@ public abstract class AbstractInterfaceInvokeExpr extends AbstractInstanceInvoke
     up.literal(")");
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseInterfaceInvokeExpr(this);
   }
 
@@ -143,7 +150,8 @@ public abstract class AbstractInterfaceInvokeExpr extends AbstractInstanceInvoke
     return argCount;
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) getBase()).convertToBaf(context, out);
 
     if (argBoxes != null) {

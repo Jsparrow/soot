@@ -8,8 +8,8 @@ import soot.jimple.parser.analysis.*;
 public final class AConstantCaseLabel extends PCaseLabel
 {
     private TCase _case_;
-    private TMinus _minus_;
-    private TIntegerConstant _integerConstant_;
+    private TMinus minus;
+    private TIntegerConstant integerConstant;
 
     public AConstantCaseLabel()
     {
@@ -35,8 +35,8 @@ public final class AConstantCaseLabel extends PCaseLabel
     {
         return new AConstantCaseLabel(
             cloneNode(this._case_),
-            cloneNode(this._minus_),
-            cloneNode(this._integerConstant_));
+            cloneNode(this.minus),
+            cloneNode(this.integerConstant));
     }
 
     @Override
@@ -72,14 +72,14 @@ public final class AConstantCaseLabel extends PCaseLabel
 
     public TMinus getMinus()
     {
-        return this._minus_;
+        return this.minus;
     }
 
     public void setMinus(TMinus node)
     {
-        if(this._minus_ != null)
+        if(this.minus != null)
         {
-            this._minus_.parent(null);
+            this.minus.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AConstantCaseLabel extends PCaseLabel
             node.parent(this);
         }
 
-        this._minus_ = node;
+        this.minus = node;
     }
 
     public TIntegerConstant getIntegerConstant()
     {
-        return this._integerConstant_;
+        return this.integerConstant;
     }
 
     public void setIntegerConstant(TIntegerConstant node)
     {
-        if(this._integerConstant_ != null)
+        if(this.integerConstant != null)
         {
-            this._integerConstant_.parent(null);
+            this.integerConstant.parent(null);
         }
 
         if(node != null)
@@ -117,16 +117,13 @@ public final class AConstantCaseLabel extends PCaseLabel
             node.parent(this);
         }
 
-        this._integerConstant_ = node;
+        this.integerConstant = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._case_)
-            + toString(this._minus_)
-            + toString(this._integerConstant_);
+        return new StringBuilder().append("").append(toString(this._case_)).append(toString(this.minus)).append(toString(this.integerConstant)).toString();
     }
 
     @Override
@@ -139,15 +136,15 @@ public final class AConstantCaseLabel extends PCaseLabel
             return;
         }
 
-        if(this._minus_ == child)
+        if(this.minus == child)
         {
-            this._minus_ = null;
+            this.minus = null;
             return;
         }
 
-        if(this._integerConstant_ == child)
+        if(this.integerConstant == child)
         {
-            this._integerConstant_ = null;
+            this.integerConstant = null;
             return;
         }
 
@@ -164,13 +161,13 @@ public final class AConstantCaseLabel extends PCaseLabel
             return;
         }
 
-        if(this._minus_ == oldChild)
+        if(this.minus == oldChild)
         {
             setMinus((TMinus) newChild);
             return;
         }
 
-        if(this._integerConstant_ == oldChild)
+        if(this.integerConstant == oldChild)
         {
             setIntegerConstant((TIntegerConstant) newChild);
             return;

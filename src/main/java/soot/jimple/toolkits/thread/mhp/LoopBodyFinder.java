@@ -43,8 +43,8 @@ import soot.toolkits.graph.DirectedGraph;
 
 public class LoopBodyFinder {
 
-  private final Stack<Object> stack = new Stack<Object>();
-  private final Set<Set<Object>> loops = new HashSet<Set<Object>>();
+  private final Stack<Object> stack = new Stack<>();
+  private final Set<Set<Object>> loops = new HashSet<>();
 
   LoopBodyFinder(Map<Object, Object> backEdges, DirectedGraph g) {
     findLoopBody(backEdges, g);
@@ -65,7 +65,7 @@ public class LoopBodyFinder {
   }
 
   private Set<Object> finder(Object tail, Object head, DirectedGraph g) {
-    Set<Object> loop = new HashSet<Object>();
+    Set<Object> loop = new HashSet<>();
     stack.empty();
     loop.add(head);
     insert(tail, loop);
@@ -81,10 +81,11 @@ public class LoopBodyFinder {
   }
 
   private void insert(Object m, Set<Object> loop) {
-    if (!loop.contains(m)) {
-      loop.add(m);
-      stack.push(m);
-    }
+    if (loop.contains(m)) {
+		return;
+	}
+	loop.add(m);
+	stack.push(m);
   }
 
   public Set<Set<Object>> getLoopBody() {

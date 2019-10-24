@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ANegUnop extends PUnop
 {
-    private TNeg _neg_;
+    private TNeg neg;
 
     public ANegUnop()
     {
@@ -26,7 +26,7 @@ public final class ANegUnop extends PUnop
     public Object clone()
     {
         return new ANegUnop(
-            cloneNode(this._neg_));
+            cloneNode(this.neg));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ANegUnop extends PUnop
 
     public TNeg getNeg()
     {
-        return this._neg_;
+        return this.neg;
     }
 
     public void setNeg(TNeg node)
     {
-        if(this._neg_ != null)
+        if(this.neg != null)
         {
-            this._neg_.parent(null);
+            this.neg.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ANegUnop extends PUnop
             node.parent(this);
         }
 
-        this._neg_ = node;
+        this.neg = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._neg_);
+            + toString(this.neg);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._neg_ == child)
+        if(this.neg == child)
         {
-            this._neg_ = null;
+            this.neg = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ANegUnop extends PUnop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._neg_ == oldChild)
+        if(this.neg == oldChild)
         {
             setNeg((TNeg) newChild);
             return;

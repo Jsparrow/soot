@@ -35,30 +35,31 @@ public class MethodFinalsChecker extends polyglot.visit.NodeVisitor {
   private final HashMap<IdentityKey, ArrayList<IdentityKey>> typeToLocalsUsed;
   private final ArrayList<Node> ccallList;
 
-  public HashMap<IdentityKey, ArrayList<IdentityKey>> typeToLocalsUsed() {
+  public MethodFinalsChecker() {
+    finalLocals = new ArrayList<>();
+    inners = new ArrayList<>();
+    ccallList = new ArrayList<>();
+    typeToLocalsUsed = new HashMap<>();
+  }
+
+public HashMap<IdentityKey, ArrayList<IdentityKey>> typeToLocalsUsed() {
     return typeToLocalsUsed;
   }
 
-  public ArrayList<IdentityKey> finalLocals() {
+public ArrayList<IdentityKey> finalLocals() {
     return finalLocals;
   }
 
-  public ArrayList<IdentityKey> inners() {
+public ArrayList<IdentityKey> inners() {
     return inners;
   }
 
-  public ArrayList<Node> ccallList() {
+public ArrayList<Node> ccallList() {
     return ccallList;
   }
 
-  public MethodFinalsChecker() {
-    finalLocals = new ArrayList<IdentityKey>();
-    inners = new ArrayList<IdentityKey>();
-    ccallList = new ArrayList<Node>();
-    typeToLocalsUsed = new HashMap<IdentityKey, ArrayList<IdentityKey>>();
-  }
-
-  public polyglot.ast.Node override(polyglot.ast.Node parent, polyglot.ast.Node n) {
+@Override
+public polyglot.ast.Node override(polyglot.ast.Node parent, polyglot.ast.Node n) {
     if (n instanceof polyglot.ast.LocalClassDecl) {
       inners.add(new polyglot.util.IdentityKey(((polyglot.ast.LocalClassDecl) n).decl().type()));
       polyglot.ast.ClassBody localClassBody = ((polyglot.ast.LocalClassDecl) n).decl().body();
@@ -79,23 +80,22 @@ public class MethodFinalsChecker extends polyglot.visit.NodeVisitor {
     return null;
   }
 
-  public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
+@Override
+public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
 
     if (n instanceof polyglot.ast.LocalDecl) {
       polyglot.ast.LocalDecl ld = (polyglot.ast.LocalDecl) n;
-      if (ld.flags().isFinal()) {
-        if (!finalLocals.contains(new polyglot.util.IdentityKey(ld.localInstance()))) {
-          finalLocals.add(new polyglot.util.IdentityKey(ld.localInstance()));
-        }
-      }
+      boolean condition = ld.flags().isFinal() && !finalLocals.contains(new polyglot.util.IdentityKey(ld.localInstance()));
+	if (condition) {
+	  finalLocals.add(new polyglot.util.IdentityKey(ld.localInstance()));
+	}
     }
     if (n instanceof polyglot.ast.Formal) {
       polyglot.ast.Formal ld = (polyglot.ast.Formal) n;
-      if (ld.flags().isFinal()) {
-        if (!finalLocals.contains(new polyglot.util.IdentityKey(ld.localInstance()))) {
-          finalLocals.add(new polyglot.util.IdentityKey(ld.localInstance()));
-        }
-      }
+      boolean condition1 = ld.flags().isFinal() && !finalLocals.contains(new polyglot.util.IdentityKey(ld.localInstance()));
+	if (condition1) {
+	  finalLocals.add(new polyglot.util.IdentityKey(ld.localInstance()));
+	}
     }
 
     if (n instanceof polyglot.ast.ConstructorCall) {

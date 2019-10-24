@@ -158,12 +158,7 @@ public class BackwardsInterproceduralCFG implements BiDiInterproceduralCFG<Unit,
   // swapped
   @Override
   public boolean isReturnSite(Unit n) {
-    for (Unit pred : getSuccsOf(n)) {
-      if (isCallStmt(pred)) {
-        return true;
-      }
-    }
-    return false;
+    return getSuccsOf(n).stream().anyMatch(this::isCallStmt);
   }
 
   // same

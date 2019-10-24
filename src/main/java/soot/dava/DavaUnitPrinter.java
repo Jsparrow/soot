@@ -42,25 +42,29 @@ import soot.jimple.ThisRef;
  */
 public class DavaUnitPrinter extends AbstractUnitPrinter {
   DavaBody body;
+private boolean eatSpace = false;
 
-  /*
+/*
    * 30th March 2006, Nomair A Naeem Adding constructor so that the current methods DabaBody can be stored
    */
   public DavaUnitPrinter(DavaBody body) {
     this.body = body;
   }
 
-  public void methodRef(SootMethodRef m) {
+@Override
+public void methodRef(SootMethodRef m) {
     handleIndent();
     output.append(m.name());
   }
 
-  public void fieldRef(SootFieldRef f) {
+@Override
+public void fieldRef(SootFieldRef f) {
     handleIndent();
     output.append(f.name());
   }
 
-  public void identityRef(IdentityRef r) {
+@Override
+public void identityRef(IdentityRef r) {
     handleIndent();
     if (r instanceof ThisRef) {
       literal("this");
@@ -69,11 +73,10 @@ public class DavaUnitPrinter extends AbstractUnitPrinter {
     }
   }
 
-  private boolean eatSpace = false;
-
-  public void literal(String s) {
+@Override
+public void literal(String s) {
     handleIndent();
-    if (eatSpace && s.equals(" ")) {
+    if (eatSpace && " ".equals(s)) {
       eatSpace = false;
       return;
     }
@@ -85,7 +88,8 @@ public class DavaUnitPrinter extends AbstractUnitPrinter {
     output.append(s);
   }
 
-  public void type(Type t) {
+@Override
+public void type(Type t) {
     handleIndent();
     if (t instanceof RefType) {
 
@@ -109,11 +113,12 @@ public class DavaUnitPrinter extends AbstractUnitPrinter {
     }
   }
 
-  public void unitRef(Unit u, boolean branchTarget) {
+@Override
+public void unitRef(Unit u, boolean branchTarget) {
     throw new RuntimeException("Dava doesn't have unit references!");
   }
 
-  @Override
+@Override
   public void constant(Constant c) {
     if (c instanceof ClassConstant) {
       handleIndent();
@@ -124,27 +129,27 @@ public class DavaUnitPrinter extends AbstractUnitPrinter {
     }
   }
 
-  public void addNot() {
+public void addNot() {
     output.append(" !");
   }
 
-  public void addAggregatedOr() {
+public void addAggregatedOr() {
     output.append(" || ");
   }
 
-  public void addAggregatedAnd() {
+public void addAggregatedAnd() {
     output.append(" && ");
   }
 
-  public void addLeftParen() {
+public void addLeftParen() {
     output.append(" (");
   }
 
-  public void addRightParen() {
+public void addRightParen() {
     output.append(") ");
   }
 
-  public void printString(String s) {
+public void printString(String s) {
     output.append(s);
   }
 

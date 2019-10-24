@@ -32,7 +32,8 @@ public class GIfStmt extends JIfStmt {
     super(Grimp.v().newConditionExprBox(condition), Grimp.v().newStmtBox(target));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GIfStmt(Grimp.cloneIfNecessary(getCondition()), getTarget());
   }
 }

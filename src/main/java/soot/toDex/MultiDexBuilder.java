@@ -55,24 +55,22 @@ public class MultiDexBuilder {
   public void internClass(final ClassDef clz) {
     curPool.mark();
     curPool.internClass(clz);
-    if (hasOverflowed()) {
-      // reset to state before overflow occurred
+    if (!hasOverflowed()) {
+		return;
+	}
+	// reset to state before overflow occurred
       curPool.reset();
-
-      // we need a new dexpool
+	// we need a new dexpool
       newDexPool();
-
-      // re-execute on new pool since the last execution was dropped
+	// re-execute on new pool since the last execution was dropped
       // NOTE: We do not want to call internClass recursively here, this
       // might end in an endless loop
       // if the class is to large for a single dex file!
       curPool.internClass(clz);
-
-      // If a single class causes an overflow, we're really out of luck
+	// If a single class causes an overflow, we're really out of luck
       if (curPool.hasOverflowed()) {
         throw new RuntimeException("Class is bigger than a single dex file can be");
       }
-    }
   }
 
   protected boolean hasOverflowed() {
@@ -113,7 +111,7 @@ public class MultiDexBuilder {
     for (DexPool dexPool : dexPools) {
       int count = result.size();
       // name dex files: classes.dex, classes2.dex, classes3.dex, etc.
-      File file = new File(folder, "classes" + (count == 0 ? "" : count + 1) + ".dex");
+      File file = new File(folder, new StringBuilder().append("classes").append(count == 0 ? "" : count + 1).append(".dex").toString());
       result.add(file);
       FileDataStore fds = new FileDataStore(file);
       dexPool.writeTo(fds);

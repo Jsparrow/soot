@@ -49,11 +49,13 @@ public abstract class AbstractRefTypeInst extends AbstractInst {
     this.opType = type;
   }
 
-  String getParameters() {
+  @Override
+String getParameters() {
     return " " + opType.toString();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     up.type(opType);
   }

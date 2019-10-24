@@ -47,7 +47,8 @@ public class AbstractDataSource implements Value {
   }
 
   /** Clones the object. Not implemented here. */
-  public Object clone() {
+  @Override
+public Object clone() {
     return new AbstractDataSource(sourcename);
   }
 
@@ -55,37 +56,44 @@ public class AbstractDataSource implements Value {
    * Returns true if this object is structurally equivalent to c. AbstractDataSources are equal and equivalent if their
    * sourcename is the same
    */
-  public boolean equivTo(Object c) {
+  @Override
+public boolean equivTo(Object c) {
     if (sourcename instanceof Value) {
       return (c instanceof AbstractDataSource && ((Value) sourcename).equivTo(((AbstractDataSource) c).sourcename));
     }
     return (c instanceof AbstractDataSource && ((AbstractDataSource) c).sourcename.equals(sourcename));
   }
 
-  public boolean equals(Object c) {
+  @Override
+public boolean equals(Object c) {
     return (c instanceof AbstractDataSource && ((AbstractDataSource) c).sourcename.equals(sourcename));
   }
 
   /** Returns a hash code consistent with structural equality for this object. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     if (sourcename instanceof Value) {
       return ((Value) sourcename).equivHashCode();
     }
     return sourcename.hashCode();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return NullType.v();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     throw new RuntimeException("Not Implemented");
   }
 
-  public String toString() {
-    return "sourceof<" + sourcename.toString() + ">";
+  @Override
+public String toString() {
+    return new StringBuilder().append("sourceof<").append(sourcename.toString()).append(">").toString();
   }
 }

@@ -27,25 +27,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MapNumberer<T> implements Numberer<T> {
-  Map<T, Integer> map = new HashMap<T, Integer>();
-  ArrayList<T> al = new ArrayList<T>();
+  Map<T, Integer> map = new HashMap<>();
+  ArrayList<T> al = new ArrayList<>();
   int nextIndex = 1;
 
-  @Override
-  public void add(T o) {
-    if (!map.containsKey(o)) {
-      map.put(o, new Integer(nextIndex));
-      al.add(o);
-      nextIndex++;
-    }
+  public MapNumberer() {
+    al.add(null);
   }
 
-  @Override
+@Override
+  public void add(T o) {
+    if (map.containsKey(o)) {
+		return;
+	}
+	map.put(o, Integer.valueOf(nextIndex));
+	al.add(o);
+	nextIndex++;
+  }
+
+@Override
   public T get(long number) {
     return al.get((int) number);
   }
 
-  @Override
+@Override
   public long get(Object o) {
     if (o == null) {
       return 0;
@@ -57,20 +62,16 @@ public class MapNumberer<T> implements Numberer<T> {
     return i.intValue();
   }
 
-  @Override
+@Override
   public int size() {
     return nextIndex - 1;
     /* subtract 1 for null */ }
 
-  public MapNumberer() {
-    al.add(null);
-  }
-
-  public boolean contains(Object o) {
+public boolean contains(Object o) {
     return map.containsKey(o);
   }
 
-  @Override
+@Override
   public boolean remove(T o) {
     Integer i = map.remove(o);
     if (i == null) {

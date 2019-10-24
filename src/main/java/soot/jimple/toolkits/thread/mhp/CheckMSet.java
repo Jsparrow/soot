@@ -30,6 +30,8 @@ import soot.jimple.toolkits.thread.mhp.stmt.JPegStmt;
 import soot.tagkit.Tag;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -43,7 +45,9 @@ import soot.toolkits.scalar.FlowSet;
 // -Richard L. Halpert, 2006-11-30
 
 public class CheckMSet {
-  CheckMSet(Map m1, Map m2) {
+  private static final Logger logger = LoggerFactory.getLogger(CheckMSet.class);
+
+CheckMSet(Map m1, Map m2) {
     checkKeySet(m1, m2);
     check(m1, m2);
 
@@ -116,7 +120,7 @@ public class CheckMSet {
               Object oo = itit.next();
               FlowSet mSet11 = (FlowSet) m1.get(oo);
               if (mSet11 == null) {
-                throw new RuntimeException("1--mSet of " + obj + " is null!");
+                throw new RuntimeException(new StringBuilder().append("1--mSet of ").append(obj).append(" is null!").toString());
               }
               if (!compare(mSet11, mSet2)) {
                 throw new RuntimeException("1--mSet before and after are NOT the same!");
@@ -125,7 +129,7 @@ public class CheckMSet {
           } else {
             FlowSet mSet1 = (FlowSet) m1.get(obj);
             if (mSet1 == null) {
-              throw new RuntimeException("2--mSet of " + obj + " is null!");
+              throw new RuntimeException(new StringBuilder().append("2--mSet of ").append(obj).append(" is null!").toString());
             }
             if (!compare(mSet1, mSet2)) {
               throw new RuntimeException("2--mSet before and after are NOT the same!");
@@ -174,8 +178,8 @@ public class CheckMSet {
       while (it1.hasNext()) {
         Object o = it1.next();
         if (!temp.contains(o)) {
-          System.out.println("mSet2: \n" + mSet2);
-          System.err.println("mSet2 does not contains " + o);
+          logger.info("mSet2: \n" + mSet2);
+          logger.error("mSet2 does not contains " + o);
 
           return false;
         }
@@ -199,13 +203,13 @@ public class CheckMSet {
                 Object oo = itit.next();
 
                 if (!mSet1.contains(oo)) {
-                  System.err.println("1--mSet1 does not contains " + oo);
+                  logger.error("1--mSet1 does not contains " + oo);
                   return false;
                 }
               }
             } else {
               if (!mSet1.contains(o)) {
-                System.err.println("2--mSet1 does not contains " + o);
+                logger.error("2--mSet1 does not contains " + o);
                 return false;
               }
             }
@@ -215,7 +219,7 @@ public class CheckMSet {
         else {
 
           if (!mSet1.contains(obj)) {
-            System.err.println("3--mSet1 does not contains " + obj);
+            logger.error("3--mSet1 does not contains " + obj);
             return false;
           }
         }

@@ -91,12 +91,13 @@ public final class AssignEdge {
     callSite = i;
   }
 
-  public String toString() {
-    String ret = src + " -> " + dst;
+  @Override
+public String toString() {
+    String ret = new StringBuilder().append(src).append(" -> ").append(dst).toString();
     if (isReturnEdge()) {
-      ret += "(* return" + callSite + " *)";
+      ret += new StringBuilder().append("(* return").append(callSite).append(" *)").toString();
     } else if (isParamEdge()) {
-      ret += "(* param" + callSite + " *)";
+      ret += new StringBuilder().append("(* param").append(callSite).append(" *)").toString();
 
     }
     return ret;

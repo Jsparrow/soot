@@ -32,56 +32,66 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class IterableMap implements Map {
-  private HashMap<Object, Object> content_map, back_map;
-  private HashChain key_chain, value_chain;
+  private HashMap<Object, Object> contentMap;
+private HashMap<Object, Object> backMap;
+  private HashChain keyChain;
+private HashChain valueChain;
+private transient Set<Object> keySet = null;
+private transient Set<Object> valueSet = null;
+private transient Collection<Object> values = null;
 
-  public IterableMap() {
+public IterableMap() {
     this(7, 0.7f);
   }
 
-  public IterableMap(int initialCapacity) {
+public IterableMap(int initialCapacity) {
     this(initialCapacity, 0.7f);
   }
 
-  public IterableMap(int initialCapacity, float loadFactor) {
-    content_map = new HashMap<Object, Object>(initialCapacity, loadFactor);
-    back_map = new HashMap<Object, Object>(initialCapacity, loadFactor);
-    key_chain = new HashChain();
-    value_chain = new HashChain();
+public IterableMap(int initialCapacity, float loadFactor) {
+    contentMap = new HashMap<>(initialCapacity, loadFactor);
+    backMap = new HashMap<>(initialCapacity, loadFactor);
+    keyChain = new HashChain();
+    valueChain = new HashChain();
   }
 
-  public void clear() {
-    Iterator kcit = key_chain.iterator();
+@Override
+public void clear() {
+    Iterator kcit = keyChain.iterator();
     while (kcit.hasNext()) {
-      content_map.remove(kcit.next());
+      contentMap.remove(kcit.next());
     }
 
-    Iterator vcit = value_chain.iterator();
+    Iterator vcit = valueChain.iterator();
     while (vcit.hasNext()) {
-      back_map.remove(vcit.next());
+      backMap.remove(vcit.next());
     }
 
-    key_chain.clear();
-    value_chain.clear();
+    keyChain.clear();
+    valueChain.clear();
   }
 
-  public Iterator iterator() {
-    return key_chain.iterator();
+public Iterator iterator() {
+    return keyChain.iterator();
   }
 
-  public boolean containsKey(Object key) {
-    return key_chain.contains(key);
+@Override
+public boolean containsKey(Object key) {
+    return keyChain.contains(key);
   }
 
-  public boolean containsValue(Object value) {
-    return value_chain.contains(value);
+@Override
+public boolean containsValue(Object value) {
+    return valueChain.contains(value);
   }
 
-  public Set entrySet() {
-    return content_map.entrySet();
+@Override
+public Set entrySet() {
+    return contentMap.entrySet();
   }
 
-  public boolean equals(Object o) {
+@Override
+public boolean equals(Object o) {
     if (o == this) {
       return true;
     }
@@ -92,16 +102,16 @@ public class IterableMap implements Map {
 
     IterableMap other = (IterableMap) o;
 
-    if (key_chain.equals(other.key_chain) == false) {
+    if (keyChain.equals(other.keyChain) == false) {
       return false;
     }
 
     // check that the other has our mapping
-    Iterator kcit = key_chain.iterator();
+    Iterator kcit = keyChain.iterator();
     while (kcit.hasNext()) {
       Object ko = kcit.next();
 
-      if (other.content_map.get(ko) != content_map.get(ko)) {
+      if (other.contentMap.get(ko) != contentMap.get(ko)) {
         return false;
       }
     }
@@ -109,51 +119,55 @@ public class IterableMap implements Map {
     return true;
   }
 
-  public Object get(Object key) {
-    return content_map.get(key);
+@Override
+public Object get(Object key) {
+    return contentMap.get(key);
   }
 
-  public int hashCode() {
-    return content_map.hashCode();
+@Override
+public int hashCode() {
+    return contentMap.hashCode();
   }
 
-  public boolean isEmpty() {
-    return key_chain.isEmpty();
+@Override
+public boolean isEmpty() {
+    return keyChain.isEmpty();
   }
 
-  private transient Set<Object> keySet = null;
-  private transient Set<Object> valueSet = null;
-  private transient Collection<Object> values = null;
-
-  public Set<Object> keySet() {
+@Override
+public Set<Object> keySet() {
     if (keySet == null) {
       keySet = new AbstractSet() {
-        public Iterator iterator() {
-          return key_chain.iterator();
+        @Override
+		public Iterator iterator() {
+          return keyChain.iterator();
         }
 
-        public int size() {
-          return key_chain.size();
+        @Override
+		public int size() {
+          return keyChain.size();
         }
 
-        public boolean contains(Object o) {
-          return key_chain.contains(o);
+        @Override
+		public boolean contains(Object o) {
+          return keyChain.contains(o);
         }
 
-        public boolean remove(Object o) {
-          if (key_chain.contains(o) == false) {
+        @Override
+		public boolean remove(Object o) {
+          if (keyChain.contains(o) == false) {
             return false;
           }
 
-          if (IterableMap.this.content_map.get(o) == null) {
-            IterableMap.this.remove(o);
-            return true;
-          }
-
-          return (IterableMap.this.remove(o) != null);
+          if (IterableMap.this.contentMap.get(o) != null) {
+			return (IterableMap.this.remove(o) != null);
+		}
+		IterableMap.this.remove(o);
+		return true;
         }
 
-        public void clear() {
+        @Override
+		public void clear() {
           IterableMap.this.clear();
         }
       };
@@ -161,32 +175,36 @@ public class IterableMap implements Map {
     return keySet;
   }
 
-  public Set<Object> valueSet() {
+public Set<Object> valueSet() {
     if (valueSet == null) {
       valueSet = new AbstractSet() {
-        public Iterator iterator() {
-          return value_chain.iterator();
+        @Override
+		public Iterator iterator() {
+          return valueChain.iterator();
         }
 
-        public int size() {
-          return value_chain.size();
+        @Override
+		public int size() {
+          return valueChain.size();
         }
 
-        public boolean contains(Object o) {
-          return value_chain.contains(o);
+        @Override
+		public boolean contains(Object o) {
+          return valueChain.contains(o);
         }
 
-        public boolean remove(Object o) {
-          if (value_chain.contains(o) == false) {
+        @Override
+		public boolean remove(Object o) {
+          if (valueChain.contains(o) == false) {
             return false;
           }
 
-          HashChain c = (HashChain) IterableMap.this.back_map.get(o);
+          HashChain c = (HashChain) IterableMap.this.backMap.get(o);
           Iterator it = c.snapshotIterator();
           while (it.hasNext()) {
             Object ko = it.next();
 
-            if (IterableMap.this.content_map.get(o) == null) {
+            if (IterableMap.this.contentMap.get(o) == null) {
               IterableMap.this.remove(ko);
             } else if (IterableMap.this.remove(ko) == null) {
               return false;
@@ -195,7 +213,8 @@ public class IterableMap implements Map {
           return true;
         }
 
-        public void clear() {
+        @Override
+		public void clear() {
           IterableMap.this.clear();
         }
       };
@@ -203,28 +222,29 @@ public class IterableMap implements Map {
     return valueSet;
   }
 
-  public Object put(Object key, Object value) {
-    if (key_chain.contains(key)) {
+@Override
+public Object put(Object key, Object value) {
+    if (keyChain.contains(key)) {
 
-      Object old_value = content_map.get(key);
+      Object old_value = contentMap.get(key);
 
       if (old_value == value) {
         return value;
       }
 
-      HashChain kc = (HashChain) back_map.get(old_value);
+      HashChain kc = (HashChain) backMap.get(old_value);
       kc.remove(key);
 
       if (kc.isEmpty()) {
-        value_chain.remove(old_value);
-        back_map.remove(old_value);
+        valueChain.remove(old_value);
+        backMap.remove(old_value);
       }
 
-      kc = (HashChain) back_map.get(value);
+      kc = (HashChain) backMap.get(value);
       if (kc == null) {
         kc = new HashChain();
-        back_map.put(value, kc);
-        value_chain.add(value);
+        backMap.put(value, kc);
+        valueChain.add(value);
       }
       kc.add(key);
 
@@ -232,14 +252,14 @@ public class IterableMap implements Map {
 
     } else {
 
-      key_chain.add(key);
-      content_map.put(key, value);
+      keyChain.add(key);
+      contentMap.put(key, value);
 
-      HashChain kc = (HashChain) back_map.get(value);
+      HashChain kc = (HashChain) backMap.get(value);
       if (kc == null) {
         kc = new HashChain();
-        back_map.put(value, kc);
-        value_chain.add(value);
+        backMap.put(value, kc);
+        valueChain.add(value);
       }
       kc.add(key);
 
@@ -247,8 +267,9 @@ public class IterableMap implements Map {
     }
   }
 
-  public void putAll(Map t) {
-    Iterator kit = (t instanceof IterableMap) ? ((IterableMap) t).key_chain.iterator() : t.keySet().iterator();
+@Override
+public void putAll(Map t) {
+    Iterator kit = (t instanceof IterableMap) ? ((IterableMap) t).keyChain.iterator() : t.keySet().iterator();
 
     while (kit.hasNext()) {
       Object key = kit.next();
@@ -256,42 +277,49 @@ public class IterableMap implements Map {
     }
   }
 
-  public Object remove(Object key) {
-    if (key_chain.contains(key) == false) {
+@Override
+public Object remove(Object key) {
+    if (keyChain.contains(key) == false) {
       return null;
     }
 
-    key_chain.remove(key);
-    Object value = content_map.remove(key);
-    HashChain c = (HashChain) back_map.get(value);
+    keyChain.remove(key);
+    Object value = contentMap.remove(key);
+    HashChain c = (HashChain) backMap.get(value);
     c.remove(key);
     if (c.size() == 0) {
-      back_map.remove(value);
+      backMap.remove(value);
     }
 
     return value;
   }
 
-  public int size() {
-    return key_chain.size();
+@Override
+public int size() {
+    return keyChain.size();
   }
 
-  public Collection<Object> values() {
+@Override
+public Collection<Object> values() {
     if (values == null) {
       values = new AbstractCollection() {
-        public Iterator iterator() {
-          return new Mapping_Iterator(IterableMap.this.key_chain, IterableMap.this.content_map);
+        @Override
+		public Iterator iterator() {
+          return new Mapping_Iterator(IterableMap.this.keyChain, IterableMap.this.contentMap);
         }
 
-        public int size() {
-          return key_chain.size();
+        @Override
+		public int size() {
+          return keyChain.size();
         }
 
-        public boolean contains(Object o) {
-          return value_chain.contains(o);
+        @Override
+		public boolean contains(Object o) {
+          return valueChain.contains(o);
         }
 
-        public void clear() {
+        @Override
+		public void clear() {
           IterableMap.this.clear();
         }
       };
@@ -308,15 +336,18 @@ public class IterableMap implements Map {
       this.m = m;
     }
 
-    public boolean hasNext() {
+    @Override
+	public boolean hasNext() {
       return it.hasNext();
     }
 
-    public Object next() throws NoSuchElementException {
+    @Override
+	public Object next() {
       return m.get(it.next());
     }
 
-    public void remove() throws UnsupportedOperationException {
+    @Override
+	public void remove() {
       throw new UnsupportedOperationException("You cannot remove from an Iterator on the values() for an IterableMap.");
     }
   }

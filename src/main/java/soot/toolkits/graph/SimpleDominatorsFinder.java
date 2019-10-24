@@ -59,30 +59,32 @@ public class SimpleDominatorsFinder<N> implements DominatorsFinder<N> {
     // "] Finding Dominators...");
 
     this.graph = graph;
-    SimpleDominatorsAnalysis<N> analysis = new SimpleDominatorsAnalysis<N>(graph);
+    SimpleDominatorsAnalysis<N> analysis = new SimpleDominatorsAnalysis<>(graph);
 
     // build node to dominators map
     {
-      nodeToDominators = new HashMap<N, FlowSet<N>>(graph.size() * 2 + 1, 0.7f);
+      nodeToDominators = new HashMap<>(graph.size() * 2 + 1, 0.7f);
 
-      for (Iterator<N> nodeIt = graph.iterator(); nodeIt.hasNext();) {
-        N node = nodeIt.next();
+      for (N node : graph) {
         FlowSet<N> set = analysis.getFlowAfter(node);
         nodeToDominators.put(node, set);
       }
     }
   }
 
-  public DirectedGraph<N> getGraph() {
+  @Override
+public DirectedGraph<N> getGraph() {
     return graph;
   }
 
-  public List<N> getDominators(N node) {
+  @Override
+public List<N> getDominators(N node) {
     // non-backed list since FlowSet is an ArrayPackedFlowSet
     return nodeToDominators.get(node).toList();
   }
 
-  public N getImmediateDominator(N node) {
+  @Override
+public N getImmediateDominator(N node) {
     // root node
     if (getGraph().getHeads().contains(node)) {
       return null;
@@ -101,19 +103,16 @@ public class SimpleDominatorsFinder<N> implements DominatorsFinder<N> {
     return null;
   }
 
-  public boolean isDominatedBy(N node, N dominator) {
+  @Override
+public boolean isDominatedBy(N node, N dominator) {
     // avoid the creation of temp-lists
     return nodeToDominators.get(node).contains(dominator);
   }
 
-  public boolean isDominatedByAll(N node, Collection<N> dominators) {
+  @Override
+public boolean isDominatedByAll(N node, Collection<N> dominators) {
     FlowSet<N> f = nodeToDominators.get(node);
-    for (N n : dominators) {
-      if (!f.contains(n)) {
-        return false;
-      }
-    }
-    return true;
+    return dominators.stream().allMatch(f::contains);
   }
 }
 
@@ -139,14 +138,14 @@ class SimpleDominatorsAnalysis<N> extends ForwardFlowAnalysis<N, FlowSet<N>> {
 
     // define empty set, with proper universe for complementation
 
-    List<N> nodes = new ArrayList<N>(graph.size());
+    List<N> nodes = new ArrayList<>(graph.size());
 
     for (N n : graph) {
       nodes.add(n);
     }
 
-    FlowUniverse<N> nodeUniverse = new CollectionFlowUniverse<N>(nodes);
-    emptySet = new ArrayPackedSet<N>(nodeUniverse);
+    FlowUniverse<N> nodeUniverse = new CollectionFlowUniverse<>(nodes);
+    emptySet = new ArrayPackedSet<>(nodeUniverse);
     fullSet = (BoundedFlowSet<N>) emptySet.clone();
     fullSet.complement();
 
@@ -167,9 +166,7 @@ class SimpleDominatorsAnalysis<N> extends ForwardFlowAnalysis<N, FlowSet<N>> {
   @Override
   protected FlowSet<N> entryInitialFlow() {
     FlowSet<N> initSet = (FlowSet<N>) emptySet.clone();
-    for (N h : graph.getHeads()) {
-      initSet.add(h);
-    }
+    graph.getHeads().forEach(initSet::add);
     return initSet;
   }
 

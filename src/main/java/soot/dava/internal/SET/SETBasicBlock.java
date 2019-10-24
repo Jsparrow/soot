@@ -33,8 +33,14 @@ import soot.util.IterableSet;
 public class SETBasicBlock implements Comparable {
   private static final Logger logger = LoggerFactory.getLogger(SETBasicBlock.class);
 
-  private SETNode entryNode, exitNode;
-  private final IterableSet predecessors, successors, body;
+  private SETNode entryNode;
+
+private SETNode exitNode;
+  private final IterableSet predecessors;
+
+private final IterableSet successors;
+
+private final IterableSet body;
   private int priority;
 
   public SETBasicBlock() {
@@ -46,7 +52,8 @@ public class SETBasicBlock implements Comparable {
     priority = -1;
   }
 
-  public int compareTo(Object o) {
+  @Override
+public int compareTo(Object o) {
     if (o == this) {
       return 0;
     }

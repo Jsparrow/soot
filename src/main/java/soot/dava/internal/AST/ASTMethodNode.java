@@ -65,25 +65,30 @@ public class ASTMethodNode extends ASTNode {
    *
    * Any local in the dontPrintLocals list is not printed in the top declarations
    */
-  private List<Local> dontPrintLocals = new ArrayList<Local>();
+  private List<Local> dontPrintLocals = new ArrayList<>();
 
-  public ASTStatementSequenceNode getDeclarations() {
+  public ASTMethodNode(List<Object> body) {
+    this.body = body;
+    subBodies.add(body);
+  }
+
+public ASTStatementSequenceNode getDeclarations() {
     return declarations;
   }
 
-  public void setDeclarations(ASTStatementSequenceNode decl) {
+public void setDeclarations(ASTStatementSequenceNode decl) {
     declarations = decl;
   }
 
-  public void setDavaBody(DavaBody bod) {
+public void setDavaBody(DavaBody bod) {
     this.davaBody = bod;
   }
 
-  public DavaBody getDavaBody() {
+public DavaBody getDavaBody() {
     return davaBody;
   }
 
-  public void storeLocals(Body OrigBody) {
+public void storeLocals(Body OrigBody) {
     if ((OrigBody instanceof DavaBody) == false) {
       throw new RuntimeException("Only DavaBodies should invoke this method");
     }
@@ -115,7 +120,7 @@ public class ASTMethodNode extends ASTNode {
       if (typeToLocals.containsKey(t)) {
         localList = typeToLocals.get(t);
       } else {
-        localList = new ArrayList<Local>();
+        localList = new ArrayList<>();
         typeToLocals.put(t, localList);
       }
 
@@ -124,7 +129,7 @@ public class ASTMethodNode extends ASTNode {
 
     // create a StatementSequenceNode with all the declarations
 
-    List<AugmentedStmt> statementSequence = new ArrayList<AugmentedStmt>();
+    List<AugmentedStmt> statementSequence = new ArrayList<>();
 
     Iterator<Type> typeIt = typeToLocals.keySet().iterator();
 
@@ -146,17 +151,11 @@ public class ASTMethodNode extends ASTNode {
     declarations = new ASTStatementSequenceNode(statementSequence);
 
     body.add(0, declarations);
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
     subBodies.add(body);
   }
 
-  public ASTMethodNode(List<Object> body) {
-    super();
-    this.body = body;
-    subBodies.add(body);
-  }
-
-  /*
+/*
    * Nomair A. Naeem 23rd November 2005 Need to efficiently get all locals being declared in the declarations node Dont
    * really care what type they are.. Interesting thing is that they are all different names :)
    */
@@ -185,7 +184,7 @@ public class ASTMethodNode extends ASTNode {
     return toReturn;
   }
 
-  /*
+/*
    * Given a local first searches the declarations for the local Once it is found the local is removed from its declaring
    * stmt If the declaring stmt does not declare any more locals the stmt itself is removed IT WOULD BE NICE TO ALSO CHECK IF
    * THIS WAS THE LAST STMT IN THE NODE IN WHICH CASE THE NODE SHOULD BE REMOVED just afraid of its after effects on other
@@ -226,7 +225,7 @@ public class ASTMethodNode extends ASTNode {
     // the removal of a local might have made some declaration empty
     // remove such a declaraion
 
-    List<AugmentedStmt> newSequence = new ArrayList<AugmentedStmt>();
+    List<AugmentedStmt> newSequence = new ArrayList<>();
     for (AugmentedStmt as : declarations.getStatements()) {
       s = as.get_Stmt();
 
@@ -244,35 +243,38 @@ public class ASTMethodNode extends ASTNode {
     declarations.setStatements(newSequence);
   }
 
-  /*
+/*
    * Nomair A Naeem 21-FEB-2005 Used by UselessLabeledBlockRemove to update a body
    */
   public void replaceBody(List<Object> body) {
     this.body = body;
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
     subBodies.add(body);
   }
 
-  public Object clone() {
+@Override
+public Object clone() {
     ASTMethodNode toReturn = new ASTMethodNode(body);
     toReturn.setDeclarations((ASTStatementSequenceNode) declarations.clone());
     toReturn.setDontPrintLocals(dontPrintLocals);
     return toReturn;
   }
 
-  public void setDontPrintLocals(List<Local> list) {
+public void setDontPrintLocals(List<Local> list) {
     dontPrintLocals = list;
   }
 
-  public void addToDontPrintLocalsList(Local toAdd) {
+public void addToDontPrintLocalsList(Local toAdd) {
     dontPrintLocals.add(toAdd);
   }
 
-  public void perform_Analysis(ASTAnalysis a) {
+@Override
+public void perform_Analysis(ASTAnalysis a) {
     perform_AnalysisOnSubBodies(a);
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public void toString(UnitPrinter up) {
     if (!(up instanceof DavaUnitPrinter)) {
       throw new RuntimeException("Only DavaUnitPrinter should be used to print DavaBody");
     }
@@ -337,7 +339,7 @@ public class ASTMethodNode extends ASTNode {
     printDeclarationsFollowedByBody(up, body);
   }
 
-  /*
+/*
    * This method has been written to bring into the printing of the method body the printing of the declared locals
    *
    * This is required because the dontPrintLocals list contains a list of locals which are declared from within the body and
@@ -382,7 +384,7 @@ public class ASTMethodNode extends ASTNode {
         dup.startUnit(u);
         String type = declStmt.getType().toString();
 
-        if (type.equals("null_type")) {
+        if ("null_type".equals(type)) {
           dup.printString("Object");
         } else {
           IterableSet importSet = davaBody.getImportList();
@@ -445,8 +447,9 @@ public class ASTMethodNode extends ASTNode {
     }
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+@Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     /*
      * Print out constructor first
      */
@@ -479,11 +482,12 @@ public class ASTMethodNode extends ASTNode {
     return b.toString();
   }
 
-  /*
+/*
    * Nomair A. Naeem, 7-FEB-05 Part of Visitor Design Implementation for AST See: soot.dava.toolkits.base.AST.analysis For
    * details
    */
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTMethodNode(this);
   }
 }

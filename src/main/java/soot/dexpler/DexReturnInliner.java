@@ -85,13 +85,7 @@ public class DexReturnInliner extends DexTransformer {
           if (isInstanceofReturn(gtStmt.getTarget())) {
             Stmt stmt = (Stmt) gtStmt.getTarget().clone();
 
-            for (Trap t : body.getTraps()) {
-              for (UnitBox ubox : t.getUnitBoxes()) {
-                if (ubox.getUnit() == u) {
-                  ubox.setUnit(stmt);
-                }
-              }
-            }
+            body.getTraps().forEach(t -> t.getUnitBoxes().stream().filter(ubox -> ubox.getUnit() == u).forEach(ubox -> ubox.setUnit(stmt)));
 
             while (!u.getBoxesPointingToThis().isEmpty()) {
               u.getBoxesPointingToThis().get(0).setUnit(stmt);
@@ -110,7 +104,7 @@ public class DexReturnInliner extends DexTransformer {
             // We only copy this return if it is used more than
             // once, otherwise we will end up with unused copies
             if (duplicateIfTargets == null) {
-              duplicateIfTargets = new HashSet<Unit>();
+              duplicateIfTargets = new HashSet<>();
             }
             if (!duplicateIfTargets.add(t)) {
               Unit newTarget = (Unit) t.clone();
@@ -144,7 +138,7 @@ public class DexReturnInliner extends DexTransformer {
     for (Unit u : body.getUnits()) {
       if (lastUnit != null && isInstanceofReturn(u) && !isInstanceofFlowChange(lastUnit)) {
         if (fallThroughReturns == null) {
-          fallThroughReturns = new HashSet<Unit>();
+          fallThroughReturns = new HashSet<>();
         }
         fallThroughReturns.add(u);
       }

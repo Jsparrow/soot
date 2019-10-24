@@ -92,21 +92,25 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
   protected volatile String sig;
   protected volatile String subSig;
 
-  /**
+protected NumberedString subsignature;
+
+protected int number = 0;
+
+/**
    * Constructs a {@link SootMethod} with the given name, parameter types and return type.
    */
   public SootMethod(String name, List<Type> parameterTypes, Type returnType) {
     this(name, parameterTypes, returnType, 0, Collections.<SootClass>emptyList());
   }
 
-  /**
+/**
    * Constructs a {@link SootMethod} with the given name, parameter types, return type and modifiers.
    */
   public SootMethod(String name, List<Type> parameterTypes, Type returnType, int modifiers) {
     this(name, parameterTypes, returnType, modifiers, Collections.<SootClass>emptyList());
   }
 
-  /**
+/**
    * Constructs a {@link SootMethod} with the given name, parameter types, return type, and list of thrown exceptions.
    */
   public SootMethod(String name, List<Type> parameterTypes, Type returnType, int modifiers,
@@ -121,25 +125,26 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     this.modifiers = modifiers;
 
     if (exceptions == null && !thrownExceptions.isEmpty()) {
-      exceptions = new ArrayList<SootClass>();
+      exceptions = new ArrayList<>();
       this.exceptions.addAll(thrownExceptions);
     }
     subsignature = Scene.v().getSubSigNumberer().findOrAdd(getSubSignature());
   }
 
-  /**
+/**
    * Returns a hash code for this method consistent with structural equality.
    */
   public int equivHashCode() {
     return returnType.hashCode() * 101 + modifiers * 17 + name.hashCode();
   }
 
-  /** Returns the name of this method. */
-  public String getName() {
+/** Returns the name of this method. */
+  @Override
+public String getName() {
     return name;
   }
 
-  /** Sets the name of this method. */
+/** Sets the name of this method. */
   public synchronized void setName(String name) {
     boolean wasDeclared = isDeclared;
     SootClass oldDeclaringClass = declaringClass;
@@ -155,7 +160,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     }
   }
 
-  /** Sets the declaring class */
+/** Sets the declaring class */
   public synchronized void setDeclaringClass(SootClass declClass) {
     // There is nothing to stop this field from being null except when it actually gets in
     // other classes such as SootMethodRef (when it tries to resolve the method). However, if
@@ -170,7 +175,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     sig = null;
   }
 
-  /** Returns the class which declares the current {@link SootMethod}. */
+/** Returns the class which declares the current {@link SootMethod}. */
   @Override
   public SootClass getDeclaringClass() {
     if (!isDeclared) {
@@ -180,11 +185,11 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return declaringClass;
   }
 
-  public void setDeclared(boolean isDeclared) {
+public void setDeclared(boolean isDeclared) {
     this.isDeclared = isDeclared;
   }
 
-  /**
+/**
    * Returns true when some {@link SootClass} object declares this {@link SootMethod} object.
    */
   @Override
@@ -192,18 +197,18 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return isDeclared;
   }
 
-  /** Returns true when this {@link SootMethod} object is phantom. */
+/** Returns true when this {@link SootMethod} object is phantom. */
   @Override
   public boolean isPhantom() {
     return isPhantom;
   }
 
-  /** Returns true if this method is not phantom, abstract or native, i.e. this method can have a body. */
+/** Returns true if this method is not phantom, abstract or native, i.e. this method can have a body. */
   public boolean isConcrete() {
     return !isPhantom() && !isAbstract() && !isNative();
   }
 
-  /** Sets the phantom flag on this method. */
+/** Sets the phantom flag on this method. */
   @Override
   public void setPhantom(boolean value) {
     if (value) {
@@ -217,7 +222,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     isPhantom = value;
   }
 
-  /**
+/**
    * Gets the modifiers of this method.
    *
    * @see soot.Modifier
@@ -227,7 +232,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return modifiers;
   }
 
-  /**
+/**
    * Sets the modifiers of this method.
    *
    * @see soot.Modifier
@@ -237,12 +242,13 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     this.modifiers = modifiers;
   }
 
-  /** Returns the return type of this method. */
-  public Type getReturnType() {
+/** Returns the return type of this method. */
+  @Override
+public Type getReturnType() {
     return returnType;
   }
 
-  /** Sets the return type of this method. */
+/** Sets the return type of this method. */
   public synchronized void setReturnType(Type t) {
     boolean wasDeclared = isDeclared;
     SootClass oldDeclaringClass = declaringClass;
@@ -258,24 +264,26 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     }
   }
 
-  /** Returns the number of parameters taken by this method. */
+/** Returns the number of parameters taken by this method. */
   public int getParameterCount() {
     return parameterTypes == null ? 0 : parameterTypes.length;
   }
 
-  /** Gets the type of the <i>n</i>th parameter of this method. */
-  public Type getParameterType(int n) {
+/** Gets the type of the <i>n</i>th parameter of this method. */
+  @Override
+public Type getParameterType(int n) {
     return parameterTypes[n];
   }
 
-  /**
+/**
    * Returns a read-only list of the parameter types of this method.
    */
-  public List<Type> getParameterTypes() {
+  @Override
+public List<Type> getParameterTypes() {
     return parameterTypes == null ? Collections.<Type>emptyList() : Arrays.asList(parameterTypes);
   }
 
-  /**
+/**
    * Changes the set of parameter types of this method.
    */
   public synchronized void setParameterTypes(List<Type> l) {
@@ -293,17 +301,17 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     }
   }
 
-  /** Returns the {@link MethodSource} of the current {@link SootMethod}. */
+/** Returns the {@link MethodSource} of the current {@link SootMethod}. */
   public MethodSource getSource() {
     return ms;
   }
 
-  /** Sets the {@link MethodSource} of the current {@link SootMethod}. */
+/** Sets the {@link MethodSource} of the current {@link SootMethod}. */
   public synchronized void setSource(MethodSource ms) {
     this.ms = ms;
   }
 
-  /**
+/**
    * Retrieves the active body for this method.
    */
   @SuppressWarnings("deprecation")
@@ -340,7 +348,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     }
   }
 
-  /**
+/**
    * Sets the active body for this method.
    */
   public synchronized void setActiveBody(Body body) {
@@ -363,7 +371,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     this.activeBody = body;
   }
 
-  /**
+/**
    * Returns the active body if present, else constructs an active body and returns that.
    *
    * If you called Scene.v().loadClassAndSupport() for a class yourself, it will not be an application class, so you cannot
@@ -410,17 +418,17 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     }
   }
 
-  /** Returns true if this method has an active body. */
+/** Returns true if this method has an active body. */
   public boolean hasActiveBody() {
     return activeBody != null;
   }
 
-  /** Releases the active body associated with this method. */
+/** Releases the active body associated with this method. */
   public synchronized void releaseActiveBody() {
     activeBody = null;
   }
 
-  /**
+/**
    * Adds the given exception to the list of exceptions thrown by this method unless the exception is already in the list.
    */
   public void addExceptionIfAbsent(SootClass e) {
@@ -429,14 +437,14 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     }
   }
 
-  /**
+/**
    * Adds the given exception to the list of exceptions thrown by this method.
    */
   public void addException(SootClass e) {
     logger.trace("Adding exception {}", e);
 
     if (exceptions == null) {
-      exceptions = new ArrayList<SootClass>();
+      exceptions = new ArrayList<>();
     } else if (exceptions.contains(e)) {
       throw new RuntimeException("already throws exception " + e.getName());
     }
@@ -444,7 +452,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     exceptions.add(e);
   }
 
-  /**
+/**
    * Removes the given exception from the list of exceptions thrown by this method.
    */
   public void removeException(SootClass e) {
@@ -461,36 +469,36 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     exceptions.remove(e);
   }
 
-  /** Returns true if this method throws exception <code>e</code>. */
+/** Returns true if this method throws exception <code>e</code>. */
   public boolean throwsException(SootClass e) {
     return exceptions != null && exceptions.contains(e);
   }
 
-  public void setExceptions(List<SootClass> exceptions) {
+public void setExceptions(List<SootClass> exceptions) {
     if (exceptions != null && !exceptions.isEmpty()) {
-      this.exceptions = new ArrayList<SootClass>(exceptions);
+      this.exceptions = new ArrayList<>(exceptions);
     } else {
       this.exceptions = null;
     }
   }
 
-  /**
+/**
    * Returns a backed list of the exceptions thrown by this method.
    */
 
   public List<SootClass> getExceptions() {
     if (exceptions == null) {
-      exceptions = new ArrayList<SootClass>();
+      exceptions = new ArrayList<>();
     }
 
     return exceptions;
   }
 
-  public List<SootClass> getExceptionsUnsafe() {
+public List<SootClass> getExceptionsUnsafe() {
     return exceptions;
   }
 
-  /**
+/**
    * Convenience method returning true if this method is static.
    */
   @Override
@@ -498,7 +506,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return Modifier.isStatic(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this method is private.
    */
   @Override
@@ -506,7 +514,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return Modifier.isPrivate(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this method is public.
    */
   @Override
@@ -514,7 +522,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return Modifier.isPublic(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this method is protected.
    */
   @Override
@@ -522,35 +530,35 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return Modifier.isProtected(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this method is abstract.
    */
   public boolean isAbstract() {
     return Modifier.isAbstract(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this method is final.
    */
   public boolean isFinal() {
     return Modifier.isFinal(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this method is native.
    */
   public boolean isNative() {
     return Modifier.isNative(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this method is synchronized.
    */
   public boolean isSynchronized() {
     return Modifier.isSynchronized(this.getModifiers());
   }
 
-  /**
+/**
    *
    * @return yes if this is the main method
    */
@@ -565,7 +573,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return false;
   }
 
-  /**
+/**
    *
    * @return yes, if this function is a constructor. Please not that <clinit> methods are not treated as constructors in this
    *         method.
@@ -574,7 +582,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return name.equals(constructorName);
   }
 
-  /**
+/**
    *
    * @return yes, if this function is a static initializer.
    */
@@ -582,7 +590,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return name.equals(staticInitializerName);
   }
 
-  /**
+/**
    * @return yes, if this is a class initializer or main function.
    */
   public boolean isEntryMethod() {
@@ -593,7 +601,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return isMain();
   }
 
-  /**
+/**
    * We rely on the JDK class recognition to decide if a method is JDK method.
    */
   public boolean isJavaLibraryMethod() {
@@ -601,11 +609,11 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return cl.isJavaLibraryClass();
   }
 
-  /**
+/**
    * Returns the parameters part of the signature in the format in which it appears in bytecode.
    */
   public String getBytecodeParms() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     for (Iterator<Type> typeIt = getParameterTypes().iterator(); typeIt.hasNext();) {
       final Type type = typeIt.next();
       buffer.append(AbstractJasminClass.jasminDescriptorOf(type));
@@ -613,15 +621,15 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return buffer.toString().intern();
   }
 
-  /**
+/**
    * Returns the signature of this method in the format in which it appears in bytecode (eg. [Ljava/lang/Object instead of
    * java.lang.Object[]).
    */
   public String getBytecodeSignature() {
     String name = getName();
 
-    StringBuffer buffer = new StringBuffer();
-    buffer.append("<" + Scene.v().quotedNameOf(getDeclaringClass().getName()) + ": ");
+    StringBuilder buffer = new StringBuilder();
+    buffer.append(new StringBuilder().append("<").append(Scene.v().quotedNameOf(getDeclaringClass().getName())).append(": ").toString());
     buffer.append(name);
     buffer.append(AbstractJasminClass.jasminDescriptorOf(makeRef()));
     buffer.append(">");
@@ -629,10 +637,11 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return buffer.toString().intern();
   }
 
-  /**
+/**
    * Returns the Soot signature of this method. Used to refer to methods unambiguously.
    */
-  public String getSignature() {
+  @Override
+public String getSignature() {
     if (sig == null) {
       synchronized (this) {
         if (sig == null) {
@@ -643,11 +652,11 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return sig;
   }
 
-  public static String getSignature(SootClass cl, String name, List<Type> params, Type returnType) {
+public static String getSignature(SootClass cl, String name, List<Type> params, Type returnType) {
     return getSignature(cl, getSubSignatureImpl(name, params, returnType));
   }
 
-  public static String getSignature(SootClass cl, String subSignature) {
+public static String getSignature(SootClass cl, String subSignature) {
     StringBuilder buffer = new StringBuilder();
     buffer.append("<");
     buffer.append(Scene.v().quotedNameOf(cl.getName()));
@@ -658,7 +667,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return buffer.toString();
   }
 
-  /**
+/**
    * Returns the Soot subsignature of this method. Used to refer to methods unambiguously.
    */
   public String getSubSignature() {
@@ -672,11 +681,11 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return subSig;
   }
 
-  public static String getSubSignature(String name, List<Type> params, Type returnType) {
+public static String getSubSignature(String name, List<Type> params, Type returnType) {
     return getSubSignatureImpl(name, params, returnType);
   }
 
-  private static String getSubSignatureImpl(String name, List<Type> params, Type returnType) {
+private static String getSubSignatureImpl(String name, List<Type> params, Type returnType) {
     StringBuilder buffer = new StringBuilder();
 
     buffer.append(returnType.toQuotedString());
@@ -698,19 +707,17 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return buffer.toString();
   }
 
-  protected NumberedString subsignature;
-
-  public NumberedString getNumberedSubSignature() {
+public NumberedString getNumberedSubSignature() {
     return subsignature;
   }
 
-  /** Returns the signature of this method. */
+/** Returns the signature of this method. */
   @Override
   public String toString() {
     return getSignature();
   }
 
-  /*
+/*
    * TODO: Nomair A. Naeem .... 8th Feb 2006 This is really messy coding So much for modularization!! Should some day look
    * into creating the DavaDeclaration from within DavaBody
    */
@@ -719,7 +726,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
       return "static";
     }
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     // modifiers
     StringTokenizer st = new StringTokenizer(Modifier.toString(this.getModifiers()));
@@ -790,7 +797,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
 
       buffer.append(" ");
       if (hasActiveBody()) {
-        buffer.append(((DavaBody) getActiveBody()).get_ParamMap().get(new Integer(count++)));
+        buffer.append(((DavaBody) getActiveBody()).get_ParamMap().get(Integer.valueOf(count++)));
       } else {
         if (t == BooleanType.v()) {
           buffer.append("z" + count++);
@@ -843,12 +850,12 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return buffer.toString().intern();
   }
 
-  /**
+/**
    * Returns the declaration of this method, as used at the top of textual body representations (before the {}'s containing
    * the code for representation.)
    */
   public String getDeclaration() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     // modifiers
     StringTokenizer st = new StringTokenizer(Modifier.toString(this.getModifiers()));
@@ -903,34 +910,32 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     return buffer.toString().intern();
   }
 
-  @Override
+@Override
   public final int getNumber() {
     return number;
   }
 
-  @Override
+@Override
   public final void setNumber(int number) {
     this.number = number;
   }
 
-  protected int number = 0;
-
-  @Override
+@Override
   public SootMethod method() {
     return this;
   }
 
-  @Override
+@Override
   public Context context() {
     return null;
   }
 
-  public SootMethodRef makeRef() {
+public SootMethodRef makeRef() {
     return Scene.v().makeMethodRef(declaringClass, name, parameterTypes == null ? null : Arrays.asList(parameterTypes),
         returnType, isStatic());
   }
 
-  @Override
+@Override
   public int getJavaSourceStartLineNumber() {
     super.getJavaSourceStartLineNumber();
     // search statements for first line number

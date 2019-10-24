@@ -26,14 +26,15 @@ public class AssertStmtChecker extends polyglot.visit.NodeVisitor {
 
   private boolean hasAssert = false;
 
-  public boolean isHasAssert() {
-    return hasAssert;
-  }
-
   public AssertStmtChecker() {
   }
 
-  public polyglot.ast.Node override(polyglot.ast.Node parent, polyglot.ast.Node n) {
+public boolean isHasAssert() {
+    return hasAssert;
+  }
+
+@Override
+public polyglot.ast.Node override(polyglot.ast.Node parent, polyglot.ast.Node n) {
     if (n instanceof polyglot.ast.ClassDecl) {
       return n;
     }
@@ -43,7 +44,8 @@ public class AssertStmtChecker extends polyglot.visit.NodeVisitor {
     return null;
   }
 
-  public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
+@Override
+public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
 
     if (n instanceof polyglot.ast.Assert) {
       hasAssert = true;

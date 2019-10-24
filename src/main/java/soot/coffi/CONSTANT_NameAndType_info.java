@@ -50,7 +50,8 @@ class CONSTANT_NameAndType_info extends cp_info {
    * @return number of bytes occupied by this object.
    * @see cp_info#size
    */
-  public int size() {
+  @Override
+public int size() {
     return 5;
   }
 
@@ -62,7 +63,8 @@ class CONSTANT_NameAndType_info extends cp_info {
    * @return String representation of this entry.
    * @see cp_info#toString
    */
-  public String toString(cp_info constant_pool[]) {
+  @Override
+public String toString(cp_info constant_pool[]) {
     CONSTANT_Utf8_info ci = (CONSTANT_Utf8_info) (constant_pool[name_index]);
     // CONSTANT_Utf8_info di = (CONSTANT_Utf8_info)(constant_pool[descriptor_index]);
     return ci.convert(); // + "/" + di.convert();
@@ -74,7 +76,8 @@ class CONSTANT_NameAndType_info extends cp_info {
    * @return the String "nameandtype".
    * @see cp_info#typeName
    */
-  public String typeName() {
+  @Override
+public String typeName() {
     return "nameandtype";
   }
 
@@ -90,7 +93,8 @@ class CONSTANT_NameAndType_info extends cp_info {
    * @return a value <0, 0, or >0 indicating whether this is smaller, the same or larger than cp.
    * @see cp_info#compareTo
    */
-  public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
+  @Override
+public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
     int i;
     if (tag != cp.tag) {
       return tag - cp.tag;
@@ -103,7 +107,8 @@ class CONSTANT_NameAndType_info extends cp_info {
     return ((CONSTANT_Utf8_info) (constant_pool[descriptor_index])).compareTo(cp_constant_pool[cu.descriptor_index]);
   }
 
-  public Value createJimpleConstantValue(cp_info[] constant_pool) {
+  @Override
+public Value createJimpleConstantValue(cp_info[] constant_pool) {
     throw new UnsupportedOperationException("cannot convert to Jimple: " + typeName());
   }
 

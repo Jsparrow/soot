@@ -32,12 +32,14 @@ public class ThrowCreatedByCompilerTag implements Tag {
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "ThrowCreatedByCompilerTag";
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("ThrowCreatedByCompilerTag has no value for bytecode");
   }
 }

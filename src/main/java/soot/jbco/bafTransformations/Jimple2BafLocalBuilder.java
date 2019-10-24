@@ -40,24 +40,26 @@ import soot.jbco.IJbcoTransform;
 public class Jimple2BafLocalBuilder extends BodyTransformer implements IJbcoTransform {
 
   public static String dependancies[] = new String[] { "jtp.jbco_jl", "bb.jbco_j2bl", "bb.lp" };
+public static String name = "bb.jbco_j2bl";
+private static boolean runOnce = false;
 
-  public String[] getDependencies() {
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_j2bl";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
   }
 
-  private static boolean runOnce = false;
-
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
-    if (soot.jbco.Main.methods2JLocals.size() == 0) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+    if (soot.jbco.Main.methods2JLocals.isEmpty()) {
       if (!runOnce) {
         runOnce = true;
         out.println("[Jimple2BafLocalBuilder]:: Jimple Local Lists have not been built");
@@ -67,13 +69,12 @@ public class Jimple2BafLocalBuilder extends BodyTransformer implements IJbcoTran
     }
 
     Collection<Local> bLocals = b.getLocals();
-    HashMap<Local, Local> bafToJLocals = new HashMap<Local, Local>();
+    HashMap<Local, Local> bafToJLocals = new HashMap<>();
     Iterator<Local> jlocIt = soot.jbco.Main.methods2JLocals.get(b.getMethod()).iterator();
     while (jlocIt.hasNext()) {
       Local jl = jlocIt.next();
-      Iterator<Local> blocIt = bLocals.iterator();
-      while (blocIt.hasNext()) {
-        Local bl = (Local) blocIt.next();
+      for (Local bLocal : bLocals) {
+        Local bl = (Local) bLocal;
         if (bl.getName().equals(jl.getName())) {
           bafToJLocals.put(bl, jl);
           break;

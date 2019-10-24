@@ -41,9 +41,11 @@ public abstract class AbstractBranchInst extends AbstractInst {
     targetBoxes = Collections.singletonList(targetBox);
   }
 
-  abstract public String getName();
+  @Override
+public abstract String getName();
 
-  public String toString() {
+  @Override
+public String toString() {
     String target = "";
     Unit targetUnit = getTarget();
     if (this == targetUnit) {
@@ -51,10 +53,11 @@ public abstract class AbstractBranchInst extends AbstractInst {
     } else {
       target = getTarget().toString();
     }
-    return getName() + " " + target;
+    return new StringBuilder().append(getName()).append(" ").append(target).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(getName());
     up.literal(" ");
     targetBox.toString(up);
@@ -72,13 +75,16 @@ public abstract class AbstractBranchInst extends AbstractInst {
     return targetBox;
   }
 
-  public List<UnitBox> getUnitBoxes() {
+  @Override
+public List<UnitBox> getUnitBoxes() {
     return targetBoxes;
   }
 
-  abstract public void apply(Switch sw);
+  @Override
+public abstract void apply(Switch sw);
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return true;
   }
 

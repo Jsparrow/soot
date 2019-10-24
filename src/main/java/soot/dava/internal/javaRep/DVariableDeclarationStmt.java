@@ -93,7 +93,8 @@ public class DVariableDeclarationStmt extends AbstractUnit implements Stmt {
     }
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     DVariableDeclarationStmt temp = new DVariableDeclarationStmt(declarationType, davaBody);
     Iterator it = declarations.iterator();
     while (it.hasNext()) {
@@ -107,8 +108,9 @@ public class DVariableDeclarationStmt extends AbstractUnit implements Stmt {
     return temp;
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
     if (declarations.size() == 0) {
       return b.toString();
@@ -116,7 +118,7 @@ public class DVariableDeclarationStmt extends AbstractUnit implements Stmt {
 
     String type = declarationType.toString();
 
-    if (type.equals("null_type")) {
+    if ("null_type".equals(type)) {
       b.append("Object");
     } else {
       b.append(type);
@@ -135,7 +137,8 @@ public class DVariableDeclarationStmt extends AbstractUnit implements Stmt {
     return b.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (declarations.size() == 0) {
       return;
     }
@@ -147,7 +150,7 @@ public class DVariableDeclarationStmt extends AbstractUnit implements Stmt {
 
       String type = declarationType.toString();
 
-      if (type.equals("null_type")) {
+      if ("null_type".equals(type)) {
         dup.printString("Object");
       } else {
         IterableSet importSet = davaBody.getImportList();
@@ -177,47 +180,58 @@ public class DVariableDeclarationStmt extends AbstractUnit implements Stmt {
    * 
    */
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 
-  public boolean containsInvokeExpr() {
+  @Override
+public boolean containsInvokeExpr() {
     return false;
   }
 
-  public InvokeExpr getInvokeExpr() {
+  @Override
+public InvokeExpr getInvokeExpr() {
     throw new RuntimeException("getInvokeExpr() called with no invokeExpr present!");
   }
 
-  public ValueBox getInvokeExprBox() {
+  @Override
+public ValueBox getInvokeExprBox() {
     throw new RuntimeException("getInvokeExprBox() called with no invokeExpr present!");
   }
 
-  public boolean containsArrayRef() {
+  @Override
+public boolean containsArrayRef() {
     return false;
   }
 
-  public ArrayRef getArrayRef() {
+  @Override
+public ArrayRef getArrayRef() {
     throw new RuntimeException("getArrayRef() called with no ArrayRef present!");
   }
 
-  public ValueBox getArrayRefBox() {
+  @Override
+public ValueBox getArrayRefBox() {
     throw new RuntimeException("getArrayRefBox() called with no ArrayRef present!");
   }
 
-  public boolean containsFieldRef() {
+  @Override
+public boolean containsFieldRef() {
     return false;
   }
 
-  public FieldRef getFieldRef() {
+  @Override
+public FieldRef getFieldRef() {
     throw new RuntimeException("getFieldRef() called with no FieldRef present!");
   }
 
-  public ValueBox getFieldRefBox() {
+  @Override
+public ValueBox getFieldRefBox() {
     throw new RuntimeException("getFieldRefBox() called with no FieldRef present!");
   }
 

@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ALengthofUnop extends PUnop
 {
-    private TLengthof _lengthof_;
+    private TLengthof lengthof;
 
     public ALengthofUnop()
     {
@@ -26,7 +26,7 @@ public final class ALengthofUnop extends PUnop
     public Object clone()
     {
         return new ALengthofUnop(
-            cloneNode(this._lengthof_));
+            cloneNode(this.lengthof));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ALengthofUnop extends PUnop
 
     public TLengthof getLengthof()
     {
-        return this._lengthof_;
+        return this.lengthof;
     }
 
     public void setLengthof(TLengthof node)
     {
-        if(this._lengthof_ != null)
+        if(this.lengthof != null)
         {
-            this._lengthof_.parent(null);
+            this.lengthof.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ALengthofUnop extends PUnop
             node.parent(this);
         }
 
-        this._lengthof_ = node;
+        this.lengthof = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._lengthof_);
+            + toString(this.lengthof);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._lengthof_ == child)
+        if(this.lengthof == child)
         {
-            this._lengthof_ = null;
+            this.lengthof = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ALengthofUnop extends PUnop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._lengthof_ == oldChild)
+        if(this.lengthof == oldChild)
         {
             setLengthof((TLengthof) newChild);
             return;

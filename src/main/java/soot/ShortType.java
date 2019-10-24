@@ -36,19 +36,23 @@ public class ShortType extends PrimType implements IntegerType {
     return G.v().soot_ShortType();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x8B817DD3;
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "short";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseShortType(this);
   }
 

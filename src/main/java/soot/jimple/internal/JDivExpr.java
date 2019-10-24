@@ -35,19 +35,23 @@ public class JDivExpr extends AbstractJimpleFloatBinopExpr implements DivExpr {
     super(op1, op2);
   }
 
-  public final String getSymbol() {
+  @Override
+public final String getSymbol() {
     return " / ";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseDivExpr(this);
   }
 
-  Object makeBafInst(Type opType) {
+  @Override
+Object makeBafInst(Type opType) {
     return Baf.v().newDivInst(this.getOp1().getType());
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JDivExpr(Jimple.cloneIfNecessary(getOp1()), Jimple.cloneIfNecessary(getOp2()));
   }
 }

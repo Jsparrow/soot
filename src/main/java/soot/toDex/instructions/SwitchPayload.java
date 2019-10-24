@@ -38,7 +38,6 @@ public abstract class SwitchPayload extends AbstractPayload {
   protected List<Unit> targets;
 
   public SwitchPayload(List<Unit> targets) {
-    super();
     this.targets = targets;
   }
 

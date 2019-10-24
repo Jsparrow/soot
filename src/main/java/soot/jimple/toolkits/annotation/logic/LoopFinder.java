@@ -38,6 +38,7 @@ import soot.jimple.Stmt;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.MHGDominatorsFinder;
 import soot.toolkits.graph.UnitGraph;
+import java.util.stream.Collectors;
 
 public class LoopFinder extends BodyTransformer {
 
@@ -47,7 +48,8 @@ public class LoopFinder extends BodyTransformer {
     loops = null;
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     getLoops(b);
   }
 
@@ -63,22 +65,18 @@ public class LoopFinder extends BodyTransformer {
       return loops;
     }
 
-    MHGDominatorsFinder<Unit> a = new MHGDominatorsFinder<Unit>(g);
-    Map<Stmt, List<Stmt>> loops = new HashMap<Stmt, List<Stmt>>();
+    MHGDominatorsFinder<Unit> a = new MHGDominatorsFinder<>(g);
+    Map<Stmt, List<Stmt>> loops = new HashMap<>();
 
-    for (Unit u : g.getBody().getUnits()) {
+    g.getBody().getUnits().forEach(u -> {
       List<Unit> succs = g.getSuccsOf(u);
       List<Unit> dominaters = a.getDominators(u);
-      List<Stmt> headers = new ArrayList<Stmt>();
+      List<Stmt> headers = new ArrayList<>();
 
-      for (Unit succ : succs) {
-        if (dominaters.contains(succ)) {
-          // header succeeds and dominates s, we have a loop
-          headers.add((Stmt) succ);
-        }
-      }
+      // header succeeds and dominates s, we have a loop
+	succs.stream().filter(dominaters::contains).forEach(succ -> headers.add((Stmt) succ));
 
-      for (Unit header : headers) {
+      headers.forEach(header -> {
         List<Stmt> loopBody = getLoopBodyFor(header, u, g);
         if (loops.containsKey(header)) {
           // merge bodies
@@ -87,21 +85,19 @@ public class LoopFinder extends BodyTransformer {
         } else {
           loops.put((Stmt) header, loopBody);
         }
-      }
-    }
+      });
+    });
 
-    Set<Loop> ret = new HashSet<Loop>();
-    for (Map.Entry<Stmt, List<Stmt>> entry : loops.entrySet()) {
-      ret.add(new Loop(entry.getKey(), entry.getValue(), g));
-    }
+    Set<Loop> ret = new HashSet<>();
+    loops.entrySet().forEach(entry -> ret.add(new Loop(entry.getKey(), entry.getValue(), g)));
 
     this.loops = ret;
     return ret;
   }
 
   private List<Stmt> getLoopBodyFor(Unit header, Unit node, UnitGraph g) {
-    List<Stmt> loopBody = new ArrayList<Stmt>();
-    Deque<Unit> stack = new ArrayDeque<Unit>();
+    List<Stmt> loopBody = new ArrayList<>();
+    Deque<Unit> stack = new ArrayDeque<>();
 
     loopBody.add((Stmt) header);
     stack.push(node);
@@ -112,9 +108,7 @@ public class LoopFinder extends BodyTransformer {
         // add next to loop body
         loopBody.add(0, next);
         // put all preds of next on stack
-        for (Unit u : g.getPredsOf(next)) {
-          stack.push(u);
-        }
+		g.getPredsOf(next).forEach(stack::push);
       }
     }
 
@@ -125,11 +119,7 @@ public class LoopFinder extends BodyTransformer {
   }
 
   private List<Stmt> union(List<Stmt> l1, List<Stmt> l2) {
-    for (Stmt next : l2) {
-      if (!l1.contains(next)) {
-        l1.add(next);
-      }
-    }
+    l1.addAll(l2.stream().filter(next -> !l1.contains(next)).collect(Collectors.toList()));
     return l1;
   }
 }

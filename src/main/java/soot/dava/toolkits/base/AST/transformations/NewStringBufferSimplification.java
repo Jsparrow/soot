@@ -32,6 +32,8 @@ import soot.dava.internal.javaRep.DNewInvokeExpr;
 import soot.dava.internal.javaRep.DVirtualInvokeExpr;
 import soot.dava.toolkits.base.AST.analysis.DepthFirstAdapter;
 import soot.grimp.internal.GAddExpr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Matches the output pattern
@@ -41,7 +43,8 @@ import soot.grimp.internal.GAddExpr;
  */
 
 public class NewStringBufferSimplification extends DepthFirstAdapter {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(NewStringBufferSimplification.class);
+public static boolean DEBUG = false;
 
   public NewStringBufferSimplification() {
 
@@ -51,40 +54,42 @@ public class NewStringBufferSimplification extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void inExprOrRefValueBox(ValueBox argBox) {
+  @Override
+public void inExprOrRefValueBox(ValueBox argBox) {
     if (DEBUG) {
-      System.out.println("ValBox is: " + argBox.toString());
+      logger.info("ValBox is: " + argBox.toString());
     }
 
     Value tempArgValue = argBox.getValue();
     if (DEBUG) {
-      System.out.println("arg value is: " + tempArgValue);
+      logger.info("arg value is: " + tempArgValue);
     }
 
     if (!(tempArgValue instanceof DVirtualInvokeExpr)) {
       if (DEBUG) {
-        System.out.println("Not a DVirtualInvokeExpr" + tempArgValue.getClass());
+        logger.info("Not a DVirtualInvokeExpr" + tempArgValue.getClass());
       }
       return;
     }
 
     // check this is a toString for StringBuffer
     if (DEBUG) {
-      System.out.println("arg value is a virtual invokeExpr");
+      logger.info("arg value is a virtual invokeExpr");
     }
     DVirtualInvokeExpr vInvokeExpr = ((DVirtualInvokeExpr) tempArgValue);
 
     // need this try catch since DavaStmtHandler expr will not have a "getMethod"
     try {
-      if (!(vInvokeExpr.getMethod().toString().equals("<java.lang.StringBuffer: java.lang.String toString()>"))) {
+      if (!("<java.lang.StringBuffer: java.lang.String toString()>".equals(vInvokeExpr.getMethod().toString()))) {
         return;
       }
     } catch (Exception e) {
-      return;
+      logger.error(e.getMessage(), e);
+	return;
     }
 
     if (DEBUG) {
-      System.out.println("Ends in toString()");
+      logger.info("Ends in toString()");
     }
 
     Value base = vInvokeExpr.getBase();
@@ -92,11 +97,11 @@ public class NewStringBufferSimplification extends DepthFirstAdapter {
     while (base instanceof DVirtualInvokeExpr) {
       DVirtualInvokeExpr tempV = (DVirtualInvokeExpr) base;
       if (DEBUG) {
-        System.out.println("base method is " + tempV.getMethod());
+        logger.info("base method is " + tempV.getMethod());
       }
       if (!tempV.getMethod().toString().startsWith("<java.lang.StringBuffer: java.lang.StringBuffer append")) {
         if (DEBUG) {
-          System.out.println("Found a virtual invoke which is not a append" + tempV.getMethod());
+          logger.info("Found a virtual invoke which is not a append" + tempV.getMethod());
         }
         return;
       }
@@ -111,10 +116,10 @@ public class NewStringBufferSimplification extends DepthFirstAdapter {
     }
 
     if (DEBUG) {
-      System.out.println("New expr is " + ((DNewInvokeExpr) base).getMethod());
+      logger.info("New expr is " + ((DNewInvokeExpr) base).getMethod());
     }
 
-    if (!((DNewInvokeExpr) base).getMethod().toString().equals("<java.lang.StringBuffer: void <init>()>")) {
+    if (!"<java.lang.StringBuffer: void <init>()>".equals(((DNewInvokeExpr) base).getMethod().toString())) {
       return;
     }
 
@@ -122,7 +127,7 @@ public class NewStringBufferSimplification extends DepthFirstAdapter {
      * The arg is a new invoke expr of StringBuffer and all the appends are present in the args list
      */
     if (DEBUG) {
-      System.out.println("Found a new StringBuffer.append list in it");
+      logger.info("Found a new StringBuffer.append list in it");
     }
 
     // argBox contains the new StringBuffer
@@ -139,7 +144,7 @@ public class NewStringBufferSimplification extends DepthFirstAdapter {
 
     }
     if (DEBUG) {
-      System.out.println("New expression for System.out.println is" + newVal);
+      logger.info("New expression for System.out.println is" + newVal);
     }
 
     argBox.setValue(newVal);

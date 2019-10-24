@@ -51,7 +51,8 @@ public class SynchronizedMethodTransformer extends BodyTransformer {
     return G.v().soot_toDex_SynchronizedMethodTransformer();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     if (!b.getMethod().isSynchronized() || b.getMethod().isStatic()) {
       return;
     }
@@ -70,9 +71,7 @@ public class SynchronizedMethodTransformer extends BodyTransformer {
 
         // We also need to leave the monitor when the method terminates
         UnitGraph graph = new ExceptionalUnitGraph(b);
-        for (Unit tail : graph.getTails()) {
-          b.getUnits().insertBefore(Jimple.v().newExitMonitorStmt(b.getThisLocal()), tail);
-        }
+        graph.getTails().forEach(tail -> b.getUnits().insertBefore(Jimple.v().newExitMonitorStmt(b.getThisLocal()), tail));
       }
       break;
     }

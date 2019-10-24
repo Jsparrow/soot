@@ -40,11 +40,11 @@ public class InterfaceTest extends AbstractASMBackendTest {
 		new String[] { "soot/asm/backend/targets/Measurable" });
 		visitor.visitSource("Comparable.java", null);
 		visitor.visitField(Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC, "LESS", "I",
-		null, new Integer(-1)).visitEnd();
+		null, Integer.valueOf(-1)).visitEnd();
 		visitor.visitField(Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC, "EQUAL", "I",
-		null, new Integer(0)).visitEnd();
+		null, Integer.valueOf(0)).visitEnd();
 		visitor.visitField(Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC, "GREATER", "I",
-		null, new Integer(1)).visitEnd();
+		null, Integer.valueOf(1)).visitEnd();
 		visitor.visitMethod(Opcodes.ACC_PUBLIC + Opcodes.ACC_ABSTRACT, "compareTo",
 				"(Ljava/lang/Object;)I", null, null).visitEnd();
 		visitor.visitEnd();

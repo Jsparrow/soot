@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AInvokeExpression extends PExpression
 {
-    private PInvokeExpr _invokeExpr_;
+    private PInvokeExpr invokeExpr;
 
     public AInvokeExpression()
     {
@@ -26,7 +26,7 @@ public final class AInvokeExpression extends PExpression
     public Object clone()
     {
         return new AInvokeExpression(
-            cloneNode(this._invokeExpr_));
+            cloneNode(this.invokeExpr));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AInvokeExpression extends PExpression
 
     public PInvokeExpr getInvokeExpr()
     {
-        return this._invokeExpr_;
+        return this.invokeExpr;
     }
 
     public void setInvokeExpr(PInvokeExpr node)
     {
-        if(this._invokeExpr_ != null)
+        if(this.invokeExpr != null)
         {
-            this._invokeExpr_.parent(null);
+            this.invokeExpr.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AInvokeExpression extends PExpression
             node.parent(this);
         }
 
-        this._invokeExpr_ = node;
+        this.invokeExpr = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._invokeExpr_);
+            + toString(this.invokeExpr);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._invokeExpr_ == child)
+        if(this.invokeExpr == child)
         {
-            this._invokeExpr_ = null;
+            this.invokeExpr = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AInvokeExpression extends PExpression
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._invokeExpr_ == oldChild)
+        if(this.invokeExpr == oldChild)
         {
             setInvokeExpr((PInvokeExpr) newChild);
             return;

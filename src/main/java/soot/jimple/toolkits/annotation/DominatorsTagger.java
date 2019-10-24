@@ -46,7 +46,8 @@ public class DominatorsTagger extends BodyTransformer {
     return G.v().soot_jimple_toolkits_annotation_DominatorsTagger();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map opts) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map opts) {
 
     MHGDominatorsFinder analysis = new MHGDominatorsFinder(new ExceptionalUnitGraph(b));
     Iterator it = b.getUnits().iterator();
@@ -56,7 +57,7 @@ public class DominatorsTagger extends BodyTransformer {
       Iterator dIt = dominators.iterator();
       while (dIt.hasNext()) {
         Stmt ds = (Stmt) dIt.next();
-        String info = ds + " dominates " + s;
+        String info = new StringBuilder().append(ds).append(" dominates ").append(s).toString();
         s.addTag(new LinkTag(info, ds, b.getMethod().getDeclaringClass().getName(), "Dominators"));
       }
     }

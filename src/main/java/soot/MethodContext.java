@@ -31,49 +31,53 @@ import java.util.Map;
  */
 public final class MethodContext implements MethodOrMethodContext {
   private SootMethod method;
+private Context context;
 
-  public SootMethod method() {
-    return method;
-  }
-
-  private Context context;
-
-  public Context context() {
-    return context;
-  }
-
-  private MethodContext(SootMethod method, Context context) {
+private MethodContext(SootMethod method, Context context) {
     this.method = method;
     this.context = context;
   }
 
-  public int hashCode() {
+@Override
+public SootMethod method() {
+    return method;
+  }
+
+@Override
+public Context context() {
+    return context;
+  }
+
+@Override
+public int hashCode() {
     return method.hashCode() + context.hashCode();
   }
 
-  public boolean equals(Object o) {
-    if (o instanceof MethodContext) {
-      MethodContext other = (MethodContext) o;
-      return method.equals(other.method) && context.equals(other.context);
-    }
-    return false;
+@Override
+public boolean equals(Object o) {
+    if (!(o instanceof MethodContext)) {
+		return false;
+	}
+	MethodContext other = (MethodContext) o;
+	return method.equals(other.method) && context.equals(other.context);
   }
 
-  public static MethodOrMethodContext v(SootMethod method, Context context) {
+public static MethodOrMethodContext v(SootMethod method, Context context) {
     if (context == null) {
       return method;
     }
     MethodContext probe = new MethodContext(method, context);
     Map<MethodContext, MethodContext> map = G.v().MethodContext_map;
     MethodContext ret = map.get(probe);
-    if (ret == null) {
-      map.put(probe, probe);
-      return probe;
-    }
-    return ret;
+    if (ret != null) {
+		return ret;
+	}
+	map.put(probe, probe);
+	return probe;
   }
 
-  public String toString() {
-    return "Method " + method + " in context " + context;
+@Override
+public String toString() {
+    return new StringBuilder().append("Method ").append(method).append(" in context ").append(context).toString();
   }
 }

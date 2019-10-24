@@ -57,6 +57,7 @@ import soot.tagkit.IntegerConstantValueTag;
 import soot.tagkit.LongConstantValueTag;
 import soot.tagkit.StringConstantValueTag;
 import soot.tagkit.Tag;
+import java.util.stream.Collectors;
 
 /**
  * This is the reverse operation of the {@link ConstantValueToInitializerTransformer}. We scan for <clinit> methods that
@@ -75,9 +76,7 @@ public class ConstantInitializerToTagTransformer extends SceneTransformer {
 
   @Override
   protected void internalTransform(String phaseName, Map<String, String> options) {
-    for (SootClass sc : Scene.v().getClasses()) {
-      transformClass(sc, false);
-    }
+    Scene.v().getClasses().forEach(sc -> transformClass(sc, false));
   }
 
   /**
@@ -96,9 +95,9 @@ public class ConstantInitializerToTagTransformer extends SceneTransformer {
       return;
     }
 
-    Set<SootField> nonConstantFields = new HashSet<SootField>();
-    Map<SootField, ConstantValueTag> newTags = new HashMap<SootField, ConstantValueTag>();
-    Set<SootField> removeTagList = new HashSet<SootField>(); // in case of
+    Set<SootField> nonConstantFields = new HashSet<>();
+    Map<SootField, ConstantValueTag> newTags = new HashMap<>();
+    Set<SootField> removeTagList = new HashSet<>(); // in case of
     // mismatch
     // between
     // code/constant
@@ -120,7 +119,8 @@ public class ConstantInitializerToTagTransformer extends SceneTransformer {
               continue;
             }
           } catch (ConflictingFieldRefException ex) {
-            // Ignore this statement
+            logger.error(ex.getMessage(), ex);
+			// Ignore this statement
             continue;
           }
 
@@ -137,8 +137,8 @@ public class ConstantInitializerToTagTransformer extends SceneTransformer {
                     itU.remove();
                   }
                 } else {
-                  logger.debug("" + "WARNING: Constant value for field '" + field + "' mismatch between code ("
-                      + assign.getRightOp() + ") and constant table (" + t + ")");
+                  logger.debug(new StringBuilder().append("").append("WARNING: Constant value for field '").append(field).append("' mismatch between code (").append(assign.getRightOp()).append(") and constant table (")
+						.append(t).append(")").toString());
                   removeTagList.add(field);
                 }
                 found = true;
@@ -173,6 +173,7 @@ public class ConstantInitializerToTagTransformer extends SceneTransformer {
               removeTagList.add(sf);
             }
           } catch (ConflictingFieldRefException ex) {
+			logger.error(ex.getMessage(), ex);
             // let's assume that a broken field doesn't cause any
             // harm
           }
@@ -201,6 +202,7 @@ public class ConstantInitializerToTagTransformer extends SceneTransformer {
                 itU.remove();
               }
             } catch (ConflictingFieldRefException ex) {
+				logger.error(ex.getMessage(), ex);
               // Ignore broken code
             }
           }
@@ -209,19 +211,11 @@ public class ConstantInitializerToTagTransformer extends SceneTransformer {
     }
 
     // remove constant tags
-    for (SootField sf : removeTagList) {
-      if (removeTagList.contains(sf)) {
-        List<Tag> toRemoveTagList = new ArrayList<Tag>();
-        for (Tag t : sf.getTags()) {
-          if (t instanceof ConstantValueTag) {
-            toRemoveTagList.add(t);
-          }
-        }
-        for (Tag t : toRemoveTagList) {
-          sf.getTags().remove(t);
-        }
-      }
-    }
+	removeTagList.stream().filter(removeTagList::contains).forEach(sf -> {
+        List<Tag> toRemoveTagList = new ArrayList<>();
+        toRemoveTagList.addAll(sf.getTags().stream().filter(t -> t instanceof ConstantValueTag).collect(Collectors.toList()));
+        toRemoveTagList.forEach(t -> sf.getTags().remove(t));
+      });
   }
 
   private ConstantValueTag createConstantTagFromValue(Constant rightOp) {

@@ -165,12 +165,15 @@ public abstract class JPegStmt extends AbstractHost
    * public Object clone() { if (containUnit()){ } return new JPegStmt(object,name,caller, ); }
    */
 
-  public String toString() {
+  @Override
+public String toString() {
 
     if (sootMethod != null) {
-      return "(" + getObject() + ", " + getName() + ", " + getCaller() + "," + sootMethod + ")";
+      return new StringBuilder().append("(").append(getObject()).append(", ").append(getName()).append(", ").append(getCaller())
+			.append(",").append(sootMethod).append(")").toString();
     } else {
-      return "(" + getObject() + ", " + getName() + ", " + getCaller() + ")";
+      return new StringBuilder().append("(").append(getObject()).append(", ").append(getName()).append(", ").append(getCaller())
+			.append(")").toString();
     }
 
   }
@@ -178,12 +181,15 @@ public abstract class JPegStmt extends AbstractHost
   public String testToString() {
     if (containUnit()) {
       if (sootMethod != null) {
-        return "(" + getObject() + ", " + getName() + ", " + getCaller() + ", " + getUnit() + "," + sootMethod + ")";
+        return new StringBuilder().append("(").append(getObject()).append(", ").append(getName()).append(", ").append(getCaller())
+				.append(", ").append(getUnit()).append(",").append(sootMethod).append(")").toString();
       } else {
-        return "(" + getObject() + ", " + getName() + ", " + getCaller() + ", " + getUnit() + ")";
+        return new StringBuilder().append("(").append(getObject()).append(", ").append(getName()).append(", ").append(getCaller())
+				.append(", ").append(getUnit()).append(")").toString();
       }
     } else {
-      return "(" + getObject() + ", " + getName() + ", " + getCaller() + ")";
+      return new StringBuilder().append("(").append(getObject()).append(", ").append(getName()).append(", ").append(getCaller())
+			.append(")").toString();
     }
 
   }

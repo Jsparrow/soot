@@ -33,7 +33,8 @@ public class LocalStmtPair {
     this.stmt = stmt;
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     if (other instanceof LocalStmtPair && ((LocalStmtPair) other).local == this.local
         && ((LocalStmtPair) other).stmt == this.stmt) {
       return true;
@@ -42,7 +43,8 @@ public class LocalStmtPair {
     }
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return local.hashCode() * 101 + stmt.hashCode() + 17;
   }
 

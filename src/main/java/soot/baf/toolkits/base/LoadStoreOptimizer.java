@@ -74,38 +74,47 @@ import soot.toolkits.scalar.LocalDefs;
 import soot.toolkits.scalar.LocalUses;
 import soot.toolkits.scalar.UnitValueBoxPair;
 import soot.util.Chain;
+import java.util.stream.Collectors;
 
 public class LoadStoreOptimizer extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(LoadStoreOptimizer.class);
 
-  public LoadStoreOptimizer(Singletons.Global g) {
+// constants returned by the stackIndependent function.
+  private static final int FAILURE = 0;
+
+private static final int SUCCESS = 1;
+
+private static final int MAKE_DUP = 2;
+
+private static final int MAKE_DUP1_X1 = 3;
+
+private static final int SPECIAL_SUCCESS = 4;
+
+private static final int HAS_CHANGED = 5;
+
+private static final int SPECIAL_SUCCESS2 = 6;
+
+private static final int STORE_LOAD_ELIMINATION = 0;
+
+private static final int STORE_LOAD_LOAD_ELIMINATION = -1;
+
+// Constants
+  boolean debug = false;
+
+private Map<String, String> gOptions;
+
+public LoadStoreOptimizer(Singletons.Global g) {
   }
 
-  public static LoadStoreOptimizer v() {
+public static LoadStoreOptimizer v() {
     return G.v().soot_baf_toolkits_base_LoadStoreOptimizer();
   }
 
-  // Constants
-  boolean debug = false;
-
-  // constants returned by the stackIndependent function.
-  final static private int FAILURE = 0;
-  final static private int SUCCESS = 1;
-  final static private int MAKE_DUP = 2;
-  final static private int MAKE_DUP1_X1 = 3;
-  final static private int SPECIAL_SUCCESS = 4;
-  final static private int HAS_CHANGED = 5;
-  final static private int SPECIAL_SUCCESS2 = 6;
-
-  final static private int STORE_LOAD_ELIMINATION = 0;
-  final static private int STORE_LOAD_LOAD_ELIMINATION = -1;
-
-  private Map<String, String> gOptions;
-
-  /** The method that drives the optimizations. */
+/** The method that drives the optimizations. */
   /* This is the public interface to LoadStoreOptimizer */
 
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
 
     gOptions = options;
 
@@ -116,7 +125,7 @@ public class LoadStoreOptimizer extends BodyTransformer {
     debug = PhaseOptions.getBoolean(gOptions, "debug");
 
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Performing LoadStore optimizations...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Performing LoadStore optimizations...").toString());
     }
 
     if (debug) {
@@ -136,36 +145,34 @@ public class LoadStoreOptimizer extends BodyTransformer {
     private boolean mPass2 = false;
 
     void go() {
-      if (!mUnits.isEmpty()) {
-        buildUnitToBlockMap();
-        computeLocalDefsAndLocalUsesInfo();
+      if (mUnits.isEmpty()) {
+		return;
+	}
+	buildUnitToBlockMap();
+	computeLocalDefsAndLocalUsesInfo();
+	if (debug) {
+	  logger.debug("Calling optimizeLoadStore(1)\n");
+	}
+	optimizeLoadStores();
+	if (PhaseOptions.getBoolean(gOptions, "inter")) {
+	  if (debug) {
+	    logger.debug("Calling doInterBlockOptimizations");
+	  }
+	  doInterBlockOptimizations();
 
-        if (debug) {
-          logger.debug("Calling optimizeLoadStore(1)\n");
-        }
-        optimizeLoadStores();
-
-        if (PhaseOptions.getBoolean(gOptions, "inter")) {
-          if (debug) {
-            logger.debug("Calling doInterBlockOptimizations");
-          }
-          doInterBlockOptimizations();
-
-          // computeLocalDefsAndLocalUsesInfo();
-          // propagateLoadsBackwards(); if(debug) logger.debug("pass 3");
-          // optimizeLoadStores(); if(debug) logger.debug("pass 4");
-          // propagateLoadsForward(); if(debug) logger.debug("pass 5");
-          // propagateBackwardsIndependentHunk(); if(debug) logger.debug("pass 6");
-        }
-
-        if (PhaseOptions.getBoolean(gOptions, "sl2") || PhaseOptions.getBoolean(gOptions, "sll2")) {
-          mPass2 = true;
-          if (debug) {
-            logger.debug("Calling optimizeLoadStore(2)");
-          }
-          optimizeLoadStores();
-        }
-      }
+	  // computeLocalDefsAndLocalUsesInfo();
+	  // propagateLoadsBackwards(); if(debug) logger.debug("pass 3");
+	  // optimizeLoadStores(); if(debug) logger.debug("pass 4");
+	  // propagateLoadsForward(); if(debug) logger.debug("pass 5");
+	  // propagateBackwardsIndependentHunk(); if(debug) logger.debug("pass 6");
+	}
+	if (PhaseOptions.getBoolean(gOptions, "sl2") || PhaseOptions.getBoolean(gOptions, "sll2")) {
+	  mPass2 = true;
+	  if (debug) {
+	    logger.debug("Calling optimizeLoadStore(2)");
+	  }
+	  optimizeLoadStores();
+	}
     }
 
     /*
@@ -174,35 +181,26 @@ public class LoadStoreOptimizer extends BodyTransformer {
     private void buildUnitToBlockMap() {
       BlockGraph blockGraph = new ZonedBlockGraph(mBody);
       if (debug) {
-        logger.debug("Method " + mBody.getMethod().getName() + " Block Graph: ");
+        logger.debug(new StringBuilder().append("Method ").append(mBody.getMethod().getName()).append(" Block Graph: ").toString());
         logger.debug("" + blockGraph);
       }
 
       List<Block> blocks = blockGraph.getBlocks();
-      mUnitToBlockMap = new HashMap<Unit, Block>();
+      mUnitToBlockMap = new HashMap<>();
 
-      Iterator<Block> blockIt = blocks.iterator();
-      while (blockIt.hasNext()) {
-        Block block = blockIt.next();
-
-        Iterator<Unit> unitIt = block.iterator();
-        while (unitIt.hasNext()) {
-          Unit unit = unitIt.next();
+      blocks.forEach(block -> {
+        for (Unit unit : block) {
           mUnitToBlockMap.put(unit, block);
         }
-      }
+      });
     }
 
     // computes a list of all the stores in mUnits in order of their occurence therein.
 
     private List<Unit> buildStoreList() {
-      List<Unit> storeList = new ArrayList<Unit>();
+      List<Unit> storeList = new ArrayList<>();
 
-      for (Unit unit : mUnits) {
-        if (unit instanceof StoreInst) {
-          storeList.add(unit);
-        }
-      }
+      storeList.addAll(mUnits.stream().filter(unit -> unit instanceof StoreInst).collect(Collectors.toList()));
       return storeList;
     }
 
@@ -240,9 +238,7 @@ public class LoadStoreOptimizer extends BodyTransformer {
 
               // check that all uses have only the current store as their definition
               {
-                Iterator<UnitValueBoxPair> useIt = uses.iterator();
-                while (useIt.hasNext()) {
-                  UnitValueBoxPair pair = useIt.next();
+                for (UnitValueBoxPair pair : uses) {
                   Unit loadUnit = pair.getUnit();
                   if (!(loadUnit instanceof LoadInst)) {
                     continue nextUnit;
@@ -261,9 +257,7 @@ public class LoadStoreOptimizer extends BodyTransformer {
               {
                 Block storeBlock = mUnitToBlockMap.get(unit);
 
-                Iterator<UnitValueBoxPair> useIt = uses.iterator();
-                while (useIt.hasNext()) {
-                  UnitValueBoxPair pair = useIt.next();
+                for (UnitValueBoxPair pair : uses) {
                   Block useBlock = mUnitToBlockMap.get(pair.getUnit());
                   if (useBlock != storeBlock) {
                     continue nextUnit;
@@ -422,84 +416,81 @@ public class LoadStoreOptimizer extends BodyTransformer {
 
     private int pushStoreToLoad(Unit from, Unit to, Block block) {
       Unit storePred = block.getPredOf(from);
-      if (storePred != null) {
-        if (((Inst) storePred).getOutCount() == 1) {
-          Set<Unit> unitsToMove = new HashSet<Unit>();
-          unitsToMove.add(storePred);
-          unitsToMove.add(from);
-          int h = ((Inst) storePred).getInCount();
-          Unit currentUnit = storePred;
-          if (h != 0) {
-            currentUnit = block.getPredOf(storePred);
-            while (currentUnit != null) {
+      boolean condition = storePred != null && ((Inst) storePred).getOutCount() == 1;
+	if (condition) {
+	  Set<Unit> unitsToMove = new HashSet<>();
+	  unitsToMove.add(storePred);
+	  unitsToMove.add(from);
+	  int h = ((Inst) storePred).getInCount();
+	  Unit currentUnit = storePred;
+	  if (h != 0) {
+	    currentUnit = block.getPredOf(storePred);
+	    while (currentUnit != null) {
 
-              h -= ((Inst) currentUnit).getOutCount();
-              if (h < 0) { // xxx could be more flexible here?
-                if (debug) {
-                  logger.debug("xxx: negative");
-                }
-                return FAILURE;
-              }
-              h += ((Inst) currentUnit).getInCount();
-              unitsToMove.add(currentUnit);
-              if (h == 0) {
-                break;
-              }
-              currentUnit = block.getPredOf(currentUnit);
-            }
-          }
-          if (currentUnit == null) {
-            if (debug) {
-              logger.debug("xxx: null");
-            }
-            return FAILURE;
-          }
+	      h -= ((Inst) currentUnit).getOutCount();
+	      if (h < 0) { // xxx could be more flexible here?
+	        if (debug) {
+	          logger.debug("xxx: negative");
+	        }
+	        return FAILURE;
+	      }
+	      h += ((Inst) currentUnit).getInCount();
+	      unitsToMove.add(currentUnit);
+	      if (h == 0) {
+	        break;
+	      }
+	      currentUnit = block.getPredOf(currentUnit);
+	    }
+	  }
+	  if (currentUnit == null) {
+	    if (debug) {
+	      logger.debug("xxx: null");
+	    }
+	    return FAILURE;
+	  }
 
-          Unit uu = from;
-          for (;;) {
-            uu = block.getSuccOf(uu);
-            if (uu == to) {
-              break;
-            }
-            Iterator<Unit> it2 = unitsToMove.iterator();
-            while (it2.hasNext()) {
-              Unit nu = it2.next();
-              if (debug) {
-                logger.debug("xxxspecial;success pushing forward stuff.");
-              }
+	  Unit uu = from;
+	  for (;;) {
+	    uu = block.getSuccOf(uu);
+	    if (uu == to) {
+	      break;
+	    }
+	    for (Unit nu : unitsToMove) {
+	      if (debug) {
+	        logger.debug("xxxspecial;success pushing forward stuff.");
+	      }
 
-              if (!canMoveUnitOver(nu, uu)) {
-                if (debug) {
-                  logger.debug("xxx: cant move over faillure" + nu);
-                }
-                return FAILURE;
-              }
-              if (debug) {
-                logger.debug("can move" + nu + " over " + uu);
-              }
-            }
-          }
+	      if (!canMoveUnitOver(nu, uu)) {
+	        if (debug) {
+	          logger.debug("xxx: cant move over faillure" + nu);
+	        }
+	        return FAILURE;
+	      }
+	      if (debug) {
+	        logger.debug(new StringBuilder().append("can move").append(nu).append(" over ").append(uu).toString());
+	      }
+	    }
+	  }
 
-          // if we get here it means we can move all the units in the set pass the units in between [to, from]
-          Unit unitToMove = currentUnit;
-          while (unitToMove != from) {
-            Unit succ = block.getSuccOf(unitToMove);
-            if (debug) {
-              logger.debug("moving " + unitToMove);
-            }
-            block.remove(unitToMove);
-            block.insertBefore(unitToMove, to);
-            unitToMove = succ;
-          }
-          block.remove(from);
-          block.insertBefore(from, to);
+	  // if we get here it means we can move all the units in the set pass the units in between [to, from]
+	  Unit unitToMove = currentUnit;
+	  while (unitToMove != from) {
+	    Unit succ = block.getSuccOf(unitToMove);
+	    if (debug) {
+	      logger.debug("moving " + unitToMove);
+	    }
+	    block.remove(unitToMove);
+	    block.insertBefore(unitToMove, to);
+	    unitToMove = succ;
+	  }
+	  block.remove(from);
+	  block.insertBefore(from, to);
 
-          if (debug) {
-            logger.debug("xxx1success pushing forward stuff.");
-          }
-          return SPECIAL_SUCCESS;
-        }
-      }
+	  if (debug) {
+	    logger.debug("xxx1success pushing forward stuff.");
+	  }
+	  return SPECIAL_SUCCESS;
+	}
 
       return FAILURE;
     }
@@ -517,7 +508,8 @@ public class LoadStoreOptimizer extends BodyTransformer {
 
     private int stackIndependent(Unit from, Unit to, Block block, int aContext) {
       if (debug) {
-        logger.debug("Trying: " + from + "/" + to + " in block  " + block.getIndexInMethod() + ":");
+        logger.debug(new StringBuilder().append("Trying: ").append(from).append("/").append(to).append(" in block  ").append(block.getIndexInMethod())
+				.append(":").toString());
         logger.debug(
             "context:" + (aContext == STORE_LOAD_ELIMINATION ? "STORE_LOAD_ELIMINATION" : "STORE_LOAD_LOAD_ELIMINATION"));
       }
@@ -812,23 +804,20 @@ public class LoadStoreOptimizer extends BodyTransformer {
             logger.debug("1006:(LoadStoreOptimizer@stackIndependent): Stack went negative while trying to reorder code.");
           }
 
-          if (flag == 1) {
-            if (current instanceof DupInst) {
-              block.remove(unitToMove);
-              block.insertAfter(unitToMove, current);
-              // block.insertAfter( new BSwapInst( ) ,unitToMove);
-            }
-
-          }
+          boolean condition = flag == 1 && current instanceof DupInst;
+		if (condition) {
+		  block.remove(unitToMove);
+		  block.insertAfter(unitToMove, current);
+		  // block.insertAfter( new BSwapInst( ) ,unitToMove);
+		}
           return false;
         }
         h += ((Inst) current).getInCount();
 
-        if (h == 0 && reachedStore == true) {
-          if (!isRequiredByFollowingUnits(unitToMove, to)) {
+        boolean condition1 = h == 0 && reachedStore == true && !isRequiredByFollowingUnits(unitToMove, to);
+		if (condition1) {
             if (debug) {
-              logger.debug("10077:(LoadStoreOptimizer@stackIndependent): reordering bytecode move: " + unitToMove
-                  + "before: " + current);
+              logger.debug(new StringBuilder().append("10077:(LoadStoreOptimizer@stackIndependent): reordering bytecode move: ").append(unitToMove).append("before: ").append(current).toString());
             }
             block.remove(unitToMove);
             block.insertBefore(unitToMove, current);
@@ -836,7 +825,6 @@ public class LoadStoreOptimizer extends BodyTransformer {
             reorderingOccurred = true;
             break;
           }
-        }
       }
 
       if (reorderingOccurred) {
@@ -891,12 +879,7 @@ public class LoadStoreOptimizer extends BodyTransformer {
      */
     private boolean isExceptionHandlerBlock(Block aBlock) {
       Unit blockHead = aBlock.getHead();
-      for (Trap trap : mBody.getTraps()) {
-        if (trap.getHandlerUnit() == blockHead) {
-          return true;
-        }
-      }
-      return false;
+      return mBody.getTraps().stream().anyMatch(trap -> trap.getHandlerUnit() == blockHead);
     }
 
     // not a save function :: goes over block boundries
@@ -922,12 +905,9 @@ public class LoadStoreOptimizer extends BodyTransformer {
       while (hasChanged) {
         hasChanged = false;
 
-        List<Unit> tempList = new ArrayList<Unit>();
+        List<Unit> tempList = new ArrayList<>();
         tempList.addAll(mUnits);
-        Iterator<Unit> it = tempList.iterator();
-        while (it.hasNext()) {
-          Unit u = it.next();
-
+        for (Unit u : tempList) {
           if (u instanceof LoadInst) {
             if (debug) {
               logger.debug("inter trying: " + u);
@@ -942,41 +922,38 @@ public class LoadStoreOptimizer extends BodyTransformer {
                 Unit storeUnit = defs.get(0);
                 if (storeUnit instanceof StoreInst) {
                   List<UnitValueBoxPair> uses = mLocalUses.getUsesOf(storeUnit);
-                  if (uses.size() == 1) {
-                    if (allSuccesorsOfAreThePredecessorsOf(defBlock, loadBlock)) {
-                      if (getDeltaStackHeightFromTo(defBlock.getSuccOf(storeUnit), defBlock.getTail()) == 0) {
-                        Iterator<Block> it2 = defBlock.getSuccs().iterator();
-                        boolean res = true;
-                        while (it2.hasNext()) {
-                          Block b = it2.next();
-                          if (getDeltaStackHeightFromTo(b.getHead(), b.getTail()) != 0) {
-                            res = false;
-                            break;
-                          }
-                          if (b.getPreds().size() != 1 || b.getSuccs().size() != 1) {
-                            res = false;
-                            break;
-                          }
-                        }
-                        if (debug) {
-                          logger.debug("" + defBlock.toString() + loadBlock.toString());
-                        }
+                  boolean condition = uses.size() == 1 && allSuccesorsOfAreThePredecessorsOf(defBlock, loadBlock) && getDeltaStackHeightFromTo(defBlock.getSuccOf(storeUnit), defBlock.getTail()) == 0;
+				if (condition) {
+				    Iterator<Block> it2 = defBlock.getSuccs().iterator();
+				    boolean res = true;
+				    while (it2.hasNext()) {
+				      Block b = it2.next();
+				      if (getDeltaStackHeightFromTo(b.getHead(), b.getTail()) != 0) {
+				        res = false;
+				        break;
+				      }
+				      if (b.getPreds().size() != 1 || b.getSuccs().size() != 1) {
+				        res = false;
+				        break;
+				      }
+				    }
+				    if (debug) {
+				      logger.debug(new StringBuilder().append("").append(defBlock.toString()).append(loadBlock.toString()).toString());
+				    }
 
-                        if (res) {
-                          defBlock.remove(storeUnit);
-                          mUnitToBlockMap.put(storeUnit, loadBlock);
-                          loadBlock.insertBefore(storeUnit, loadBlock.getHead());
-                          hasChanged = true;
-                          if (debug) {
-                            logger.debug("inter-block opti occurred " + storeUnit + " " + u);
-                          }
-                          if (debug) {
-                            logger.debug("" + defBlock.toString() + loadBlock.toString());
-                          }
-                        }
-                      }
-                    }
-                  }
+				    if (res) {
+				      defBlock.remove(storeUnit);
+				      mUnitToBlockMap.put(storeUnit, loadBlock);
+				      loadBlock.insertBefore(storeUnit, loadBlock.getHead());
+				      hasChanged = true;
+				      if (debug) {
+				        logger.debug(new StringBuilder().append("inter-block opti occurred ").append(storeUnit).append(" ").append(u).toString());
+				      }
+				      if (debug) {
+				        logger.debug(new StringBuilder().append("").append(defBlock.toString()).append(loadBlock.toString()).toString());
+				      }
+				    }
+				  }
                 }
               }
             }
@@ -1083,13 +1060,9 @@ public class LoadStoreOptimizer extends BodyTransformer {
 
     void propagateBackwardsIndependentHunk() {
 
-      List<Unit> tempList = new ArrayList<Unit>();
+      List<Unit> tempList = new ArrayList<>();
       tempList.addAll(mUnits);
-      Iterator<Unit> it = tempList.iterator();
-
-      while (it.hasNext()) {
-        Unit u = it.next();
-
+      for (Unit u : tempList) {
         if (u instanceof NewInst) {
           Block block = mUnitToBlockMap.get(u);
           Unit succ = block.getSuccOf(u);

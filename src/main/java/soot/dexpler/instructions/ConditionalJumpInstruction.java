@@ -49,7 +49,8 @@ public abstract class ConditionalJumpInstruction extends JumpInstruction impleme
    */
   protected abstract IfStmt ifStatement(DexBody body);
 
-  public void jimplify(DexBody body) {
+  @Override
+public void jimplify(DexBody body) {
     // check if target instruction has been jimplified
     if (getTargetInstruction(body).getUnit() != null) {
       IfStmt s = ifStatement(body);
@@ -72,7 +73,8 @@ public abstract class ConditionalJumpInstruction extends JumpInstruction impleme
 
   // DalvikTyper.v() here?
 
-  public void deferredJimplify(DexBody body) {
+  @Override
+public void deferredJimplify(DexBody body) {
     IfStmt s = ifStatement(body);
     body.getBody().getUnits().swapWith(markerUnit, s); // insertAfter(s, markerUnit);
     setUnit(s);

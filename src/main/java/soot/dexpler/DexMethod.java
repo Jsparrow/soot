@@ -108,41 +108,33 @@ public class DexMethod {
   }
 
   protected MethodSource createMethodSource(final Method method) {
-    return new MethodSource() {
-
-      @Override
-      public Body getBody(SootMethod m, String phaseName) {
+    return (SootMethod m, String phaseName) -> {
         Body b = Jimple.v().newBody(m);
         try {
           // add the body of this code item
           DexBody dexBody = new DexBody(dexFile, method, declaringClass.getType());
           dexBody.jimplify(b, m);
         } catch (InvalidDalvikBytecodeException e) {
-          String msg = "Warning: Invalid bytecode in method " + m + ": " + e;
+          String msg = new StringBuilder().append("Warning: Invalid bytecode in method ").append(m).append(": ").append(e).toString();
           logger.debug("" + msg);
           Util.emptyBody(b);
           Util.addExceptionAfterUnit(b, "java.lang.RuntimeException", b.getUnits().getLast(),
-              "Soot has detected that this method contains invalid Dalvik bytecode,"
-                  + " which would have throw an exception at runtime. [" + msg + "]");
+              new StringBuilder().append("Soot has detected that this method contains invalid Dalvik bytecode,").append(" which would have throw an exception at runtime. [").append(msg).append("]").toString());
           TypeAssigner.v().transform(b);
         }
         m.setActiveBody(b);
 
         return m.getActiveBody();
-      }
-    };
+      };
   }
 
   protected List<Type> getParameterTypes(final Method method) {
     // retrieve all parameter types
-    List<Type> parameterTypes = new ArrayList<Type>();
+    List<Type> parameterTypes = new ArrayList<>();
     if (method.getParameters() != null) {
       List<? extends CharSequence> parameters = method.getParameterTypes();
 
-      for (CharSequence t : parameters) {
-        Type type = DexType.toSoot(t.toString());
-        parameterTypes.add(type);
-      }
+      parameters.stream().map(t -> DexType.toSoot(t.toString())).forEach(parameterTypes::add);
     }
     return parameterTypes;
   }
@@ -150,26 +142,22 @@ public class DexMethod {
   protected List<SootClass> getThrownExceptions(final Method method) {
     // the following snippet retrieves all exceptions that this method
     // throws by analyzing its annotations
-    List<SootClass> thrownExceptions = new ArrayList<SootClass>();
+    List<SootClass> thrownExceptions = new ArrayList<>();
     for (Annotation a : method.getAnnotations()) {
       Type atype = DexType.toSoot(a.getType());
       String atypes = atype.toString();
-      if (!(atypes.equals("dalvik.annotation.Throws"))) {
+      if (!("dalvik.annotation.Throws".equals(atypes))) {
         continue;
       }
-      for (AnnotationElement ae : a.getElements()) {
-        EncodedValue ev = ae.getValue();
-        if (ev instanceof ArrayEncodedValue) {
-          for (EncodedValue evSub : ((ArrayEncodedValue) ev).getValue()) {
-            if (evSub instanceof TypeEncodedValue) {
-              TypeEncodedValue valueType = (TypeEncodedValue) evSub;
-              String exceptionName = valueType.getValue();
-              String dottedName = Util.dottedClassName(exceptionName);
-              thrownExceptions.add(SootResolver.v().makeClassRef(dottedName));
-            }
-          }
+      a.getElements().stream().map(AnnotationElement::getValue).forEach(ev -> {
+		if (ev instanceof ArrayEncodedValue) {
+          ((ArrayEncodedValue) ev).getValue().stream().filter(evSub -> evSub instanceof TypeEncodedValue).map(evSub -> (TypeEncodedValue) evSub).forEach(valueType -> {
+			String exceptionName = valueType.getValue();
+			String dottedName = Util.dottedClassName(exceptionName);
+			thrownExceptions.add(SootResolver.v().makeClassRef(dottedName));
+		});
         }
-      }
+	});
     }
     return thrownExceptions;
   }

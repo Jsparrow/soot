@@ -36,23 +36,28 @@ public class NullConstant extends Constant {
     return G.v().soot_jimple_NullConstant();
   }
 
-  public boolean equals(Object c) {
+  @Override
+public boolean equals(Object c) {
     return c == G.v().soot_jimple_NullConstant();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 982;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return Jimple.NULL;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return NullType.v();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ConstantSwitch) sw).caseNullConstant(this);
   }
 }

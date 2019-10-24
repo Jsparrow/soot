@@ -52,7 +52,7 @@ import soot.jimple.StringConstant;
 public class ConstantInvokeMethodBaseTransformer extends SceneTransformer {
   private static final Logger logger = LoggerFactory.getLogger(ConstantInvokeMethodBaseTransformer.class);
 
-  private final static String INVOKE_SIG
+  private static final String INVOKE_SIG
       = "<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>";
 
   public ConstantInvokeMethodBaseTransformer(Singletons.Global g) {
@@ -74,7 +74,7 @@ public class ConstantInvokeMethodBaseTransformer extends SceneTransformer {
       if (sootClass.resolvingLevel() < SootClass.BODIES) {
         continue;
       }
-      for (SootMethod sootMethod : sootClass.getMethods()) {
+      sootClass.getMethods().forEach(sootMethod -> {
         Body body = sootMethod.retrieveActiveBody();
 
         for (Iterator<Unit> iterator = body.getUnits().snapshotIterator(); iterator.hasNext();) {
@@ -82,8 +82,7 @@ public class ConstantInvokeMethodBaseTransformer extends SceneTransformer {
 
           if (u.containsInvokeExpr()) {
             InvokeExpr invokeExpr = u.getInvokeExpr();
-            if (invokeExpr.getMethod().getSignature().equals(INVOKE_SIG)) {
-              if (invokeExpr.getArg(0) instanceof StringConstant) {
+            if (invokeExpr.getMethod().getSignature().equals(INVOKE_SIG) && invokeExpr.getArg(0) instanceof StringConstant) {
 
                 StringConstant constant = (StringConstant) invokeExpr.getArg(0);
                 Local newLocal = Jimple.v().newLocal("sc" + body.getLocalCount(), constant.getType());
@@ -95,10 +94,9 @@ public class ConstantInvokeMethodBaseTransformer extends SceneTransformer {
                   logger.debug("Replaced constant base object of Method.invoke() by local in: " + sootMethod.toString());
                 }
               }
-            }
           }
         }
-      }
+      });
     }
   }
 }

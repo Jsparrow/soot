@@ -79,25 +79,23 @@ public class SmartMethodLocalObjectsAnalysis {
     }
 
     List<EquivalentValue> sources = smdfa.sourcesOf(localEqVal);
-    Iterator<EquivalentValue> sourcesIt = sources.iterator();
-    while (sourcesIt.hasNext()) {
-      EquivalentValue source = sourcesIt.next();
+    for (EquivalentValue source : sources) {
       if (source.getValue() instanceof Ref) {
         if (!context.isFieldLocal(source)) {
           if (printMessages) {
-            logger.debug("      Requested value " + local + " is SHARED in " + method + " ");
+            logger.debug(new StringBuilder().append("      Requested value ").append(local).append(" is SHARED in ").append(method).append(" ").toString());
           }
           return false;
         }
       } else if (source.getValue() instanceof Constant) {
         if (printMessages) {
-          logger.debug("      Requested value " + local + " is SHARED in " + method + " ");
+          logger.debug(new StringBuilder().append("      Requested value ").append(local).append(" is SHARED in ").append(method).append(" ").toString());
         }
         return false;
       }
     }
     if (printMessages) {
-      logger.debug("      Requested value " + local + " is LOCAL in " + method + " ");
+      logger.debug(new StringBuilder().append("      Requested value ").append(local).append(" is LOCAL in ").append(method).append(" ").toString());
     }
     return true;
   }
@@ -113,20 +111,17 @@ public class SmartMethodLocalObjectsAnalysis {
     }
 
     List<EquivalentValue> sources = smdfa.sourcesOf(localEqVal);
-    Iterator<EquivalentValue> sourcesIt = sources.iterator();
-    while (sourcesIt.hasNext()) {
-      EquivalentValue source = sourcesIt.next();
-      if (source.getValue() instanceof Ref) {
-        if (!context.isFieldLocal(source)) {
-          if (printMessages) {
-            logger.debug("      Requested value " + local + " is LOCAL in " + method + " ");
-          }
-          return false;
-        }
-      }
+    for (EquivalentValue source : sources) {
+      boolean condition = source.getValue() instanceof Ref && !context.isFieldLocal(source);
+	if (condition) {
+	  if (printMessages) {
+	    logger.debug(new StringBuilder().append("      Requested value ").append(local).append(" is LOCAL in ").append(method).append(" ").toString());
+	  }
+	  return false;
+	}
     }
     if (printMessages) {
-      logger.debug("      Requested value " + local + " is SHARED in " + method + " ");
+      logger.debug(new StringBuilder().append("      Requested value ").append(local).append(" is SHARED in ").append(method).append(" ").toString());
     }
     return true;
   }

@@ -49,7 +49,8 @@ public abstract class ASTAggregatedCondition extends ASTCondition {
     this.right = right;
   }
 
-  public void flip() {
+  @Override
+public void flip() {
     if (not) {
       not = false;
     } else {
@@ -57,7 +58,8 @@ public abstract class ASTAggregatedCondition extends ASTCondition {
     }
   }
 
-  public boolean isNotted() {
+  @Override
+public boolean isNotted() {
     return not;
   }
 }

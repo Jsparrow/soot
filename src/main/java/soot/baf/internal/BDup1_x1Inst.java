@@ -41,36 +41,43 @@ public class BDup1_x1Inst extends BDupInst implements Dup1_x1Inst {
     mUnderType = Baf.getDescriptorTypeOf(aUnderType);
   }
 
-  public Type getOp1Type() {
+  @Override
+public Type getOp1Type() {
     return mOpType;
   }
 
-  public Type getUnder1Type() {
+  @Override
+public Type getUnder1Type() {
     return mUnderType;
   }
 
-  public List<Type> getOpTypes() {
-    List<Type> res = new ArrayList<Type>();
+  @Override
+public List<Type> getOpTypes() {
+    List<Type> res = new ArrayList<>();
     res.add(mOpType);
     return res;
   }
 
-  public List<Type> getUnderTypes() {
-    List<Type> res = new ArrayList<Type>();
+  @Override
+public List<Type> getUnderTypes() {
+    List<Type> res = new ArrayList<>();
     res.add(mUnderType);
     return res;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "dup1_x1";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseDup1_x1Inst(this);
   }
 
-  public String toString() {
-    return "dup1_x1." + Baf.bafDescriptorOf(mOpType) + "_" + Baf.bafDescriptorOf(mUnderType);
+  @Override
+public String toString() {
+    return new StringBuilder().append("dup1_x1.").append(Baf.bafDescriptorOf(mOpType)).append("_").append(Baf.bafDescriptorOf(mUnderType)).toString();
   }
 
 }

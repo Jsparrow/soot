@@ -18,16 +18,166 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production Modifiers : {@link ASTNode} ::= <span class="component">{@link Modifier}*</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:190
  */
-public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
-  /**
+public class Modifiers extends ASTNode<ASTNode> {
+  private static final Logger logger = LoggerFactory.getLogger(Modifiers.class);
+/**
+   * @ast method 
+   * @aspect AnnotationsCodegen
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:290
+   */
+  
+
+  // Add ACC_ANNOTATION flag to generated class file
+  public static final int ACC_ANNOTATION = 0x2000;
+/**
+   * @ast method 
+   * @aspect EnumsCodegen
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/EnumsCodegen.jrag:12
+   */
+  
+    // add flags to enums
+  public static final int ACC_ENUM = 0x4000;
+/**
+   * @ast method 
+   * @aspect GenericsCodegen
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:325
+   */
+  
+
+
+  public static final int ACC_BRIDGE = 0x0040;
+/**
+   * @ast method 
+   * @aspect VariableArityParametersCodegen
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/VariableArityParametersCodegen.jrag:78
+   */
+  
+
+  public static final int ACC_VARARGS = 0x0080;
+/**
+   * @apilevel internal
+   */
+  protected boolean isPublic_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isPublic_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isPrivate_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isPrivate_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isProtected_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isProtected_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isStatic_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isStatic_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isFinal_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isFinal_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isAbstract_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isAbstract_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isVolatile_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isVolatile_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isTransient_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isTransient_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isStrictfp_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isStrictfp_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isSynchronized_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isSynchronized_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isNative_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isNative_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean isSynthetic_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean isSynthetic_value;
+protected java.util.Map numModifier_String_values;
+/**
+   * @ast method 
+   * 
+   */
+  public Modifiers() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public Modifiers(List<Modifier> p0) {
+    setChild(p0, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     isPublic_computed = false;
     isPrivate_computed = false;
@@ -43,16 +193,18 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isSynthetic_computed = false;
     numModifier_String_values = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Modifiers clone() throws CloneNotSupportedException {
     Modifiers node = (Modifiers)super.clone();
     node.isPublic_computed = false;
@@ -72,29 +224,33 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Modifiers copy() {
     try {
       Modifiers node = (Modifiers) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Modifiers fullCopy() {
     Modifiers tree = (Modifiers) copy();
     if (children != null) {
@@ -108,66 +264,86 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:314
    */
-  public void checkModifiers() {
+  @Override
+public void checkModifiers() {
     super.checkModifiers();
-    if(numProtectionModifiers() > 1)
-      error("only one public, protected, private allowed");
-    if(numModifier("static") > 1)
-      error("only one static allowed");
+    if(numProtectionModifiers() > 1) {
+		error("only one public, protected, private allowed");
+	}
+    if(numModifier("static") > 1) {
+		error("only one static allowed");
+	}
     // 8.4.3.1
     // 8.4.3.2
     // 8.1.1.2
-    if(numCompletenessModifiers() > 1)
-      error("only one of final, abstract, volatile allowed");
-    if(numModifier("synchronized") > 1)
-      error("only one synchronized allowed");
-    if(numModifier("transient") > 1)
-      error("only one transient allowed");
-    if(numModifier("native") > 1)
-      error("only one native allowed");
-    if(numModifier("strictfp") > 1)
-      error("only one strictfp allowed");
+    if(numCompletenessModifiers() > 1) {
+		error("only one of final, abstract, volatile allowed");
+	}
+    if(numModifier("synchronized") > 1) {
+		error("only one synchronized allowed");
+	}
+    if(numModifier("transient") > 1) {
+		error("only one transient allowed");
+	}
+    if(numModifier("native") > 1) {
+		error("only one native allowed");
+	}
+    if(numModifier("strictfp") > 1) {
+		error("only one strictfp allowed");
+	}
 
-    if(isPublic() && !mayBePublic())
-      error("modifier public not allowed in this context");
-    if(isPrivate() && !mayBePrivate())
-      error("modifier private not allowed in this context");
-    if(isProtected() && !mayBeProtected())
-      error("modifier protected not allowed in this context");
-    if(isStatic() && !mayBeStatic())
-      error("modifier static not allowed in this context");
-    if(isFinal() && !mayBeFinal())
-      error("modifier final not allowed in this context");
-    if(isAbstract() && !mayBeAbstract())
-      error("modifier abstract not allowed in this context");
-    if(isVolatile() && !mayBeVolatile())
-      error("modifier volatile not allowed in this context");
-    if(isTransient() && !mayBeTransient())
-      error("modifier transient not allowed in this context");
-    if(isStrictfp() && !mayBeStrictfp())
-      error("modifier strictfp not allowed in this context");
-    if(isSynchronized() && !mayBeSynchronized())
-      error("modifier synchronized not allowed in this context");
-    if(isNative() && !mayBeNative())
-      error("modifier native not allowed in this context");
+    if(isPublic() && !mayBePublic()) {
+		error("modifier public not allowed in this context");
+	}
+    if(isPrivate() && !mayBePrivate()) {
+		error("modifier private not allowed in this context");
+	}
+    if(isProtected() && !mayBeProtected()) {
+		error("modifier protected not allowed in this context");
+	}
+    if(isStatic() && !mayBeStatic()) {
+		error("modifier static not allowed in this context");
+	}
+    if(isFinal() && !mayBeFinal()) {
+		error("modifier final not allowed in this context");
+	}
+    if(isAbstract() && !mayBeAbstract()) {
+		error("modifier abstract not allowed in this context");
+	}
+    if(isVolatile() && !mayBeVolatile()) {
+		error("modifier volatile not allowed in this context");
+	}
+    if(isTransient() && !mayBeTransient()) {
+		error("modifier transient not allowed in this context");
+	}
+    if(isStrictfp() && !mayBeStrictfp()) {
+		error("modifier strictfp not allowed in this context");
+	}
+    if(isSynchronized() && !mayBeSynchronized()) {
+		error("modifier synchronized not allowed in this context");
+	}
+    if(isNative() && !mayBeNative()) {
+		error("modifier native not allowed in this context");
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:435
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     for(int i = 0; i < getNumModifier(); i++) {
       getModifier(i).toString(s);
       s.append(" ");
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect AnnotationsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:83
@@ -189,7 +365,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
 	    }
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect AnnotationsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:101
@@ -202,110 +378,73 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       }
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect AnnotationsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:110
    */
   public void addRuntimeVisibleAnnotationsAttribute(Collection c) {
     Collection annotations = runtimeVisibleAnnotations();
-    if(!annotations.isEmpty()) {
-      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
-      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+    if (annotations.isEmpty()) {
+		return;
+	}
+	soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+	for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
         Annotation annotation = (Annotation)iter.next();
         ArrayList elements = new ArrayList(1);
         annotation.appendAsAttributeTo(elements);
         tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
       }
-      c.add(tag);
-    }
+	c.add(tag);
   }
-  /**
+/**
    * @ast method 
    * @aspect AnnotationsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:125
    */
   public void addRuntimeInvisibleAnnotationsAttribute(Collection c) {
     Collection annotations = runtimeInvisibleAnnotations();
-    if(!annotations.isEmpty()) {
-      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
-      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+    if (annotations.isEmpty()) {
+		return;
+	}
+	soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+	for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
         Annotation annotation = (Annotation)iter.next();
         ArrayList elements = new ArrayList(1);
         annotation.appendAsAttributeTo(elements);
         tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
       }
-      c.add(tag);
-    }
+	c.add(tag);
   }
-  /**
+/**
    * @ast method 
    * @aspect AnnotationsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:210
    */
   public Collection runtimeVisibleAnnotations() {
     Collection annotations = new ArrayList();
-    for(int i = 0; i < getNumModifier(); i++)
-      if(getModifier(i).isRuntimeVisible())
-        annotations.add(getModifier(i));
+    for(int i = 0; i < getNumModifier(); i++) {
+		if(getModifier(i).isRuntimeVisible()) {
+			annotations.add(getModifier(i));
+		}
+	}
     return annotations;
   }
-  /**
+/**
    * @ast method 
    * @aspect AnnotationsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:266
    */
   public Collection runtimeInvisibleAnnotations() {
     Collection annotations = new ArrayList();
-    for(int i = 0; i < getNumModifier(); i++)
-      if(getModifier(i).isRuntimeInvisible())
-        annotations.add(getModifier(i));
+    for(int i = 0; i < getNumModifier(); i++) {
+		if(getModifier(i).isRuntimeInvisible()) {
+			annotations.add(getModifier(i));
+		}
+	}
     return annotations;
   }
-  /**
-   * @ast method 
-   * @aspect AnnotationsCodegen
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:290
-   */
-  
-
-  // Add ACC_ANNOTATION flag to generated class file
-  public static final int ACC_ANNOTATION = 0x2000;
-  /**
-   * @ast method 
-   * @aspect EnumsCodegen
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/EnumsCodegen.jrag:12
-   */
-  
-    // add flags to enums
-  public static final int ACC_ENUM = 0x4000;
-  /**
-   * @ast method 
-   * @aspect GenericsCodegen
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:325
-   */
-  
-
-
-  public static final int ACC_BRIDGE = 0x0040;
-  /**
-   * @ast method 
-   * @aspect VariableArityParametersCodegen
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/VariableArityParametersCodegen.jrag:78
-   */
-  
-
-  public static final int ACC_VARARGS = 0x0080;
-  /**
-   * @ast method 
-   * 
-   */
-  public Modifiers() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -313,34 +452,30 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[1];
     setChild(new List(), 0);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public Modifiers(List<Modifier> p0) {
-    setChild(p0, 0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 1;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Modifier list.
    * @param list The new list node to be used as the Modifier list.
    * @apilevel high-level
@@ -350,7 +485,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public void setModifierList(List<Modifier> list) {
     setChild(list, 0);
   }
-  /**
+/**
    * Retrieves the number of children in the Modifier list.
    * @return Number of children in the Modifier list.
    * @apilevel high-level
@@ -360,7 +495,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public int getNumModifier() {
     return getModifierList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the Modifier list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the Modifier list.
@@ -371,7 +506,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public int getNumModifierNoTransform() {
     return getModifierListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the Modifier list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the Modifier list.
@@ -383,7 +518,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public Modifier getModifier(int i) {
     return (Modifier)getModifierList().getChild(i);
   }
-  /**
+/**
    * Append an element to the Modifier list.
    * @param node The element to append to the Modifier list.
    * @apilevel high-level
@@ -394,7 +529,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     List<Modifier> list = (parent == null || state == null) ? getModifierListNoTransform() : getModifierList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -403,7 +538,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     List<Modifier> list = getModifierListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the Modifier list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -415,7 +550,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     List<Modifier> list = getModifierList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the Modifier list.
    * @return The node representing the Modifier list.
    * @apilevel high-level
@@ -425,7 +560,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public List<Modifier> getModifiers() {
     return getModifierList();
   }
-  /**
+/**
    * Retrieves the Modifier list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Modifier list.
@@ -436,7 +571,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public List<Modifier> getModifiersNoTransform() {
     return getModifierListNoTransform();
   }
-  /**
+/**
    * Retrieves the Modifier list.
    * @return The node representing the Modifier list.
    * @apilevel high-level
@@ -449,7 +584,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the Modifier list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Modifier list.
@@ -461,15 +596,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public List<Modifier> getModifierListNoTransform() {
     return (List<Modifier>)getChildNoTransform(0);
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isPublic_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isPublic_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:372
@@ -483,22 +610,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isPublic_value = isPublic_compute();
-      if(isFinal && num == state().boundariesCrossed) isPublic_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isPublic_computed = true;
+	}
     return isPublic_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isPublic_compute() {  return numModifier("public") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isPrivate_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isPrivate_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:373
@@ -512,22 +633,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isPrivate_value = isPrivate_compute();
-      if(isFinal && num == state().boundariesCrossed) isPrivate_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isPrivate_computed = true;
+	}
     return isPrivate_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isPrivate_compute() {  return numModifier("private") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isProtected_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isProtected_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:374
@@ -541,22 +656,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isProtected_value = isProtected_compute();
-      if(isFinal && num == state().boundariesCrossed) isProtected_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isProtected_computed = true;
+	}
     return isProtected_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isProtected_compute() {  return numModifier("protected") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isStatic_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isStatic_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:375
@@ -570,22 +679,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isStatic_value = isStatic_compute();
-      if(isFinal && num == state().boundariesCrossed) isStatic_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isStatic_computed = true;
+	}
     return isStatic_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isStatic_compute() {  return numModifier("static") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isFinal_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isFinal_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:376
@@ -599,22 +702,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isFinal_value = isFinal_compute();
-      if(isFinal && num == state().boundariesCrossed) isFinal_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isFinal_computed = true;
+	}
     return isFinal_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isFinal_compute() {  return numModifier("final") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isAbstract_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isAbstract_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:377
@@ -628,22 +725,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isAbstract_value = isAbstract_compute();
-      if(isFinal && num == state().boundariesCrossed) isAbstract_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isAbstract_computed = true;
+	}
     return isAbstract_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isAbstract_compute() {  return numModifier("abstract") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isVolatile_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isVolatile_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:378
@@ -657,22 +748,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isVolatile_value = isVolatile_compute();
-      if(isFinal && num == state().boundariesCrossed) isVolatile_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isVolatile_computed = true;
+	}
     return isVolatile_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isVolatile_compute() {  return numModifier("volatile") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isTransient_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isTransient_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:379
@@ -686,22 +771,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isTransient_value = isTransient_compute();
-      if(isFinal && num == state().boundariesCrossed) isTransient_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isTransient_computed = true;
+	}
     return isTransient_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isTransient_compute() {  return numModifier("transient") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isStrictfp_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isStrictfp_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:380
@@ -715,22 +794,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isStrictfp_value = isStrictfp_compute();
-      if(isFinal && num == state().boundariesCrossed) isStrictfp_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isStrictfp_computed = true;
+	}
     return isStrictfp_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isStrictfp_compute() {  return numModifier("strictfp") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isSynchronized_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isSynchronized_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:381
@@ -744,22 +817,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isSynchronized_value = isSynchronized_compute();
-      if(isFinal && num == state().boundariesCrossed) isSynchronized_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isSynchronized_computed = true;
+	}
     return isSynchronized_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isSynchronized_compute() {  return numModifier("synchronized") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isNative_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isNative_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:382
@@ -773,22 +840,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isNative_value = isNative_compute();
-      if(isFinal && num == state().boundariesCrossed) isNative_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isNative_computed = true;
+	}
     return isNative_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isNative_compute() {  return numModifier("native") != 0;  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean isSynthetic_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean isSynthetic_value;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:384
@@ -802,14 +863,16 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     isSynthetic_value = isSynthetic_compute();
-      if(isFinal && num == state().boundariesCrossed) isSynthetic_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		isSynthetic_computed = true;
+	}
     return isSynthetic_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isSynthetic_compute() {  return numModifier("synthetic") != 0;  }
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:386
@@ -820,7 +883,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:389
@@ -831,8 +894,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  protected java.util.Map numModifier_String_values;
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:392
@@ -840,7 +902,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   @SuppressWarnings({"unchecked", "cast"})
   public int numModifier(String name) {
     Object _parameters = name;
-    if(numModifier_String_values == null) numModifier_String_values = new java.util.HashMap(4);
+    if(numModifier_String_values == null) {
+		numModifier_String_values = new java.util.HashMap(4);
+	}
     if(numModifier_String_values.containsKey(_parameters)) {
       return ((Integer)numModifier_String_values.get(_parameters)).intValue();
     }
@@ -848,22 +912,25 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     int numModifier_String_value = numModifier_compute(name);
-      if(isFinal && num == state().boundariesCrossed) numModifier_String_values.put(_parameters, Integer.valueOf(numModifier_String_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		numModifier_String_values.put(_parameters, Integer.valueOf(numModifier_String_value));
+	}
     return numModifier_String_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private int numModifier_compute(String name) {
     int n = 0;
     for(int i = 0; i < getNumModifier(); i++) {
       String s = getModifier(i).getID();
-      if(s.equals(name))
-        n++;
+      if(s.equals(name)) {
+		n++;
+	}
     }
     return n;
   }
-  /**
+/**
    * @attribute syn
    * @aspect Annotations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:214
@@ -874,8 +941,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     for(int i = 0; i < getNumModifier(); i++) {
       if(getModifier(i) instanceof Annotation) {
         Annotation a = (Annotation)getModifier(i);
-        if(a.type() == typeDecl)
-          return a;
+        if(a.type() == typeDecl) {
+			return a;
+		}
       }
     }
     return null;
@@ -883,7 +951,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Annotations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:289
@@ -892,14 +960,15 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     ASTNode$State state = state();
     try {
     Annotation a = annotation(lookupType("java.lang", "SuppressWarnings"));
-    if(a != null && a.getNumElementValuePair() == 1 && a.getElementValuePair(0).getName().equals("value"))
-      return a.getElementValuePair(0).getElementValue().hasValue(s);
+    if(a != null && a.getNumElementValuePair() == 1 && "value".equals(a.getElementValuePair(0).getName())) {
+		return a.getElementValuePair(0).getElementValue().hasValue(s);
+	}
     return false;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Annotations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:319
@@ -910,7 +979,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * @return true if the modifier list includes the SafeVarargs annotation
 	 * @attribute syn
    * @aspect SafeVarargs
@@ -922,7 +991,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:358
@@ -933,7 +1002,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     TypeDecl hostType_value = getParent().Define_TypeDecl_hostType(this, null);
     return hostType_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:360
@@ -944,7 +1013,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBePublic_value = getParent().Define_boolean_mayBePublic(this, null);
     return mayBePublic_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:361
@@ -955,7 +1024,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBePrivate_value = getParent().Define_boolean_mayBePrivate(this, null);
     return mayBePrivate_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:362
@@ -966,7 +1035,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeProtected_value = getParent().Define_boolean_mayBeProtected(this, null);
     return mayBeProtected_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:363
@@ -977,7 +1046,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeStatic_value = getParent().Define_boolean_mayBeStatic(this, null);
     return mayBeStatic_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:364
@@ -988,7 +1057,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeFinal_value = getParent().Define_boolean_mayBeFinal(this, null);
     return mayBeFinal_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:365
@@ -999,7 +1068,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeAbstract_value = getParent().Define_boolean_mayBeAbstract(this, null);
     return mayBeAbstract_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:366
@@ -1010,7 +1079,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeVolatile_value = getParent().Define_boolean_mayBeVolatile(this, null);
     return mayBeVolatile_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:367
@@ -1021,7 +1090,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeTransient_value = getParent().Define_boolean_mayBeTransient(this, null);
     return mayBeTransient_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:368
@@ -1032,7 +1101,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeStrictfp_value = getParent().Define_boolean_mayBeStrictfp(this, null);
     return mayBeStrictfp_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:369
@@ -1043,7 +1112,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeSynchronized_value = getParent().Define_boolean_mayBeSynchronized(this, null);
     return mayBeSynchronized_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:370
@@ -1054,7 +1123,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     boolean mayBeNative_value = getParent().Define_boolean_mayBeNative(this, null);
     return mayBeNative_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect Annotations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:56
@@ -1065,11 +1134,12 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     TypeDecl lookupType_String_String_value = getParent().Define_TypeDecl_lookupType(this, null, packageName, typeName);
     return lookupType_String_String_value;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:424
    * @apilevel internal
    */
-  public Annotation Define_Annotation_lookupAnnotation(ASTNode caller, ASTNode child, TypeDecl typeDecl) {
+  @Override
+public Annotation Define_Annotation_lookupAnnotation(ASTNode caller, ASTNode child, TypeDecl typeDecl) {
     if(caller == getModifierListNoTransform())  { 
     int index = caller.getIndexOfChild(child);
     {
@@ -1079,10 +1149,11 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     else {      return getParent().Define_Annotation_lookupAnnotation(this, caller, typeDecl);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

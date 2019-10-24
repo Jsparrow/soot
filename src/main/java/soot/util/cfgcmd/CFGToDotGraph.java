@@ -215,56 +215,9 @@ public class CFGToDotGraph {
     if (coll.size() <= 1) {
       return coll.iterator();
     } else {
-      ArrayList<T> list = new ArrayList<T>(coll);
-      Collections.sort(list, comp);
+      ArrayList<T> list = new ArrayList<>(coll);
+      list.sort(comp);
       return list.iterator();
-    }
-  }
-
-  /**
-   * Comparator used to order a list of nodes by the order in which they were labeled.
-   */
-  private static class NodeComparator<T> implements Comparator<T> {
-    private DotNamer<T> namer;
-
-    NodeComparator(DotNamer<T> namer) {
-      this.namer = namer;
-    }
-
-    public int compare(T o1, T o2) {
-      return (namer.getNumber(o1) - namer.getNumber(o2));
-    }
-
-    public boolean equal(T o1, T o2) {
-      return (namer.getNumber(o1) == namer.getNumber(o2));
-    }
-  }
-
-  /**
-   * Comparator used to order a list of ExceptionDests by the order in which their handler nodes were labeled.
-   */
-  private static class ExceptionDestComparator<T> implements Comparator<ExceptionDest<T>> {
-    private DotNamer<T> namer;
-
-    ExceptionDestComparator(DotNamer<T> namer) {
-      this.namer = namer;
-    }
-
-    private int getValue(ExceptionDest<T> o) {
-      T handler = o.getHandlerNode();
-      if (handler == null) {
-        return Integer.MAX_VALUE;
-      } else {
-        return namer.getNumber(handler);
-      }
-    }
-
-    public int compare(ExceptionDest<T> o1, ExceptionDest<T> o2) {
-      return (getValue(o1) - getValue(o2));
-    }
-
-    public boolean equal(ExceptionDest<T> o1, ExceptionDest<T> o2) {
-      return (getValue(o1) == getValue(o2));
     }
   }
 
@@ -284,8 +237,8 @@ public class CFGToDotGraph {
    */
   public <N> DotGraph drawCFG(DirectedGraph<N> graph, Body body) {
     DotGraph canvas = initDotGraph(body);
-    DotNamer<N> namer = new DotNamer<N>((int) (graph.size() / 0.7f), 0.7f);
-    NodeComparator<N> comparator = new NodeComparator<N>(namer);
+    DotNamer<N> namer = new DotNamer<>((int) (graph.size() / 0.7f), 0.7f);
+    NodeComparator<N> comparator = new NodeComparator<>(namer);
 
     // To facilitate comparisons between different graphs of the same
     // method, prelabel the nodes in the order they appear
@@ -313,7 +266,7 @@ public class CFGToDotGraph {
     return canvas;
   }
 
-  /**
+/**
    * Create a <code>DotGraph</code> whose nodes and edges depict the control flow in a <code>ExceptionalGraph</code>, with
    * distinguished edges for exceptional control flow.
    *
@@ -361,7 +314,8 @@ public class CFGToDotGraph {
             // exceptional exit node produces a less cluttered
             // graph.
             handlerStart = new Object() {
-              public String toString() {
+              @Override
+			public String toString() {
                 return "Esc";
               }
             };
@@ -382,7 +336,7 @@ public class CFGToDotGraph {
     return canvas;
   }
 
-  /**
+/**
    * A utility method that initializes a DotGraph object for use in any variety of drawCFG().
    *
    * @param body
@@ -409,38 +363,7 @@ public class CFGToDotGraph {
     return canvas;
   }
 
-  /**
-   * A utility class for assigning unique names to DotGraph entities. It maintains a mapping from CFG <code>Object</code>s to
-   * strings identifying the corresponding nodes in generated dot source.
-   */
-  @SuppressWarnings("serial")
-  private static class DotNamer<N> extends HashMap<N, Integer> {
-    private int nodecount = 0;
-
-    DotNamer(int initialCapacity, float loadFactor) {
-      super(initialCapacity, loadFactor);
-    }
-
-    String getName(N node) {
-      Integer index = this.get(node);
-      if (index == null) {
-        index = nodecount++;
-        this.put(node, index);
-      }
-      return index.toString();
-    }
-
-    int getNumber(N node) {
-      Integer index = this.get(node);
-      if (index == null) {
-        index = nodecount++;
-        this.put(node, index);
-      }
-      return index;
-    }
-  }
-
-  /**
+/**
    * A utility method which formats the text for each node in a <code>DotGraph</code> representing a CFG.
    *
    * @param body
@@ -478,12 +401,12 @@ public class CFGToDotGraph {
           if (targetLabel == null) {
             nodeLabel = printer.toString();
           } else {
-            nodeLabel = targetLabel + ": " + printer.toString();
+            nodeLabel = new StringBuilder().append(targetLabel).append(": ").append(printer.toString()).toString();
           }
 
         } else if (node instanceof Block) {
           Iterator<Unit> units = ((Block) node).iterator();
-          StringBuffer buffer = new StringBuffer();
+          StringBuilder buffer = new StringBuilder();
           while (units.hasNext()) {
             Unit unit = units.next();
             String targetLabel = (String) printer.labels().get(unit);
@@ -502,7 +425,7 @@ public class CFGToDotGraph {
     }
   }
 
-  /**
+/**
    * Utility routine for setting some common formatting style for the {@link DotGraphNode}s corresponding to some collection
    * of objects.
    *
@@ -520,14 +443,13 @@ public class CFGToDotGraph {
   private <N> void setStyle(Collection<? extends N> objects, DotGraph canvas, DotNamer<N> namer, String style,
       DotGraphAttribute attrib) {
     // Fill the entry and exit nodes.
-    for (N object : objects) {
-      DotGraphNode objectNode = canvas.getNode(namer.getName(object));
-      objectNode.setStyle(style);
-      objectNode.setAttribute(attrib);
-    }
+	objects.stream().map(object -> canvas.getNode(namer.getName(object))).forEach(objectNode -> {
+		objectNode.setStyle(style);
+		objectNode.setAttribute(attrib);
+	});
   }
 
-  /**
+/**
    * Utility routine to format the list of names in a ThrowableSet into a label for the edge showing where those Throwables
    * are handled.
    */
@@ -537,7 +459,7 @@ public class CFGToDotGraph {
     // Insert line breaks between individual Throwables (dot seems to
     // orient these edges more or less vertically, most of the time).
     int inputLength = input.length();
-    StringBuffer result = new StringBuffer(inputLength + 5);
+    StringBuilder result = new StringBuilder(inputLength + 5);
     for (int i = 0; i < inputLength; i++) {
       char c = input.charAt(i);
       if (c == '+' || c == '-') {
@@ -546,5 +468,85 @@ public class CFGToDotGraph {
       result.append(c);
     }
     return result.toString();
+  }
+
+/**
+   * Comparator used to order a list of nodes by the order in which they were labeled.
+   */
+  private static class NodeComparator<T> implements Comparator<T> {
+    private DotNamer<T> namer;
+
+    NodeComparator(DotNamer<T> namer) {
+      this.namer = namer;
+    }
+
+    @Override
+	public int compare(T o1, T o2) {
+      return (namer.getNumber(o1) - namer.getNumber(o2));
+    }
+
+    public boolean equal(T o1, T o2) {
+      return (namer.getNumber(o1) == namer.getNumber(o2));
+    }
+  }
+
+  /**
+   * Comparator used to order a list of ExceptionDests by the order in which their handler nodes were labeled.
+   */
+  private static class ExceptionDestComparator<T> implements Comparator<ExceptionDest<T>> {
+    private DotNamer<T> namer;
+
+    ExceptionDestComparator(DotNamer<T> namer) {
+      this.namer = namer;
+    }
+
+    private int getValue(ExceptionDest<T> o) {
+      T handler = o.getHandlerNode();
+      if (handler == null) {
+        return Integer.MAX_VALUE;
+      } else {
+        return namer.getNumber(handler);
+      }
+    }
+
+    @Override
+	public int compare(ExceptionDest<T> o1, ExceptionDest<T> o2) {
+      return (getValue(o1) - getValue(o2));
+    }
+
+    public boolean equal(ExceptionDest<T> o1, ExceptionDest<T> o2) {
+      return (getValue(o1) == getValue(o2));
+    }
+  }
+
+  /**
+   * A utility class for assigning unique names to DotGraph entities. It maintains a mapping from CFG <code>Object</code>s to
+   * strings identifying the corresponding nodes in generated dot source.
+   */
+  @SuppressWarnings("serial")
+  private static class DotNamer<N> extends HashMap<N, Integer> {
+    private int nodecount = 0;
+
+    DotNamer(int initialCapacity, float loadFactor) {
+      super(initialCapacity, loadFactor);
+    }
+
+    String getName(N node) {
+      Integer index = this.get(node);
+      if (index == null) {
+        index = nodecount++;
+        this.put(node, index);
+      }
+      return index.toString();
+    }
+
+    int getNumber(N node) {
+      Integer index = this.get(node);
+      if (index == null) {
+        index = nodecount++;
+        this.put(node, index);
+      }
+      return index;
+    }
   }
 }

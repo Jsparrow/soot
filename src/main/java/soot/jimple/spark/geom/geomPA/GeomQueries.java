@@ -58,7 +58,11 @@ public class GeomQueries {
   protected CgEdge call_graph[];
 
   // Basic call graph info copied from geomPTA
-  protected int vis_cg[], rep_cg[], scc_size[];
+  protected int vis_cg[];
+
+protected int rep_cg[];
+
+protected int scc_size[];
   protected int block_num[];
   protected long max_context_size_block[];
 
@@ -66,9 +70,9 @@ public class GeomQueries {
   protected int top_rank[];
 
   // Temporary data structures reused across queries
-  private boolean prop_initialized = false;
+  private boolean propInitialized = false;
   private Queue<Integer> topQ;
-  private int in_degree[];
+  private int inDegree[];
   private ContextsCollector[] contextsForMethods;
 
   /**
@@ -90,8 +94,8 @@ public class GeomQueries {
     Arrays.fill(call_graph, null);
 
     // We duplicate a call graph without SCC edges
-    in_degree = new int[n_func];
-    Arrays.fill(in_degree, 0);
+    inDegree = new int[n_func];
+    Arrays.fill(inDegree, 0);
 
     CgEdge[] raw_call_graph = geomPTA.call_graph;
     for (int i = 0; i < n_func; ++i) {
@@ -108,7 +112,7 @@ public class GeomQueries {
           // The non-SCC edge is attached to the SCC representative
           q.next = call_graph[rep];
           call_graph[rep] = q;
-          in_degree[rep_cg[q.t]]++;
+          inDegree[rep_cg[q.t]]++;
         }
         p = p.next;
       }
@@ -136,7 +140,7 @@ public class GeomQueries {
    * Only needed by part of the queries. Therefore, it is called on demand.
    */
   private void prepareIntervalPropagations() {
-    if (prop_initialized) {
+    if (propInitialized) {
       return;
     }
 
@@ -145,7 +149,7 @@ public class GeomQueries {
     top_rank = new int[n_func];
     Arrays.fill(top_rank, 0);
 
-    topQ = new LinkedList<Integer>();
+    topQ = new LinkedList<>();
     topQ.add(Constants.SUPER_MAIN);
 
     while (!topQ.isEmpty()) {
@@ -159,7 +163,7 @@ public class GeomQueries {
         if (top_rank[rep_t] < w) {
           top_rank[rep_t] = w;
         }
-        if (--in_degree[rep_t] == 0) {
+        if (--inDegree[rep_t] == 0) {
           topQ.add(rep_t);
         }
         p = p.next;
@@ -174,7 +178,7 @@ public class GeomQueries {
       contextsForMethods[i] = cc;
     }
 
-    prop_initialized = true;
+    propInitialized = true;
   }
 
   /**
@@ -200,8 +204,8 @@ public class GeomQueries {
     while (p != null) {
       int t = p.t;
       int rep_t = rep_cg[t];
-      if (in_degree[rep_t] != 0 || (top_rank[rep_t] <= top_rank[rep_target] && dfsScanSubgraph(t, target) == true)) {
-        in_degree[rep_t]++;
+      if (inDegree[rep_t] != 0 || (top_rank[rep_t] <= top_rank[rep_target] && dfsScanSubgraph(t, target) == true)) {
+        inDegree[rep_t]++;
         reachable = true;
       }
 
@@ -212,15 +216,14 @@ public class GeomQueries {
   }
 
   protected void transferInSCC(int s, int t, long L, long R, ContextsCollector tContexts) {
-    if (s == t) {
-      if (scc_size[s] == 1) {
+    boolean condition = s == t && scc_size[s] == 1;
+	if (condition) {
         /*
          * If s is not a member of mutually recursive call SCC, it's unnecessary to pollute all blocks of t.
          */
         tContexts.insert(L, R);
         return;
       }
-    }
 
     /*
      * We assume all blocks of target method are reachable for soundness and for simplicity.
@@ -233,7 +236,8 @@ public class GeomQueries {
     long offset = (L - 1) % block_size;
     long ctxtLength = R - L;
     long block_offset = 0;
-    long lEnd, rEnd;
+    long lEnd;
+	long rEnd;
 
     // We iterate all blocks of target method
     for (int i = 0; i < n_blocks; ++i) {
@@ -288,7 +292,7 @@ public class GeomQueries {
           int t = p.t;
           int rep_t = rep_cg[t];
 
-          if (in_degree[rep_t] != 0) {
+          if (inDegree[rep_t] != 0) {
             // This node has a path to target
             ContextsCollector reptContexts = contextsForMethods[rep_t];
             long block_size = max_context_size_block[s];
@@ -310,7 +314,7 @@ public class GeomQueries {
               }
             }
 
-            if (--in_degree[rep_t] == 0 && rep_t != rep_target) {
+            if (--inDegree[rep_t] == 0 && rep_t != rep_target) {
               topQ.add(rep_t);
             }
           }
@@ -497,8 +501,7 @@ public class GeomQueries {
     visitor.prepare();
 
     long L = 1;
-    for (int i = 0; i < callEdgeChain.length; ++i) {
-      Edge sootEdge = callEdgeChain[i];
+    for (Edge sootEdge : callEdgeChain) {
       CgEdge ctxt = geomPTA.getInternalEdgeFromSootEdge(sootEdge);
       if (ctxt == null || ctxt.is_obsoleted == true) {
         return false;
@@ -598,13 +601,12 @@ public class GeomQueries {
     pn1 = pn1.getRepresentative();
     pn2 = pn2.getRepresentative();
 
-    if (!pn1.hasPTResult() || !pn2.hasPTResult()) {
-      VarNode vn1 = (VarNode) pn1.getWrappedNode();
-      VarNode vn2 = (VarNode) pn2.getWrappedNode();
-      return isAliasCI((Local) vn1.getVariable(), (Local) vn2.getVariable());
-    }
-
-    return pn1.heap_sensitive_intersection(pn2);
+    if (!(!pn1.hasPTResult() || !pn2.hasPTResult())) {
+		return pn1.heap_sensitive_intersection(pn2);
+	}
+	VarNode vn1 = (VarNode) pn1.getWrappedNode();
+	VarNode vn2 = (VarNode) pn2.getWrappedNode();
+	return isAliasCI((Local) vn1.getVariable(), (Local) vn2.getVariable());
   }
 
   /**

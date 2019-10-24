@@ -62,77 +62,77 @@ import soot.jimple.UnopExpr;
 
 public interface Analysis {
 
-  public void caseASTMethodNode(ASTMethodNode node);
+  void caseASTMethodNode(ASTMethodNode node);
 
-  public void caseASTSynchronizedBlockNode(ASTSynchronizedBlockNode node);
+  void caseASTSynchronizedBlockNode(ASTSynchronizedBlockNode node);
 
-  public void caseASTLabeledBlockNode(ASTLabeledBlockNode node);
+  void caseASTLabeledBlockNode(ASTLabeledBlockNode node);
 
-  public void caseASTUnconditionalLoopNode(ASTUnconditionalLoopNode node);
+  void caseASTUnconditionalLoopNode(ASTUnconditionalLoopNode node);
 
-  public void caseASTSwitchNode(ASTSwitchNode node);
+  void caseASTSwitchNode(ASTSwitchNode node);
 
-  public void caseASTIfNode(ASTIfNode node);
+  void caseASTIfNode(ASTIfNode node);
 
-  public void caseASTIfElseNode(ASTIfElseNode node);
+  void caseASTIfElseNode(ASTIfElseNode node);
 
-  public void caseASTWhileNode(ASTWhileNode node);
+  void caseASTWhileNode(ASTWhileNode node);
 
-  public void caseASTForLoopNode(ASTForLoopNode node);
+  void caseASTForLoopNode(ASTForLoopNode node);
 
-  public void caseASTDoWhileNode(ASTDoWhileNode node);
+  void caseASTDoWhileNode(ASTDoWhileNode node);
 
-  public void caseASTTryNode(ASTTryNode node);
+  void caseASTTryNode(ASTTryNode node);
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node);
+  void caseASTStatementSequenceNode(ASTStatementSequenceNode node);
 
-  public void caseASTUnaryCondition(ASTUnaryCondition uc);
+  void caseASTUnaryCondition(ASTUnaryCondition uc);
 
-  public void caseASTBinaryCondition(ASTBinaryCondition bc);
+  void caseASTBinaryCondition(ASTBinaryCondition bc);
 
-  public void caseASTAndCondition(ASTAndCondition ac);
+  void caseASTAndCondition(ASTAndCondition ac);
 
-  public void caseASTOrCondition(ASTOrCondition oc);
+  void caseASTOrCondition(ASTOrCondition oc);
 
-  public void caseType(Type t);
+  void caseType(Type t);
 
-  public void caseDefinitionStmt(DefinitionStmt s);
+  void caseDefinitionStmt(DefinitionStmt s);
 
-  public void caseReturnStmt(ReturnStmt s);
+  void caseReturnStmt(ReturnStmt s);
 
-  public void caseInvokeStmt(InvokeStmt s);
+  void caseInvokeStmt(InvokeStmt s);
 
-  public void caseThrowStmt(ThrowStmt s);
+  void caseThrowStmt(ThrowStmt s);
 
-  public void caseDVariableDeclarationStmt(DVariableDeclarationStmt s);
+  void caseDVariableDeclarationStmt(DVariableDeclarationStmt s);
 
-  public void caseStmt(Stmt s);
+  void caseStmt(Stmt s);
 
-  public void caseValue(Value v);
+  void caseValue(Value v);
 
-  public void caseExpr(Expr e);
+  void caseExpr(Expr e);
 
-  public void caseRef(Ref r);
+  void caseRef(Ref r);
 
-  public void caseBinopExpr(BinopExpr be);
+  void caseBinopExpr(BinopExpr be);
 
-  public void caseUnopExpr(UnopExpr ue);
+  void caseUnopExpr(UnopExpr ue);
 
-  public void caseNewArrayExpr(NewArrayExpr nae);
+  void caseNewArrayExpr(NewArrayExpr nae);
 
-  public void caseNewMultiArrayExpr(NewMultiArrayExpr nmae);
+  void caseNewMultiArrayExpr(NewMultiArrayExpr nmae);
 
-  public void caseInstanceOfExpr(InstanceOfExpr ioe);
+  void caseInstanceOfExpr(InstanceOfExpr ioe);
 
-  public void caseInvokeExpr(InvokeExpr ie);
+  void caseInvokeExpr(InvokeExpr ie);
 
-  public void caseInstanceInvokeExpr(InstanceInvokeExpr iie);
+  void caseInstanceInvokeExpr(InstanceInvokeExpr iie);
 
-  public void caseCastExpr(CastExpr ce);
+  void caseCastExpr(CastExpr ce);
 
-  public void caseArrayRef(ArrayRef ar);
+  void caseArrayRef(ArrayRef ar);
 
-  public void caseInstanceFieldRef(InstanceFieldRef ifr);
+  void caseInstanceFieldRef(InstanceFieldRef ifr);
 
-  public void caseStaticFieldRef(StaticFieldRef sfr);
+  void caseStaticFieldRef(StaticFieldRef sfr);
 }

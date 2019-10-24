@@ -33,23 +33,24 @@ import soot.jimple.Jimple;
 import soot.jimple.JimpleToBafContext;
 
 @SuppressWarnings("serial")
-abstract public class AbstractJimpleFloatBinopExpr extends AbstractFloatBinopExpr implements ConvertToBaf {
-  AbstractJimpleFloatBinopExpr(Value op1, Value op2) {
-    this(Jimple.v().newArgBox(op1), Jimple.v().newArgBox(op2));
-  }
-
+public abstract class AbstractJimpleFloatBinopExpr extends AbstractFloatBinopExpr implements ConvertToBaf {
   protected AbstractJimpleFloatBinopExpr(ValueBox op1Box, ValueBox op2Box) {
-    this.op1Box = op1Box;
-    this.op2Box = op2Box;
-  }
+	    this.op1Box = op1Box;
+	    this.op2Box = op2Box;
+	  }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
-    ((ConvertToBaf) this.getOp1()).convertToBaf(context, out);
-    ((ConvertToBaf) this.getOp2()).convertToBaf(context, out);
-    Unit u = (Unit) makeBafInst(this.getOp1().getType());
-    out.add(u);
-    u.addAllTagsOf(context.getCurrentUnit());
-  }
+	AbstractJimpleFloatBinopExpr(Value op1, Value op2) {
+	    this(Jimple.v().newArgBox(op1), Jimple.v().newArgBox(op2));
+	  }
 
-  abstract Object makeBafInst(Type opType);
+	@Override
+	public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+	    ((ConvertToBaf) this.getOp1()).convertToBaf(context, out);
+	    ((ConvertToBaf) this.getOp2()).convertToBaf(context, out);
+	    Unit u = (Unit) makeBafInst(this.getOp1().getType());
+	    out.add(u);
+	    u.addAllTagsOf(context.getCurrentUnit());
+	  }
+
+	abstract Object makeBafInst(Type opType);
 }

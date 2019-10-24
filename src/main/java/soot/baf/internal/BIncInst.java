@@ -51,56 +51,69 @@ public class BIncInst extends AbstractInst implements IncInst {
 
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 0;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BIncInst(getLocal(), getConstant());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  public Constant getConstant() {
+  @Override
+public Constant getConstant() {
     return mConstant;
   }
 
-  public void setConstant(Constant aConstant) {
+  @Override
+public void setConstant(Constant aConstant) {
     mConstant = aConstant;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "inc.i";
   }
 
-  final String getParameters() {
+  @Override
+final String getParameters() {
     return " " + localBox.getValue().toString();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     localBox.toString(up);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseIncInst(this);
   }
 
-  public void setLocal(Local l) {
+  @Override
+public void setLocal(Local l) {
     localBox.setValue(l);
   }
 
-  public Local getLocal() {
+  @Override
+public Local getLocal() {
     return (Local) localBox.getValue();
   }
 
@@ -114,11 +127,13 @@ public class BIncInst extends AbstractInst implements IncInst {
     return mDefBoxes;
   }
 
-  public String toString() {
-    return "inc.i" + " " + getLocal() + " " + getConstant();
+  @Override
+public String toString() {
+    return new StringBuilder().append("inc.i").append(" ").append(getLocal()).append(" ").append(getConstant()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal("inc.i");
     up.literal(" ");
     localBox.toString(up);

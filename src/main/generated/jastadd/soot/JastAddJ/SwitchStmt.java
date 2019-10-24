@@ -18,16 +18,80 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production SwitchStmt : {@link BranchTargetStmt} ::= <span class="component">{@link Expr}</span> <span class="component">{@link Block}</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:202
  */
-public class SwitchStmt extends BranchTargetStmt implements Cloneable {
-  /**
+public class SwitchStmt extends BranchTargetStmt {
+  private static final Logger logger = LoggerFactory.getLogger(SwitchStmt.class);
+protected java.util.Map targetOf_ContinueStmt_values;
+protected java.util.Map targetOf_BreakStmt_values;
+protected java.util.Map isDAafter_Variable_values;
+protected java.util.Map isDUafter_Variable_values;
+/**
+   * @apilevel internal
+   */
+  protected boolean canCompleteNormally_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean canCompleteNormally_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean defaultCase_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected DefaultCase defaultCase_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean end_label_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected soot.jimple.Stmt end_label_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeInt_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeInt_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeLong_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeLong_value;
+/**
+   * @ast method 
+   * 
+   */
+  public SwitchStmt() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public SwitchStmt(Expr p0, Block p1) {
+    setChild(p0, 0);
+    setChild(p1, 1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     targetOf_ContinueStmt_values = null;
     targetOf_BreakStmt_values = null;
@@ -43,16 +107,18 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     typeLong_computed = false;
     typeLong_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public SwitchStmt clone() throws CloneNotSupportedException {
     SwitchStmt node = (SwitchStmt)super.clone();
     node.targetOf_ContinueStmt_values = null;
@@ -72,29 +138,33 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public SwitchStmt copy() {
     try {
       SwitchStmt node = (SwitchStmt) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public SwitchStmt fullCopy() {
     SwitchStmt tree = (SwitchStmt) copy();
     if (children != null) {
@@ -108,24 +178,26 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:554
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     s.append(indent());
     s.append("switch (");
     getExpr().toString(s);
     s.append(")");
     getBlock().toString(s);
   }
-  /**
+/**
    * @ast method 
    * @aspect Statements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Statements.jrag:50
    */
-  public void jimplify2(Body b) {
+  @Override
+public void jimplify2(Body b) {
     soot.jimple.Stmt cond_label = newLabel();
     soot.jimple.Stmt switch_label = newLabel();
 
@@ -143,7 +215,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     for(int i= 0; i < getBlock().getNumStmt(); i++) {
       if(getBlock().getStmt(i) instanceof ConstCase) {
         ConstCase ca = (ConstCase)getBlock().getStmt(i);
-        map.put(new Integer(ca.getValue().constant().intValue()), ca);
+        map.put(Integer.valueOf(ca.getValue().constant().intValue()), ca);
       }        
     }
 
@@ -158,11 +230,12 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     if(tableSwitchSize < lookupSwitchSize) {
       ArrayList targets = new ArrayList();
       for(long i = low; i <= high; i++) {
-        ConstCase ca = (ConstCase)map.get(new Integer((int)i));
-        if(ca != null)
-          targets.add(ca.label());
-        else
-          targets.add(defaultStmt);
+        ConstCase ca = (ConstCase)map.get(Integer.valueOf((int)i));
+        if(ca != null) {
+			targets.add(ca.label());
+		} else {
+			targets.add(defaultStmt);
+		}
       }
       b.setLine(this);
       b.add(b.newTableSwitchStmt(expr, (int)low, (int)high, targets, defaultStmt, this));
@@ -181,12 +254,13 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     }
     b.addLabel(end_label());
   }
-  /**
+/**
    * @ast method 
    * @aspect EnumsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/EnumsCodegen.jrag:17
    */
-  public void transformation() {
+  @Override
+public void transformation() {
     if(getExpr().type().isEnumDecl()) {
       TypeDecl type = getExpr().type();
       hostType().createEnumArray(type);
@@ -200,16 +274,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     }
     super.transformation();
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public SwitchStmt() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -217,34 +282,29 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[2];
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public SwitchStmt(Expr p0, Block p1) {
-    setChild(p0, 0);
-    setChild(p1, 1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 2;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Expr child.
    * @param node The new node to replace the Expr child.
    * @apilevel high-level
@@ -254,7 +314,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public void setExpr(Expr node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the Expr child.
    * @return The current node used as the Expr child.
    * @apilevel high-level
@@ -264,7 +324,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public Expr getExpr() {
     return (Expr)getChild(0);
   }
-  /**
+/**
    * Retrieves the Expr child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Expr child.
@@ -275,7 +335,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public Expr getExprNoTransform() {
     return (Expr)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the Block child.
    * @param node The new node to replace the Block child.
    * @apilevel high-level
@@ -285,7 +345,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public void setBlock(Block node) {
     setChild(node, 1);
   }
-  /**
+/**
    * Retrieves the Block child.
    * @return The current node used as the Block child.
    * @apilevel high-level
@@ -295,7 +355,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public Block getBlock() {
     return (Block)getChild(1);
   }
-  /**
+/**
    * Retrieves the Block child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Block child.
@@ -306,17 +366,18 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public Block getBlockNoTransform() {
     return (Block)getChildNoTransform(1);
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:491
    */
     public void refined_Enums_SwitchStmt_typeCheck() {
      TypeDecl type = getExpr().type();
-    if((!type.isIntegralType() || type.isLong()) && !type.isEnumDecl())
-      error("Switch expression must be of char, byte, short, int, or enum type");
+    if((!type.isIntegralType() || type.isLong()) && !type.isEnumDecl()) {
+		error("Switch expression must be of char, byte, short, int, or enum type");
+	}
   }
-  /**
+/**
 	 * <p>Overrides the type checking of the switch statement's expression.
 	 *
 	 * <p>In JSR 334 a switch statement may use an expression of type String.
@@ -324,23 +385,27 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
    * @aspect StringsInSwitch
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/StringsInSwitch.jrag:25
    */
-    public void typeCheck() {
+    @Override
+	public void typeCheck() {
 		TypeDecl type = getExpr().type();
 		if ((!type.isIntegralType() || type.isLong()) && !type.isEnumDecl()
-				&& !type.isString())
+				&& !type.isString()) {
 			error("Switch expression must be of type " +
 					"char, byte, short, int, enum, or string");
+		}
 	}
-  protected java.util.Map targetOf_ContinueStmt_values;
-  /**
+/**
    * @attribute syn
    * @aspect BranchTarget
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BranchTarget.jrag:72
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean targetOf(ContinueStmt stmt) {
     Object _parameters = stmt;
-    if(targetOf_ContinueStmt_values == null) targetOf_ContinueStmt_values = new java.util.HashMap(4);
+    if(targetOf_ContinueStmt_values == null) {
+		targetOf_ContinueStmt_values = new java.util.HashMap(4);
+	}
     if(targetOf_ContinueStmt_values.containsKey(_parameters)) {
       return ((Boolean)targetOf_ContinueStmt_values.get(_parameters)).booleanValue();
     }
@@ -348,23 +413,27 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean targetOf_ContinueStmt_value = targetOf_compute(stmt);
-      if(isFinal && num == state().boundariesCrossed) targetOf_ContinueStmt_values.put(_parameters, Boolean.valueOf(targetOf_ContinueStmt_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		targetOf_ContinueStmt_values.put(_parameters, Boolean.valueOf(targetOf_ContinueStmt_value));
+	}
     return targetOf_ContinueStmt_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean targetOf_compute(ContinueStmt stmt) {  return false;  }
-  protected java.util.Map targetOf_BreakStmt_values;
-  /**
+/**
    * @attribute syn
    * @aspect BranchTarget
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BranchTarget.jrag:76
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean targetOf(BreakStmt stmt) {
     Object _parameters = stmt;
-    if(targetOf_BreakStmt_values == null) targetOf_BreakStmt_values = new java.util.HashMap(4);
+    if(targetOf_BreakStmt_values == null) {
+		targetOf_BreakStmt_values = new java.util.HashMap(4);
+	}
     if(targetOf_BreakStmt_values.containsKey(_parameters)) {
       return ((Boolean)targetOf_BreakStmt_values.get(_parameters)).booleanValue();
     }
@@ -372,23 +441,27 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean targetOf_BreakStmt_value = targetOf_compute(stmt);
-      if(isFinal && num == state().boundariesCrossed) targetOf_BreakStmt_values.put(_parameters, Boolean.valueOf(targetOf_BreakStmt_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		targetOf_BreakStmt_values.put(_parameters, Boolean.valueOf(targetOf_BreakStmt_value));
+	}
     return targetOf_BreakStmt_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean targetOf_compute(BreakStmt stmt) {  return !stmt.hasLabel();  }
-  protected java.util.Map isDAafter_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:531
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean isDAafter(Variable v) {
     Object _parameters = v;
-    if(isDAafter_Variable_values == null) isDAafter_Variable_values = new java.util.HashMap(4);
+    if(isDAafter_Variable_values == null) {
+		isDAafter_Variable_values = new java.util.HashMap(4);
+	}
     if(isDAafter_Variable_values.containsKey(_parameters)) {
       return ((Boolean)isDAafter_Variable_values.get(_parameters)).booleanValue();
     }
@@ -396,10 +469,12 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean isDAafter_Variable_value = isDAafter_compute(v);
-      if(isFinal && num == state().boundariesCrossed) isDAafter_Variable_values.put(_parameters, Boolean.valueOf(isDAafter_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		isDAafter_Variable_values.put(_parameters, Boolean.valueOf(isDAafter_Variable_value));
+	}
     return isDAafter_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isDAafter_compute(Variable v) {
@@ -414,12 +489,13 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     }
     for(Iterator iter = targetBreaks().iterator(); iter.hasNext(); ) {
       BreakStmt stmt = (BreakStmt)iter.next();
-      if(!stmt.isDAafterReachedFinallyBlocks(v))
-        return false;
+      if(!stmt.isDAafterReachedFinallyBlocks(v)) {
+		return false;
+	}
     }
     return true;
   }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:549
@@ -430,16 +506,18 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     finally {
     }
   }
-  protected java.util.Map isDUafter_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:1000
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean isDUafter(Variable v) {
     Object _parameters = v;
-    if(isDUafter_Variable_values == null) isDUafter_Variable_values = new java.util.HashMap(4);
+    if(isDUafter_Variable_values == null) {
+		isDUafter_Variable_values = new java.util.HashMap(4);
+	}
     if(isDUafter_Variable_values.containsKey(_parameters)) {
       return ((Boolean)isDUafter_Variable_values.get(_parameters)).booleanValue();
     }
@@ -447,27 +525,33 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean isDUafter_Variable_value = isDUafter_compute(v);
-      if(isFinal && num == state().boundariesCrossed) isDUafter_Variable_values.put(_parameters, Boolean.valueOf(isDUafter_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		isDUafter_Variable_values.put(_parameters, Boolean.valueOf(isDUafter_Variable_value));
+	}
     return isDUafter_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isDUafter_compute(Variable v) {
-    if(!(!noDefaultLabel() || getExpr().isDUafter(v)))
-      return false;
-    if(!(!switchLabelEndsBlock() || getExpr().isDUafter(v)))
-      return false;
-    if(!unassignedAfterLastStmt(v))
-      return false;
+    if(!(!noDefaultLabel() || getExpr().isDUafter(v))) {
+		return false;
+	}
+    if(!(!switchLabelEndsBlock() || getExpr().isDUafter(v))) {
+		return false;
+	}
+    if(!unassignedAfterLastStmt(v)) {
+		return false;
+	}
     for(Iterator iter = targetBreaks().iterator(); iter.hasNext(); ) {
       BreakStmt stmt = (BreakStmt)iter.next();
-      if(!stmt.isDUafterReachedFinallyBlocks(v))
-        return false;
+      if(!stmt.isDUafterReachedFinallyBlocks(v)) {
+		return false;
+	}
     }
     return true;
   }
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:1015
@@ -478,7 +562,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:1018
@@ -489,7 +573,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect UnreachableStatements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:60
@@ -500,7 +584,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect UnreachableStatements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:62
@@ -508,15 +592,17 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public boolean noStmts() {
     ASTNode$State state = state();
     try {
-    for(int i = 0; i < getBlock().getNumStmt(); i++)
-      if(!(getBlock().getStmt(i) instanceof Case))
-        return false;
+    for(int i = 0; i < getBlock().getNumStmt(); i++) {
+		if(!(getBlock().getStmt(i) instanceof Case)) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect UnreachableStatements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:69
@@ -527,7 +613,7 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect UnreachableStatements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:72
@@ -535,28 +621,23 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   public boolean noDefaultLabel() {
     ASTNode$State state = state();
     try {
-    for(int i = 0; i < getBlock().getNumStmt(); i++)
-      if(getBlock().getStmt(i) instanceof DefaultCase)
-        return false;
+    for(int i = 0; i < getBlock().getNumStmt(); i++) {
+		if(getBlock().getStmt(i) instanceof DefaultCase) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean canCompleteNormally_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean canCompleteNormally_value;
-  /**
+/**
    * @attribute syn
    * @aspect UnreachableStatements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:79
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean canCompleteNormally() {
     if(canCompleteNormally_computed) {
       return canCompleteNormally_value;
@@ -565,22 +646,16 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     canCompleteNormally_value = canCompleteNormally_compute();
-      if(isFinal && num == state().boundariesCrossed) canCompleteNormally_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		canCompleteNormally_computed = true;
+	}
     return canCompleteNormally_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean canCompleteNormally_compute() {  return lastStmtCanCompleteNormally() || noStmts() || noStmtsAfterLastLabel() || noDefaultLabel() || reachableBreak();  }
-  /**
-   * @apilevel internal
-   */
-  protected boolean defaultCase_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected DefaultCase defaultCase_value;
-  /**
+/**
    * @attribute syn
    * @aspect Statements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Statements.jrag:40
@@ -594,28 +669,23 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     defaultCase_value = defaultCase_compute();
-      if(isFinal && num == state().boundariesCrossed) defaultCase_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		defaultCase_computed = true;
+	}
     return defaultCase_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private DefaultCase defaultCase_compute() {
     for(int i= 0; i < getBlock().getNumStmt(); i++) {
-      if(getBlock().getStmt(i) instanceof DefaultCase)
-        return (DefaultCase)getBlock().getStmt(i);
+      if(getBlock().getStmt(i) instanceof DefaultCase) {
+		return (DefaultCase)getBlock().getStmt(i);
+	}
     }
     return null;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean end_label_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected soot.jimple.Stmt end_label_value;
-  /**
+/**
    * @attribute syn
    * @aspect Statements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Statements.jrag:48
@@ -629,44 +699,40 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     end_label_value = end_label_compute();
-      if(isFinal && num == state().boundariesCrossed) end_label_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		end_label_computed = true;
+	}
     return end_label_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private soot.jimple.Stmt end_label_compute() {  return newLabel();  }
-  /**
+/**
    * @attribute syn
    * @aspect Statements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Statements.jrag:200
    */
-  public soot.jimple.Stmt break_label() {
+  @Override
+public soot.jimple.Stmt break_label() {
     ASTNode$State state = state();
     try {  return end_label();  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect PreciseRethrow
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/PreciseRethrow.jrag:55
    */
-  public boolean modifiedInScope(Variable var) {
+  @Override
+public boolean modifiedInScope(Variable var) {
     ASTNode$State state = state();
     try {  return getBlock().modifiedInScope(var);  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeInt_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeInt_value;
-  /**
+/**
    * @attribute inh
    * @aspect SpecialClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:61
@@ -680,18 +746,12 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     typeInt_value = getParent().Define_TypeDecl_typeInt(this, null);
-      if(isFinal && num == state().boundariesCrossed) typeInt_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		typeInt_computed = true;
+	}
     return typeInt_value;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeLong_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeLong_value;
-  /**
+/**
    * @attribute inh
    * @aspect SpecialClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:63
@@ -705,31 +765,36 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     typeLong_value = getParent().Define_TypeDecl_typeLong(this, null);
-      if(isFinal && num == state().boundariesCrossed) typeLong_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		typeLong_computed = true;
+	}
     return typeLong_value;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:568
    * @apilevel internal
    */
-  public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
+  @Override
+public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
     if(caller == getBlockNoTransform()) {
       return getExpr().isDAafter(v);
     }
     else if(caller == getExprNoTransform()){
-    if(((ASTNode)v).isDescendantTo(this))
-      return false;
+    if(((ASTNode)v).isDescendantTo(this)) {
+		return false;
+	}
     boolean result = isDAbefore(v);
     return result;
   }
     else {      return getParent().Define_boolean_isDAbefore(this, caller, v);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:1023
    * @apilevel internal
    */
-  public boolean Define_boolean_isDUbefore(ASTNode caller, ASTNode child, Variable v) {
+  @Override
+public boolean Define_boolean_isDUbefore(ASTNode caller, ASTNode child, Variable v) {
     if(caller == getBlockNoTransform()) {
       return getExpr().isDUafter(v);
     }
@@ -739,69 +804,76 @@ public class SwitchStmt extends BranchTargetStmt implements Cloneable {
     else {      return getParent().Define_boolean_isDUbefore(this, caller, v);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:377
    * @apilevel internal
    */
-  public boolean Define_boolean_insideSwitch(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_insideSwitch(ASTNode caller, ASTNode child) {
     if(caller == getBlockNoTransform()) {
       return true;
     }
     else {      return getParent().Define_boolean_insideSwitch(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:418
    * @apilevel internal
    */
-  public Case Define_Case_bind(ASTNode caller, ASTNode child, Case c) {
-    if(caller == getBlockNoTransform()){
-    Block b = getBlock();
-    for(int i = 0; i < b.getNumStmt(); i++)
-      if(b.getStmt(i) instanceof Case && ((Case)b.getStmt(i)).constValue(c))
-        return (Case)b.getStmt(i);
-    return null;
+  @Override
+public Case Define_Case_bind(ASTNode caller, ASTNode child, Case c) {
+    if (caller != getBlockNoTransform()) {
+		return getParent().Define_Case_bind(this, caller, c);
+	}
+	Block b = getBlock();
+	for(int i = 0; i < b.getNumStmt(); i++) {
+		if(b.getStmt(i) instanceof Case && ((Case)b.getStmt(i)).constValue(c)) {
+			return (Case)b.getStmt(i);
+		}
+	}
+	return null;
   }
-    else {      return getParent().Define_Case_bind(this, caller, c);
-    }
-  }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:359
    * @apilevel internal
    */
-  public TypeDecl Define_TypeDecl_switchType(ASTNode caller, ASTNode child) {
+  @Override
+public TypeDecl Define_TypeDecl_switchType(ASTNode caller, ASTNode child) {
     if(caller == getBlockNoTransform()) {
       return getExpr().type();
     }
     else {      return getParent().Define_TypeDecl_switchType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:82
    * @apilevel internal
    */
-  public boolean Define_boolean_reachable(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_reachable(ASTNode caller, ASTNode child) {
     if(caller == getBlockNoTransform()) {
       return reachable();
     }
     else {      return getParent().Define_boolean_reachable(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:158
    * @apilevel internal
    */
-  public boolean Define_boolean_reportUnreachable(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_reportUnreachable(ASTNode caller, ASTNode child) {
     if(caller == getBlockNoTransform()) {
       return reachable();
     }
     else {      return getParent().Define_boolean_reportUnreachable(this, caller);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

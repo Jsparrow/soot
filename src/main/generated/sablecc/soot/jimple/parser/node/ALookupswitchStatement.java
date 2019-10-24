@@ -8,14 +8,14 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ALookupswitchStatement extends PStatement
 {
-    private TLookupswitch _lookupswitch_;
-    private TLParen _lParen_;
-    private PImmediate _immediate_;
-    private TRParen _rParen_;
-    private TLBrace _lBrace_;
-    private final LinkedList<PCaseStmt> _caseStmt_ = new LinkedList<PCaseStmt>();
-    private TRBrace _rBrace_;
-    private TSemicolon _semicolon_;
+    private TLookupswitch lookupswitch;
+    private TLParen lParen;
+    private PImmediate immediate;
+    private TRParen rParen;
+    private TLBrace lBrace;
+    private final LinkedList<PCaseStmt> caseStmt = new LinkedList<>();
+    private TRBrace rBrace;
+    private TSemicolon semicolon;
 
     public ALookupswitchStatement()
     {
@@ -55,14 +55,14 @@ public final class ALookupswitchStatement extends PStatement
     public Object clone()
     {
         return new ALookupswitchStatement(
-            cloneNode(this._lookupswitch_),
-            cloneNode(this._lParen_),
-            cloneNode(this._immediate_),
-            cloneNode(this._rParen_),
-            cloneNode(this._lBrace_),
-            cloneList(this._caseStmt_),
-            cloneNode(this._rBrace_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.lookupswitch),
+            cloneNode(this.lParen),
+            cloneNode(this.immediate),
+            cloneNode(this.rParen),
+            cloneNode(this.lBrace),
+            cloneList(this.caseStmt),
+            cloneNode(this.rBrace),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -73,14 +73,14 @@ public final class ALookupswitchStatement extends PStatement
 
     public TLookupswitch getLookupswitch()
     {
-        return this._lookupswitch_;
+        return this.lookupswitch;
     }
 
     public void setLookupswitch(TLookupswitch node)
     {
-        if(this._lookupswitch_ != null)
+        if(this.lookupswitch != null)
         {
-            this._lookupswitch_.parent(null);
+            this.lookupswitch.parent(null);
         }
 
         if(node != null)
@@ -93,19 +93,19 @@ public final class ALookupswitchStatement extends PStatement
             node.parent(this);
         }
 
-        this._lookupswitch_ = node;
+        this.lookupswitch = node;
     }
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -118,19 +118,19 @@ public final class ALookupswitchStatement extends PStatement
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -143,19 +143,19 @@ public final class ALookupswitchStatement extends PStatement
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -168,19 +168,19 @@ public final class ALookupswitchStatement extends PStatement
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     public TLBrace getLBrace()
     {
-        return this._lBrace_;
+        return this.lBrace;
     }
 
     public void setLBrace(TLBrace node)
     {
-        if(this._lBrace_ != null)
+        if(this.lBrace != null)
         {
-            this._lBrace_.parent(null);
+            this.lBrace.parent(null);
         }
 
         if(node != null)
@@ -193,45 +193,39 @@ public final class ALookupswitchStatement extends PStatement
             node.parent(this);
         }
 
-        this._lBrace_ = node;
+        this.lBrace = node;
     }
 
     public LinkedList<PCaseStmt> getCaseStmt()
     {
-        return this._caseStmt_;
+        return this.caseStmt;
     }
 
     public void setCaseStmt(List<?> list)
     {
-        for(PCaseStmt e : this._caseStmt_)
-        {
-            e.parent(null);
-        }
-        this._caseStmt_.clear();
+        this.caseStmt.forEach(e -> e.parent(null));
+        this.caseStmt.clear();
 
-        for(Object obj_e : list)
-        {
-            PCaseStmt e = (PCaseStmt) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PCaseStmt) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._caseStmt_.add(e);
-        }
+			e.parent(this);
+			this.caseStmt.add(e);
+		});
     }
 
     public TRBrace getRBrace()
     {
-        return this._rBrace_;
+        return this.rBrace;
     }
 
     public void setRBrace(TRBrace node)
     {
-        if(this._rBrace_ != null)
+        if(this.rBrace != null)
         {
-            this._rBrace_.parent(null);
+            this.rBrace.parent(null);
         }
 
         if(node != null)
@@ -244,19 +238,19 @@ public final class ALookupswitchStatement extends PStatement
             node.parent(this);
         }
 
-        this._rBrace_ = node;
+        this.rBrace = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -269,71 +263,64 @@ public final class ALookupswitchStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._lookupswitch_)
-            + toString(this._lParen_)
-            + toString(this._immediate_)
-            + toString(this._rParen_)
-            + toString(this._lBrace_)
-            + toString(this._caseStmt_)
-            + toString(this._rBrace_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.lookupswitch)).append(toString(this.lParen)).append(toString(this.immediate)).append(toString(this.rParen))
+				.append(toString(this.lBrace)).append(toString(this.caseStmt)).append(toString(this.rBrace)).append(toString(this.semicolon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._lookupswitch_ == child)
+        if(this.lookupswitch == child)
         {
-            this._lookupswitch_ = null;
+            this.lookupswitch = null;
             return;
         }
 
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
-        if(this._lBrace_ == child)
+        if(this.lBrace == child)
         {
-            this._lBrace_ = null;
+            this.lBrace = null;
             return;
         }
 
-        if(this._caseStmt_.remove(child))
+        if(this.caseStmt.remove(child))
         {
             return;
         }
 
-        if(this._rBrace_ == child)
+        if(this.rBrace == child)
         {
-            this._rBrace_ = null;
+            this.rBrace = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -344,37 +331,37 @@ public final class ALookupswitchStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._lookupswitch_ == oldChild)
+        if(this.lookupswitch == oldChild)
         {
             setLookupswitch((TLookupswitch) newChild);
             return;
         }
 
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;
         }
 
-        if(this._lBrace_ == oldChild)
+        if(this.lBrace == oldChild)
         {
             setLBrace((TLBrace) newChild);
             return;
         }
 
-        for(ListIterator<PCaseStmt> i = this._caseStmt_.listIterator(); i.hasNext();)
+        for(ListIterator<PCaseStmt> i = this.caseStmt.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {
@@ -392,13 +379,13 @@ public final class ALookupswitchStatement extends PStatement
             }
         }
 
-        if(this._rBrace_ == oldChild)
+        if(this.rBrace == oldChild)
         {
             setRBrace((TRBrace) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

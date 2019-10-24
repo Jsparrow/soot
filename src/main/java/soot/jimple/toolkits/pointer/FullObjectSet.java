@@ -34,67 +34,72 @@ import soot.Type;
 import soot.jimple.ClassConstant;
 
 public class FullObjectSet extends Union {
-  public FullObjectSet(Singletons.Global g) {
-    this(RefType.v("java.lang.Object"));
-  }
-
-  public static FullObjectSet v() {
-    return G.v().soot_jimple_toolkits_pointer_FullObjectSet();
-  }
-
-  public static FullObjectSet v(RefType t) {
-    if (t.getClassName().equals("java.lang.Object")) {
-      return v();
-    }
-    return new FullObjectSet(t);
-  }
-
   private final Set<Type> types;
 
-  private FullObjectSet(RefType declaredType) {
-    Type type = AnySubType.v(declaredType);
-    types = Collections.singleton(type);
-  }
+	public FullObjectSet(Singletons.Global g) {
+	    this(RefType.v("java.lang.Object"));
+	  }
 
-  public Type type() {
-    return types.iterator().next();
-  }
+	private FullObjectSet(RefType declaredType) {
+	    Type type = AnySubType.v(declaredType);
+	    types = Collections.singleton(type);
+	  }
 
-  /** Returns true if this set contains no run-time objects. */
-  public boolean isEmpty() {
-    return false;
-  }
+	public static FullObjectSet v() {
+	    return G.v().soot_jimple_toolkits_pointer_FullObjectSet();
+	  }
 
-  /** Returns true if this set is a subset of other. */
-  public boolean hasNonEmptyIntersection(PointsToSet other) {
-    return other != null;
-  }
+	public static FullObjectSet v(RefType t) {
+	    if ("java.lang.Object".equals(t.getClassName())) {
+	      return v();
+	    }
+	    return new FullObjectSet(t);
+	  }
 
-  /** Set of all possible run-time types of objects in the set. */
-  @Override
-  public Set<Type> possibleTypes() {
-    return types;
-  }
+	public Type type() {
+	    return types.iterator().next();
+	  }
 
-  /**
-   * Adds all objects in s into this union of sets, returning true if this union was changed.
-   */
-  public boolean addAll(PointsToSet s) {
-    return false;
-  }
+	/** Returns true if this set contains no run-time objects. */
+	  @Override
+	public boolean isEmpty() {
+	    return false;
+	  }
 
-  public Set<String> possibleStringConstants() {
-    return null;
-  }
+	/** Returns true if this set is a subset of other. */
+	  @Override
+	public boolean hasNonEmptyIntersection(PointsToSet other) {
+	    return other != null;
+	  }
 
-  public Set<ClassConstant> possibleClassConstants() {
-    return null;
-  }
+	/** Set of all possible run-time types of objects in the set. */
+	  @Override
+	  public Set<Type> possibleTypes() {
+	    return types;
+	  }
 
-  /**
-   * {@inheritDoc}
-   */
-  public int depth() {
-    return 0;
-  }
+	/**
+	   * Adds all objects in s into this union of sets, returning true if this union was changed.
+	   */
+	  @Override
+	public boolean addAll(PointsToSet s) {
+	    return false;
+	  }
+
+	@Override
+	public Set<String> possibleStringConstants() {
+	    return null;
+	  }
+
+	@Override
+	public Set<ClassConstant> possibleClassConstants() {
+	    return null;
+	  }
+
+	/**
+	   * {@inheritDoc}
+	   */
+	  public int depth() {
+	    return 0;
+	  }
 }

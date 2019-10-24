@@ -36,7 +36,8 @@ public class InvokeSpecialInstruction extends MethodInvocationInstruction {
     super(instruction, codeAdress);
   }
 
-  public void jimplify(DexBody body) {
+  @Override
+public void jimplify(DexBody body) {
     jimplifySpecial(body);
   }
   

@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AGotoStatement extends PStatement
 {
-    private PGotoStmt _gotoStmt_;
+    private PGotoStmt gotoStmt;
 
     public AGotoStatement()
     {
@@ -26,7 +26,7 @@ public final class AGotoStatement extends PStatement
     public Object clone()
     {
         return new AGotoStatement(
-            cloneNode(this._gotoStmt_));
+            cloneNode(this.gotoStmt));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AGotoStatement extends PStatement
 
     public PGotoStmt getGotoStmt()
     {
-        return this._gotoStmt_;
+        return this.gotoStmt;
     }
 
     public void setGotoStmt(PGotoStmt node)
     {
-        if(this._gotoStmt_ != null)
+        if(this.gotoStmt != null)
         {
-            this._gotoStmt_.parent(null);
+            this.gotoStmt.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AGotoStatement extends PStatement
             node.parent(this);
         }
 
-        this._gotoStmt_ = node;
+        this.gotoStmt = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._gotoStmt_);
+            + toString(this.gotoStmt);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._gotoStmt_ == child)
+        if(this.gotoStmt == child)
         {
-            this._gotoStmt_ = null;
+            this.gotoStmt = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AGotoStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._gotoStmt_ == oldChild)
+        if(this.gotoStmt == oldChild)
         {
             setGotoStmt((PGotoStmt) newChild);
             return;

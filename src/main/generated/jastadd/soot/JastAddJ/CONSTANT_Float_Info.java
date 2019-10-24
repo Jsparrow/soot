@@ -34,13 +34,15 @@ public class CONSTANT_Float_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
+    @Override
+	public String toString() {
       return "FloatInfo: " + Float.toString(value);
     }
 
 
 
-    public Expr expr() {
+    @Override
+	public Expr expr() {
       return Literal.buildFloatLiteral(value);
     }
 

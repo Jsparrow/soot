@@ -135,7 +135,8 @@ public class DelayabilityAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Equi
     inSet1.intersection(inSet2, outSet);
   }
 
-  protected void copy(FlowSet<EquivalentValue> sourceSet, FlowSet<EquivalentValue> destSet) {
+  @Override
+protected void copy(FlowSet<EquivalentValue> sourceSet, FlowSet<EquivalentValue> destSet) {
     sourceSet.copy(destSet);
   }
 }

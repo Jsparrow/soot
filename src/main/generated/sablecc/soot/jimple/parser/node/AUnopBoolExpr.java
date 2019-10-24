@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AUnopBoolExpr extends PBoolExpr
 {
-    private PUnopExpr _unopExpr_;
+    private PUnopExpr unopExpr;
 
     public AUnopBoolExpr()
     {
@@ -26,7 +26,7 @@ public final class AUnopBoolExpr extends PBoolExpr
     public Object clone()
     {
         return new AUnopBoolExpr(
-            cloneNode(this._unopExpr_));
+            cloneNode(this.unopExpr));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AUnopBoolExpr extends PBoolExpr
 
     public PUnopExpr getUnopExpr()
     {
-        return this._unopExpr_;
+        return this.unopExpr;
     }
 
     public void setUnopExpr(PUnopExpr node)
     {
-        if(this._unopExpr_ != null)
+        if(this.unopExpr != null)
         {
-            this._unopExpr_.parent(null);
+            this.unopExpr.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AUnopBoolExpr extends PBoolExpr
             node.parent(this);
         }
 
-        this._unopExpr_ = node;
+        this.unopExpr = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._unopExpr_);
+            + toString(this.unopExpr);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._unopExpr_ == child)
+        if(this.unopExpr == child)
         {
-            this._unopExpr_ = null;
+            this.unopExpr = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AUnopBoolExpr extends PBoolExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._unopExpr_ == oldChild)
+        if(this.unopExpr == oldChild)
         {
             setUnopExpr((PUnopExpr) newChild);
             return;

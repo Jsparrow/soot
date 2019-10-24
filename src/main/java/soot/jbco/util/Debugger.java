@@ -33,45 +33,49 @@ import soot.Unit;
 import soot.baf.JSRInst;
 import soot.baf.TableSwitchInst;
 import soot.baf.TargetArgInst;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Debugger {
 
-  public static void printBaf(Body b) {
+  private static final Logger logger = LoggerFactory.getLogger(Debugger.class);
 
-    System.out.println(b.getMethod().getName() + "\n");
+public static void printBaf(Body b) {
+
+    logger.info(b.getMethod().getName() + "\n");
     int i = 0;
-    Map<Unit, Integer> index = new HashMap<Unit, Integer>();
+    Map<Unit, Integer> index = new HashMap<>();
     Iterator<Unit> it = b.getUnits().iterator();
     while (it.hasNext()) {
-      index.put(it.next(), new Integer(i++));
+      index.put(it.next(), Integer.valueOf(i++));
     }
     it = b.getUnits().iterator();
     while (it.hasNext()) {
       Object o = it.next();
-      System.out.println(index.get(o).toString() + " " + o + " "
-          + (o instanceof TargetArgInst ? index.get(((TargetArgInst) o).getTarget()).toString() : ""));
+      logger.info(new StringBuilder().append(index.get(o).toString()).append(" ").append(o).append(" ").append(o instanceof TargetArgInst ? index.get(((TargetArgInst) o).getTarget()).toString() : "")
+			.toString());
     }
-    System.out.println("\n");
+    logger.info("\n");
   }
 
   public static void printUnits(Body b, String msg) {
     int i = 0;
-    Map<Unit, Integer> numbers = new HashMap<Unit, Integer>();
+    Map<Unit, Integer> numbers = new HashMap<>();
     PatchingChain<Unit> u = b.getUnits();
     Iterator<Unit> it = u.snapshotIterator();
     while (it.hasNext()) {
-      numbers.put(it.next(), new Integer(i++));
+      numbers.put(it.next(), Integer.valueOf(i++));
     }
 
     int jsr = 0;
-    System.out.println("\r\r" + b.getMethod().getName() + "  " + msg);
+    logger.info(new StringBuilder().append("\r\r").append(b.getMethod().getName()).append("  ").append(msg).toString());
     Iterator<Unit> udit = u.snapshotIterator();
     while (udit.hasNext()) {
       Unit unit = (Unit) udit.next();
       Integer numb = numbers.get(unit);
 
       if (numb.intValue() == 149) {
-        System.out.println("hi");
+        logger.info("hi");
       }
 
       if (unit instanceof TargetArgInst) {
@@ -80,74 +84,76 @@ public class Debugger {
         }
         TargetArgInst ti = (TargetArgInst) unit;
         if (ti.getTarget() == null) {
-          System.out.println(unit + " null null null null null null null null null");
+          logger.info(unit + " null null null null null null null null null");
           continue;
         }
-        System.out.println(numbers.get(unit).toString() + " " + unit + "   #" + numbers.get(ti.getTarget()).toString());
+        logger.info(new StringBuilder().append(numbers.get(unit).toString()).append(" ").append(unit).append("   #").append(numbers.get(ti.getTarget()).toString()).toString());
         continue;
       } else if (unit instanceof TableSwitchInst) {
         TableSwitchInst tswi = (TableSwitchInst) unit;
-        System.out.println(numbers.get(unit).toString() + " SWITCH:");
-        System.out.println("\tdefault: " + tswi.getDefaultTarget() + "  " + numbers.get(tswi.getDefaultTarget()).toString());
+        logger.info(numbers.get(unit).toString() + " SWITCH:");
+        logger.info(new StringBuilder().append("\tdefault: ").append(tswi.getDefaultTarget()).append("  ").append(numbers.get(tswi.getDefaultTarget()).toString()).toString());
         int index = 0;
         for (int x = tswi.getLowIndex(); x <= tswi.getHighIndex(); x++) {
-          System.out
-              .println("\t " + x + ": " + tswi.getTarget(index) + "  " + numbers.get(tswi.getTarget(index++)).toString());
+          logger
+              .info(new StringBuilder().append("\t ").append(x).append(": ").append(tswi.getTarget(index)).append("  ").append(numbers.get(tswi.getTarget(index++)).toString())
+					.toString());
         }
         continue;
       }
-      System.out.println(numb.toString() + " " + unit);
+      logger.info(new StringBuilder().append(numb.toString()).append(" ").append(unit).toString());
     }
 
     Iterator<Trap> tit = b.getTraps().iterator();
     while (tit.hasNext()) {
       Trap t = tit.next();
-      System.out.println(numbers.get(t.getBeginUnit()) + " " + t.getBeginUnit() + " to " + numbers.get(t.getEndUnit()) + " "
-          + t.getEndUnit() + "  at " + numbers.get(t.getHandlerUnit()) + " " + t.getHandlerUnit());
+      logger.info(new StringBuilder().append(numbers.get(t.getBeginUnit())).append(" ").append(t.getBeginUnit()).append(" to ").append(numbers.get(t.getEndUnit())).append(" ")
+			.append(t.getEndUnit()).append("  at ").append(numbers.get(t.getHandlerUnit())).append(" ").append(t.getHandlerUnit()).toString());
     }
     if (jsr > 0) {
-      System.out.println("\r\tJSR Instructions: " + jsr);
+      logger.info("\r\tJSR Instructions: " + jsr);
     }
   }
 
   public static void printUnits(PatchingChain<Unit> u, String msg) {
     int i = 0;
-    HashMap<Unit, Integer> numbers = new HashMap<Unit, Integer>();
+    HashMap<Unit, Integer> numbers = new HashMap<>();
     Iterator<Unit> it = u.snapshotIterator();
     while (it.hasNext()) {
-      numbers.put(it.next(), new Integer(i++));
+      numbers.put(it.next(), Integer.valueOf(i++));
     }
 
-    System.out.println("\r\r***********  " + msg);
+    logger.info("\r\r***********  " + msg);
     Iterator<Unit> udit = u.snapshotIterator();
     while (udit.hasNext()) {
       Unit unit = (Unit) udit.next();
       Integer numb = numbers.get(unit);
 
       if (numb.intValue() == 149) {
-        System.out.println("hi");
+        logger.info("hi");
       }
 
       if (unit instanceof TargetArgInst) {
         TargetArgInst ti = (TargetArgInst) unit;
         if (ti.getTarget() == null) {
-          System.out.println(unit + " null null null null null null null null null");
+          logger.info(unit + " null null null null null null null null null");
           continue;
         }
-        System.out.println(numbers.get(unit).toString() + " " + unit + "   #" + numbers.get(ti.getTarget()).toString());
+        logger.info(new StringBuilder().append(numbers.get(unit).toString()).append(" ").append(unit).append("   #").append(numbers.get(ti.getTarget()).toString()).toString());
         continue;
       } else if (unit instanceof TableSwitchInst) {
         TableSwitchInst tswi = (TableSwitchInst) unit;
-        System.out.println(numbers.get(unit).toString() + " SWITCH:");
-        System.out.println("\tdefault: " + tswi.getDefaultTarget() + "  " + numbers.get(tswi.getDefaultTarget()).toString());
+        logger.info(numbers.get(unit).toString() + " SWITCH:");
+        logger.info(new StringBuilder().append("\tdefault: ").append(tswi.getDefaultTarget()).append("  ").append(numbers.get(tswi.getDefaultTarget()).toString()).toString());
         int index = 0;
         for (int x = tswi.getLowIndex(); x <= tswi.getHighIndex(); x++) {
-          System.out
-              .println("\t " + x + ": " + tswi.getTarget(index) + "  " + numbers.get(tswi.getTarget(index++)).toString());
+          logger
+              .info(new StringBuilder().append("\t ").append(x).append(": ").append(tswi.getTarget(index)).append("  ").append(numbers.get(tswi.getTarget(index++)).toString())
+					.toString());
         }
         continue;
       }
-      System.out.println(numb.toString() + " " + unit);
+      logger.info(new StringBuilder().append(numb.toString()).append(" ").append(unit).toString());
     }
   }
 }

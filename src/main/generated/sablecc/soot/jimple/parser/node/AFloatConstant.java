@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFloatConstant extends PConstant
 {
-    private TMinus _minus_;
-    private TFloatConstant _floatConstant_;
+    private TMinus minus;
+    private TFloatConstant floatConstant;
 
     public AFloatConstant()
     {
@@ -30,8 +30,8 @@ public final class AFloatConstant extends PConstant
     public Object clone()
     {
         return new AFloatConstant(
-            cloneNode(this._minus_),
-            cloneNode(this._floatConstant_));
+            cloneNode(this.minus),
+            cloneNode(this.floatConstant));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class AFloatConstant extends PConstant
 
     public TMinus getMinus()
     {
-        return this._minus_;
+        return this.minus;
     }
 
     public void setMinus(TMinus node)
     {
-        if(this._minus_ != null)
+        if(this.minus != null)
         {
-            this._minus_.parent(null);
+            this.minus.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class AFloatConstant extends PConstant
             node.parent(this);
         }
 
-        this._minus_ = node;
+        this.minus = node;
     }
 
     public TFloatConstant getFloatConstant()
     {
-        return this._floatConstant_;
+        return this.floatConstant;
     }
 
     public void setFloatConstant(TFloatConstant node)
     {
-        if(this._floatConstant_ != null)
+        if(this.floatConstant != null)
         {
-            this._floatConstant_.parent(null);
+            this.floatConstant.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class AFloatConstant extends PConstant
             node.parent(this);
         }
 
-        this._floatConstant_ = node;
+        this.floatConstant = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._minus_)
-            + toString(this._floatConstant_);
+        return new StringBuilder().append("").append(toString(this.minus)).append(toString(this.floatConstant)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._minus_ == child)
+        if(this.minus == child)
         {
-            this._minus_ = null;
+            this.minus = null;
             return;
         }
 
-        if(this._floatConstant_ == child)
+        if(this.floatConstant == child)
         {
-            this._floatConstant_ = null;
+            this.floatConstant = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class AFloatConstant extends PConstant
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._minus_ == oldChild)
+        if(this.minus == oldChild)
         {
             setMinus((TMinus) newChild);
             return;
         }
 
-        if(this._floatConstant_ == oldChild)
+        if(this.floatConstant == oldChild)
         {
             setFloatConstant((TFloatConstant) newChild);
             return;

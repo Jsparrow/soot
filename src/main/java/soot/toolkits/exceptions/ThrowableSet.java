@@ -91,7 +91,7 @@ import soot.options.Options;
 public class ThrowableSet {
 
   private static final boolean INSTRUMENTING = false;
-  private final static SootClass JAVA_LANG_OBJECT_CLASS = Scene.v().getObjectType().getSootClass();
+  private static final SootClass JAVA_LANG_OBJECT_CLASS = Scene.v().getObjectType().getSootClass();
 
   /**
    * Set of exception types included within the set.
@@ -205,7 +205,7 @@ public class ThrowableSet {
    *           ThrowableSet.IllegalStateException} if this <code>ThrowableSet</code> is the result of a
    *           {@link #whichCatchableAs(RefType)} operation and, thus, unable to represent the addition of <code>e</code>.
    */
-  public ThrowableSet add(RefType e) throws ThrowableSet.AlreadyHasExclusionsException {
+  public ThrowableSet add(RefType e) {
     if (INSTRUMENTING) {
       Manager.v().addsOfRefType++;
     }
@@ -241,8 +241,8 @@ public class ThrowableSet {
     for (AnySubType excludedType : exceptionsExcluded) {
       RefType exclusionBase = excludedType.getBase();
       if ((eHasNoHierarchy && exclusionBase.equals(e)) || (!eHasNoHierarchy && hierarchy.canStoreType(e, exclusionBase))) {
-        throw new AlreadyHasExclusionsException("ThrowableSet.add(RefType): adding" + e.toString() + " to the set [ "
-            + this.toString() + "] where " + exclusionBase.toString() + " is excluded.");
+        throw new AlreadyHasExclusionsException(new StringBuilder().append("ThrowableSet.add(RefType): adding").append(e.toString()).append(" to the set [ ").append(this.toString()).append("] where ").append(exclusionBase.toString())
+				.append(" is excluded.").toString());
       }
     }
 
@@ -262,7 +262,7 @@ public class ThrowableSet {
         } else if (!(incumbent instanceof RefType)) {
           // assertion failure.
           throw new IllegalStateException(
-              "ThrowableSet.add(RefType): Set element " + incumbent.toString() + " is neither a RefType nor an AnySubType.");
+              new StringBuilder().append("ThrowableSet.add(RefType): Set element ").append(incumbent.toString()).append(" is neither a RefType nor an AnySubType.").toString());
         }
       }
     }
@@ -312,7 +312,7 @@ public class ThrowableSet {
    *           if this <code>ThrowableSet</code> is the result of a {@link #whichCatchableAs(RefType)} operation and, thus,
    *           unable to represent the addition of <code>e</code>.
    */
-  public ThrowableSet add(AnySubType e) throws ThrowableSet.AlreadyHasExclusionsException {
+  public ThrowableSet add(AnySubType e) {
     if (INSTRUMENTING) {
       Manager.v().addsOfAnySubType++;
     }
@@ -353,8 +353,8 @@ public class ThrowableSet {
           // To ensure that the subcategories total properly:
           Manager.v().addsInclusionInterrupted++;
         }
-        throw new AlreadyHasExclusionsException("ThrowableSet.add(" + e.toString() + ") to the set [ " + this.toString()
-            + "] where " + exclusionBase.toString() + " is excluded.");
+        throw new AlreadyHasExclusionsException(new StringBuilder().append("ThrowableSet.add(").append(e.toString()).append(") to the set [ ").append(this.toString()).append("] where ").append(exclusionBase.toString())
+				.append(" is excluded.").toString());
       }
     }
 
@@ -403,8 +403,7 @@ public class ThrowableSet {
           resultSet.add(incumbent);
         }
       } else { // assertion failure.
-        throw new IllegalStateException("ThrowableSet.add(AnySubType): Set element " + incumbent.toString()
-            + " is neither a RefType nor an AnySubType.");
+        throw new IllegalStateException(new StringBuilder().append("ThrowableSet.add(AnySubType): Set element ").append(incumbent.toString()).append(" is neither a RefType nor an AnySubType.").toString());
       }
     }
     if (addNewException) {
@@ -434,13 +433,13 @@ public class ThrowableSet {
    *           operation, so that it is not possible to represent the addition of <code>s</code> to this
    *           <code>ThrowableSet</code>.
    */
-  public ThrowableSet add(ThrowableSet s) throws ThrowableSet.AlreadyHasExclusionsException {
+  public ThrowableSet add(ThrowableSet s) {
     if (INSTRUMENTING) {
       Manager.v().addsOfSet++;
     }
     if ((exceptionsExcluded.size() > 0) || (s.exceptionsExcluded.size() > 0)) {
       throw new AlreadyHasExclusionsException(
-          "ThrowableSet.Add(ThrowableSet): attempt to add to [" + this.toString() + "] after removals recorded.");
+          new StringBuilder().append("ThrowableSet.Add(ThrowableSet): attempt to add to [").append(this.toString()).append("] after removals recorded.").toString());
     }
     ThrowableSet result = getMemoizedAdds(s);
     if (result == null) {
@@ -493,8 +492,7 @@ public class ThrowableSet {
                 addNewType = false;
               }
             } else { // assertion failure.
-              throw new IllegalStateException("ThrowableSet.add(Set): incumbent Set element " + incumbentType
-                  + " is neither a RefType nor an AnySubType.");
+              throw new IllegalStateException(new StringBuilder().append("ThrowableSet.add(Set): incumbent Set element ").append(incumbentType).append(" is neither a RefType nor an AnySubType.").toString());
             }
           }
         } else if (newType instanceof AnySubType) {
@@ -522,12 +520,12 @@ public class ThrowableSet {
               }
             } else { // assertion failure.
               throw new IllegalStateException(
-                  "ThrowableSet.add(Set): old Set element " + incumbentType + " is neither a RefType nor an AnySubType.");
+                  new StringBuilder().append("ThrowableSet.add(Set): old Set element ").append(incumbentType).append(" is neither a RefType nor an AnySubType.").toString());
             }
           }
         } else { // assertion failure.
           throw new IllegalArgumentException(
-              "ThrowableSet.add(Set): new Set element " + newType + " is neither a RefType nor an AnySubType.");
+              new StringBuilder().append("ThrowableSet.add(Set): new Set element ").append(newType).append(" is neither a RefType nor an AnySubType.").toString());
         }
         if (addNewType) {
           changes++;
@@ -564,11 +562,9 @@ public class ThrowableSet {
     int changes = 0;
     Set<RefLikeType> resultSet = new HashSet<>(this.exceptionsIncluded);
     for (RefLikeType tp : removedExceptions) {
-      if (tp instanceof RefType) {
-        if (resultSet.remove(tp)) {
-          changes++;
-        }
-      }
+      if (tp instanceof RefType && resultSet.remove(tp)) {
+	  changes++;
+	}
     }
 
     ThrowableSet result = null;
@@ -597,7 +593,7 @@ public class ThrowableSet {
   public ThrowableSet remove(ThrowableSet s) {
     if ((exceptionsExcluded.size() > 0) || (s.exceptionsExcluded.size() > 0)) {
       throw new AlreadyHasExclusionsException(
-          "ThrowableSet.Add(ThrowableSet): attempt to add to [" + this.toString() + "] after removals recorded.");
+          new StringBuilder().append("ThrowableSet.Add(ThrowableSet): attempt to add to [").append(this.toString()).append("] after removals recorded.").toString());
     }
 
     // Remove the exceptions
@@ -654,11 +650,10 @@ public class ThrowableSet {
       }
       return true;
     } else {
-      if (INSTRUMENTING) {
-        if (exceptionsExcluded.size() == 0) {
-          Manager.v().catchableAsFromSearch++;
-        }
-      }
+      boolean condition = INSTRUMENTING && exceptionsExcluded.size() == 0;
+	if (condition) {
+	  Manager.v().catchableAsFromSearch++;
+	}
       for (RefLikeType thrownType : exceptionsIncluded) {
         if (thrownType instanceof RefType) {
           if (thrownType == catcher) {
@@ -671,7 +666,7 @@ public class ThrowableSet {
         } else {
           RefType thrownBase = ((AnySubType) thrownType).getBase();
           if (catcherHasNoHierarchy) {
-            if (thrownBase.equals(catcher) || thrownBase.getClassName().equals("java.lang.Throwable")) {
+            if (thrownBase.equals(catcher) || "java.lang.Throwable".equals(thrownBase.getClassName())) {
               return true;
             }
           }
@@ -760,7 +755,7 @@ public class ThrowableSet {
           if (base.equals(catcher)) {
             caughtIncluded = addExceptionToSet(inclusion, caughtIncluded);
           } else {
-            if (base.getClassName().equals("java.lang.Throwable")) {
+            if ("java.lang.Throwable".equals(base.getClassName())) {
               caughtIncluded = addExceptionToSet(catcher, caughtIncluded);
             }
             uncaughtIncluded = addExceptionToSet(inclusion, uncaughtIncluded);
@@ -818,17 +813,17 @@ public class ThrowableSet {
    */
   @Override
   public String toString() {
-    StringBuffer buffer = new StringBuffer(this.toBriefString());
+    StringBuilder buffer = new StringBuilder(this.toBriefString());
     buffer.append(":\n  ");
-    for (RefLikeType ei : exceptionsIncluded) {
+    exceptionsIncluded.forEach(ei -> {
       buffer.append('+');
       buffer.append(ei == null ? "null" : ei.toString());
       // buffer.append(i.next().toString());
-    }
-    for (RefLikeType ee : exceptionsExcluded) {
+    });
+    exceptionsExcluded.forEach(ee -> {
       buffer.append('-');
       buffer.append(ee.toString());
-    }
+    });
     return buffer.toString();
   }
 
@@ -882,7 +877,7 @@ public class ThrowableSet {
 
     Collection<RefLikeType> vmErrorThrowables = ThrowableSet.Manager.v().VM_ERRORS.exceptionsIncluded;
     boolean containsAllVmErrors = s.containsAll(vmErrorThrowables);
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 
     if (containsAllVmErrors) {
       buf.append(connector);

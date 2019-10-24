@@ -35,16 +35,19 @@ public class IteratorMapper<T, U> implements Iterator<U> {
     this.delegate = delegate;
   }
 
-  public boolean hasNext() {
+  @Override
+public boolean hasNext() {
     return delegate.hasNext();
   }
 
-  public U next() {
+  @Override
+public U next() {
     // TODO Auto-generated method stub
     return mapper.map(delegate.next());
   }
 
-  public void remove() {
+  @Override
+public void remove() {
     delegate.remove();
   }
 

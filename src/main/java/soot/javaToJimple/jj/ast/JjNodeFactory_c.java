@@ -54,7 +54,8 @@ public class JjNodeFactory_c extends NodeFactory_c implements JjNodeFactory {
   // TODO: Override factory methods for overriden AST nodes.
   // TODO: Override factory methods for AST nodes with new extension nodes.
 
-  public JjComma_c JjComma(Position pos, Expr first, Expr second) {
+  @Override
+public JjComma_c JjComma(Position pos, Expr first, Expr second) {
     JjComma_c n = new JjComma_c(pos, first, second);
     return n;
   }
@@ -64,21 +65,24 @@ public class JjNodeFactory_c extends NodeFactory_c implements JjNodeFactory {
     return n;
   }
 
-  public Unary Unary(Position pos, Unary.Operator op, Expr expr) {
+  @Override
+public Unary Unary(Position pos, Unary.Operator op, Expr expr) {
     Unary n = new JjUnary_c(pos, op, expr);
     n = (Unary) n.ext(extFactory().extUnary());
     n = (Unary) n.del(delFactory().delUnary());
     return n;
   }
 
-  public Binary Binary(Position pos, Expr left, Binary.Operator op, Expr right) {
+  @Override
+public Binary Binary(Position pos, Expr left, Binary.Operator op, Expr right) {
     Binary n = new JjBinary_c(pos, left, op, right);
     n = (Binary) n.ext(extFactory().extBinary());
     n = (Binary) n.del(delFactory().delBinary());
     return n;
   }
 
-  public Assign Assign(Position pos, Expr left, Assign.Operator op, Expr right) {
+  @Override
+public Assign Assign(Position pos, Expr left, Assign.Operator op, Expr right) {
     if (left instanceof Local) {
       return LocalAssign(pos, (Local) left, op, right);
     } else if (left instanceof Field) {
@@ -89,61 +93,70 @@ public class JjNodeFactory_c extends NodeFactory_c implements JjNodeFactory {
     return AmbAssign(pos, left, op, right);
   }
 
-  public LocalAssign LocalAssign(Position pos, Local left, Assign.Operator op, Expr right) {
+  @Override
+public LocalAssign LocalAssign(Position pos, Local left, Assign.Operator op, Expr right) {
     LocalAssign n = new JjLocalAssign_c(pos, left, op, right);
     n = (LocalAssign) n.ext(extFactory().extLocalAssign());
     n = (LocalAssign) n.del(delFactory().delLocalAssign());
     return n;
   }
 
-  public LocalDecl LocalDecl(Position pos, Flags flags, TypeNode type, String name, Expr init) {
+  @Override
+public LocalDecl LocalDecl(Position pos, Flags flags, TypeNode type, String name, Expr init) {
     LocalDecl n = new JjLocalDecl_c(pos, flags, type, name, init);
     n = (LocalDecl) n.ext(extFactory().extLocalDecl());
     n = (LocalDecl) n.del(delFactory().delLocalDecl());
     return n;
   }
 
-  public FieldAssign FieldAssign(Position pos, Field left, Assign.Operator op, Expr right) {
+  @Override
+public FieldAssign FieldAssign(Position pos, Field left, Assign.Operator op, Expr right) {
     FieldAssign n = new JjFieldAssign_c(pos, left, op, right);
     n = (FieldAssign) n.ext(extFactory().extFieldAssign());
     n = (FieldAssign) n.del(delFactory().delFieldAssign());
     return n;
   }
 
-  public FieldDecl FieldDecl(Position pos, Flags flags, TypeNode type, String name, Expr init) {
+  @Override
+public FieldDecl FieldDecl(Position pos, Flags flags, TypeNode type, String name, Expr init) {
     FieldDecl n = new JjFieldDecl_c(pos, flags, type, name, init);
     n = (FieldDecl) n.ext(extFactory().extFieldDecl());
     n = (FieldDecl) n.del(delFactory().delFieldDecl());
     return n;
   }
 
-  public ArrayAccessAssign ArrayAccessAssign(Position pos, ArrayAccess left, Assign.Operator op, Expr right) {
+  @Override
+public ArrayAccessAssign ArrayAccessAssign(Position pos, ArrayAccess left, Assign.Operator op, Expr right) {
     ArrayAccessAssign n = new JjArrayAccessAssign_c(pos, left, op, right);
     n = (ArrayAccessAssign) n.ext(extFactory().extArrayAccessAssign());
     n = (ArrayAccessAssign) n.del(delFactory().delArrayAccessAssign());
     return n;
   }
 
-  public Cast Cast(Position pos, TypeNode type, Expr expr) {
+  @Override
+public Cast Cast(Position pos, TypeNode type, Expr expr) {
     Cast n = new JjCast_c(pos, type, expr);
     n = (Cast) n.ext(extFactory().extCast());
     n = (Cast) n.del(delFactory().delCast());
     return n;
   }
 
-  public NewArray NewArray(Position pos, TypeNode base, List dims, int addDims, ArrayInit init) {
+  @Override
+public NewArray NewArray(Position pos, TypeNode base, List dims, int addDims, ArrayInit init) {
     // System.out.println("new array pos: "+pos);
     return super.NewArray(pos, base, dims, addDims, init);
   }
 
-  public ArrayInit ArrayInit(Position pos, List elements) {
+  @Override
+public ArrayInit ArrayInit(Position pos, List elements) {
     ArrayInit n = new JjArrayInit_c(pos, elements);
     n = (ArrayInit) n.ext(extFactory().extArrayInit());
     n = (ArrayInit) n.del(delFactory().delArrayInit());
     return n;
   }
 
-  public Return Return(Position pos, Expr expr) {
+  @Override
+public Return Return(Position pos, Expr expr) {
     Return n = new JjReturn_c(pos, expr);
     n = (Return) n.ext(extFactory().extReturn());
     n = (Return) n.del(delFactory().delReturn());

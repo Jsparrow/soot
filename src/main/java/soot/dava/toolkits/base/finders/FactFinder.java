@@ -28,5 +28,5 @@ import soot.dava.internal.SET.SETNode;
 import soot.dava.internal.asg.AugmentedStmtGraph;
 
 public interface FactFinder {
-  public abstract void find(DavaBody body, AugmentedStmtGraph asg, SETNode SET) throws RetriggerAnalysisException;
+  abstract void find(DavaBody body, AugmentedStmtGraph asg, SETNode SET) throws RetriggerAnalysisException;
 }

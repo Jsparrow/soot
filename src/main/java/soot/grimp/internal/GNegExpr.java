@@ -31,7 +31,8 @@ public class GNegExpr extends AbstractNegExpr {
     super(Grimp.v().newExprBox(op));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GNegExpr(Grimp.cloneIfNecessary(getOp()));
   }
 

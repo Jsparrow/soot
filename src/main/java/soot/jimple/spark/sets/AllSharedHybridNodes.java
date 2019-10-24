@@ -30,14 +30,19 @@ import soot.Singletons;
 /** A singleton to hold the hash table for SharedHybridSet */
 
 public class AllSharedHybridNodes {
-  public AllSharedHybridNodes(Singletons.Global g) {
-  }
+  public BitVectorLookupMap lookupMap = new BitVectorLookupMap(); // A hash table of all
+	  // the bit vectors for all points-to sets.
+	  // It can keep growing as more bit vectors are added to it, which
+	  // means it will have to occasionally double in size, which is expensive.
 
-  public static AllSharedHybridNodes v() {
-    return G.v().soot_jimple_spark_sets_AllSharedHybridNodes();
-  }
+	public AllSharedHybridNodes(Singletons.Global g) {
+	  }
 
-  public class BitVectorLookupMap {
+	public static AllSharedHybridNodes v() {
+	    return G.v().soot_jimple_spark_sets_AllSharedHybridNodes();
+	  }
+
+public class BitVectorLookupMap {
     // Each element i is a list of BitVectors which have i 1s
     // (i elements in the set).
     // But should this be a LinkedList or some kind of Set?
@@ -45,12 +50,12 @@ public class AllSharedHybridNodes {
     // TODO: Maybe implement my own linked list here
     // -it would need an add method and an iterator
 
-    public LinkedList[] map = new LinkedList[1];
-
-    private final static int INCREASE_FACTOR = 2; // change to affect the
+    private static final int INCREASE_FACTOR = 2; // change to affect the
     // speed/memory tradeoff
 
-    public void add(int size, PointsToBitVector toAdd) {
+	public LinkedList[] map = new LinkedList[1];
+
+	public void add(int size, PointsToBitVector toAdd) {
       if (map.length < size + 1)
       // if the `map' array isn't big enough
       {
@@ -66,17 +71,12 @@ public class AllSharedHybridNodes {
       map[size].add(toAdd);
     }
 
-    public void remove(int size, PointsToBitVector toRemove) {
+	public void remove(int size, PointsToBitVector toRemove) {
       /*
        * if (map[size] == null) { //Can't happen System.out.println(toRemove.cardinality()); }
        */
       map[size].remove(toRemove);
     }
   }
-
-  public BitVectorLookupMap lookupMap = new BitVectorLookupMap(); // A hash table of all
-  // the bit vectors for all points-to sets.
-  // It can keep growing as more bit vectors are added to it, which
-  // means it will have to occasionally double in size, which is expensive.
 
 }

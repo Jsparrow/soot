@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AShrBinop extends PBinop
 {
-    private TShr _shr_;
+    private TShr shr;
 
     public AShrBinop()
     {
@@ -26,7 +26,7 @@ public final class AShrBinop extends PBinop
     public Object clone()
     {
         return new AShrBinop(
-            cloneNode(this._shr_));
+            cloneNode(this.shr));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AShrBinop extends PBinop
 
     public TShr getShr()
     {
-        return this._shr_;
+        return this.shr;
     }
 
     public void setShr(TShr node)
     {
-        if(this._shr_ != null)
+        if(this.shr != null)
         {
-            this._shr_.parent(null);
+            this.shr.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AShrBinop extends PBinop
             node.parent(this);
         }
 
-        this._shr_ = node;
+        this.shr = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._shr_);
+            + toString(this.shr);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._shr_ == child)
+        if(this.shr == child)
         {
-            this._shr_ = null;
+            this.shr = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AShrBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._shr_ == oldChild)
+        if(this.shr == oldChild)
         {
             setShr((TShr) newChild);
             return;

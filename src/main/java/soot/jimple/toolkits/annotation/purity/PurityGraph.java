@@ -84,18 +84,35 @@ import soot.util.dot.DotGraphNode;
 public class PurityGraph {
   private static final Logger logger = LoggerFactory.getLogger(PurityGraph.class);
   public static final boolean doCheck = false;
+/**
+   * Caching: this semm to actually improve both speed and memory consumption!
+   */
+  private static final Map<PurityNode, PurityNode> nodeCache = new HashMap<>();
+private static final Map<PurityEdge, PurityEdge> edgeCache = new HashMap<>();
+/**
+   * A parameter (or this) can be: - read and write - read only - safe (read only & no externally visible alias is created)
+   */
+  static final int PARAM_RW = 0;
+static final int PARAM_RO = 1;
+static final int PARAM_SAFE = 2;
+/** Simple statistics on maximal graph sizes. */
 
-  protected Set nodes; // all nodes
-  protected Set paramNodes; // only parameter & this nodes
-  protected MultiMap edges; // source node -> edges
-  protected MultiMap locals; // local -> nodes
-  protected Set ret; // return -> nodes
-  protected Set globEscape; // nodes escaping globally
-  protected MultiMap backEdges; // target node -> edges
-  protected MultiMap backLocals; // target node -> local node sources
-  protected MultiMap mutated; // node -> field such that (node,field) is mutated
+  private static int maxInsideNodes = 0;
+private static int maxLoadNodes = 0;
+private static int maxInsideEdges = 0;
+private static int maxOutsideEdges = 0;
+private static int maxMutated = 0;
+protected Set nodes; // all nodes
+protected Set paramNodes; // only parameter & this nodes
+protected MultiMap edges; // source node -> edges
+protected MultiMap locals; // local -> nodes
+protected Set ret; // return -> nodes
+protected Set globEscape; // nodes escaping globally
+protected MultiMap backEdges; // target node -> edges
+protected MultiMap backLocals; // target node -> local node sources
+protected MultiMap mutated; // node -> field such that (node,field) is mutated
 
-  /**
+/**
    * Initially empty graph.
    */
   PurityGraph() {
@@ -114,7 +131,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Copy constructor.
    */
   PurityGraph(PurityGraph x) {
@@ -132,7 +149,8 @@ public class PurityGraph {
     }
   }
 
-  public int hashCode() {
+@Override
+public int hashCode() {
     return nodes.hashCode()
         // + paramNodes.hashCode() // redundant info
         + edges.hashCode() + locals.hashCode() + ret.hashCode() + globEscape.hashCode()
@@ -141,7 +159,8 @@ public class PurityGraph {
         + mutated.hashCode();
   }
 
-  public boolean equals(Object o) {
+@Override
+public boolean equals(Object o) {
     if (!(o instanceof PurityGraph)) {
       return false;
     }
@@ -154,27 +173,17 @@ public class PurityGraph {
         && mutated.equals(g.mutated);
   }
 
-  /**
-   * Caching: this semm to actually improve both speed and memory consumption!
-   */
-  private static final Map<PurityNode, PurityNode> nodeCache = new HashMap<PurityNode, PurityNode>();
-  private static final Map<PurityEdge, PurityEdge> edgeCache = new HashMap<PurityEdge, PurityEdge>();
-
-  private static PurityNode cacheNode(PurityNode p) {
-    if (!nodeCache.containsKey(p)) {
-      nodeCache.put(p, p);
-    }
+private static PurityNode cacheNode(PurityNode p) {
+    nodeCache.putIfAbsent(p, p);
     return nodeCache.get(p);
   }
 
-  private static PurityEdge cacheEdge(PurityEdge e) {
-    if (!edgeCache.containsKey(e)) {
-      edgeCache.put(e, e);
-    }
+private static PurityEdge cacheEdge(PurityEdge e) {
+    edgeCache.putIfAbsent(e, e);
     return edgeCache.get(e);
   }
 
-  /**
+/**
    * Conservative constructor for unanalysable calls.
    *
    * <p>
@@ -218,7 +227,7 @@ public class PurityGraph {
     return g;
   }
 
-  /**
+/**
    * Special constructor for "pure" methods returning a fresh object. (or simply pure if returns void or primitive).
    */
   public static PurityGraph freshGraph(SootMethod m) {
@@ -234,7 +243,7 @@ public class PurityGraph {
     return g;
   }
 
-  /**
+/**
    * Replace the current graph with its union with arg. arg is not modified.
    */
   void union(PurityGraph arg) {
@@ -252,7 +261,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Sanity check. Used internally for debugging!
    */
   protected void sanityCheck() {
@@ -264,7 +273,7 @@ public class PurityGraph {
       while (itt.hasNext()) {
         PurityEdge e = (PurityEdge) itt.next();
         if (!src.equals(e.getSource())) {
-          logger.debug("invalid edge source " + e + ", should be " + src);
+          logger.debug(new StringBuilder().append("invalid edge source ").append(e).append(", should be ").append(src).toString());
           err = true;
         }
         if (!nodes.contains(e.getSource())) {
@@ -292,7 +301,7 @@ public class PurityGraph {
       while (itt.hasNext()) {
         PurityEdge e = (PurityEdge) itt.next();
         if (!dst.equals(e.getTarget())) {
-          logger.debug("invalid backEdge dest " + e + ", should be " + dst);
+          logger.debug(new StringBuilder().append("invalid backEdge dest ").append(e).append(", should be ").append(dst).toString());
           err = true;
         }
         if (!edges.get(e.getSource()).contains(e)) {
@@ -336,11 +345,11 @@ public class PurityGraph {
       while (itt.hasNext()) {
         PurityNode n = (PurityNode) itt.next();
         if (!nodes.contains(n)) {
-          logger.debug("target of local node in nodes " + l + " / " + n);
+          logger.debug(new StringBuilder().append("target of local node in nodes ").append(l).append(" / ").append(n).toString());
           err = true;
         }
         if (!backLocals.get(n).contains(l)) {
-          logger.debug("backLocals does contain local " + l + " / " + n);
+          logger.debug(new StringBuilder().append("backLocals does contain local ").append(l).append(" / ").append(n).toString());
           err = true;
         }
       }
@@ -352,11 +361,11 @@ public class PurityGraph {
       while (itt.hasNext()) {
         Local l = (Local) itt.next();
         if (!nodes.contains(n)) {
-          logger.debug("backLocal node not in in nodes " + l + " / " + n);
+          logger.debug(new StringBuilder().append("backLocal node not in in nodes ").append(l).append(" / ").append(n).toString());
           err = true;
         }
         if (!locals.get(l).contains(n)) {
-          logger.debug("locals does contain backLocal " + l + " / " + n);
+          logger.debug(new StringBuilder().append("locals does contain backLocal ").append(l).append(" / ").append(n).toString());
           err = true;
         }
       }
@@ -377,16 +386,17 @@ public class PurityGraph {
         err = true;
       }
     }
-    if (err) {
-      dump();
-      DotGraph dot = new DotGraph("sanityCheckFailure");
-      fillDotGraph("chk", dot);
-      dot.plot("sanityCheckFailure.dot");
-      throw new Error("PurityGraph sanity check failed!!!");
-    }
+    if (!err) {
+		return;
+	}
+	dump();
+	DotGraph dot = new DotGraph("sanityCheckFailure");
+	fillDotGraph("chk", dot);
+	dot.plot("sanityCheckFailure.dot");
+	throw new Error("PurityGraph sanity check failed!!!");
   }
 
-  ////////////////////////
+////////////////////////
   // ESCAPE INFORMATION //
   ////////////////////////
 
@@ -404,22 +414,23 @@ public class PurityGraph {
     }
   }
 
-  protected void internalPassNode(PurityNode node, Set<PurityNode> dest, boolean consider_inside) {
-    if (!dest.contains(node)) {
-      dest.add(node);
-      internalPassEdges(edges.get(node), dest, consider_inside);
-    }
+protected void internalPassNode(PurityNode node, Set<PurityNode> dest, boolean consider_inside) {
+    if (dest.contains(node)) {
+		return;
+	}
+	dest.add(node);
+	internalPassEdges(edges.get(node), dest, consider_inside);
   }
 
-  protected void internalPassNodes(Set toColor, Set<PurityNode> dest, boolean consider_inside) {
+protected void internalPassNodes(Set toColor, Set<PurityNode> dest, boolean consider_inside) {
     Iterator it = toColor.iterator();
     while (it.hasNext()) {
       internalPassNode((PurityNode) it.next(), dest, consider_inside);
     }
   }
 
-  protected Set<PurityNode> getEscaping() {
-    Set<PurityNode> escaping = new HashSet<PurityNode>();
+protected Set<PurityNode> getEscaping() {
+    Set<PurityNode> escaping = new HashSet<>();
     internalPassNodes(ret, escaping, true);
     internalPassNodes(globEscape, escaping, true);
     internalPassNode(PurityGlobalNode.node, escaping, true);
@@ -427,21 +438,19 @@ public class PurityGraph {
     return escaping;
   }
 
-  /**
+/**
    * Call this on the merge of graphs at all return points of a method to know whether the method is pure.
    */
   public boolean isPure() {
     if (!mutated.get(PurityGlobalNode.node).isEmpty()) {
       return false;
     }
-    Set<PurityNode> A = new HashSet<PurityNode>();
-    Set<PurityNode> B = new HashSet<PurityNode>();
+    Set<PurityNode> A = new HashSet<>();
+    Set<PurityNode> B = new HashSet<>();
     internalPassNodes(paramNodes, A, false);
     internalPassNodes(globEscape, B, true);
     internalPassNode(PurityGlobalNode.node, B, true);
-    Iterator<PurityNode> it = A.iterator();
-    while (it.hasNext()) {
-      PurityNode n = it.next();
+    for (PurityNode n : A) {
       if (B.contains(n) || !mutated.get(n).isEmpty()) {
         return false;
       }
@@ -449,7 +458,7 @@ public class PurityGraph {
     return true;
   }
 
-  /**
+/**
    * We use a less restrictive notion of purity for constructors: pure constructors can mutate fields of this.
    *
    * @see isPure
@@ -458,15 +467,13 @@ public class PurityGraph {
     if (!mutated.get(PurityGlobalNode.node).isEmpty()) {
       return false;
     }
-    Set<PurityNode> A = new HashSet<PurityNode>();
-    Set<PurityNode> B = new HashSet<PurityNode>();
+    Set<PurityNode> A = new HashSet<>();
+    Set<PurityNode> B = new HashSet<>();
     internalPassNodes(paramNodes, A, false);
     internalPassNodes(globEscape, B, true);
     internalPassNode(PurityGlobalNode.node, B, true);
     PurityNode th = PurityThisNode.node;
-    Iterator<PurityNode> it = A.iterator();
-    while (it.hasNext()) {
-      PurityNode n = it.next();
+    for (PurityNode n : A) {
       if (B.contains(n) || (!n.equals(th) && !mutated.get(n).isEmpty())) {
         return false;
       }
@@ -474,31 +481,23 @@ public class PurityGraph {
     return true;
   }
 
-  /**
-   * A parameter (or this) can be: - read and write - read only - safe (read only & no externally visible alias is created)
-   */
-  static final int PARAM_RW = 0;
-  static final int PARAM_RO = 1;
-  static final int PARAM_SAFE = 2;
-
-  protected int internalParamStatus(PurityNode p) {
+protected int internalParamStatus(PurityNode p) {
     if (!paramNodes.contains(p)) {
       return PARAM_RW;
     }
 
-    Set<PurityNode> S1 = new HashSet<PurityNode>();
+    Set<PurityNode> S1 = new HashSet<>();
     internalPassNode(p, S1, false);
     Iterator<PurityNode> it = S1.iterator();
     while (it.hasNext()) {
       PurityNode n = it.next();
-      if (n.isLoad() || n.equals(p)) {
-        if (!mutated.get(n).isEmpty() || globEscape.contains(n)) {
-          return PARAM_RW;
-        }
-      }
+      boolean condition = (n.isLoad() || n.equals(p)) && (!mutated.get(n).isEmpty() || globEscape.contains(n));
+	if (condition) {
+	  return PARAM_RW;
+	}
     }
 
-    Set<PurityNode> S2 = new HashSet<PurityNode>();
+    Set<PurityNode> S2 = new HashSet<>();
     internalPassNodes(ret, S2, true);
     internalPassNodes(paramNodes, S2, true);
     it = S2.iterator();
@@ -515,7 +514,7 @@ public class PurityGraph {
     return PARAM_SAFE;
   }
 
-  /**
+/**
    * Call this on the merge of graphs at all return points of a method to know whether an object passed as method parameter
    * is read only (PARAM_RO), read write (PARAM_RW), or safe (PARAM_SAFE). Returns PARAM_RW for primitive-type parameters.
    */
@@ -523,22 +522,23 @@ public class PurityGraph {
     return internalParamStatus(cacheNode(new PurityParamNode(param)));
   }
 
-  /**
+/**
    * @see isParamReadOnly
    */
   public int thisStatus() {
     return internalParamStatus(PurityThisNode.node);
   }
 
-  /////////////////////////
+/////////////////////////
   // GRAPH MANUPULATIONS //
   /////////////////////////
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new PurityGraph(this);
   }
 
-  // utility functions to update local / backLocals constitently
+// utility functions to update local / backLocals constitently
   protected final boolean localsRemove(Local local) {
     Iterator it = locals.get(local).iterator();
     while (it.hasNext()) {
@@ -548,12 +548,12 @@ public class PurityGraph {
     return locals.remove(local);
   }
 
-  protected final boolean localsPut(Local local, PurityNode node) {
+protected final boolean localsPut(Local local, PurityNode node) {
     backLocals.put(node, local);
     return locals.put(local, node);
   }
 
-  protected final boolean localsPutAll(Local local, Set nodes) {
+protected final boolean localsPutAll(Local local, Set nodes) {
     Iterator it = nodes.iterator();
     while (it.hasNext()) {
       Object node = it.next();
@@ -562,7 +562,7 @@ public class PurityGraph {
     return locals.putAll(local, nodes);
   }
 
-  /** Utility function to remove a node & all adjacent edges */
+/** Utility function to remove a node & all adjacent edges */
   protected final void removeNode(PurityNode n) {
     Iterator it = edges.get(n).iterator();
     while (it.hasNext()) {
@@ -589,7 +589,7 @@ public class PurityGraph {
     mutated.remove(n);
   }
 
-  /** Utility function to merge node src into dst; src is removed */
+/** Utility function to merge node src into dst; src is removed */
   protected final void mergeNodes(PurityNode src, PurityNode dst) {
     Iterator it = (new LinkedList(edges.get(src))).iterator();
     while (it.hasNext()) {
@@ -646,12 +646,12 @@ public class PurityGraph {
     }
   }
 
-  /** Experimental simplification: merge redundant load nodes. */
+/** Experimental simplification: merge redundant load nodes. */
   void simplifyLoad() {
     Iterator it = (new LinkedList(nodes)).iterator();
     while (it.hasNext()) {
       PurityNode p = (PurityNode) it.next();
-      Map<String, PurityNode> fmap = new HashMap<String, PurityNode>();
+      Map<String, PurityNode> fmap = new HashMap<>();
       Iterator itt = (new LinkedList(edges.get(p))).iterator();
       while (itt.hasNext()) {
         PurityEdge e = (PurityEdge) itt.next();
@@ -671,12 +671,12 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Experimental simplification: remove inside nodes not reachable from escaping nodes (params, ret, globEscape) or load
    * nodes.
    */
   void simplifyInside() {
-    Set<PurityNode> r = new HashSet<PurityNode>();
+    Set<PurityNode> r = new HashSet<>();
     internalPassNodes(paramNodes, r, true);
     internalPassNodes(ret, r, true);
     internalPassNodes(globEscape, r, true);
@@ -700,7 +700,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Remove all local bindings (except ret). This info is indeed superfluous on summary purity graphs representing the effect
    * of a method. This saves a little memory, but also, simplify summary graph drawings a lot!
    *
@@ -711,7 +711,7 @@ public class PurityGraph {
     backLocals = new HashMultiMap();
   }
 
-  /** Copy assignment left = right. */
+/** Copy assignment left = right. */
   void assignParamToLocal(int right, Local left) {
     // strong update on local
     PurityNode node = cacheNode(new PurityParamNode(right));
@@ -724,7 +724,7 @@ public class PurityGraph {
     }
   }
 
-  /** Copy assignment left = this. */
+/** Copy assignment left = this. */
   void assignThisToLocal(Local left) {
     // strong update on local
     PurityNode node = PurityThisNode.node;
@@ -737,7 +737,7 @@ public class PurityGraph {
     }
   }
 
-  /** Copy assignment left = right. */
+/** Copy assignment left = right. */
   void assignLocalToLocal(Local right, Local left) {
     // strong update on local
     localsRemove(left);
@@ -747,7 +747,7 @@ public class PurityGraph {
     }
   }
 
-  /** return right statement . */
+/** return right statement . */
   void returnLocal(Local right) {
     // strong update on ret
     ret.clear();
@@ -757,11 +757,11 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Load non-static: left = right.field, or left = right[?] if field is [].
    */
   void assignFieldToLocal(Stmt stmt, Local right, String field, Local left) {
-    Set<PurityNode> esc = new HashSet<PurityNode>();
+    Set<PurityNode> esc = new HashSet<>();
     Set<PurityNode> escaping = getEscaping();
 
     // strong update on local
@@ -790,14 +790,12 @@ public class PurityGraph {
       PurityNode loadNode = cacheNode(new PurityStmtNode(stmt, false));
       nodes.add(loadNode);
 
-      Iterator<PurityNode> itEsc = esc.iterator();
-      while (itEsc.hasNext()) {
-        PurityNode node = itEsc.next();
+      esc.forEach(node -> {
         PurityEdge edge = cacheEdge(new PurityEdge(node, field, loadNode, false));
         if (edges.put(node, edge)) {
           backEdges.put(loadNode, edge);
         }
-      }
+      });
       localsPut(left, loadNode);
     }
     if (doCheck) {
@@ -805,7 +803,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Store non-static: left.field = right, or left[?] = right if field is [].
    */
   void assignLocalToField(Local right, Local left, String field) {
@@ -830,7 +828,7 @@ public class PurityGraph {
     }
   }
 
-  /** Allocation: left = new or left = new[?]. */
+/** Allocation: left = new or left = new[?]. */
   void assignNewToLocal(Stmt stmt, Local left) {
     // strong update on local
     // we add a label inside node
@@ -843,7 +841,7 @@ public class PurityGraph {
     }
   }
 
-  /** A local variable is used in an unknown construct. */
+/** A local variable is used in an unknown construct. */
   void localEscapes(Local l) {
     // nodes escape globally
     globEscape.addAll(locals.get(l));
@@ -852,7 +850,7 @@ public class PurityGraph {
     }
   }
 
-  /** A local variable is assigned to some outside value. */
+/** A local variable is assigned to some outside value. */
   void localIsUnknown(Local l) {
     // strong update on local
     PurityNode node = PurityGlobalNode.node;
@@ -864,7 +862,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Store static: C.field = right.
    */
   void assignLocalToStaticField(Local right, String field) {
@@ -877,7 +875,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Store a primitive type into a non-static field left.field = v
    */
   void mutateField(Local left, String field) {
@@ -893,7 +891,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Store a primitive type into a static field left.field = v
    */
   void mutateStaticField(String field) {
@@ -905,7 +903,7 @@ public class PurityGraph {
     }
   }
 
-  /**
+/**
    * Method call left = right.method(args).
    *
    * @param g
@@ -956,11 +954,10 @@ public class PurityGraph {
               Iterator it34 = edges.get(n3).iterator();
               while (it34.hasNext()) {
                 PurityEdge e34 = (PurityEdge) it34.next();
-                if (e34.isInside() && e12.getField().equals(e34.getField())) {
-                  if (mu.put(e12.getTarget(), e34.getTarget())) {
+                boolean condition = e34.isInside() && e12.getField().equals(e34.getField()) && mu.put(e12.getTarget(), e34.getTarget());
+				if (condition) {
                     hasChanged = true;
                   }
-                }
               }
             }
           }
@@ -993,22 +990,20 @@ public class PurityGraph {
                 Iterator it34 = g.edges.get(n3).iterator();
                 while (it34.hasNext()) {
                   PurityEdge e34 = (PurityEdge) it34.next();
-                  if (e34.isInside()) {
-                    if (e12.getField().equals(e34.getField())) {
-                      PurityNode n2 = e12.getTarget();
-                      PurityNode n4 = e34.getTarget();
+                  if (e34.isInside() && e12.getField().equals(e34.getField())) {
+				  PurityNode n2 = e12.getTarget();
+				  PurityNode n4 = e34.getTarget();
 
-                      // add n4 (if not param node) to mu(n2)
-                      if (!n4.isParam() && mu.put(n2, n4)) {
-                        hasChanged = true;
-                      }
+				  // add n4 (if not param node) to mu(n2)
+				  if (!n4.isParam() && mu.put(n2, n4)) {
+				    hasChanged = true;
+				  }
 
-                      // add mu(n4) to mu(n2)
-                      if (mu.putAll(n2, mu.get(n4))) {
-                        hasChanged = true;
-                      }
-                    }
-                  }
+				  // add mu(n4) to mu(n2)
+				  if (mu.putAll(n2, mu.get(n4))) {
+				    hasChanged = true;
+				  }
+				}
                 }
               }
             }
@@ -1129,7 +1124,7 @@ public class PurityGraph {
     }
   }
 
-  /////////////
+/////////////
   // DRAWING //
   /////////////
 
@@ -1148,14 +1143,14 @@ public class PurityGraph {
    *          Globally escaping nodes have a red label.
    */
   void fillDotGraph(String prefix, DotGraph out) {
-    Map<PurityNode, String> nodeId = new HashMap<PurityNode, String>();
+    Map<PurityNode, String> nodeId = new HashMap<>();
     int id = 0;
 
     // add nodes
     Iterator it = nodes.iterator();
     while (it.hasNext()) {
       PurityNode n = (PurityNode) it.next();
-      String label = "N" + prefix + "_" + id;
+      String label = new StringBuilder().append("N").append(prefix).append("_").append(id).toString();
       DotGraphNode node = out.drawNode(label);
       node.setLabel(n.toString());
       if (!n.isInside()) {
@@ -1191,7 +1186,7 @@ public class PurityGraph {
     while (it.hasNext()) {
       Local local = (Local) it.next();
       if (!locals.get(local).isEmpty()) {
-        String label = "L" + prefix + "_" + id;
+        String label = new StringBuilder().append("L").append(prefix).append("_").append(id).toString();
         DotGraphNode node = out.drawNode(label);
         node.setLabel(local.toString());
         node.setShape("plaintext");
@@ -1223,7 +1218,7 @@ public class PurityGraph {
       Iterator itt = mutated.get(n).iterator();
       while (itt.hasNext()) {
         String f = (String) itt.next();
-        String label = "M" + prefix + "_" + id;
+        String label = new StringBuilder().append("M").append(prefix).append("_").append(id).toString();
         DotGraphNode node = out.drawNode(label);
         node.setLabel("");
         node.setShape("plaintext");
@@ -1234,9 +1229,9 @@ public class PurityGraph {
     }
   }
 
-  /** Debugging... */
+/** Debugging... */
 
-  static private void dumpSet(String name, Set s) {
+  private static void dumpSet(String name, Set s) {
     logger.debug("" + name);
     Iterator it = s.iterator();
     while (it.hasNext()) {
@@ -1244,7 +1239,7 @@ public class PurityGraph {
     }
   }
 
-  static private void dumpMultiMap(String name, MultiMap s) {
+private static void dumpMultiMap(String name, MultiMap s) {
     logger.debug("" + name);
     Iterator it = s.keySet().iterator();
     while (it.hasNext()) {
@@ -1257,7 +1252,7 @@ public class PurityGraph {
     }
   }
 
-  void dump() {
+void dump() {
     dumpSet("nodes Set:", nodes);
     dumpSet("paramNodes Set:", paramNodes);
     dumpMultiMap("edges MultiMap:", edges);
@@ -1270,20 +1265,12 @@ public class PurityGraph {
     logger.debug("");
   }
 
-  /** Simple statistics on maximal graph sizes. */
-
-  static private int maxInsideNodes = 0;
-  static private int maxLoadNodes = 0;
-  static private int maxInsideEdges = 0;
-  static private int maxOutsideEdges = 0;
-  static private int maxMutated = 0;
-
-  void dumpStat() {
-    logger.debug("Stat: " + maxInsideNodes + " inNodes, " + maxLoadNodes + " loadNodes, " + maxInsideEdges + " inEdges, "
-        + maxOutsideEdges + " outEdges, " + maxMutated + " mutated.");
+void dumpStat() {
+    logger.debug(new StringBuilder().append("Stat: ").append(maxInsideNodes).append(" inNodes, ").append(maxLoadNodes).append(" loadNodes, ").append(maxInsideEdges).append(" inEdges, ")
+			.append(maxOutsideEdges).append(" outEdges, ").append(maxMutated).append(" mutated.").toString());
   }
 
-  void updateStat() {
+void updateStat() {
     Iterator it = nodes.iterator();
     int insideNodes = 0;
     int loadNodes = 0;

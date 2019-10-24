@@ -31,7 +31,8 @@ public class GReturnStmt extends JReturnStmt {
     super(Grimp.v().newExprBox(returnValue));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GReturnStmt(Grimp.cloneIfNecessary(getOp()));
   }
 

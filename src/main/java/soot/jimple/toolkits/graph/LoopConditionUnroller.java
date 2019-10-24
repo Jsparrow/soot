@@ -76,23 +76,22 @@ public class LoopConditionUnroller extends BodyTransformer {
   /*
    * this implementation still fails in finding all possible while-loops, but does a good job.
    */
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "]     Unrolling Loop Conditions...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("]     Unrolling Loop Conditions...").toString());
     }
 
-    visitingSuccs = new HashSet<Block>();
-    visitedBlocks = new HashSet<Block>();
+    visitingSuccs = new HashSet<>();
+    visitedBlocks = new HashSet<>();
     this.body = body;
     this.maxSize = PhaseOptions.getInt(options, "maxSize");
 
     BlockGraph bg = new BriefBlockGraph(body);
-    for (Block b : bg.getHeads()) {
-      unrollConditions(b);
-    }
+    bg.getHeads().forEach(this::unrollConditions);
 
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "]     Unrolling Loop Conditions done.");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("]     Unrolling Loop Conditions done.").toString());
     }
   }
 
@@ -122,7 +121,7 @@ public class LoopConditionUnroller extends BodyTransformer {
    * @param toClone
    *          the Unit that will get cloned and then inserted.
    */
-  private Unit insertCloneAfter(Chain<Unit> unitChain, Unit node, Unit toClone) {
+  private Unit insertCloneAfter(Unit node, Unit toClone) {
     Unit clone = (Unit) toClone.clone();
     body.getUnits().insertAfter(clone, node);
     return clone;
@@ -157,12 +156,12 @@ public class LoopConditionUnroller extends BodyTransformer {
     if (unitsToTraps != null) {
       return unitsToTraps;
     }
-    unitsToTraps = new HashMap<Unit, List<Trap>>();
-    for (Trap trap : body.getTraps()) {
+    unitsToTraps = new HashMap<>();
+    body.getTraps().forEach(trap -> {
       Unit beginUnit = trap.getBeginUnit();
       List<Trap> unitTraps = unitsToTraps.get(beginUnit);
       if (unitTraps == null) {
-        unitTraps = new ArrayList<Trap>();
+        unitTraps = new ArrayList<>();
         unitsToTraps.put(beginUnit, unitTraps);
       }
       unitTraps.add(trap);
@@ -170,12 +169,12 @@ public class LoopConditionUnroller extends BodyTransformer {
       if (endUnit != beginUnit) {
         unitTraps = unitsToTraps.get(endUnit);
         if (unitTraps == null) {
-          unitTraps = new ArrayList<Trap>();
+          unitTraps = new ArrayList<>();
           unitsToTraps.put(endUnit, unitTraps);
         }
         unitTraps.add(trap);
       }
-    }
+    });
     return unitsToTraps;
   }
 
@@ -192,8 +191,8 @@ public class LoopConditionUnroller extends BodyTransformer {
    */
   private Unit copyBlock(Block block) {
     Map<Unit, List<Trap>> traps = getTraps();
-    Set<Trap> openedTraps = new HashSet<Trap>();
-    Map<Trap, Trap> copiedTraps = new HashMap<Trap, Trap>();
+    Set<Trap> openedTraps = new HashSet<>();
+    Map<Trap, Trap> copiedTraps = new HashMap<>();
     Chain<Unit> unitChain = body.getUnits();
 
     Unit tail = block.getTail();
@@ -203,7 +202,7 @@ public class LoopConditionUnroller extends BodyTransformer {
     boolean first = true;
     Unit copiedHead = null;
     for (Unit currentUnit = block.getHead(); currentUnit != newGoto; currentUnit = (Unit) unitChain.getSuccOf(currentUnit)) {
-      last = insertCloneAfter(unitChain, last, currentUnit);
+      last = insertCloneAfter(last, currentUnit);
       if (first) {
         first = false;
         copiedHead = last;
@@ -243,10 +242,8 @@ public class LoopConditionUnroller extends BodyTransformer {
         }
       }
     }
-    /* close all open traps */
-    Iterator<Trap> openedIterator = openedTraps.iterator();
-    while (openedIterator.hasNext()) {
-      openedIterator.next().setEndUnit(last);
+    for (Trap openedTrap : openedTraps) {
+      openedTrap.setEndUnit(last);
     }
     return copiedHead;
   }
@@ -264,14 +261,14 @@ public class LoopConditionUnroller extends BodyTransformer {
     }
     visitedBlocks.add(block);
     visitingSuccs.add(block); // currently visiting successors
-    for (Block succ : block.getSuccs()) {
+    block.getSuccs().forEach(succ -> {
       if (visitedBlocks.contains(succ)) {
-        if (succ != block && visitingSuccs.contains(succ)) {
-          /*
-           * we only want blocks with at least 2 predecessors, to avoid that a copied while-condition gets copied again in a
-           * future pass of unrollConditions
-           */
-          if (succ.getPreds().size() >= 2 && succ.getSuccs().size() == 2) {
+        boolean condition1 = succ != block && visitingSuccs.contains(succ) && succ.getPreds().size() >= 2 && succ.getSuccs().size() == 2;
+		/*
+		           * we only want blocks with at least 2 predecessors, to avoid that a copied while-condition gets copied again in a
+		           * future pass of unrollConditions
+		           */
+		if (condition1) {
             Block condition = succ; // just renaming for clearer
             // code
             Block loopTailBlock = block; // just renaming for
@@ -294,12 +291,11 @@ public class LoopConditionUnroller extends BodyTransformer {
               }
             }
           }
-        }
       } else {
         /* unvisited successor */
         unrollConditions(succ);
       }
-    }
+    });
     visitingSuccs.remove(block);
   }
 }

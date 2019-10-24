@@ -74,11 +74,12 @@ public class MoveExceptionInstruction extends DexlibAbstractInstruction implemen
     if (realType == null) {
       throw new RuntimeException("Real type of this instruction has not been set or was already retyped: " + this);
     }
-    if (body.getUnits().contains(stmtToRetype)) {
-      Local l = (Local) (stmtToRetype.getLeftOp());
-      l.setType(realType);
-      realType = null;
-    }
+    if (!body.getUnits().contains(stmtToRetype)) {
+		return;
+	}
+	Local l = (Local) (stmtToRetype.getLeftOp());
+	l.setType(realType);
+	realType = null;
   }
 
   @Override

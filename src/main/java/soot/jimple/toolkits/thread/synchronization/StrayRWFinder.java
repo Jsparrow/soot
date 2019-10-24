@@ -58,7 +58,8 @@ public class StrayRWFinder extends BackwardFlowAnalysis {
     this.tns = tns;
     if (G.v().Union_factory == null) {
       G.v().Union_factory = new UnionFactory() {
-        public Union newUnion() {
+        @Override
+		public Union newUnion() {
           return FullObjectSet.v();
         }
       };
@@ -71,22 +72,26 @@ public class StrayRWFinder extends BackwardFlowAnalysis {
   /**
    * All INs are initialized to the empty set.
    **/
-  protected Object newInitialFlow() {
+  @Override
+protected Object newInitialFlow() {
     return emptySet.clone();
   }
 
   /**
    * IN(Start) is the empty set
    **/
-  protected Object entryInitialFlow() {
+  @Override
+protected Object entryInitialFlow() {
     return emptySet.clone();
   }
 
   /**
    * OUT is the same as (IN minus killSet) plus the genSet.
    **/
-  protected void flowThrough(Object inValue, Object unit, Object outValue) {
-    FlowSet in = (FlowSet) inValue, out = (FlowSet) outValue;
+  @Override
+protected void flowThrough(Object inValue, Object unit, Object outValue) {
+    FlowSet in = (FlowSet) inValue;
+	FlowSet out = (FlowSet) outValue;
 
     RWSet stmtRead = sea.readSet(body.getMethod(), (Stmt) unit);
     RWSet stmtWrite = sea.writeSet(body.getMethod(), (Stmt) unit);
@@ -103,21 +108,25 @@ public class StrayRWFinder extends BackwardFlowAnalysis {
     }
 
     in.copy(out);
-    if (addSelf.booleanValue()) {
-      CriticalSection tn = new CriticalSection(false, body.getMethod(), 0);
-      tn.entermonitor = (Stmt) unit;
-      tn.units.add((Unit) unit);
-      tn.read.union(stmtRead);
-      tn.write.union(stmtWrite);
-      out.add(tn);
-    }
+    if (!addSelf.booleanValue()) {
+		return;
+	}
+	CriticalSection tn = new CriticalSection(false, body.getMethod(), 0);
+	tn.entermonitor = (Stmt) unit;
+	tn.units.add((Unit) unit);
+	tn.read.union(stmtRead);
+	tn.write.union(stmtWrite);
+	out.add(tn);
   }
 
   /**
    * union, except for transactions in progress. They get joined
    **/
-  protected void merge(Object in1, Object in2, Object out) {
-    FlowSet inSet1 = ((FlowSet) in1).clone(), inSet2 = ((FlowSet) in2).clone(), outSet = (FlowSet) out;
+  @Override
+protected void merge(Object in1, Object in2, Object out) {
+    FlowSet inSet1 = ((FlowSet) in1).clone();
+	FlowSet inSet2 = ((FlowSet) in2).clone();
+	FlowSet outSet = (FlowSet) out;
     /*
      * boolean hasANull1 = false; Transaction tn1 = null; Iterator inIt1 = inSet1.iterator(); while(inIt1.hasNext()) { tn1 =
      * (Transaction) inIt1.next(); if(tn1.entermonitor == null) { hasANull1 = true; break; } }
@@ -131,8 +140,10 @@ public class StrayRWFinder extends BackwardFlowAnalysis {
     inSet1.union(inSet2, outSet);
   }
 
-  protected void copy(Object source, Object dest) {
-    FlowSet sourceSet = (FlowSet) source, destSet = (FlowSet) dest;
+  @Override
+protected void copy(Object source, Object dest) {
+    FlowSet sourceSet = (FlowSet) source;
+	FlowSet destSet = (FlowSet) dest;
 
     sourceSet.copy(destSet);
   }

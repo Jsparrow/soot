@@ -8,7 +8,7 @@ import soot.jimple.parser.analysis.*;
 public final class AImplementsClause extends PImplementsClause
 {
     private TImplements _implements_;
-    private PClassNameList _classNameList_;
+    private PClassNameList classNameList;
 
     public AImplementsClause()
     {
@@ -31,7 +31,7 @@ public final class AImplementsClause extends PImplementsClause
     {
         return new AImplementsClause(
             cloneNode(this._implements_),
-            cloneNode(this._classNameList_));
+            cloneNode(this.classNameList));
     }
 
     @Override
@@ -67,14 +67,14 @@ public final class AImplementsClause extends PImplementsClause
 
     public PClassNameList getClassNameList()
     {
-        return this._classNameList_;
+        return this.classNameList;
     }
 
     public void setClassNameList(PClassNameList node)
     {
-        if(this._classNameList_ != null)
+        if(this.classNameList != null)
         {
-            this._classNameList_.parent(null);
+            this.classNameList.parent(null);
         }
 
         if(node != null)
@@ -87,15 +87,13 @@ public final class AImplementsClause extends PImplementsClause
             node.parent(this);
         }
 
-        this._classNameList_ = node;
+        this.classNameList = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._implements_)
-            + toString(this._classNameList_);
+        return new StringBuilder().append("").append(toString(this._implements_)).append(toString(this.classNameList)).toString();
     }
 
     @Override
@@ -108,9 +106,9 @@ public final class AImplementsClause extends PImplementsClause
             return;
         }
 
-        if(this._classNameList_ == child)
+        if(this.classNameList == child)
         {
-            this._classNameList_ = null;
+            this.classNameList = null;
             return;
         }
 
@@ -127,7 +125,7 @@ public final class AImplementsClause extends PImplementsClause
             return;
         }
 
-        if(this._classNameList_ == oldChild)
+        if(this.classNameList == oldChild)
         {
             setClassNameList((PClassNameList) newChild);
             return;

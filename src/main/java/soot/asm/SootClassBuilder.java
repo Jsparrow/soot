@@ -103,7 +103,7 @@ public class SootClassBuilder extends ClassVisitor {
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     name = AsmUtil.toQualifiedName(name);
     if (!name.equals(klass.getName())) {
-      throw new RuntimeException("Class names not equal! " + name + " != " + klass.getName());
+      throw new RuntimeException(new StringBuilder().append("Class names not equal! ").append(name).append(" != ").append(klass.getName()).toString());
     }
     klass.setModifiers(access & ~Opcodes.ACC_SUPER);
     if (superName != null) {
@@ -160,7 +160,7 @@ public class SootClassBuilder extends ClassVisitor {
       thrownExceptions = Collections.emptyList();
     } else {
       int len = exceptions.length;
-      thrownExceptions = new ArrayList<SootClass>(len);
+      thrownExceptions = new ArrayList<>(len);
       for (int i = 0; i != len; i++) {
         String ex = AsmUtil.toQualifiedName(exceptions[i]);
         addDep(RefType.v(ex));
@@ -168,9 +168,7 @@ public class SootClassBuilder extends ClassVisitor {
       }
     }
     List<soot.Type> sigTypes = AsmUtil.toJimpleDesc(desc);
-    for (soot.Type type : sigTypes) {
-      addDep(type);
-    }
+    sigTypes.forEach(this::addDep);
     SootMethod method
         = Scene.v().makeSootMethod(name, sigTypes, sigTypes.remove(sigTypes.size() - 1), access, thrownExceptions);
     if (signature != null) {

@@ -72,27 +72,23 @@ public class AccessManager {
       return false;
     }
 
-    // Condition 2. Check the package names.
-    if (!target.isPrivate() && !target.isProtected() && !target.isPublic()) {
-      if (!targetClass.getPackageName().equals(containerClass.getPackageName())) {
+    boolean condition = !target.isPrivate() && !target.isProtected() && !target.isPublic() && !targetClass.getPackageName().equals(containerClass.getPackageName());
+	// Condition 2. Check the package names.
+    if (condition) {
         return false;
       }
-    }
 
     // Condition 3.
-    if (target.isProtected()) {
-      Hierarchy h = Scene.v().getActiveHierarchy();
-
-      // protected means that you can be accessed by your children.
+	if (!target.isProtected()) {
+		return true;
+	}
+	Hierarchy h = Scene.v().getActiveHierarchy();
+	// protected means that you can be accessed by your children.
       // i.e. container must be in a child of target.
       if (h.isClassSuperclassOfIncluding(targetClass, containerClass)) {
         return true;
       }
-
-      return false;
-    }
-
-    return true;
+	return false;
   }
 
   /**
@@ -145,7 +141,7 @@ public class AccessManager {
       throw new RuntimeException();
     }
 
-    ArrayList<Unit> unitList = new ArrayList<Unit>();
+    ArrayList<Unit> unitList = new ArrayList<>();
     unitList.addAll(units);
 
     boolean bInside = before == null;
@@ -243,7 +239,7 @@ public class AccessManager {
 
   private static void createGetAccessor(SootMethod container, AssignStmt as, FieldRef ref) {
     java.util.List parameterTypes = new LinkedList();
-    java.util.List<SootClass> thrownExceptions = new LinkedList<SootClass>();
+    java.util.List<SootClass> thrownExceptions = new LinkedList<>();
 
     Body accessorBody = Jimple.v().newBody();
     soot.util.Chain accStmts = accessorBody.getUnits();
@@ -292,7 +288,7 @@ public class AccessManager {
 
   private static void createSetAccessor(SootMethod container, AssignStmt as, FieldRef ref) {
     java.util.List parameterTypes = new LinkedList();
-    java.util.List<SootClass> thrownExceptions = new LinkedList<SootClass>();
+    java.util.List<SootClass> thrownExceptions = new LinkedList<>();
 
     Body accessorBody = Jimple.v().newBody();
     soot.util.Chain accStmts = accessorBody.getUnits();
@@ -348,7 +344,7 @@ public class AccessManager {
 
   private static void createInvokeAccessor(SootMethod container, Stmt stmt) {
     java.util.List parameterTypes = new LinkedList();
-    java.util.List<SootClass> thrownExceptions = new LinkedList<SootClass>();
+    java.util.List<SootClass> thrownExceptions = new LinkedList<>();
     Type returnType;
 
     Body accessorBody = Jimple.v().newBody();
@@ -444,9 +440,9 @@ public class AccessManager {
    *
    */
   public static boolean ensureAccess(SootMethod container, ClassMember target, String options) {
-    boolean accessors = options.equals("accessors");
-    boolean allowChanges = !(options.equals("none"));
-    boolean safeChangesOnly = !(options.equals("unsafe"));
+    boolean accessors = "accessors".equals(options);
+    boolean allowChanges = !("none".equals(options));
+    boolean safeChangesOnly = !("unsafe".equals(options));
 
     SootClass targetClass = target.getDeclaringClass();
     if (!ensureAccess(container, targetClass, options)) {
@@ -463,29 +459,26 @@ public class AccessManager {
 
     // throw new RuntimeException("Not implemented yet!");
 
-    if (target.getDeclaringClass().isApplicationClass()) {
-      if (accessors) {
+    if (!target.getDeclaringClass().isApplicationClass()) {
+		return false;
+	}
+	if (accessors) {
         return true;
       }
-
-      if (safeChangesOnly) {
+	if (safeChangesOnly) {
         throw new RuntimeException("Not implemented yet!");
       }
-
-      target.setModifiers(target.getModifiers() | Modifier.PUBLIC);
-      return true;
-    } else {
-      return false;
-    }
+	target.setModifiers(target.getModifiers() | Modifier.PUBLIC);
+	return true;
   }
 
   /**
    * Modifies code so that an access to <code>target</code> is legal from code in <code>container</code>.
    */
   public static boolean ensureAccess(SootMethod container, SootClass target, String options) {
-    boolean accessors = options.equals("accessors");
-    boolean allowChanges = !(options.equals("none"));
-    boolean safeChangesOnly = !(options.equals("unsafe"));
+    boolean accessors = "accessors".equals(options);
+    boolean allowChanges = !("none".equals(options));
+    boolean safeChangesOnly = !("unsafe".equals(options));
 
     if (isAccessLegal(container, target)) {
       return true;

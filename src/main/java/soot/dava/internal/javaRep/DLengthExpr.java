@@ -34,15 +34,18 @@ public class DLengthExpr extends AbstractLengthExpr implements Precedence {
     super(Grimp.v().newObjExprBox(op));
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 950;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new DLengthExpr(Grimp.cloneIfNecessary(getOp()));
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (PrecedenceTest.needsBrackets(getOpBox(), this)) {
       up.literal("(");
     }
@@ -54,8 +57,9 @@ public class DLengthExpr extends AbstractLengthExpr implements Precedence {
     up.literal("length");
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     if (PrecedenceTest.needsBrackets(getOpBox(), this)) {
       b.append("(");
     }

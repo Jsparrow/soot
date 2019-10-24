@@ -26,41 +26,43 @@ import java.util.Arrays;
 
 public class ImmutableStack<T> {
 
-  private static final ImmutableStack<Object> EMPTY = new ImmutableStack<Object>(new Object[0]);
+  private static final ImmutableStack<Object> EMPTY = new ImmutableStack<>(new Object[0]);
 
   private static final int MAX_SIZE = Integer.MAX_VALUE;
 
-  public static int getMaxSize() {
+private final T[] entries;
+
+private ImmutableStack(T[] entries) {
+    this.entries = entries;
+  }
+
+public static int getMaxSize() {
     return MAX_SIZE;
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   public static final <T> ImmutableStack<T> emptyStack() {
     return (ImmutableStack<T>) EMPTY;
   }
 
-  final private T[] entries;
-
-  private ImmutableStack(T[] entries) {
-    this.entries = entries;
-  }
-
-  public boolean equals(Object o) {
+@Override
+public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (o != null && o instanceof ImmutableStack) {
-      ImmutableStack other = (ImmutableStack) o;
-      return Arrays.equals(entries, other.entries);
-    }
-    return false;
+    if (!(o instanceof ImmutableStack)) {
+		return false;
+	}
+	ImmutableStack other = (ImmutableStack) o;
+	return Arrays.equals(entries, other.entries);
   }
 
-  public int hashCode() {
+@Override
+public int hashCode() {
     return Util.hashArray(this.entries);
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   public ImmutableStack<T> push(T entry) {
     assert entry != null;
     if (MAX_SIZE == 0) {
@@ -78,46 +80,47 @@ public class ImmutableStack<T> {
       tmpEntries[MAX_SIZE - 1] = entry;
 
     }
-    return new ImmutableStack<T>(tmpEntries);
+    return new ImmutableStack<>(tmpEntries);
   }
 
-  public T peek() {
+public T peek() {
     assert entries.length != 0;
     return entries[entries.length - 1];
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   public ImmutableStack<T> pop() {
     assert entries.length != 0;
     int size = entries.length - 1;
     T[] tmpEntries = (T[]) new Object[size];
     System.arraycopy(entries, 0, tmpEntries, 0, size);
-    return new ImmutableStack<T>(tmpEntries);
+    return new ImmutableStack<>(tmpEntries);
   }
 
-  public boolean isEmpty() {
+public boolean isEmpty() {
     return entries.length == 0;
   }
 
-  public int size() {
+public int size() {
     return entries.length;
   }
 
-  public T get(int i) {
+public T get(int i) {
     return entries[i];
   }
 
-  public String toString() {
+@Override
+public String toString() {
     String objArrayToString = Util.objArrayToString(entries);
     assert entries.length <= MAX_SIZE : objArrayToString;
     return objArrayToString;
   }
 
-  public boolean contains(T entry) {
+public boolean contains(T entry) {
     return Util.arrayContains(entries, entry, entries.length);
   }
 
-  public boolean topMatches(ImmutableStack<T> other) {
+public boolean topMatches(ImmutableStack<T> other) {
     if (other.size() > size()) {
       return false;
     }
@@ -129,26 +132,26 @@ public class ImmutableStack<T> {
     return true;
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   public ImmutableStack<T> reverse() {
     T[] tmpEntries = (T[]) new Object[entries.length];
     for (int i = entries.length - 1, j = 0; i >= 0; i--, j++) {
       tmpEntries[j] = entries[i];
     }
-    return new ImmutableStack<T>(tmpEntries);
+    return new ImmutableStack<>(tmpEntries);
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   public ImmutableStack<T> popAll(ImmutableStack<T> other) {
     // TODO Auto-generated method stub
     assert topMatches(other);
     int size = entries.length - other.entries.length;
     T[] tmpEntries = (T[]) new Object[size];
     System.arraycopy(entries, 0, tmpEntries, 0, size);
-    return new ImmutableStack<T>(tmpEntries);
+    return new ImmutableStack<>(tmpEntries);
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   public ImmutableStack<T> pushAll(ImmutableStack<T> other) {
     // TODO Auto-generated method stub
     int size = entries.length + other.entries.length;
@@ -166,6 +169,6 @@ public class ImmutableStack<T> {
       System.arraycopy(entries, entries.length - numFromThis, tmpEntries, 0, numFromThis);
       System.arraycopy(other.entries, 0, tmpEntries, numFromThis, other.entries.length);
     }
-    return new ImmutableStack<T>(tmpEntries);
+    return new ImmutableStack<>(tmpEntries);
   }
 }

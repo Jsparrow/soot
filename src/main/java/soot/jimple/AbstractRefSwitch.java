@@ -23,30 +23,37 @@ package soot.jimple;
  */
 
 public abstract class AbstractRefSwitch implements RefSwitch {
-  public void caseArrayRef(ArrayRef v) {
+  @Override
+public void caseArrayRef(ArrayRef v) {
     defaultCase(v);
   }
 
-  public void caseStaticFieldRef(StaticFieldRef v) {
+  @Override
+public void caseStaticFieldRef(StaticFieldRef v) {
     defaultCase(v);
   }
 
-  public void caseInstanceFieldRef(InstanceFieldRef v) {
+  @Override
+public void caseInstanceFieldRef(InstanceFieldRef v) {
     defaultCase(v);
   }
 
-  public void caseParameterRef(ParameterRef v) {
+  @Override
+public void caseParameterRef(ParameterRef v) {
     defaultCase(v);
   }
 
-  public void caseCaughtExceptionRef(CaughtExceptionRef v) {
+  @Override
+public void caseCaughtExceptionRef(CaughtExceptionRef v) {
     defaultCase(v);
   }
 
-  public void caseThisRef(ThisRef v) {
+  @Override
+public void caseThisRef(ThisRef v) {
     defaultCase(v);
   }
 
-  public void defaultCase(Object obj) {
+  @Override
+public void defaultCase(Object obj) {
   }
 }

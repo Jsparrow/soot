@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ACmpltBinop extends PBinop
 {
-    private TCmplt _cmplt_;
+    private TCmplt cmplt;
 
     public ACmpltBinop()
     {
@@ -26,7 +26,7 @@ public final class ACmpltBinop extends PBinop
     public Object clone()
     {
         return new ACmpltBinop(
-            cloneNode(this._cmplt_));
+            cloneNode(this.cmplt));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ACmpltBinop extends PBinop
 
     public TCmplt getCmplt()
     {
-        return this._cmplt_;
+        return this.cmplt;
     }
 
     public void setCmplt(TCmplt node)
     {
-        if(this._cmplt_ != null)
+        if(this.cmplt != null)
         {
-            this._cmplt_.parent(null);
+            this.cmplt.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ACmpltBinop extends PBinop
             node.parent(this);
         }
 
-        this._cmplt_ = node;
+        this.cmplt = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._cmplt_);
+            + toString(this.cmplt);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._cmplt_ == child)
+        if(this.cmplt == child)
         {
-            this._cmplt_ = null;
+            this.cmplt = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ACmpltBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._cmplt_ == oldChild)
+        if(this.cmplt == oldChild)
         {
             setCmplt((TCmplt) newChild);
             return;

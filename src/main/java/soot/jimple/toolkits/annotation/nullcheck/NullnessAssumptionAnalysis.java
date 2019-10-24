@@ -56,27 +56,31 @@ import soot.toolkits.scalar.BackwardFlowAnalysis;
  * @author Richard L. Halpert Adapted from Eric Bodden's NullnessAnalysis
  */
 public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
-  protected final static Object BOTTOM = new Object() {
-    public String toString() {
+  protected static final Object BOTTOM = new Object() {
+    @Override
+	public String toString() {
       return "bottom";
     }
   };
 
-  protected final static Object NULL = new Object() {
-    public String toString() {
+  protected static final Object NULL = new Object() {
+    @Override
+	public String toString() {
       return "null";
     }
   };
 
-  protected final static Object NON_NULL = new Object() {
-    public String toString() {
+  protected static final Object NON_NULL = new Object() {
+    @Override
+	public String toString() {
       return "non-null";
     }
   };
 
   // TOP IS MEANINGLESS FOR THIS ANALYSIS: YOU CAN'T ASSUME A VALUE IS NULL AND NON_NULL. BOTTOM IS USED FOR THAT CASE
-  protected final static Object TOP = new Object() {
-    public String toString() {
+  protected static final Object TOP = new Object() {
+    @Override
+	public String toString() {
       return "top";
     }
   };
@@ -96,7 +100,8 @@ public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
   /**
    * {@inheritDoc}
    */
-  protected void flowThrough(Object inValue, Object unit, Object outValue)
+  @Override
+protected void flowThrough(Object inValue, Object unit, Object outValue)
   // protected void flowThrough(Object flowin, Unit u, List fallOut, List branchOuts)
   {
     AnalysisInfo in = (AnalysisInfo) inValue;
@@ -192,25 +197,27 @@ public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
   }
 
   private void handleFieldRef(FieldRef fieldRef, AnalysisInfo out) {
-    if (fieldRef instanceof InstanceFieldRef) {
-      InstanceFieldRef instanceFieldRef = (InstanceFieldRef) fieldRef;
-      // here we know that the receiver must point to an object
-      Value base = instanceFieldRef.getBase();
-      out.put(base, NON_NULL);
-    }
-    // but the referenced object might point to everything
     // out.put(fieldRef, TOP);
+	// but the referenced object might point to everything
+	if (!(fieldRef instanceof InstanceFieldRef)) {
+		return;
+	}
+	InstanceFieldRef instanceFieldRef = (InstanceFieldRef) fieldRef;
+	// here we know that the receiver must point to an object
+      Value base = instanceFieldRef.getBase();
+	out.put(base, NON_NULL);
   }
 
   private void handleInvokeExpr(InvokeExpr invokeExpr, AnalysisInfo out) {
-    if (invokeExpr instanceof InstanceInvokeExpr) {
-      InstanceInvokeExpr instanceInvokeExpr = (InstanceInvokeExpr) invokeExpr;
-      // here we know that the receiver must point to an object
-      Value base = instanceInvokeExpr.getBase();
-      out.put(base, NON_NULL);
-    }
-    // but the returned object might point to everything
     // out.put(invokeExpr, TOP);
+	// but the returned object might point to everything
+	if (!(invokeExpr instanceof InstanceInvokeExpr)) {
+		return;
+	}
+	InstanceInvokeExpr instanceInvokeExpr = (InstanceInvokeExpr) invokeExpr;
+	// here we know that the receiver must point to an object
+      Value base = instanceInvokeExpr.getBase();
+	out.put(base, NON_NULL);
   }
 
   private void handleRefTypeAssignment(DefinitionStmt assignStmt, AnalysisInfo rhsInfo, AnalysisInfo out) {
@@ -234,7 +241,8 @@ public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
   /**
    * {@inheritDoc}
    */
-  protected void copy(Object source, Object dest) {
+  @Override
+protected void copy(Object source, Object dest) {
     Map s = (Map) source;
     Map d = (Map) dest;
     d.clear();
@@ -244,14 +252,16 @@ public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
   /**
    * {@inheritDoc}
    */
-  protected Object entryInitialFlow() {
+  @Override
+protected Object entryInitialFlow() {
     return new AnalysisInfo();
   }
 
   /**
    * {@inheritDoc}
    */
-  protected void merge(Object in1, Object in2, Object out) {
+  @Override
+protected void merge(Object in1, Object in2, Object out) {
     AnalysisInfo left = (AnalysisInfo) in1;
     AnalysisInfo right = (AnalysisInfo) in2;
     AnalysisInfo res = (AnalysisInfo) out;
@@ -264,7 +274,7 @@ public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
 
     for (Iterator keyIter = values.iterator(); keyIter.hasNext();) {
       Value v = (Value) keyIter.next();
-      Set<Object> leftAndRight = new HashSet<Object>();
+      Set<Object> leftAndRight = new HashSet<>();
       leftAndRight.add(left.get(v));
       leftAndRight.add(right.get(v));
 
@@ -297,7 +307,8 @@ public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
   /**
    * {@inheritDoc}
    */
-  protected Object newInitialFlow() {
+  @Override
+protected Object newInitialFlow() {
     return new AnalysisInfo();
   }
 
@@ -340,14 +351,14 @@ public class NullnessAssumptionAnalysis extends BackwardFlowAnalysis {
   protected static class AnalysisInfo extends HashMap {
 
     public AnalysisInfo() {
-      super();
     }
 
     public AnalysisInfo(Map m) {
       super(m);
     }
 
-    public Object get(Object key) {
+    @Override
+	public Object get(Object key) {
       Object object = super.get(key);
       if (object == null) {
         return BOTTOM;

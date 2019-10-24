@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ANopStatement extends PStatement
 {
-    private TNop _nop_;
-    private TSemicolon _semicolon_;
+    private TNop nop;
+    private TSemicolon semicolon;
 
     public ANopStatement()
     {
@@ -30,8 +30,8 @@ public final class ANopStatement extends PStatement
     public Object clone()
     {
         return new ANopStatement(
-            cloneNode(this._nop_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.nop),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class ANopStatement extends PStatement
 
     public TNop getNop()
     {
-        return this._nop_;
+        return this.nop;
     }
 
     public void setNop(TNop node)
     {
-        if(this._nop_ != null)
+        if(this.nop != null)
         {
-            this._nop_.parent(null);
+            this.nop.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class ANopStatement extends PStatement
             node.parent(this);
         }
 
-        this._nop_ = node;
+        this.nop = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class ANopStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._nop_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.nop)).append(toString(this.semicolon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._nop_ == child)
+        if(this.nop == child)
         {
-            this._nop_ = null;
+            this.nop = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class ANopStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._nop_ == oldChild)
+        if(this.nop == oldChild)
         {
             setNop((TNop) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

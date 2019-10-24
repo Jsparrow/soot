@@ -62,7 +62,7 @@ public abstract class AbstractBinopExpr implements Expr {
 
   @Override
   public final List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+    List<ValueBox> list = new ArrayList<>();
 
     list.addAll(op1Box.getValue().getUseBoxes());
     list.add(op1Box);
@@ -72,33 +72,40 @@ public abstract class AbstractBinopExpr implements Expr {
     return list;
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof AbstractBinopExpr) {
-      AbstractBinopExpr abe = (AbstractBinopExpr) o;
-      return op1Box.getValue().equivTo(abe.op1Box.getValue()) && op2Box.getValue().equivTo(abe.op2Box.getValue())
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof AbstractBinopExpr)) {
+		return false;
+	}
+	AbstractBinopExpr abe = (AbstractBinopExpr) o;
+	return op1Box.getValue().equivTo(abe.op1Box.getValue()) && op2Box.getValue().equivTo(abe.op2Box.getValue())
           && getSymbol().equals(abe.getSymbol());
-    }
-    return false;
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return op1Box.getValue().equivHashCode() * 101 + op2Box.getValue().equivHashCode() + 17 ^ getSymbol().hashCode();
   }
 
   /** Returns the unique symbol for an operator. */
-  abstract protected String getSymbol();
+  protected abstract String getSymbol();
 
-  abstract public Object clone();
+  @Override
+public abstract Object clone();
 
-  public String toString() {
-    Value op1 = op1Box.getValue(), op2 = op2Box.getValue();
-    String leftOp = op1.toString(), rightOp = op2.toString();
+  @Override
+public String toString() {
+    Value op1 = op1Box.getValue();
+	Value op2 = op2Box.getValue();
+    String leftOp = op1.toString();
+	String rightOp = op2.toString();
 
-    return leftOp + getSymbol() + rightOp;
+    return new StringBuilder().append(leftOp).append(getSymbol()).append(rightOp).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     // Value val1 = op1Box.getValue();
     // Value val2 = op2Box.getValue();
 

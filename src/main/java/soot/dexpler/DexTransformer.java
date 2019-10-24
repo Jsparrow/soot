@@ -84,37 +84,34 @@ public abstract class DexTransformer extends BodyTransformer {
    *          the body that contains the local
    */
   protected List<Unit> collectDefinitionsWithAliases(Local l, LocalDefs localDefs, LocalUses localUses, Body body) {
-    Set<Local> seenLocals = new HashSet<Local>();
-    List<Local> newLocals = new ArrayList<Local>();
-    List<Unit> defs = new ArrayList<Unit>();
+    Set<Local> seenLocals = new HashSet<>();
+    List<Local> newLocals = new ArrayList<>();
+    List<Unit> defs = new ArrayList<>();
     newLocals.add(l);
     seenLocals.add(l);
 
     while (!newLocals.isEmpty()) {
       Local local = newLocals.remove(0);
-      for (Unit u : collectDefinitions(local, localDefs)) {
-        if (u instanceof AssignStmt) {
+      //
+	collectDefinitions(local, localDefs).stream().map(u -> {
+		if (u instanceof AssignStmt) {
           Value r = ((AssignStmt) u).getRightOp();
           if (r instanceof Local && seenLocals.add((Local) r)) {
             newLocals.add((Local) r);
           }
         }
-        defs.add(u);
-        //
-        List<UnitValueBoxPair> usesOf = localUses.getUsesOf(u);
-        for (UnitValueBoxPair pair : usesOf) {
-          Unit unit = pair.getUnit();
-          if (unit instanceof AssignStmt) {
-            AssignStmt assignStmt = ((AssignStmt) unit);
-            Value right = assignStmt.getRightOp();
-            Value left = assignStmt.getLeftOp();
-            if (right == local && left instanceof Local && seenLocals.add((Local) left)) {
-              newLocals.add((Local) left);
-            }
-          }
-        }
-        //
-      }
+		defs.add(u);
+		return localUses.getUsesOf(u);
+	}).flatMap(List::stream).map(UnitValueBoxPair::getUnit).forEach(unit -> {
+		if (unit instanceof AssignStmt) {
+			AssignStmt assignStmt = ((AssignStmt) unit);
+			Value right = assignStmt.getRightOp();
+			Value left = assignStmt.getLeftOp();
+			if (right == local && left instanceof Local && seenLocals.add((Local) left)) {
+				newLocals.add((Local) left);
+			}
+		}
+	});
     }
     return defs;
   }
@@ -164,7 +161,7 @@ public abstract class DexTransformer extends BodyTransformer {
       if (alreadyVisitedDefs.contains(baseDef)) {
         continue;
       }
-      Set<Unit> newVisitedDefs = new HashSet<Unit>(alreadyVisitedDefs);
+      Set<Unit> newVisitedDefs = new HashSet<>(alreadyVisitedDefs);
       newVisitedDefs.add(baseDef);
 
       // baseDef is either an assignment statement or an identity
@@ -186,7 +183,7 @@ public abstract class DexTransformer extends BodyTransformer {
           }
         } else if (r instanceof ArrayRef) {
           ArrayRef ar = (ArrayRef) r;
-          if (ar.getType().toString().equals(".unknown") || ar.getType().toString().equals("unknown")) { // ||
+          if (".unknown".equals(ar.getType().toString()) || "unknown".equals(ar.getType().toString())) { // ||
             // ar.getType())
             // {
             Type t = findArrayType(localDefs, stmt, ++depth, newVisitedDefs); // TODO: which type should be
@@ -298,7 +295,7 @@ public abstract class DexTransformer extends BodyTransformer {
       if (nullDefCount == defsOfaBaseList.size()) {
         return NullType.v();
       } else {
-        throw new RuntimeException("ERROR: could not find type of array from statement '" + arrayStmt + "'");
+        throw new RuntimeException(new StringBuilder().append("ERROR: could not find type of array from statement '").append(arrayStmt).append("'").toString());
       }
     } else {
       return aType;

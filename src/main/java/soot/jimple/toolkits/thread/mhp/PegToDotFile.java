@@ -36,6 +36,8 @@ import soot.util.dot.DotGraph;
 import soot.util.dot.DotGraphConstants;
 import soot.util.dot.DotGraphEdge;
 import soot.util.dot.DotGraphNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -54,27 +56,27 @@ public class PegToDotFile {
    * make all control fields public, allow other soot class dump the graph in the middle
    */
 
-  public final static int UNITGRAPH = 0;
-  public final static int BLOCKGRAPH = 1;
-  public final static int ARRAYBLOCK = 2;
+  private static final Logger logger = LoggerFactory.getLogger(PegToDotFile.class);
+public static final int UNITGRAPH = 0;
+  public static final int BLOCKGRAPH = 1;
+  public static final int ARRAYBLOCK = 2;
 
   public static int graphtype = UNITGRAPH;
 
   public static boolean isBrief = false;
-  private static final Map<Object, String> listNodeName = new HashMap<Object, String>();
-  private static final Map<Object, String> startNodeToName = new HashMap<Object, String>();
+  private static final Map<Object, String> listNodeName = new HashMap<>();
+  private static final Map<Object, String> startNodeToName = new HashMap<>();
 
   /* in one page or several pages of 8.5x11 */
   public static boolean onepage = true;
+private static int nodecount = 0;
 
-  public PegToDotFile(PegGraph graph, boolean onepage, String name) {
+public PegToDotFile(PegGraph graph, boolean onepage, String name) {
     PegToDotFile.onepage = onepage;
     toDotFile(name, graph, "PEG graph");
   }
 
-  private static int nodecount = 0;
-
-  /**
+/**
    * Generates a dot format file for a DirectedGraph
    * 
    * @param methodname,
@@ -107,7 +109,7 @@ public class PegToDotFile {
         Object node = nodesIt.next();
 
         if (node instanceof List) {
-          String listName = "list" + (new Integer(sequence++)).toString();
+          String listName = "list" + (Integer.valueOf(sequence++)).toString();
           String nodeName = makeNodeName(getNodeOrder(nodeindex, listName));
           listNodeName.put(node, listName);
 
@@ -125,8 +127,8 @@ public class PegToDotFile {
       } else {
 
         Tag tag = (Tag) ((JPegStmt) node).getTags().get(0);
-        nodeName = makeNodeName(getNodeOrder(nodeindex, tag + " " + node));
-        if (((JPegStmt) node).getName().equals("start")) {
+        nodeName = makeNodeName(getNodeOrder(nodeindex, new StringBuilder().append(tag).append(" ").append(node).toString()));
+        if ("start".equals(((JPegStmt) node).getName())) {
           startNodeToName.put(node, nodeName);
         }
       }
@@ -141,7 +143,7 @@ public class PegToDotFile {
         } else {
           JPegStmt succ = (JPegStmt) s;
           Tag succTag = (Tag) succ.getTags().get(0);
-          succName = makeNodeName(getNodeOrder(nodeindex, succTag + " " + succ));
+          succName = makeNodeName(getNodeOrder(nodeindex, new StringBuilder().append(succTag).append(" ").append(succ).toString()));
         }
 
         canvas.drawEdge(nodeName, succName);
@@ -150,19 +152,19 @@ public class PegToDotFile {
       }
 
     }
-    System.out.println("Drew main chain");
+    logger.info("Drew main chain");
 
     // graph for thread
 
-    System.out.println("while printing, startToThread has size " + graph.getStartToThread().size());
+    logger.info("while printing, startToThread has size " + graph.getStartToThread().size());
     Set maps = graph.getStartToThread().entrySet();
-    System.out.println("maps has size " + maps.size());
+    logger.info("maps has size " + maps.size());
     for (Iterator iter = maps.iterator(); iter.hasNext();) {
       Map.Entry entry = (Map.Entry) iter.next();
       Object startNode = entry.getKey();
-      System.out.println("startNode is: " + startNode);
+      logger.info("startNode is: " + startNode);
       String startNodeName = startNodeToName.get(startNode);
-      System.out.println("startNodeName is: " + startNodeName);
+      logger.info("startNodeName is: " + startNodeName);
 
       List runMethodChainList = (List) entry.getValue();
       Iterator it = runMethodChainList.iterator();
@@ -179,26 +181,26 @@ public class PegToDotFile {
           if (node instanceof List) {
 
             nodeName = makeNodeName(getNodeOrder(nodeindex, listNodeName.get(node)));
-            System.out.println("Didn't draw list node");
+            logger.info("Didn't draw list node");
             // need to draw these nodes!!!
           } else {
 
-            if (((JPegStmt) node).getName().equals("begin")) {
+            if ("begin".equals(((JPegStmt) node).getName())) {
               firstNode = true;
             }
             Tag tag = (Tag) ((JPegStmt) node).getTags().get(0);
-            nodeName = makeNodeName(getNodeOrder(nodeindex, tag + " " + node));
-            if (((JPegStmt) node).getName().equals("start")) {
+            nodeName = makeNodeName(getNodeOrder(nodeindex, new StringBuilder().append(tag).append(" ").append(node).toString()));
+            if ("start".equals(((JPegStmt) node).getName())) {
               startNodeToName.put(node, nodeName);
             }
             // draw start edge
 
             if (firstNode) {
               if (startNodeName == null) {
-                System.out.println("00000000startNodeName is null ");
+                logger.info("00000000startNodeName is null ");
               }
               if (nodeName == null) {
-                System.out.println("00000000nodeName is null ");
+                logger.info("00000000nodeName is null ");
               }
               // DotGraphEdge startThreadEdge = canvas.drawEdge(startNodeName, threadNodeName);
               DotGraphEdge startThreadEdge = canvas.drawEdge(startNodeName, nodeName);
@@ -218,7 +220,7 @@ public class PegToDotFile {
             } else {
               JPegStmt succStmt = (JPegStmt) succ;
               Tag succTag = (Tag) succStmt.getTags().get(0);
-              threadNodeName = makeNodeName(getNodeOrder(nodeindex, succTag + " " + succStmt));
+              threadNodeName = makeNodeName(getNodeOrder(nodeindex, new StringBuilder().append(succTag).append(" ").append(succStmt).toString()));
 
             }
 
@@ -255,23 +257,23 @@ public class PegToDotFile {
     startNodeToName.clear();
   }
 
-  private static int getNodeOrder(Hashtable<Object, Integer> nodeindex, Object node) {
+private static int getNodeOrder(Hashtable<Object, Integer> nodeindex, Object node) {
     if (node == null) {
-      System.out.println("----node is null-----");
+      logger.info("----node is null-----");
       return 0;
       // System.exit(1); // RLH
     }
     // System.out.println("node is: "+node);
     Integer index = nodeindex.get(node);
     if (index == null) {
-      index = new Integer(nodecount++);
+      index = Integer.valueOf(nodecount++);
       nodeindex.put(node, index);
     }
     // System.out.println("order is:"+index.intValue());
     return index.intValue();
   }
 
-  private static String makeNodeName(int index) {
+private static String makeNodeName(int index) {
     return "N" + index;
   }
 }

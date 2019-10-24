@@ -27,59 +27,58 @@ import org.slf4j.LoggerFactory;
 
 public class ColorTag implements Tag {
   private static final Logger logger = LoggerFactory.getLogger(ColorTag.class);
-  /* it is a value representing red. */
+public static final int RED = 0;
+public static final int GREEN = 1;
+public static final int YELLOW = 2;
+public static final int BLUE = 3;
+public static final int ORANGE = 4;
+public static final int PURPLE = 5;
+/* it is a value representing red. */
   private int red;
-  /* it is a value representing green. */
+/* it is a value representing green. */
   private int green;
-  /* it is a value representing blue. */
+/* it is a value representing blue. */
   private int blue;
-  /*
+/*
    * for highlighting foreground of text default is to higlight background
    */
   private boolean foreground = false;
-  private String analysisType = "Unknown";
+private String analysisType = "Unknown";
 
-  public static final int RED = 0;
-  public static final int GREEN = 1;
-  public static final int YELLOW = 2;
-  public static final int BLUE = 3;
-  public static final int ORANGE = 4;
-  public static final int PURPLE = 5;
-
-  public ColorTag(int r, int g, int b, boolean fg) {
+public ColorTag(int r, int g, int b, boolean fg) {
     red = r;
     green = g;
     blue = b;
     foreground = fg;
   }
 
-  public ColorTag(int r, int g, int b) {
+public ColorTag(int r, int g, int b) {
     this(r, g, b, false);
   }
 
-  public ColorTag(int r, int g, int b, String type) {
+public ColorTag(int r, int g, int b, String type) {
     this(r, g, b, false, type);
   }
 
-  public ColorTag(int r, int g, int b, boolean fg, String type) {
+public ColorTag(int r, int g, int b, boolean fg, String type) {
     this(r, g, b, false);
     analysisType = type;
   }
 
-  public ColorTag(int color, String type) {
+public ColorTag(int color, String type) {
     this(color, false, type);
   }
 
-  public ColorTag(int color, boolean fg, String type) {
+public ColorTag(int color, boolean fg, String type) {
     this(color, fg);
     analysisType = type;
   }
 
-  public ColorTag(int color) {
+public ColorTag(int color) {
     this(color, false);
   }
 
-  public ColorTag(int color, boolean fg) {
+public ColorTag(int color, boolean fg) {
     // logger.debug("color: "+color);
     switch (color) {
       case RED: {
@@ -128,37 +127,40 @@ public class ColorTag implements Tag {
     foreground = fg;
   }
 
-  public String getAnalysisType() {
+public String getAnalysisType() {
     return analysisType;
   }
 
-  public int getRed() {
+public int getRed() {
     return red;
   }
 
-  public int getGreen() {
+public int getGreen() {
     return green;
   }
 
-  public int getBlue() {
+public int getBlue() {
     return blue;
   }
 
-  public boolean isForeground() {
+public boolean isForeground() {
     return foreground;
   }
 
-  public String getName() {
+@Override
+public String getName() {
     return "ColorTag";
   }
 
-  public byte[] getValue() {
+@Override
+public byte[] getValue() {
     byte[] v = new byte[2];
     return v;
   }
 
-  public String toString() {
-    return "" + red + " " + green + " " + blue;
+@Override
+public String toString() {
+    return new StringBuilder().append(Integer.toString(red)).append(" ").append(green).append(" ").append(blue).toString();
   }
 
 }

@@ -78,21 +78,8 @@ public class UnitThrowAnalysisTest {
 		Scene.v().loadBasicClasses();
 	}
 
-	class ImmaculateInvokeUnitThrowAnalysis extends UnitThrowAnalysis {
-		// A variant of UnitThrowAnalysis which assumes that invoked
-		// methods will never throw any exceptions, rather than that
-		// they might throw anything Throwable. This allows us to
-		// test that individual arguments to invocations are being
-		// examined.
-
-		protected ThrowableSet mightThrow(SootMethod m) {
-			return ThrowableSet.Manager.v().EMPTY;
-		}
-	}
-
 	UnitThrowAnalysis unitAnalysis;
 	UnitThrowAnalysis immaculateAnalysis;
-
 	// A collection of Grimp values and expressions used in various tests:
 	protected StaticFieldRef floatStaticFieldRef;
 	protected Local floatLocal;
@@ -102,7 +89,6 @@ public class UnitThrowAnalysisTest {
 	protected ArrayRef floatArrayRef;
 	protected VirtualInvokeExpr floatVirtualInvoke;
 	protected StaticInvokeExpr floatStaticInvoke;
-
 	private ExceptionTestUtility utility;
 
 	@Before
@@ -239,7 +225,7 @@ public class UnitThrowAnalysisTest {
 		// local2 = local1[0]
 		s = Jimple.v().newAssignStmt(scalarRef, arrayRef);
 
-		Set<RefLikeType> expectedRep = new ExceptionHashSet<RefLikeType>(utility.VM_ERRORS);
+		Set<RefLikeType> expectedRep = new ExceptionHashSet<>(utility.VM_ERRORS);
 		expectedRep.add(utility.NULL_POINTER_EXCEPTION);
 		expectedRep.add(utility.ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION);
 		assertTrue(ExceptionTestUtility.sameMembers(expectedRep, Collections.<AnySubType>emptySet(),
@@ -1269,5 +1255,18 @@ public class UnitThrowAnalysisTest {
 		expectedCatch.add(utility.RUNTIME_EXCEPTION);
 		expectedCatch.add(utility.EXCEPTION);
 		assertEquals(expectedCatch, utility.catchableSubset(unitAnalysis.mightThrow(i)));
+	}
+
+	class ImmaculateInvokeUnitThrowAnalysis extends UnitThrowAnalysis {
+		// A variant of UnitThrowAnalysis which assumes that invoked
+		// methods will never throw any exceptions, rather than that
+		// they might throw anything Throwable. This allows us to
+		// test that individual arguments to invocations are being
+		// examined.
+
+		@Override
+		protected ThrowableSet mightThrow(SootMethod m) {
+			return ThrowableSet.Manager.v().EMPTY;
+		}
 	}
 }

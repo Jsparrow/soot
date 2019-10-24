@@ -37,8 +37,9 @@ public class AnnotationAnnotationElem extends AnnotationElem {
     this.value = t;
   }
 
-  public String toString() {
-    return super.toString() + "value: " + value.toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(super.toString()).append("value: ").append(value.toString()).toString();
   }
 
   public AnnotationTag getValue() {

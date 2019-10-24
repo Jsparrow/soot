@@ -18,57 +18,82 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production PostIncExpr : {@link PostfixExpr};
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:147
  */
-public class PostIncExpr extends PostfixExpr implements Cloneable {
-  /**
+public class PostIncExpr extends PostfixExpr {
+  private static final Logger logger = LoggerFactory.getLogger(PostIncExpr.class);
+/**
+   * @ast method 
+   * 
+   */
+  public PostIncExpr() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public PostIncExpr(Expr p0) {
+    setChild(p0, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public PostIncExpr clone() throws CloneNotSupportedException {
     PostIncExpr node = (PostIncExpr)super.clone();
     node.in$Circle(false);
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public PostIncExpr copy() {
     try {
       PostIncExpr node = (PostIncExpr) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public PostIncExpr fullCopy() {
     PostIncExpr tree = (PostIncExpr) copy();
     if (children != null) {
@@ -82,22 +107,14 @@ public class PostIncExpr extends PostfixExpr implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:751
    */
-  public soot.Value eval(Body b) { return emitPostfix(b, 1); }
-  /**
-   * @ast method 
-   * 
-   */
-  public PostIncExpr() {
-    super();
-
-
-  }
-  /**
+  @Override
+public soot.Value eval(Body b) { return emitPostfix(b, 1); }
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -105,53 +122,51 @@ public class PostIncExpr extends PostfixExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[1];
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public PostIncExpr(Expr p0) {
-    setChild(p0, 0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 1;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Operand child.
    * @param node The new node to replace the Operand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setOperand(Expr node) {
+  @Override
+public void setOperand(Expr node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the Operand child.
    * @return The current node used as the Operand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public Expr getOperand() {
+  @Override
+public Expr getOperand() {
     return (Expr)getChild(0);
   }
-  /**
+/**
    * Retrieves the Operand child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Operand child.
@@ -159,24 +174,27 @@ public class PostIncExpr extends PostfixExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public Expr getOperandNoTransform() {
+  @Override
+public Expr getOperandNoTransform() {
     return (Expr)getChildNoTransform(0);
   }
-  /**
+/**
    * @attribute syn
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:372
    */
-  public String printPostOp() {
+  @Override
+public String printPostOp() {
     ASTNode$State state = state();
     try {  return "++";  }
     finally {
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

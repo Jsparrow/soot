@@ -11,6 +11,8 @@ import soot.SootMethod;
 import soot.SootMethodRef;
 import soot.jimple.Jimple;
 import soot.jimple.JimpleBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @production MethodDecl : {@link MemberDecl} ::=
@@ -23,149 +25,8 @@ import soot.jimple.JimpleBody;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:95
  */
-public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iterator {
-	/**
-	 * @apilevel low-level
-	 */
-	public void flushCache() {
-		super.flushCache();
-		accessibleFrom_TypeDecl_values = null;
-		throwsException_TypeDecl_values = null;
-		signature_computed = false;
-		signature_value = null;
-		moreSpecificThan_MethodDecl_values = null;
-		overrides_MethodDecl_values = null;
-		hides_MethodDecl_values = null;
-		parameterDeclaration_String_values = null;
-		type_computed = false;
-		type_value = null;
-		usesTypeVariable_computed = false;
-		sourceMethodDecl_computed = false;
-		sourceMethodDecl_value = null;
-		sootMethod_computed = false;
-		sootMethod_value = null;
-		sootRef_computed = false;
-		sootRef_value = null;
-		offsetBeforeParameters_computed = false;
-		offsetAfterParameters_computed = false;
-		handlesException_TypeDecl_values = null;
-	}
-
-	/**
-	 * @apilevel internal
-	 */
-	public void flushCollectionCache() {
-		super.flushCollectionCache();
-	}
-
-	/**
-	 * @apilevel internal
-	 */
-	@SuppressWarnings({ "unchecked", "cast" })
-	public MethodDecl clone() throws CloneNotSupportedException {
-		MethodDecl node = (MethodDecl) super.clone();
-		node.accessibleFrom_TypeDecl_values = null;
-		node.throwsException_TypeDecl_values = null;
-		node.signature_computed = false;
-		node.signature_value = null;
-		node.moreSpecificThan_MethodDecl_values = null;
-		node.overrides_MethodDecl_values = null;
-		node.hides_MethodDecl_values = null;
-		node.parameterDeclaration_String_values = null;
-		node.type_computed = false;
-		node.type_value = null;
-		node.usesTypeVariable_computed = false;
-		node.sourceMethodDecl_computed = false;
-		node.sourceMethodDecl_value = null;
-		node.sootMethod_computed = false;
-		node.sootMethod_value = null;
-		node.sootRef_computed = false;
-		node.sootRef_value = null;
-		node.offsetBeforeParameters_computed = false;
-		node.offsetAfterParameters_computed = false;
-		node.handlesException_TypeDecl_values = null;
-		node.in$Circle(false);
-		node.is$Final(false);
-		return node;
-	}
-
-	/**
-	 * @apilevel internal
-	 */
-	@SuppressWarnings({ "unchecked", "cast" })
-	public MethodDecl copy() {
-		try {
-			MethodDecl node = (MethodDecl) clone();
-			node.parent = null;
-			if (children != null)
-				node.children = (ASTNode[]) children.clone();
-			return node;
-		} catch (CloneNotSupportedException e) {
-			throw new Error("Error: clone not supported for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Create a deep copy of the AST subtree at this node. The copy is dangling,
-	 * i.e. has no parent.
-	 * 
-	 * @return dangling copy of the subtree at this node
-	 * @apilevel low-level
-	 */
-	@SuppressWarnings({ "unchecked", "cast" })
-	public MethodDecl fullCopy() {
-		MethodDecl tree = (MethodDecl) copy();
-		if (children != null) {
-			for (int i = 0; i < children.length; ++i) {
-				ASTNode child = (ASTNode) children[i];
-				if (child != null) {
-					child = child.fullCopy();
-					tree.setChild(child, i);
-				}
-			}
-		}
-		return tree;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect BoundNames
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BoundNames.jrag:77
-	 */
-	public Access createBoundAccess(List args) {
-		if (isStatic()) {
-			return hostType().createQualifiedAccess().qualifiesAccess(new BoundMethodAccess(name(), args, this));
-		}
-		return new BoundMethodAccess(name(), args, this);
-	}
-
-	/**
-	 * @ast method
-	 * @aspect DataStructures
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:154
-	 */
-	public SimpleSet add(Object o) {
-		return new SimpleSetImpl().add(this).add(o);
-	}
-
-	/**
-	 * @ast method
-	 * @aspect DataStructures
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:158
-	 */
-	public boolean isSingleton() {
-		return true;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect DataStructures
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:159
-	 */
-	public boolean isSingleton(Object o) {
-		return contains(o);
-	}
-
+public class MethodDecl extends MemberDecl implements SimpleSet, Iterator {
+	private static final Logger logger = LoggerFactory.getLogger(MethodDecl.class);
 	/**
 	 * @ast method
 	 * @aspect DataStructures
@@ -173,264 +34,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 */
 
 	private MethodDecl iterElem;
-
-	/**
-	 * @ast method
-	 * @aspect DataStructures
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:163
-	 */
-	public Iterator iterator() {
-		iterElem = this;
-		return this;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect DataStructures
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:164
-	 */
-	public boolean hasNext() {
-		return iterElem != null;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect DataStructures
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:165
-	 */
-	public Object next() {
-		Object o = iterElem;
-		iterElem = null;
-		return o;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect DataStructures
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:166
-	 */
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * @ast method
-	 * @aspect NameCheck
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:101
-	 */
-	public void nameCheck() {
-		// 8.4
-		// 8.4.2
-		if (!hostType().methodsSignature(signature()).contains(this))
-			error("method with signature " + signature() + " is multiply declared in type " + hostType().typeName());
-		// 8.4.3.4
-		if (isNative() && hasBlock())
-			error("native methods must have an empty semicolon body");
-		// 8.4.5
-		if (isAbstract() && hasBlock())
-			error("abstract methods must have an empty semicolon body");
-		// 8.4.5
-		if (!hasBlock() && !(isNative() || isAbstract()))
-			error("only abstract and native methods may have an empty semicolon body");
-	}
-
-	/**
-	 * @ast method
-	 * @aspect PrettyPrint
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:176
-	 */
-	public void toString(StringBuffer s) {
-		s.append(indent());
-		getModifiers().toString(s);
-		getTypeAccess().toString(s);
-		s.append(" " + name() + "(");
-		if (getNumParameter() > 0) {
-			getParameter(0).toString(s);
-			for (int i = 1; i < getNumParameter(); i++) {
-				s.append(", ");
-				getParameter(i).toString(s);
-			}
-		}
-		s.append(")");
-		if (getNumException() > 0) {
-			s.append(" throws ");
-			getException(0).toString(s);
-			for (int i = 1; i < getNumException(); i++) {
-				s.append(", ");
-				getException(i).toString(s);
-			}
-		}
-		if (hasBlock()) {
-			s.append(" ");
-			getBlock().toString(s);
-		} else {
-			s.append(";");
-		}
-	}
-
-	/**
-	 * @ast method
-	 * @aspect TypeCheck
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:386
-	 */
-	public void typeCheck() {
-		// Thrown vs super class method see MethodDecl.nameCheck
-		// 8.4.4
-		TypeDecl exceptionType = typeThrowable();
-		for (int i = 0; i < getNumException(); i++) {
-			TypeDecl typeDecl = getException(i).type();
-			if (!typeDecl.instanceOf(exceptionType))
-				error(signature() + " throws non throwable type " + typeDecl.fullName());
-		}
-
-		// check returns
-		if (!isVoid() && hasBlock() && getBlock().canCompleteNormally())
-			error("the body of a non void method may not complete normally");
-
-	}
-
-	/**
-	 * @ast method
-	 * @aspect LookupParTypeDecl
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1242
-	 */
-	public BodyDecl substitutedBodyDecl(Parameterization parTypeDecl) {
-		// System.out.println("Begin substituting " + signature() + " in " +
-		// hostType().typeName() + " with " + parTypeDecl.typeSignature());
-		MethodDecl m = new MethodDeclSubstituted((Modifiers) getModifiers().fullCopy(),
-				getTypeAccess().type().substituteReturnType(parTypeDecl), getID(),
-				getParameterList().substitute(parTypeDecl), getExceptionList().substitute(parTypeDecl),
-				substituteBody(parTypeDecl), this);
-		// System.out.println("End substituting " + signature());
-		return m;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect LookupParTypeDecl
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1257
-	 */
-	public Opt substituteBody(Parameterization parTypeDecl) {
-		return new Opt();
-	}
-
-	/**
-	 * @ast method
-	 * @aspect InnerClasses
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:199
-	 */
-	public MethodDecl createAccessor(TypeDecl methodQualifier) {
-		MethodDecl m = (MethodDecl) methodQualifier.getAccessor(this, "method");
-		if (m != null)
-			return m;
-
-		int accessorIndex = methodQualifier.accessorCounter++;
-
-		List parameterList = new List();
-		for (int i = 0; i < getNumParameter(); i++)
-			parameterList.add(new ParameterDeclaration(
-					// We don't need to create a qualified access to the type
-					// here
-					// since there can be no ambiguity concerning unqualified
-					// type names in an inner/enclosing class
-					// Jesper 2012-05-04
-					// FALSE! We need to create a qualified access in case the
-					// method we are generating an access for is not declared
-					// in the methodQualifier type
-					getParameter(i).type().createQualifiedAccess(), getParameter(i).name()));
-		List exceptionList = new List();
-		for (int i = 0; i < getNumException(); i++)
-			exceptionList.add((Access) getException(i).fullCopy());
-
-		// add synthetic flag to modifiers
-		Modifiers modifiers = new Modifiers(new List());
-		if (getModifiers().isStatic())
-			modifiers.addModifier(new Modifier("static"));
-		modifiers.addModifier(new Modifier("synthetic"));
-		modifiers.addModifier(new Modifier("public"));
-		// build accessor declaration
-		m = new MethodDecl(modifiers, getTypeAccess().type().createQualifiedAccess(),
-				name() + "$access$" + accessorIndex, parameterList, exceptionList,
-				new Opt(new Block(new List().add(createAccessorStmt()))));
-		m = methodQualifier.addMemberMethod(m);
-		methodQualifier.addAccessor(this, "method", m);
-		return m;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect InnerClasses
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:247
-	 */
-	private Stmt createAccessorStmt() {
-		List argumentList = new List();
-		for (int i = 0; i < getNumParameter(); i++)
-			argumentList.add(new VarAccess(getParameter(i).name()));
-		Access access = new BoundMethodAccess(name(), argumentList, this);
-		if (!isStatic())
-			access = new ThisAccess("this").qualifiesAccess(access);
-		return isVoid() ? (Stmt) new ExprStmt(access) : new ReturnStmt(new Opt(access));
-	}
-
-	/**
-	 * @ast method
-	 * @aspect InnerClasses
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:257
-	 */
-	public MethodDecl createSuperAccessor(TypeDecl methodQualifier) {
-		MethodDecl m = (MethodDecl) methodQualifier.getAccessor(this, "method_super");
-		if (m != null)
-			return m;
-
-		int accessorIndex = methodQualifier.accessorCounter++;
-		List parameters = new List();
-		List args = new List();
-		for (int i = 0; i < getNumParameter(); i++) {
-			parameters.add(new ParameterDeclaration(getParameter(i).type(), getParameter(i).name()));
-			args.add(new VarAccess(getParameter(i).name()));
-		}
-		Stmt stmt;
-		if (type().isVoid())
-			stmt = new ExprStmt(new SuperAccess("super").qualifiesAccess(new MethodAccess(name(), args)));
-		else
-			stmt = new ReturnStmt(new Opt(new SuperAccess("super").qualifiesAccess(new MethodAccess(name(), args))));
-		m = new MethodDecl(new Modifiers(new List().add(new Modifier("synthetic"))), type().createQualifiedAccess(),
-				name() + "$access$" + accessorIndex, parameters, new List(), new Opt(new Block(new List().add(stmt))));
-		m = methodQualifier.addMemberMethod(m);
-		methodQualifier.addAccessor(this, "method_super", m);
-		return m;
-	}
-
-	/**
-	 * @ast method
-	 * @aspect EmitJimple
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/EmitJimple.jrag:210
-	 */
-	public void jimplify1phase2() {
-		String name = name();
-		ArrayList parameters = new ArrayList();
-		ArrayList paramnames = new ArrayList();
-		for (int i = 0; i < getNumParameter(); i++) {
-			parameters.add(getParameter(i).type().getSootType());
-			paramnames.add(getParameter(i).name());
-		}
-		soot.Type returnType = type().getSootType();
-		int modifiers = sootTypeModifiers();
-		ArrayList throwtypes = new ArrayList();
-		for (int i = 0; i < getNumException(); i++)
-			throwtypes.add(getException(i).type().getSootClassDecl());
-		String signature = SootMethod.getSubSignature(name, parameters, returnType);
-		if (!hostType().getSootClassDecl().declaresMethod(signature)) {
-			SootMethod m = Scene.v().makeSootMethod(name, parameters, returnType, modifiers, throwtypes);
-			hostType().getSootClassDecl().addMethod(m);
-			m.addTag(new soot.tagkit.ParamNamesTag(paramnames));
-			sootMethod = m;
-		} else {
-			sootMethod = hostType().getSootClassDecl().getMethod(signature);
-		}
-		addAttributes();
-	}
-
 	/**
 	 * @ast method
 	 * @aspect EmitJimple
@@ -438,195 +41,106 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 */
 
 	public SootMethod sootMethod;
-
 	/**
+	 * @apilevel internal
 	 * @ast method
-	 * @aspect AnnotationsCodegen
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:43
-	 */
-	public void addAttributes() {
-		super.addAttributes();
-		ArrayList c = new ArrayList();
-		getModifiers().addRuntimeVisibleAnnotationsAttribute(c);
-		getModifiers().addRuntimeInvisibleAnnotationsAttribute(c);
-		addRuntimeVisibleParameterAnnotationsAttribute(c);
-		addRuntimeInvisibleParameterAnnotationsAttribute(c);
-		addSourceLevelParameterAnnotationsAttribute(c);
-		getModifiers().addSourceOnlyAnnotations(c);
-		for (Iterator iter = c.iterator(); iter.hasNext();) {
-			soot.tagkit.Tag tag = (soot.tagkit.Tag) iter.next();
-			sootMethod.addTag(tag);
-		}
-	}
-
-	/**
-	 * @ast method
-	 * @aspect AnnotationsCodegen
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:163
-	 */
-	public void addRuntimeVisibleParameterAnnotationsAttribute(Collection c) {
-		boolean foundVisibleAnnotations = false;
-		Collection annotations = new ArrayList(getNumParameter());
-		for (int i = 0; i < getNumParameter(); i++) {
-			Collection a = getParameter(i).getModifiers().runtimeVisibleAnnotations();
-			if (!a.isEmpty())
-				foundVisibleAnnotations = true;
-			soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(
-					soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
-			for (Iterator iter = a.iterator(); iter.hasNext();) {
-				Annotation annotation = (Annotation) iter.next();
-				ArrayList elements = new ArrayList(1);
-				annotation.appendAsAttributeTo(elements);
-				tag.addAnnotation((soot.tagkit.AnnotationTag) elements.get(0));
-			}
-			annotations.add(tag);
-		}
-		if (foundVisibleAnnotations) {
-			soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(
-					annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
-			for (Iterator iter = annotations.iterator(); iter.hasNext();) {
-				tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag) iter.next());
-			}
-			c.add(tag);
-		}
-	}
-
-	/**
-	 * @ast method
-	 * @aspect AnnotationsCodegen
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:219
-	 */
-	public void addRuntimeInvisibleParameterAnnotationsAttribute(Collection c) {
-		boolean foundVisibleAnnotations = false;
-		Collection annotations = new ArrayList(getNumParameter());
-		for (int i = 0; i < getNumParameter(); i++) {
-			Collection a = getParameter(i).getModifiers().runtimeInvisibleAnnotations();
-			if (!a.isEmpty())
-				foundVisibleAnnotations = true;
-			soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(
-					soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
-			for (Iterator iter = a.iterator(); iter.hasNext();) {
-				Annotation annotation = (Annotation) iter.next();
-				ArrayList elements = new ArrayList(1);
-				annotation.appendAsAttributeTo(elements);
-				tag.addAnnotation((soot.tagkit.AnnotationTag) elements.get(0));
-			}
-			annotations.add(tag);
-		}
-		if (foundVisibleAnnotations) {
-			soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(
-					annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
-			for (Iterator iter = annotations.iterator(); iter.hasNext();) {
-				tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag) iter.next());
-			}
-			c.add(tag);
-		}
-	}
-
-	/**
-	 * @ast method
-	 * @aspect AnnotationsCodegen
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:274
-	 */
-	public void addSourceLevelParameterAnnotationsAttribute(Collection c) {
-		boolean foundVisibleAnnotations = false;
-		Collection annotations = new ArrayList(getNumParameter());
-		for (int i = 0; i < getNumParameter(); i++) {
-			getParameter(i).getModifiers().addSourceOnlyAnnotations(c);
-		}
-	}
-
-	/**
-	 * @ast method
-	 * @aspect GenericsCodegen
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:342
-	 */
-	public void transformation() {
-		super.transformation();
-		HashSet processed = new HashSet();
-		for (Iterator iter = hostType().bridgeCandidates(signature()).iterator(); iter.hasNext();) {
-			MethodDecl m = (MethodDecl) iter.next();
-			if (this.overrides(m)) {
-				MethodDecl erased = m.erasedMethod();
-				if (!erased.signature().equals(signature()) || erased.type().erasure() != type().erasure()) {
-					StringBuffer keyBuffer = new StringBuffer();
-					for (int i = 0; i < getNumParameter(); i++) {
-						keyBuffer.append(erased.getParameter(i).type().erasure().fullName());
-					}
-					keyBuffer.append(erased.type().erasure().fullName());
-					String key = keyBuffer.toString();
-					if (!processed.contains(key)) {
-						processed.add(key);
-
-						List args = new List();
-						List parameters = new List();
-						for (int i = 0; i < getNumParameter(); i++) {
-							args.add(new CastExpr(getParameter(i).type().erasure().createBoundAccess(),
-									new VarAccess("p" + i)));
-							parameters.add(new ParameterDeclaration(erased.getParameter(i).type().erasure(), "p" + i));
-						}
-						Stmt stmt;
-						if (type().isVoid()) {
-							stmt = new ExprStmt(createBoundAccess(args));
-						} else {
-							stmt = new ReturnStmt(createBoundAccess(args));
-						}
-						List modifiersList = new List();
-						if (isPublic())
-							modifiersList.add(new Modifier("public"));
-						else if (isProtected())
-							modifiersList.add(new Modifier("protected"));
-						else if (isPrivate())
-							modifiersList.add(new Modifier("private"));
-						MethodDecl bridge = new BridgeMethodDecl(new Modifiers(modifiersList),
-								erased.type().erasure().createBoundAccess(), erased.name(), parameters,
-								(List) getExceptionList().fullCopy(), new Opt(new Block(new List().add(stmt))));
-						hostType().addBodyDecl(bridge);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Check if the method is missing a SafeVarargs annotation.
 	 * 
-	 * @ast method
-	 * @aspect SafeVarargs
-	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/SafeVarargs.jrag:151
 	 */
-	public void checkWarnings() {
-		// check for illegal use of @SafeVarargs
-		super.checkWarnings();
 
-		if (!suppressWarnings("unchecked") && !hasAnnotationSafeVarargs() && isVariableArity()
-				&& !getParameter(getNumParameter() - 1).type().isReifiable())
-			warning("possible heap pollution for " + "variable arity parameter");
-	}
+	/**
+	 * @apilevel internal
+	 */
+	protected String tokenString_ID;
+	/**
+	 * @ast method
+	 * 
+	 */
+
+	public int IDstart;
+	/**
+	 * @ast method
+	 * 
+	 */
+
+	public int IDend;
+	protected java.util.Map accessibleFrom_TypeDecl_values;
+	protected java.util.Map throwsException_TypeDecl_values;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean signature_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected String signature_value;
+	protected java.util.Map moreSpecificThan_MethodDecl_values;
+	protected java.util.Map overrides_MethodDecl_values;
+	protected java.util.Map hides_MethodDecl_values;
+	protected java.util.Map parameterDeclaration_String_values;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean type_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected TypeDecl type_value;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean usesTypeVariable_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean usesTypeVariable_value;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean sourceMethodDecl_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected MethodDecl sourceMethodDecl_value;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean sootMethod_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected SootMethod sootMethod_value;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean sootRef_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected SootMethodRef sootRef_value;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean offsetBeforeParameters_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected int offsetBeforeParameters_value;
+	/**
+	 * @apilevel internal
+	 */
+	protected boolean offsetAfterParameters_computed = false;
+	/**
+	 * @apilevel internal
+	 */
+	protected int offsetAfterParameters_value;
+	protected java.util.Map handlesException_TypeDecl_values;
 
 	/**
 	 * @ast method
 	 * 
 	 */
 	public MethodDecl() {
-		super();
 
-	}
-
-	/**
-	 * Initializes the child array to the correct size. Initializes List and Opt
-	 * nta children.
-	 * 
-	 * @apilevel internal
-	 * @ast method
-	 * @ast method
-	 * 
-	 */
-	public void init$Children() {
-		children = new ASTNode[5];
-		setChild(new List(), 2);
-		setChild(new List(), 3);
-		setChild(new Opt(), 4);
 	}
 
 	/**
@@ -659,9 +173,634 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 
 	/**
 	 * @apilevel low-level
+	 */
+	@Override
+	public void flushCache() {
+		super.flushCache();
+		accessibleFrom_TypeDecl_values = null;
+		throwsException_TypeDecl_values = null;
+		signature_computed = false;
+		signature_value = null;
+		moreSpecificThan_MethodDecl_values = null;
+		overrides_MethodDecl_values = null;
+		hides_MethodDecl_values = null;
+		parameterDeclaration_String_values = null;
+		type_computed = false;
+		type_value = null;
+		usesTypeVariable_computed = false;
+		sourceMethodDecl_computed = false;
+		sourceMethodDecl_value = null;
+		sootMethod_computed = false;
+		sootMethod_value = null;
+		sootRef_computed = false;
+		sootRef_value = null;
+		offsetBeforeParameters_computed = false;
+		offsetAfterParameters_computed = false;
+		handlesException_TypeDecl_values = null;
+	}
+
+	/**
+	 * @apilevel internal
+	 */
+	@Override
+	public void flushCollectionCache() {
+		super.flushCollectionCache();
+	}
+
+	/**
+	 * @apilevel internal
+	 */
+	@Override
+	@SuppressWarnings({ "unchecked", "cast" })
+	public MethodDecl clone() throws CloneNotSupportedException {
+		MethodDecl node = (MethodDecl) super.clone();
+		node.accessibleFrom_TypeDecl_values = null;
+		node.throwsException_TypeDecl_values = null;
+		node.signature_computed = false;
+		node.signature_value = null;
+		node.moreSpecificThan_MethodDecl_values = null;
+		node.overrides_MethodDecl_values = null;
+		node.hides_MethodDecl_values = null;
+		node.parameterDeclaration_String_values = null;
+		node.type_computed = false;
+		node.type_value = null;
+		node.usesTypeVariable_computed = false;
+		node.sourceMethodDecl_computed = false;
+		node.sourceMethodDecl_value = null;
+		node.sootMethod_computed = false;
+		node.sootMethod_value = null;
+		node.sootRef_computed = false;
+		node.sootRef_value = null;
+		node.offsetBeforeParameters_computed = false;
+		node.offsetAfterParameters_computed = false;
+		node.handlesException_TypeDecl_values = null;
+		node.in$Circle(false);
+		node.is$Final(false);
+		return node;
+	}
+
+	/**
+	 * @apilevel internal
+	 */
+	@Override
+	@SuppressWarnings({ "unchecked", "cast" })
+	public MethodDecl copy() {
+		try {
+			MethodDecl node = (MethodDecl) clone();
+			node.parent = null;
+			if (children != null) {
+				node.children = (ASTNode[]) children.clone();
+			}
+			return node;
+		} catch (CloneNotSupportedException e) {
+			logger.error(e.getMessage(), e);
+			throw new Error("Error: clone not supported for " + getClass().getName());
+		}
+	}
+
+	/**
+	 * Create a deep copy of the AST subtree at this node. The copy is dangling,
+	 * i.e. has no parent.
+	 * 
+	 * @return dangling copy of the subtree at this node
+	 * @apilevel low-level
+	 */
+	@Override
+	@SuppressWarnings({ "unchecked", "cast" })
+	public MethodDecl fullCopy() {
+		MethodDecl tree = (MethodDecl) copy();
+		if (children != null) {
+			for (int i = 0; i < children.length; ++i) {
+				ASTNode child = (ASTNode) children[i];
+				if (child != null) {
+					child = child.fullCopy();
+					tree.setChild(child, i);
+				}
+			}
+		}
+		return tree;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect BoundNames
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BoundNames.jrag:77
+	 */
+	public Access createBoundAccess(List args) {
+		if (isStatic()) {
+			return hostType().createQualifiedAccess().qualifiesAccess(new BoundMethodAccess(name(), args, this));
+		}
+		return new BoundMethodAccess(name(), args, this);
+	}
+
+	/**
+	 * @ast method
+	 * @aspect DataStructures
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:154
+	 */
+	@Override
+	public SimpleSet add(Object o) {
+		return new SimpleSetImpl().add(this).add(o);
+	}
+
+	/**
+	 * @ast method
+	 * @aspect DataStructures
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:158
+	 */
+	@Override
+	public boolean isSingleton() {
+		return true;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect DataStructures
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:159
+	 */
+	@Override
+	public boolean isSingleton(Object o) {
+		return contains(o);
+	}
+
+	/**
+	 * @ast method
+	 * @aspect DataStructures
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:163
+	 */
+	@Override
+	public Iterator iterator() {
+		iterElem = this;
+		return this;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect DataStructures
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:164
+	 */
+	@Override
+	public boolean hasNext() {
+		return iterElem != null;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect DataStructures
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:165
+	 */
+	@Override
+	public Object next() {
+		Object o = iterElem;
+		iterElem = null;
+		return o;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect DataStructures
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:166
+	 */
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * @ast method
+	 * @aspect NameCheck
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:101
+	 */
+	@Override
+	public void nameCheck() {
+		// 8.4
+		// 8.4.2
+		if (!hostType().methodsSignature(signature()).contains(this)) {
+			error(new StringBuilder().append("method with signature ").append(signature()).append(" is multiply declared in type ").append(hostType().typeName()).toString());
+		}
+		// 8.4.3.4
+		if (isNative() && hasBlock()) {
+			error("native methods must have an empty semicolon body");
+		}
+		// 8.4.5
+		if (isAbstract() && hasBlock()) {
+			error("abstract methods must have an empty semicolon body");
+		}
+		// 8.4.5
+		if (!hasBlock() && !(isNative() || isAbstract())) {
+			error("only abstract and native methods may have an empty semicolon body");
+		}
+	}
+
+	/**
+	 * @ast method
+	 * @aspect PrettyPrint
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:176
+	 */
+	@Override
+	public void toString(StringBuffer s) {
+		s.append(indent());
+		getModifiers().toString(s);
+		getTypeAccess().toString(s);
+		s.append(new StringBuilder().append(" ").append(name()).append("(").toString());
+		if (getNumParameter() > 0) {
+			getParameter(0).toString(s);
+			for (int i = 1; i < getNumParameter(); i++) {
+				s.append(", ");
+				getParameter(i).toString(s);
+			}
+		}
+		s.append(")");
+		if (getNumException() > 0) {
+			s.append(" throws ");
+			getException(0).toString(s);
+			for (int i = 1; i < getNumException(); i++) {
+				s.append(", ");
+				getException(i).toString(s);
+			}
+		}
+		if (hasBlock()) {
+			s.append(" ");
+			getBlock().toString(s);
+		} else {
+			s.append(";");
+		}
+	}
+
+	/**
+	 * @ast method
+	 * @aspect TypeCheck
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:386
+	 */
+	@Override
+	public void typeCheck() {
+		// Thrown vs super class method see MethodDecl.nameCheck
+		// 8.4.4
+		TypeDecl exceptionType = typeThrowable();
+		for (int i = 0; i < getNumException(); i++) {
+			TypeDecl typeDecl = getException(i).type();
+			if (!typeDecl.instanceOf(exceptionType)) {
+				error(new StringBuilder().append(signature()).append(" throws non throwable type ").append(typeDecl.fullName()).toString());
+			}
+		}
+
+		// check returns
+		if (!isVoid() && hasBlock() && getBlock().canCompleteNormally()) {
+			error("the body of a non void method may not complete normally");
+		}
+
+	}
+
+	/**
+	 * @ast method
+	 * @aspect LookupParTypeDecl
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1242
+	 */
+	@Override
+	public BodyDecl substitutedBodyDecl(Parameterization parTypeDecl) {
+		// System.out.println("Begin substituting " + signature() + " in " +
+		// hostType().typeName() + " with " + parTypeDecl.typeSignature());
+		MethodDecl m = new MethodDeclSubstituted((Modifiers) getModifiers().fullCopy(),
+				getTypeAccess().type().substituteReturnType(parTypeDecl), getID(),
+				getParameterList().substitute(parTypeDecl), getExceptionList().substitute(parTypeDecl),
+				substituteBody(parTypeDecl), this);
+		// System.out.println("End substituting " + signature());
+		return m;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect LookupParTypeDecl
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1257
+	 */
+	public Opt substituteBody(Parameterization parTypeDecl) {
+		return new Opt();
+	}
+
+	/**
+	 * @ast method
+	 * @aspect InnerClasses
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:199
+	 */
+	public MethodDecl createAccessor(TypeDecl methodQualifier) {
+		MethodDecl m = (MethodDecl) methodQualifier.getAccessor(this, "method");
+		if (m != null) {
+			return m;
+		}
+
+		int accessorIndex = methodQualifier.accessorCounter++;
+
+		List parameterList = new List();
+		for (int i = 0; i < getNumParameter(); i++) {
+			parameterList.add(new ParameterDeclaration(
+					// We don't need to create a qualified access to the type
+					// here
+					// since there can be no ambiguity concerning unqualified
+					// type names in an inner/enclosing class
+					// Jesper 2012-05-04
+					// FALSE! We need to create a qualified access in case the
+					// method we are generating an access for is not declared
+					// in the methodQualifier type
+					getParameter(i).type().createQualifiedAccess(), getParameter(i).name()));
+		}
+		List exceptionList = new List();
+		for (int i = 0; i < getNumException(); i++) {
+			exceptionList.add((Access) getException(i).fullCopy());
+		}
+
+		// add synthetic flag to modifiers
+		Modifiers modifiers = new Modifiers(new List());
+		if (getModifiers().isStatic()) {
+			modifiers.addModifier(new Modifier("static"));
+		}
+		modifiers.addModifier(new Modifier("synthetic"));
+		modifiers.addModifier(new Modifier("public"));
+		// build accessor declaration
+		m = new MethodDecl(modifiers, getTypeAccess().type().createQualifiedAccess(),
+				new StringBuilder().append(name()).append("$access$").append(accessorIndex).toString(), parameterList, exceptionList,
+				new Opt(new Block(new List().add(createAccessorStmt()))));
+		m = methodQualifier.addMemberMethod(m);
+		methodQualifier.addAccessor(this, "method", m);
+		return m;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect InnerClasses
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:247
+	 */
+	private Stmt createAccessorStmt() {
+		List argumentList = new List();
+		for (int i = 0; i < getNumParameter(); i++) {
+			argumentList.add(new VarAccess(getParameter(i).name()));
+		}
+		Access access = new BoundMethodAccess(name(), argumentList, this);
+		if (!isStatic()) {
+			access = new ThisAccess("this").qualifiesAccess(access);
+		}
+		return isVoid() ? (Stmt) new ExprStmt(access) : new ReturnStmt(new Opt(access));
+	}
+
+	/**
+	 * @ast method
+	 * @aspect InnerClasses
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:257
+	 */
+	public MethodDecl createSuperAccessor(TypeDecl methodQualifier) {
+		MethodDecl m = (MethodDecl) methodQualifier.getAccessor(this, "method_super");
+		if (m != null) {
+			return m;
+		}
+
+		int accessorIndex = methodQualifier.accessorCounter++;
+		List parameters = new List();
+		List args = new List();
+		for (int i = 0; i < getNumParameter(); i++) {
+			parameters.add(new ParameterDeclaration(getParameter(i).type(), getParameter(i).name()));
+			args.add(new VarAccess(getParameter(i).name()));
+		}
+		Stmt stmt;
+		if (type().isVoid()) {
+			stmt = new ExprStmt(new SuperAccess("super").qualifiesAccess(new MethodAccess(name(), args)));
+		} else {
+			stmt = new ReturnStmt(new Opt(new SuperAccess("super").qualifiesAccess(new MethodAccess(name(), args))));
+		}
+		m = new MethodDecl(new Modifiers(new List().add(new Modifier("synthetic"))), type().createQualifiedAccess(),
+				new StringBuilder().append(name()).append("$access$").append(accessorIndex).toString(), parameters, new List(), new Opt(new Block(new List().add(stmt))));
+		m = methodQualifier.addMemberMethod(m);
+		methodQualifier.addAccessor(this, "method_super", m);
+		return m;
+	}
+
+	/**
+	 * @ast method
+	 * @aspect EmitJimple
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/EmitJimple.jrag:210
+	 */
+	@Override
+	public void jimplify1phase2() {
+		String name = name();
+		ArrayList parameters = new ArrayList();
+		ArrayList paramnames = new ArrayList();
+		for (int i = 0; i < getNumParameter(); i++) {
+			parameters.add(getParameter(i).type().getSootType());
+			paramnames.add(getParameter(i).name());
+		}
+		soot.Type returnType = type().getSootType();
+		int modifiers = sootTypeModifiers();
+		ArrayList throwtypes = new ArrayList();
+		for (int i = 0; i < getNumException(); i++) {
+			throwtypes.add(getException(i).type().getSootClassDecl());
+		}
+		String signature = SootMethod.getSubSignature(name, parameters, returnType);
+		if (!hostType().getSootClassDecl().declaresMethod(signature)) {
+			SootMethod m = Scene.v().makeSootMethod(name, parameters, returnType, modifiers, throwtypes);
+			hostType().getSootClassDecl().addMethod(m);
+			m.addTag(new soot.tagkit.ParamNamesTag(paramnames));
+			sootMethod = m;
+		} else {
+			sootMethod = hostType().getSootClassDecl().getMethod(signature);
+		}
+		addAttributes();
+	}
+
+	/**
+	 * @ast method
+	 * @aspect AnnotationsCodegen
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:43
+	 */
+	@Override
+	public void addAttributes() {
+		super.addAttributes();
+		ArrayList c = new ArrayList();
+		getModifiers().addRuntimeVisibleAnnotationsAttribute(c);
+		getModifiers().addRuntimeInvisibleAnnotationsAttribute(c);
+		addRuntimeVisibleParameterAnnotationsAttribute(c);
+		addRuntimeInvisibleParameterAnnotationsAttribute(c);
+		addSourceLevelParameterAnnotationsAttribute(c);
+		getModifiers().addSourceOnlyAnnotations(c);
+		for (Iterator iter = c.iterator(); iter.hasNext();) {
+			soot.tagkit.Tag tag = (soot.tagkit.Tag) iter.next();
+			sootMethod.addTag(tag);
+		}
+	}
+
+	/**
+	 * @ast method
+	 * @aspect AnnotationsCodegen
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:163
+	 */
+	public void addRuntimeVisibleParameterAnnotationsAttribute(Collection c) {
+		boolean foundVisibleAnnotations = false;
+		Collection annotations = new ArrayList(getNumParameter());
+		for (int i = 0; i < getNumParameter(); i++) {
+			Collection a = getParameter(i).getModifiers().runtimeVisibleAnnotations();
+			if (!a.isEmpty()) {
+				foundVisibleAnnotations = true;
+			}
+			soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(
+					soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+			for (Iterator iter = a.iterator(); iter.hasNext();) {
+				Annotation annotation = (Annotation) iter.next();
+				ArrayList elements = new ArrayList(1);
+				annotation.appendAsAttributeTo(elements);
+				tag.addAnnotation((soot.tagkit.AnnotationTag) elements.get(0));
+			}
+			annotations.add(tag);
+		}
+		if (!foundVisibleAnnotations) {
+			return;
+		}
+		soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(
+				annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+		for (Iterator iter = annotations.iterator(); iter.hasNext();) {
+			tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag) iter.next());
+		}
+		c.add(tag);
+	}
+
+	/**
+	 * @ast method
+	 * @aspect AnnotationsCodegen
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:219
+	 */
+	public void addRuntimeInvisibleParameterAnnotationsAttribute(Collection c) {
+		boolean foundVisibleAnnotations = false;
+		Collection annotations = new ArrayList(getNumParameter());
+		for (int i = 0; i < getNumParameter(); i++) {
+			Collection a = getParameter(i).getModifiers().runtimeInvisibleAnnotations();
+			if (!a.isEmpty()) {
+				foundVisibleAnnotations = true;
+			}
+			soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(
+					soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+			for (Iterator iter = a.iterator(); iter.hasNext();) {
+				Annotation annotation = (Annotation) iter.next();
+				ArrayList elements = new ArrayList(1);
+				annotation.appendAsAttributeTo(elements);
+				tag.addAnnotation((soot.tagkit.AnnotationTag) elements.get(0));
+			}
+			annotations.add(tag);
+		}
+		if (!foundVisibleAnnotations) {
+			return;
+		}
+		soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(
+				annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+		for (Iterator iter = annotations.iterator(); iter.hasNext();) {
+			tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag) iter.next());
+		}
+		c.add(tag);
+	}
+
+	/**
+	 * @ast method
+	 * @aspect AnnotationsCodegen
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/AnnotationsCodegen.jrag:274
+	 */
+	public void addSourceLevelParameterAnnotationsAttribute(Collection c) {
+		boolean foundVisibleAnnotations = false;
+		Collection annotations = new ArrayList(getNumParameter());
+		for (int i = 0; i < getNumParameter(); i++) {
+			getParameter(i).getModifiers().addSourceOnlyAnnotations(c);
+		}
+	}
+
+	/**
+	 * @ast method
+	 * @aspect GenericsCodegen
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:342
+	 */
+	@Override
+	public void transformation() {
+		super.transformation();
+		HashSet processed = new HashSet();
+		for (Iterator iter = hostType().bridgeCandidates(signature()).iterator(); iter.hasNext();) {
+			MethodDecl m = (MethodDecl) iter.next();
+			if (this.overrides(m)) {
+				MethodDecl erased = m.erasedMethod();
+				if (!erased.signature().equals(signature()) || erased.type().erasure() != type().erasure()) {
+					StringBuilder keyBuffer = new StringBuilder();
+					for (int i = 0; i < getNumParameter(); i++) {
+						keyBuffer.append(erased.getParameter(i).type().erasure().fullName());
+					}
+					keyBuffer.append(erased.type().erasure().fullName());
+					String key = keyBuffer.toString();
+					if (!processed.contains(key)) {
+						processed.add(key);
+
+						List args = new List();
+						List parameters = new List();
+						for (int i = 0; i < getNumParameter(); i++) {
+							args.add(new CastExpr(getParameter(i).type().erasure().createBoundAccess(),
+									new VarAccess("p" + i)));
+							parameters.add(new ParameterDeclaration(erased.getParameter(i).type().erasure(), "p" + i));
+						}
+						Stmt stmt;
+						if (type().isVoid()) {
+							stmt = new ExprStmt(createBoundAccess(args));
+						} else {
+							stmt = new ReturnStmt(createBoundAccess(args));
+						}
+						List modifiersList = new List();
+						if (isPublic()) {
+							modifiersList.add(new Modifier("public"));
+						} else if (isProtected()) {
+							modifiersList.add(new Modifier("protected"));
+						} else if (isPrivate()) {
+							modifiersList.add(new Modifier("private"));
+						}
+						MethodDecl bridge = new BridgeMethodDecl(new Modifiers(modifiersList),
+								erased.type().erasure().createBoundAccess(), erased.name(), parameters,
+								(List) getExceptionList().fullCopy(), new Opt(new Block(new List().add(stmt))));
+						hostType().addBodyDecl(bridge);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check if the method is missing a SafeVarargs annotation.
+	 * 
+	 * @ast method
+	 * @aspect SafeVarargs
+	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/SafeVarargs.jrag:151
+	 */
+	@Override
+	public void checkWarnings() {
+		// check for illegal use of @SafeVarargs
+		super.checkWarnings();
+
+		if (!suppressWarnings("unchecked") && !hasAnnotationSafeVarargs() && isVariableArity()
+				&& !getParameter(getNumParameter() - 1).type().isReifiable()) {
+			warning("possible heap pollution for " + "variable arity parameter");
+		}
+	}
+
+	/**
+	 * Initializes the child array to the correct size. Initializes List and Opt
+	 * nta children.
+	 * 
+	 * @apilevel internal
+	 * @ast method
 	 * @ast method
 	 * 
 	 */
+	@Override
+	public void init$Children() {
+		children = new ASTNode[5];
+		setChild(new List(), 2);
+		setChild(new List(), 3);
+		setChild(new Opt(), 4);
+	}
+
+	/**
+	 * @apilevel low-level
+	 * @ast method
+	 * 
+	 */
+	@Override
 	protected int numChildren() {
 		return 5;
 	}
@@ -671,6 +810,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @ast method
 	 * 
 	 */
+	@Override
 	public boolean mayHaveRewrite() {
 		return false;
 	}
@@ -769,29 +909,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	}
 
 	/**
-	 * @apilevel internal
-	 * @ast method
-	 * 
-	 */
-
-	/**
-	 * @apilevel internal
-	 */
-	protected String tokenString_ID;
-	/**
-	 * @ast method
-	 * 
-	 */
-
-	public int IDstart;
-	/**
-	 * @ast method
-	 * 
-	 */
-
-	public int IDend;
-
-	/**
 	 * JastAdd-internal setter for lexeme ID using the Beaver parser.
 	 * 
 	 * @apilevel internal
@@ -799,8 +916,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * 
 	 */
 	public void setID(beaver.Symbol symbol) {
-		if (symbol.value != null && !(symbol.value instanceof String))
+		if (symbol.value != null && !(symbol.value instanceof String)) {
 			throw new UnsupportedOperationException("setID is only valid for String lexemes");
+		}
 		tokenString_ID = (String) symbol.value;
 		IDstart = symbol.getStart();
 		IDend = symbol.getEnd();
@@ -1210,45 +1328,60 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:717
 	 */
 
+	@Override
 	public void checkModifiers() {
 		super.checkModifiers();
 		if (hostType().isClassDecl()) {
 			// 8.4.3.1
-			if (!hostType().isEnumDecl() && isAbstract() && !hostType().isAbstract())
+			if (!hostType().isEnumDecl() && isAbstract() && !hostType().isAbstract()) {
 				error("class must be abstract to include abstract methods");
+			}
 			// 8.4.3.1
-			if (isAbstract() && isPrivate())
+			if (isAbstract() && isPrivate()) {
 				error("method may not be abstract and private");
+			}
 			// 8.4.3.1
 			// 8.4.3.2
-			if (isAbstract() && isStatic())
+			if (isAbstract() && isStatic()) {
 				error("method may not be abstract and static");
-			if (isAbstract() && isSynchronized())
+			}
+			if (isAbstract() && isSynchronized()) {
 				error("method may not be abstract and synchronized");
+			}
 			// 8.4.3.4
-			if (isAbstract() && isNative())
+			if (isAbstract() && isNative()) {
 				error("method may not be abstract and native");
-			if (isAbstract() && isStrictfp())
+			}
+			if (isAbstract() && isStrictfp()) {
 				error("method may not be abstract and strictfp");
-			if (isNative() && isStrictfp())
+			}
+			if (isNative() && isStrictfp()) {
 				error("method may not be native and strictfp");
+			}
 		}
-		if (hostType().isInterfaceDecl()) {
-			// 9.4
-			if (isStatic())
-				error("interface method " + signature() + " in " + hostType().typeName() + " may not be static");
-			if (isStrictfp())
-				error("interface method " + signature() + " in " + hostType().typeName() + " may not be strictfp");
-			if (isNative())
-				error("interface method " + signature() + " in " + hostType().typeName() + " may not be native");
-			if (isSynchronized())
-				error("interface method " + signature() + " in " + hostType().typeName() + " may not be synchronized");
-			if (isProtected())
-				error("interface method " + signature() + " in " + hostType().typeName() + " may not be protected");
-			if (isPrivate())
-				error("interface method " + signature() + " in " + hostType().typeName() + " may not be private");
-			else if (isFinal())
-				error("interface method " + signature() + " in " + hostType().typeName() + " may not be final");
+		if (!hostType().isInterfaceDecl()) {
+			return;
+		}
+		// 9.4
+		if (isStatic()) {
+			error(new StringBuilder().append("interface method ").append(signature()).append(" in ").append(hostType().typeName()).append(" may not be static").toString());
+		}
+		if (isStrictfp()) {
+			error(new StringBuilder().append("interface method ").append(signature()).append(" in ").append(hostType().typeName()).append(" may not be strictfp").toString());
+		}
+		if (isNative()) {
+			error(new StringBuilder().append("interface method ").append(signature()).append(" in ").append(hostType().typeName()).append(" may not be native").toString());
+		}
+		if (isSynchronized()) {
+			error(new StringBuilder().append("interface method ").append(signature()).append(" in ").append(hostType().typeName()).append(" may not be synchronized").toString());
+		}
+		if (isProtected()) {
+			error(new StringBuilder().append("interface method ").append(signature()).append(" in ").append(hostType().typeName()).append(" may not be protected").toString());
+		}
+		if (isPrivate()) {
+			error(new StringBuilder().append("interface method ").append(signature()).append(" in ").append(hostType().typeName()).append(" may not be private").toString());
+		} else if (isFinal()) {
+			error(new StringBuilder().append("interface method ").append(signature()).append(" in ").append(hostType().typeName()).append(" may not be final").toString());
 		}
 	}
 
@@ -1257,24 +1390,28 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect EmitJimpleRefinements
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/SootJastAddJ/EmitJimpleRefinements.jrag:100
 	 */
+	@Override
 	public void jimplify2() {
 		if (!generate() || sootMethod().hasActiveBody() || (sootMethod().getSource() != null
-				&& (sootMethod().getSource() instanceof soot.coffi.CoffiMethodSource)))
+				&& (sootMethod().getSource() instanceof soot.coffi.CoffiMethodSource))) {
 			return;
+		}
 		try {
 			if (hasBlock() && !(hostType().isInterfaceDecl())) {
 				JimpleBody body = Jimple.v().newBody(sootMethod());
 				sootMethod().setActiveBody(body);
 				Body b = new Body(hostType(), body, this);
 				b.setLine(this);
-				for (int i = 0; i < getNumParameter(); i++)
+				for (int i = 0; i < getNumParameter(); i++) {
 					getParameter(i).jimplify2(b);
+				}
 				getBlock().jimplify2(b);
-				if (type() instanceof VoidType)
+				if (type() instanceof VoidType) {
 					b.add(Jimple.v().newReturnVoidStmt());
+				}
 			}
 		} catch (RuntimeException e) {
-			System.err.println("Error generating " + hostType().typeName() + ": " + this);
+			logger.error(new StringBuilder().append("Error generating ").append(hostType().typeName()).append(": ").append(this).toString());
 			throw e;
 		}
 	}
@@ -1285,11 +1422,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:148
 	 */
 	private boolean refined_MethodDecl_MethodDecl_moreSpecificThan_MethodDecl(MethodDecl m) {
-		if (getNumParameter() == 0)
+		if (getNumParameter() == 0) {
 			return false;
+		}
 		for (int i = 0; i < getNumParameter(); i++) {
-			if (!getParameter(i).type().instanceOf(m.getParameter(i).type()))
+			if (!getParameter(i).type().instanceOf(m.getParameter(i).type())) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -1301,28 +1440,35 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 */
 	private int refined_EmitJimple_MethodDecl_sootTypeModifiers() {
 		int result = 0;
-		if (isPublic())
+		if (isPublic()) {
 			result |= soot.Modifier.PUBLIC;
-		if (isProtected())
+		}
+		if (isProtected()) {
 			result |= soot.Modifier.PROTECTED;
-		if (isPrivate())
+		}
+		if (isPrivate()) {
 			result |= soot.Modifier.PRIVATE;
-		if (isFinal())
+		}
+		if (isFinal()) {
 			result |= soot.Modifier.FINAL;
-		if (isStatic())
+		}
+		if (isStatic()) {
 			result |= soot.Modifier.STATIC;
-		if (isAbstract())
+		}
+		if (isAbstract()) {
 			result |= soot.Modifier.ABSTRACT;
-		if (isSynchronized())
+		}
+		if (isSynchronized()) {
 			result |= soot.Modifier.SYNCHRONIZED;
-		if (isStrictfp())
+		}
+		if (isStrictfp()) {
 			result |= soot.Modifier.STRICTFP;
-		if (isNative())
+		}
+		if (isNative()) {
 			result |= soot.Modifier.NATIVE;
+		}
 		return result;
 	}
-
-	protected java.util.Map accessibleFrom_TypeDecl_values;
 
 	/**
 	 * @attribute syn
@@ -1332,8 +1478,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	@SuppressWarnings({ "unchecked", "cast" })
 	public boolean accessibleFrom(TypeDecl type) {
 		Object _parameters = type;
-		if (accessibleFrom_TypeDecl_values == null)
+		if (accessibleFrom_TypeDecl_values == null) {
 			accessibleFrom_TypeDecl_values = new java.util.HashMap(4);
+		}
 		if (accessibleFrom_TypeDecl_values.containsKey(_parameters)) {
 			return ((Boolean) accessibleFrom_TypeDecl_values.get(_parameters)).booleanValue();
 		}
@@ -1341,8 +1488,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		boolean accessibleFrom_TypeDecl_value = accessibleFrom_compute(type);
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			accessibleFrom_TypeDecl_values.put(_parameters, Boolean.valueOf(accessibleFrom_TypeDecl_value));
+		}
 		return accessibleFrom_TypeDecl_value;
 	}
 
@@ -1353,15 +1501,18 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		if (isPublic()) {
 			return true;
 		} else if (isProtected()) {
-			if (hostPackage().equals(type.hostPackage()))
+			if (hostPackage().equals(type.hostPackage())) {
 				return true;
-			if (type.withinBodyThatSubclasses(hostType()) != null)
+			}
+			if (type.withinBodyThatSubclasses(hostType()) != null) {
 				return true;
+			}
 			return false;
-		} else if (isPrivate())
+		} else if (isPrivate()) {
 			return hostType().topLevelType() == type.topLevelType();
-		else
+		} else {
 			return hostPackage().equals(type.hostPackage());
+		}
 	}
 
 	/**
@@ -1369,6 +1520,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect DataStructures
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:152
 	 */
+	@Override
 	public int size() {
 		ASTNode$State state = state();
 		try {
@@ -1382,6 +1534,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect DataStructures
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:153
 	 */
+	@Override
 	public boolean isEmpty() {
 		ASTNode$State state = state();
 		try {
@@ -1395,6 +1548,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect DataStructures
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DataStructures.jrag:157
 	 */
+	@Override
 	public boolean contains(Object o) {
 		ASTNode$State state = state();
 		try {
@@ -1408,6 +1562,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect ErrorCheck
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:22
 	 */
+	@Override
 	public int lineNumber() {
 		ASTNode$State state = state();
 		try {
@@ -1415,8 +1570,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		} finally {
 		}
 	}
-
-	protected java.util.Map throwsException_TypeDecl_values;
 
 	/**
 	 * @attribute syn
@@ -1426,8 +1579,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	@SuppressWarnings({ "unchecked", "cast" })
 	public boolean throwsException(TypeDecl exceptionType) {
 		Object _parameters = exceptionType;
-		if (throwsException_TypeDecl_values == null)
+		if (throwsException_TypeDecl_values == null) {
 			throwsException_TypeDecl_values = new java.util.HashMap(4);
+		}
 		if (throwsException_TypeDecl_values.containsKey(_parameters)) {
 			return ((Boolean) throwsException_TypeDecl_values.get(_parameters)).booleanValue();
 		}
@@ -1435,8 +1589,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		boolean throwsException_TypeDecl_value = throwsException_compute(exceptionType);
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			throwsException_TypeDecl_values.put(_parameters, Boolean.valueOf(throwsException_TypeDecl_value));
+		}
 		return throwsException_TypeDecl_value;
 	}
 
@@ -1444,9 +1599,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @apilevel internal
 	 */
 	private boolean throwsException_compute(TypeDecl exceptionType) {
-		for (int i = 0; i < getNumException(); i++)
-			if (exceptionType.instanceOf(getException(i).type()))
+		for (int i = 0; i < getNumException(); i++) {
+			if (exceptionType.instanceOf(getException(i).type())) {
 				return true;
+			}
+		}
 		return false;
 	}
 
@@ -1464,15 +1621,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	}
 
 	/**
-	 * @apilevel internal
-	 */
-	protected boolean signature_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected String signature_value;
-
-	/**
 	 * @attribute syn
 	 * @aspect MethodSignature15
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:347
@@ -1486,8 +1634,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		signature_value = signature_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			signature_computed = true;
+		}
 		return signature_value;
 	}
 
@@ -1498,8 +1647,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		StringBuffer s = new StringBuffer();
 		s.append(name() + "(");
 		for (int i = 0; i < getNumParameter(); i++) {
-			if (i != 0)
+			if (i != 0) {
 				s.append(", ");
+			}
 			s.append(getParameter(i).type().erasure().typeName());
 		}
 		s.append(")");
@@ -1520,8 +1670,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		}
 	}
 
-	protected java.util.Map moreSpecificThan_MethodDecl_values;
-
 	/**
 	 * @attribute syn
 	 * @aspect MethodSignature15
@@ -1530,8 +1678,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	@SuppressWarnings({ "unchecked", "cast" })
 	public boolean moreSpecificThan(MethodDecl m) {
 		Object _parameters = m;
-		if (moreSpecificThan_MethodDecl_values == null)
+		if (moreSpecificThan_MethodDecl_values == null) {
 			moreSpecificThan_MethodDecl_values = new java.util.HashMap(4);
+		}
 		if (moreSpecificThan_MethodDecl_values.containsKey(_parameters)) {
 			return ((Boolean) moreSpecificThan_MethodDecl_values.get(_parameters)).booleanValue();
 		}
@@ -1539,8 +1688,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		boolean moreSpecificThan_MethodDecl_value = moreSpecificThan_compute(m);
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			moreSpecificThan_MethodDecl_values.put(_parameters, Boolean.valueOf(moreSpecificThan_MethodDecl_value));
+		}
 		return moreSpecificThan_MethodDecl_value;
 	}
 
@@ -1548,21 +1698,21 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @apilevel internal
 	 */
 	private boolean moreSpecificThan_compute(MethodDecl m) {
-		if (!isVariableArity() && !m.isVariableArity())
+		if (!isVariableArity() && !m.isVariableArity()) {
 			return refined_MethodDecl_MethodDecl_moreSpecificThan_MethodDecl(m);
+		}
 		int num = Math.max(getNumParameter(), m.getNumParameter());
 		for (int i = 0; i < num; i++) {
 			TypeDecl t1 = i < getNumParameter() - 1 ? getParameter(i).type()
 					: getParameter(getNumParameter() - 1).type().componentType();
 			TypeDecl t2 = i < m.getNumParameter() - 1 ? m.getParameter(i).type()
 					: m.getParameter(m.getNumParameter() - 1).type().componentType();
-			if (!t1.instanceOf(t2))
+			if (!t1.instanceOf(t2)) {
 				return false;
+			}
 		}
 		return true;
 	}
-
-	protected java.util.Map overrides_MethodDecl_values;
 
 	/**
 	 * @attribute syn
@@ -1572,8 +1722,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	@SuppressWarnings({ "unchecked", "cast" })
 	public boolean overrides(MethodDecl m) {
 		Object _parameters = m;
-		if (overrides_MethodDecl_values == null)
+		if (overrides_MethodDecl_values == null) {
 			overrides_MethodDecl_values = new java.util.HashMap(4);
+		}
 		if (overrides_MethodDecl_values.containsKey(_parameters)) {
 			return ((Boolean) overrides_MethodDecl_values.get(_parameters)).booleanValue();
 		}
@@ -1581,8 +1732,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		boolean overrides_MethodDecl_value = overrides_compute(m);
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			overrides_MethodDecl_values.put(_parameters, Boolean.valueOf(overrides_MethodDecl_value));
+		}
 		return overrides_MethodDecl_value;
 	}
 
@@ -1594,8 +1746,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 				&& m.signature().equals(signature());
 	}
 
-	protected java.util.Map hides_MethodDecl_values;
-
 	/**
 	 * @attribute syn
 	 * @aspect MethodDecl
@@ -1604,8 +1754,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	@SuppressWarnings({ "unchecked", "cast" })
 	public boolean hides(MethodDecl m) {
 		Object _parameters = m;
-		if (hides_MethodDecl_values == null)
+		if (hides_MethodDecl_values == null) {
 			hides_MethodDecl_values = new java.util.HashMap(4);
+		}
 		if (hides_MethodDecl_values.containsKey(_parameters)) {
 			return ((Boolean) hides_MethodDecl_values.get(_parameters)).booleanValue();
 		}
@@ -1613,8 +1764,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		boolean hides_MethodDecl_value = hides_compute(m);
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			hides_MethodDecl_values.put(_parameters, Boolean.valueOf(hides_MethodDecl_value));
+		}
 		return hides_MethodDecl_value;
 	}
 
@@ -1626,8 +1778,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 				&& m.signature().equals(signature());
 	}
 
-	protected java.util.Map parameterDeclaration_String_values;
-
 	/**
 	 * @attribute syn
 	 * @aspect VariableScope
@@ -1636,8 +1786,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	@SuppressWarnings({ "unchecked", "cast" })
 	public SimpleSet parameterDeclaration(String name) {
 		Object _parameters = name;
-		if (parameterDeclaration_String_values == null)
+		if (parameterDeclaration_String_values == null) {
 			parameterDeclaration_String_values = new java.util.HashMap(4);
+		}
 		if (parameterDeclaration_String_values.containsKey(_parameters)) {
 			return (SimpleSet) parameterDeclaration_String_values.get(_parameters);
 		}
@@ -1645,8 +1796,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		SimpleSet parameterDeclaration_String_value = parameterDeclaration_compute(name);
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			parameterDeclaration_String_values.put(_parameters, parameterDeclaration_String_value);
+		}
 		return parameterDeclaration_String_value;
 	}
 
@@ -1654,9 +1806,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @apilevel internal
 	 */
 	private SimpleSet parameterDeclaration_compute(String name) {
-		for (int i = 0; i < getNumParameter(); i++)
-			if (getParameter(i).name().equals(name))
+		for (int i = 0; i < getNumParameter(); i++) {
+			if (getParameter(i).name().equals(name)) {
 				return (ParameterDeclaration) getParameter(i);
+			}
+		}
 		return SimpleSet.emptySet;
 	}
 
@@ -1665,6 +1819,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect Modifiers
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:214
 	 */
+	@Override
 	public boolean isSynthetic() {
 		ASTNode$State state = state();
 		try {
@@ -1730,6 +1885,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect Modifiers
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:228
 	 */
+	@Override
 	public boolean isStatic() {
 		ASTNode$State state = state();
 		try {
@@ -1795,22 +1951,14 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect PrettyPrint
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:800
 	 */
+	@Override
 	public String dumpString() {
 		ASTNode$State state = state();
 		try {
-			return getClass().getName() + " [" + getID() + "]";
+			return new StringBuilder().append(getClass().getName()).append(" [").append(getID()).append("]").toString();
 		} finally {
 		}
 	}
-
-	/**
-	 * @apilevel internal
-	 */
-	protected boolean type_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected TypeDecl type_value;
 
 	/**
 	 * @attribute syn
@@ -1826,8 +1974,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		type_value = type_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			type_computed = true;
+		}
 		return type_value;
 	}
 
@@ -1843,6 +1992,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect TypeAnalysis
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:271
 	 */
+	@Override
 	public boolean isVoid() {
 		ASTNode$State state = state();
 		try {
@@ -1889,6 +2039,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect Annotations
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:283
 	 */
+	@Override
 	public boolean hasAnnotationSuppressWarnings(String s) {
 		ASTNode$State state = state();
 		try {
@@ -1902,6 +2053,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect Annotations
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:323
 	 */
+	@Override
 	public boolean isDeprecated() {
 		ASTNode$State state = state();
 		try {
@@ -1911,19 +2063,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	}
 
 	/**
-	 * @apilevel internal
-	 */
-	protected boolean usesTypeVariable_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected boolean usesTypeVariable_value;
-
-	/**
 	 * @attribute syn
 	 * @aspect LookupParTypeDecl
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1062
 	 */
+	@Override
 	@SuppressWarnings({ "unchecked", "cast" })
 	public boolean usesTypeVariable() {
 		if (usesTypeVariable_computed) {
@@ -1933,8 +2077,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		usesTypeVariable_value = usesTypeVariable_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			usesTypeVariable_computed = true;
+		}
 		return usesTypeVariable_value;
 	}
 
@@ -1945,15 +2090,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		return getModifiers().usesTypeVariable() || getTypeAccess().usesTypeVariable()
 				|| getParameterList().usesTypeVariable() || getExceptionList().usesTypeVariable();
 	}
-
-	/**
-	 * @apilevel internal
-	 */
-	protected boolean sourceMethodDecl_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected MethodDecl sourceMethodDecl_value;
 
 	/**
 	 * @attribute syn
@@ -1969,8 +2105,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		sourceMethodDecl_value = sourceMethodDecl_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			sourceMethodDecl_computed = true;
+		}
 		return sourceMethodDecl_value;
 	}
 
@@ -1986,6 +2123,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect GenericsParTypeDecl
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/GenericsParTypeDecl.jrag:67
 	 */
+	@Override
 	public boolean visibleTypeParameters() {
 		ASTNode$State state = state();
 		try {
@@ -2047,21 +2185,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		ASTNode$State state = state();
 		try {
 			int res = refined_EmitJimple_MethodDecl_sootTypeModifiers();
-			if (isVariableArity())
+			if (isVariableArity()) {
 				res |= Modifiers.ACC_VARARGS;
+			}
 			return res;
 		} finally {
 		}
 	}
-
-	/**
-	 * @apilevel internal
-	 */
-	protected boolean sootMethod_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected SootMethod sootMethod_value;
 
 	/**
 	 * @attribute syn
@@ -2077,8 +2207,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		sootMethod_value = sootMethod_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			sootMethod_computed = true;
+		}
 		return sootMethod_value;
 	}
 
@@ -2087,21 +2218,14 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 */
 	private SootMethod sootMethod_compute() {
 		ArrayList list = new ArrayList();
-		for (int i = 0; i < getNumParameter(); i++)
+		for (int i = 0; i < getNumParameter(); i++) {
 			list.add(getParameter(i).type().getSootType());
-		if (hostType().isArrayDecl())
+		}
+		if (hostType().isArrayDecl()) {
 			return typeObject().getSootClassDecl().getMethod(name(), list, type().getSootType());
+		}
 		return hostType().getSootClassDecl().getMethod(name(), list, type().getSootType());
 	}
-
-	/**
-	 * @apilevel internal
-	 */
-	protected boolean sootRef_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected SootMethodRef sootRef_value;
 
 	/**
 	 * @attribute syn
@@ -2117,8 +2241,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		sootRef_value = sootRef_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			sootRef_computed = true;
+		}
 		return sootRef_value;
 	}
 
@@ -2127,21 +2252,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 */
 	private SootMethodRef sootRef_compute() {
 		ArrayList parameters = new ArrayList();
-		for (int i = 0; i < getNumParameter(); i++)
+		for (int i = 0; i < getNumParameter(); i++) {
 			parameters.add(getParameter(i).type().getSootType());
+		}
 		SootMethodRef ref = Scene.v().makeMethodRef(hostType().getSootClassDecl(), name(), parameters,
 				type().getSootType(), isStatic());
 		return ref;
 	}
-
-	/**
-	 * @apilevel internal
-	 */
-	protected boolean offsetBeforeParameters_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected int offsetBeforeParameters_value;
 
 	/**
 	 * @attribute syn
@@ -2157,8 +2274,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		offsetBeforeParameters_value = offsetBeforeParameters_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			offsetBeforeParameters_computed = true;
+		}
 		return offsetBeforeParameters_value;
 	}
 
@@ -2168,15 +2286,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	private int offsetBeforeParameters_compute() {
 		return 0;
 	}
-
-	/**
-	 * @apilevel internal
-	 */
-	protected boolean offsetAfterParameters_computed = false;
-	/**
-	 * @apilevel internal
-	 */
-	protected int offsetAfterParameters_value;
 
 	/**
 	 * @attribute syn
@@ -2192,8 +2301,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		int num = state.boundariesCrossed;
 		boolean isFinal = this.is$Final();
 		offsetAfterParameters_value = offsetAfterParameters_compute();
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			offsetAfterParameters_computed = true;
+		}
 		return offsetAfterParameters_value;
 	}
 
@@ -2201,8 +2311,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @apilevel internal
 	 */
 	private int offsetAfterParameters_compute() {
-		if (getNumParameter() == 0)
+		if (getNumParameter() == 0) {
 			return offsetBeforeParameters();
+		}
 		return getParameter(getNumParameter() - 1).localNum()
 				+ getParameter(getNumParameter() - 1).type().variableSize();
 	}
@@ -2226,6 +2337,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect SafeVarargs
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/SafeVarargs.jrag:20
 	 */
+	@Override
 	public boolean hasAnnotationSafeVarargs() {
 		ASTNode$State state = state();
 		try {
@@ -2242,6 +2354,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @aspect SafeVarargs
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/SafeVarargs.jrag:56
 	 */
+	@Override
 	public boolean hasIllegalAnnotationSafeVarargs() {
 		ASTNode$State state = state();
 		try {
@@ -2263,8 +2376,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		}
 	}
 
-	protected java.util.Map handlesException_TypeDecl_values;
-
 	/**
 	 * @attribute inh
 	 * @aspect ExceptionHandling
@@ -2273,8 +2384,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	@SuppressWarnings({ "unchecked", "cast" })
 	public boolean handlesException(TypeDecl exceptionType) {
 		Object _parameters = exceptionType;
-		if (handlesException_TypeDecl_values == null)
+		if (handlesException_TypeDecl_values == null) {
 			handlesException_TypeDecl_values = new java.util.HashMap(4);
+		}
 		if (handlesException_TypeDecl_values.containsKey(_parameters)) {
 			return ((Boolean) handlesException_TypeDecl_values.get(_parameters)).booleanValue();
 		}
@@ -2283,8 +2395,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 		boolean isFinal = this.is$Final();
 		boolean handlesException_TypeDecl_value = getParent().Define_boolean_handlesException(this, null,
 				exceptionType);
-		if (isFinal && num == state().boundariesCrossed)
+		if (isFinal && num == state().boundariesCrossed) {
 			handlesException_TypeDecl_values.put(_parameters, Boolean.valueOf(handlesException_TypeDecl_value));
+		}
 		return handlesException_TypeDecl_value;
 	}
 
@@ -2328,6 +2441,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:437
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
 		if (caller == getBlockOptNoTransform()) {
 			return v.isFinal() && (v.isClassVariable() || v.isInstanceVariable()) ? true : isDAbefore(v);
@@ -2340,6 +2454,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:868
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_isDUbefore(ASTNode caller, ASTNode child, Variable v) {
 		if (caller == getBlockOptNoTransform()) {
 			return v.isFinal() && (v.isClassVariable() || v.isInstanceVariable()) ? false : true;
@@ -2352,6 +2467,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:143
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_handlesException(ASTNode caller, ASTNode child, TypeDecl exceptionType) {
 		if (caller == getBlockOptNoTransform()) {
 			return throwsException(exceptionType) || handlesException(exceptionType);
@@ -2364,6 +2480,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupVariable.jrag:46
 	 * @apilevel internal
 	 */
+	@Override
 	public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
 		if (caller == getParameterListNoTransform()) {
 			int childIndex = caller.getIndexOfChild(child);
@@ -2372,8 +2489,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 			SimpleSet set = parameterDeclaration(name);
 			// A declaration of a method parameter name shadows any other
 			// variable declarations
-			if (!set.isEmpty())
+			if (!set.isEmpty()) {
 				return set;
+			}
 			// Delegate to other declarations in scope
 			return lookupVariable(name);
 		} else {
@@ -2385,6 +2503,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:271
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBePublic(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2397,6 +2516,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:272
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBeProtected(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2409,6 +2529,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:273
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBePrivate(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2421,6 +2542,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:274
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBeAbstract(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2433,6 +2555,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:275
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBeStatic(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2445,6 +2568,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:276
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBeFinal(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2457,6 +2581,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:277
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBeSynchronized(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2469,6 +2594,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:278
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBeNative(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2481,6 +2607,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:279
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayBeStrictfp(ASTNode caller, ASTNode child) {
 		if (caller == getModifiersNoTransform()) {
 			return true;
@@ -2493,6 +2620,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:246
 	 * @apilevel internal
 	 */
+	@Override
 	public ASTNode Define_ASTNode_enclosingBlock(ASTNode caller, ASTNode child) {
 		if (caller == getBlockOptNoTransform()) {
 			return this;
@@ -2505,6 +2633,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:82
 	 * @apilevel internal
 	 */
+	@Override
 	public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
 		if (caller == getExceptionListNoTransform()) {
 			int childIndex = caller.getIndexOfChild(child);
@@ -2523,6 +2652,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:405
 	 * @apilevel internal
 	 */
+	@Override
 	public TypeDecl Define_TypeDecl_returnType(ASTNode caller, ASTNode child) {
 		if (caller == getBlockOptNoTransform()) {
 			return type();
@@ -2535,6 +2665,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:142
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_inStaticContext(ASTNode caller, ASTNode child) {
 		if (caller == getBlockOptNoTransform()) {
 			return isStatic();
@@ -2547,6 +2678,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:33
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_reachable(ASTNode caller, ASTNode child) {
 		if (caller == getBlockOptNoTransform()) {
 			return true;
@@ -2559,6 +2691,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/VariableDeclaration.jrag:61
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_isMethodParameter(ASTNode caller, ASTNode child) {
 		if (caller == getParameterListNoTransform()) {
 			int childIndex = caller.getIndexOfChild(child);
@@ -2572,6 +2705,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/VariableDeclaration.jrag:62
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_isConstructorParameter(ASTNode caller, ASTNode child) {
 		if (caller == getParameterListNoTransform()) {
 			int childIndex = caller.getIndexOfChild(child);
@@ -2585,6 +2719,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/VariableDeclaration.jrag:63
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_isExceptionHandlerParameter(ASTNode caller, ASTNode child) {
 		if (caller == getParameterListNoTransform()) {
 			int childIndex = caller.getIndexOfChild(child);
@@ -2598,9 +2733,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:86
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_mayUseAnnotationTarget(ASTNode caller, ASTNode child, String name) {
 		if (caller == getModifiersNoTransform()) {
-			return name.equals("METHOD");
+			return "METHOD".equals(name);
 		} else {
 			return getParent().Define_boolean_mayUseAnnotationTarget(this, caller, name);
 		}
@@ -2610,6 +2746,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/VariableArityParameters.jrag:22
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_variableArityValid(ASTNode caller, ASTNode child) {
 		if (caller == getParameterListNoTransform()) {
 			int i = caller.getIndexOfChild(child);
@@ -2623,12 +2760,14 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/LocalNum.jrag:26
 	 * @apilevel internal
 	 */
+	@Override
 	public int Define_int_localNum(ASTNode caller, ASTNode child) {
 		if (caller == getParameterListNoTransform()) {
 			int index = caller.getIndexOfChild(child);
 			{
-				if (index == 0)
+				if (index == 0) {
 					return offsetBeforeParameters();
+				}
 				return getParameter(index - 1).localNum() + getParameter(index - 1).type().variableSize();
 			}
 		} else {
@@ -2640,6 +2779,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Statements.jrag:351
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_enclosedByExceptionHandler(ASTNode caller, ASTNode child) {
 		if (caller == getBlockOptNoTransform()) {
 			return getNumException() != 0;
@@ -2652,6 +2792,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/PreciseRethrow.jrag:50
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_inhModifiedInScope(ASTNode caller, ASTNode child, Variable var) {
 		if (caller == getParameterListNoTransform()) {
 			int childIndex = caller.getIndexOfChild(child);
@@ -2665,6 +2806,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	 * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/PreciseRethrow.jrag:124
 	 * @apilevel internal
 	 */
+	@Override
 	public boolean Define_boolean_isCatchParam(ASTNode caller, ASTNode child) {
 		if (caller == getParameterListNoTransform()) {
 			int childIndex = caller.getIndexOfChild(child);
@@ -2677,6 +2819,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet, Iter
 	/**
 	 * @apilevel internal
 	 */
+	@Override
 	public ASTNode rewriteTo() {
 		return super.rewriteTo();
 	}

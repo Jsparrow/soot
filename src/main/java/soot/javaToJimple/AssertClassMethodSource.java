@@ -26,7 +26,8 @@ import java.util.ArrayList;
 
 public class AssertClassMethodSource implements soot.MethodSource {
 
-  public soot.Body getBody(soot.SootMethod sootMethod, String phaseName) {
+  @Override
+public soot.Body getBody(soot.SootMethod sootMethod, String phaseName) {
 
     soot.Body classBody = soot.jimple.Jimple.v().newBody(sootMethod);
 

@@ -45,7 +45,8 @@ public class AbruptEdgeFinder implements FactFinder {
     return G.v().soot_dava_toolkits_base_finders_AbruptEdgeFinder();
   }
 
-  public void find(DavaBody body, AugmentedStmtGraph asg, SETNode SET) throws RetriggerAnalysisException {
+  @Override
+public void find(DavaBody body, AugmentedStmtGraph asg, SETNode SET) throws RetriggerAnalysisException {
     Dava.v().log("AbruptEdgeFinder::find()");
 
     SET.find_AbruptEdges(this);

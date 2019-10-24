@@ -34,56 +34,63 @@ import soot.jimple.Stmt;
  *
  */
 public class PurityStmtNode implements PurityNode {
-  /** Statement that created the node */
-  private Stmt id;
-
-  /** true if an inside node, false if an load node */
-  private boolean inside;
-
   /** gives a unique id, for pretty-printing purposes */
-  private static final Map<Stmt, Integer> nMap = new HashMap<Stmt, Integer>();
-  private static int n = 0;
+	  private static final Map<Stmt, Integer> nMap = new HashMap<>();
 
-  PurityStmtNode(Stmt id, boolean inside) {
-    this.id = id;
-    this.inside = inside;
-    if (!nMap.containsKey(id)) {
-      nMap.put(id, new Integer(n));
-      n++;
-    }
-  }
+	private static int n = 0;
 
-  public String toString() {
-    if (inside) {
-      return "I_" + nMap.get(id);
-    } else {
-      return "L_" + nMap.get(id);
-      // if (inside) return "I_"+id; else return "L_"+id;
-    }
-  }
+	/** Statement that created the node */
+	  private Stmt id;
 
-  public int hashCode() {
-    return id.hashCode();
-  }
+	/** true if an inside node, false if an load node */
+	  private boolean inside;
 
-  public boolean equals(Object o) {
-    if (o instanceof PurityStmtNode) {
-      PurityStmtNode oo = (PurityStmtNode) o;
-      return id.equals(oo.id) && oo.inside == inside;
-    } else {
-      return false;
-    }
-  }
+	PurityStmtNode(Stmt id, boolean inside) {
+	    this.id = id;
+	    this.inside = inside;
+	    if (!nMap.containsKey(id)) {
+	      nMap.put(id, Integer.valueOf(n));
+	      n++;
+	    }
+	  }
 
-  public boolean isInside() {
-    return inside;
-  }
+	@Override
+	public String toString() {
+	    if (inside) {
+	      return "I_" + nMap.get(id);
+	    } else {
+	      return "L_" + nMap.get(id);
+	      // if (inside) return "I_"+id; else return "L_"+id;
+	    }
+	  }
 
-  public boolean isLoad() {
-    return !inside;
-  }
+	@Override
+	public int hashCode() {
+	    return id.hashCode();
+	  }
 
-  public boolean isParam() {
-    return false;
-  }
+	@Override
+	public boolean equals(Object o) {
+	    if (o instanceof PurityStmtNode) {
+	      PurityStmtNode oo = (PurityStmtNode) o;
+	      return id.equals(oo.id) && oo.inside == inside;
+	    } else {
+	      return false;
+	    }
+	  }
+
+	@Override
+	public boolean isInside() {
+	    return inside;
+	  }
+
+	@Override
+	public boolean isLoad() {
+	    return !inside;
+	  }
+
+	@Override
+	public boolean isParam() {
+	    return false;
+	  }
 }

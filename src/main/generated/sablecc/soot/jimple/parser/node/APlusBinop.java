@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class APlusBinop extends PBinop
 {
-    private TPlus _plus_;
+    private TPlus plus;
 
     public APlusBinop()
     {
@@ -26,7 +26,7 @@ public final class APlusBinop extends PBinop
     public Object clone()
     {
         return new APlusBinop(
-            cloneNode(this._plus_));
+            cloneNode(this.plus));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class APlusBinop extends PBinop
 
     public TPlus getPlus()
     {
-        return this._plus_;
+        return this.plus;
     }
 
     public void setPlus(TPlus node)
     {
-        if(this._plus_ != null)
+        if(this.plus != null)
         {
-            this._plus_.parent(null);
+            this.plus.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class APlusBinop extends PBinop
             node.parent(this);
         }
 
-        this._plus_ = node;
+        this.plus = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._plus_);
+            + toString(this.plus);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._plus_ == child)
+        if(this.plus == child)
         {
-            this._plus_ = null;
+            this.plus = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class APlusBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._plus_ == oldChild)
+        if(this.plus == oldChild)
         {
             setPlus((TPlus) newChild);
             return;

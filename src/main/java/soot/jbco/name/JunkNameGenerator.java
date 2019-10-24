@@ -28,7 +28,7 @@ package soot.jbco.name;
  * @author p.nesterovich
  * @since 21.03.18
  */
-public class JunkNameGenerator extends AbstractNameGenerator implements NameGenerator {
+public class JunkNameGenerator extends AbstractNameGenerator {
 
   private static final char stringChars[][] = { { 'S', '5', '$' }, { 'l', '1', 'I' }, { '_' } };
 

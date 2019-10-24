@@ -47,7 +47,8 @@ public class CriticalSectionVisibleEdgesPred implements EdgePredicate {
   }
 
   /** Returns true iff the edge e is wanted. */
-  public boolean want(Edge e) {
+  @Override
+public boolean want(Edge e) {
     String tgtMethod = e.tgt().toString();
     String tgtClass = e.tgt().getDeclaringClass().toString();
     String srcMethod = e.src().toString();
@@ -96,9 +97,7 @@ public class CriticalSectionVisibleEdgesPred implements EdgePredicate {
     // Remove Calls from within a transaction
     // one transaction is exempt - so that we may analyze calls within it
     if (tns != null) {
-      Iterator<CriticalSection> tnIt = tns.iterator();
-      while (tnIt.hasNext()) {
-        CriticalSection tn = tnIt.next();
+      for (CriticalSection tn : tns) {
         if (tn != exemptTn && tn.units.contains(e.srcStmt())) // if this method call originates inside a transaction...
         {
           return false; // ignore it

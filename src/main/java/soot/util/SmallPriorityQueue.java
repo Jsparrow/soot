@@ -37,11 +37,17 @@ import java.util.Map;
  *
  */
 class SmallPriorityQueue<E> extends PriorityQueue<E> {
-  final static int MAX_CAPACITY = Long.SIZE;
+  static final int MAX_CAPACITY = Long.SIZE;
 
   private long queue = 0;
 
-  void addAll() {
+  SmallPriorityQueue(List<? extends E> universe, Map<E, Integer> ordinalMap) {
+    super(universe, ordinalMap);
+    assert universe.size() <= Long.SIZE;
+  }
+
+@Override
+void addAll() {
     if (N == 0) {
       return;
     }
@@ -50,18 +56,13 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     min = 0;
   }
 
-  SmallPriorityQueue(List<? extends E> universe, Map<E, Integer> ordinalMap) {
-    super(universe, ordinalMap);
-    assert universe.size() <= Long.SIZE;
-  }
-
-  @Override
+@Override
   public void clear() {
     queue = 0L;
     min = Integer.MAX_VALUE;
   }
 
-  @Override
+@Override
   public Iterator<E> iterator() {
     return new Itr() {
       @Override
@@ -71,12 +72,12 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     };
   }
 
-  @Override
+@Override
   public int size() {
     return Long.bitCount(queue);
   }
 
-  @Override
+@Override
   int nextSetBit(int fromIndex) {
     assert fromIndex >= 0;
 
@@ -93,7 +94,7 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     return numberOfTrailingZeros(t0);
   }
 
-  @Override
+@Override
   boolean add(int ordinal) {
     long old = queue;
     queue |= (1L << ordinal);
@@ -104,7 +105,7 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     return true;
   }
 
-  @Override
+@Override
   boolean contains(int ordinal) {
     assert ordinal >= 0;
     assert ordinal < N;
@@ -112,7 +113,7 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     return ((queue >>> ordinal) & 1L) == 1L;
   }
 
-  @Override
+@Override
   boolean remove(int index) {
     assert index >= 0;
     assert index < N;
@@ -130,7 +131,7 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     return true;
   }
 
-  @Override
+@Override
   public boolean removeAll(Collection<?> c) {
     long mask = 0;
     for (Object o : c) {
@@ -142,7 +143,7 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     return old != queue;
   }
 
-  @Override
+@Override
   public boolean retainAll(Collection<?> c) {
     long mask = 0;
     for (Object o : c) {
@@ -154,7 +155,7 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     return old != queue;
   }
 
-  @Override
+@Override
   public boolean containsAll(Collection<?> c) {
     long mask = 0;
     for (Object o : c) {
@@ -163,7 +164,7 @@ class SmallPriorityQueue<E> extends PriorityQueue<E> {
     return (mask & ~queue) == 0;
   }
 
-  @Override
+@Override
   public boolean addAll(Collection<? extends E> c) {
     long mask = 0;
     for (Object o : c) {

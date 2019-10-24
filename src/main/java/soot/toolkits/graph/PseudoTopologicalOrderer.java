@@ -52,7 +52,17 @@ public class PseudoTopologicalOrderer<N> implements Orderer<N> {
   public PseudoTopologicalOrderer() {
   }
 
+  // deprecated methods and constructors follow
+
   /**
+   * @deprecated use {@link #PseudoTopologicalOrderer()} instead
+   */
+  @Deprecated
+  public PseudoTopologicalOrderer(boolean isReversed) {
+    mIsReversed = isReversed;
+  }
+
+/**
    * Reverses the order of the elements in the specified array.
    * 
    * @param array
@@ -66,15 +76,16 @@ public class PseudoTopologicalOrderer<N> implements Orderer<N> {
     }
   }
 
-  /**
+/**
    * {@inheritDoc}
    */
-  public List<N> newList(DirectedGraph<N> g, boolean reverse) {
+  @Override
+public List<N> newList(DirectedGraph<N> g, boolean reverse) {
     this.mIsReversed = reverse;
     return computeOrder(g, !mIsReversed);
   }
 
-  /**
+/**
    * Orders in pseudo-topological order.
    * 
    * @param g
@@ -85,7 +96,7 @@ public class PseudoTopologicalOrderer<N> implements Orderer<N> {
   @SuppressWarnings("unchecked")
   protected final List<N> computeOrder(DirectedGraph<N> g, boolean reverse) {
     final int n = g.size();
-    visited = Collections.newSetFromMap(new IdentityHashMap<N, Boolean>(n * 2 + 1));// new HashMap((3 * g.size()) / 2, 0.7f);
+    visited = Collections.newSetFromMap(new IdentityHashMap<>(n * 2 + 1));// new HashMap((3 * g.size()) / 2, 0.7f);
     indexStack = new int[n];
     stmtStack = (N[]) new Object[n];
     order = (N[]) new Object[n];
@@ -117,7 +128,7 @@ public class PseudoTopologicalOrderer<N> implements Orderer<N> {
     return o;
   }
 
-  // Unfortunately, the nice recursive solution fails
+// Unfortunately, the nice recursive solution fails
   // because of stack overflows
 
   // Fill in the 'order' list with a pseudo topological order
@@ -149,17 +160,7 @@ public class PseudoTopologicalOrderer<N> implements Orderer<N> {
     }
   }
 
-  // deprecated methods and constructors follow
-
-  /**
-   * @deprecated use {@link #PseudoTopologicalOrderer()} instead
-   */
-  @Deprecated
-  public PseudoTopologicalOrderer(boolean isReversed) {
-    mIsReversed = isReversed;
-  }
-
-  /**
+/**
    * @param g
    *          a DirectedGraph instance whose nodes we wish to order.
    * @return a pseudo-topologically ordered list of the graph's nodes.
@@ -170,7 +171,7 @@ public class PseudoTopologicalOrderer<N> implements Orderer<N> {
     return computeOrder(g, !mIsReversed);
   }
 
-  /**
+/**
    * Set the ordering for the orderer.
    * 
    * @param isReverse
@@ -182,7 +183,7 @@ public class PseudoTopologicalOrderer<N> implements Orderer<N> {
     mIsReversed = isReversed;
   }
 
-  /**
+/**
    * Check the ordering for the orderer.
    * 
    * @return true if we have reverse pseudo-topological ordering, false otherwise.

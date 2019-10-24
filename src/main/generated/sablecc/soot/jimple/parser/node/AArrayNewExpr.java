@@ -7,11 +7,11 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AArrayNewExpr extends PNewExpr
 {
-    private TNewarray _newarray_;
-    private TLParen _lParen_;
-    private PNonvoidType _nonvoidType_;
-    private TRParen _rParen_;
-    private PFixedArrayDescriptor _fixedArrayDescriptor_;
+    private TNewarray newarray;
+    private TLParen lParen;
+    private PNonvoidType nonvoidType;
+    private TRParen rParen;
+    private PFixedArrayDescriptor fixedArrayDescriptor;
 
     public AArrayNewExpr()
     {
@@ -42,11 +42,11 @@ public final class AArrayNewExpr extends PNewExpr
     public Object clone()
     {
         return new AArrayNewExpr(
-            cloneNode(this._newarray_),
-            cloneNode(this._lParen_),
-            cloneNode(this._nonvoidType_),
-            cloneNode(this._rParen_),
-            cloneNode(this._fixedArrayDescriptor_));
+            cloneNode(this.newarray),
+            cloneNode(this.lParen),
+            cloneNode(this.nonvoidType),
+            cloneNode(this.rParen),
+            cloneNode(this.fixedArrayDescriptor));
     }
 
     @Override
@@ -57,14 +57,14 @@ public final class AArrayNewExpr extends PNewExpr
 
     public TNewarray getNewarray()
     {
-        return this._newarray_;
+        return this.newarray;
     }
 
     public void setNewarray(TNewarray node)
     {
-        if(this._newarray_ != null)
+        if(this.newarray != null)
         {
-            this._newarray_.parent(null);
+            this.newarray.parent(null);
         }
 
         if(node != null)
@@ -77,19 +77,19 @@ public final class AArrayNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._newarray_ = node;
+        this.newarray = node;
     }
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -102,19 +102,19 @@ public final class AArrayNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PNonvoidType getNonvoidType()
     {
-        return this._nonvoidType_;
+        return this.nonvoidType;
     }
 
     public void setNonvoidType(PNonvoidType node)
     {
-        if(this._nonvoidType_ != null)
+        if(this.nonvoidType != null)
         {
-            this._nonvoidType_.parent(null);
+            this.nonvoidType.parent(null);
         }
 
         if(node != null)
@@ -127,19 +127,19 @@ public final class AArrayNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._nonvoidType_ = node;
+        this.nonvoidType = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -152,19 +152,19 @@ public final class AArrayNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     public PFixedArrayDescriptor getFixedArrayDescriptor()
     {
-        return this._fixedArrayDescriptor_;
+        return this.fixedArrayDescriptor;
     }
 
     public void setFixedArrayDescriptor(PFixedArrayDescriptor node)
     {
-        if(this._fixedArrayDescriptor_ != null)
+        if(this.fixedArrayDescriptor != null)
         {
-            this._fixedArrayDescriptor_.parent(null);
+            this.fixedArrayDescriptor.parent(null);
         }
 
         if(node != null)
@@ -177,51 +177,47 @@ public final class AArrayNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._fixedArrayDescriptor_ = node;
+        this.fixedArrayDescriptor = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._newarray_)
-            + toString(this._lParen_)
-            + toString(this._nonvoidType_)
-            + toString(this._rParen_)
-            + toString(this._fixedArrayDescriptor_);
+        return new StringBuilder().append("").append(toString(this.newarray)).append(toString(this.lParen)).append(toString(this.nonvoidType)).append(toString(this.rParen))
+				.append(toString(this.fixedArrayDescriptor)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._newarray_ == child)
+        if(this.newarray == child)
         {
-            this._newarray_ = null;
+            this.newarray = null;
             return;
         }
 
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._nonvoidType_ == child)
+        if(this.nonvoidType == child)
         {
-            this._nonvoidType_ = null;
+            this.nonvoidType = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
-        if(this._fixedArrayDescriptor_ == child)
+        if(this.fixedArrayDescriptor == child)
         {
-            this._fixedArrayDescriptor_ = null;
+            this.fixedArrayDescriptor = null;
             return;
         }
 
@@ -232,31 +228,31 @@ public final class AArrayNewExpr extends PNewExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._newarray_ == oldChild)
+        if(this.newarray == oldChild)
         {
             setNewarray((TNewarray) newChild);
             return;
         }
 
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._nonvoidType_ == oldChild)
+        if(this.nonvoidType == oldChild)
         {
             setNonvoidType((PNonvoidType) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;
         }
 
-        if(this._fixedArrayDescriptor_ == oldChild)
+        if(this.fixedArrayDescriptor == oldChild)
         {
             setFixedArrayDescriptor((PFixedArrayDescriptor) newChild);
             return;

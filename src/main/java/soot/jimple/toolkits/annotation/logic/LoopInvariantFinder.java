@@ -66,7 +66,8 @@ public class LoopInvariantFinder extends BodyTransformer {
   /**
    * this one uses the side effect tester
    */
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
 
     SmartLocalDefs sld = SmartLocalDefsPool.v().getSmartLocalDefsFor(b);
     UnitGraph g = sld.getGraph();
@@ -80,19 +81,13 @@ public class LoopInvariantFinder extends BodyTransformer {
       return;
     }
 
-    Iterator<Loop> lIt = loops.iterator();
-    while (lIt.hasNext()) {
-      Loop loop = lIt.next();
+    loops.forEach(loop -> {
       Stmt header = loop.getHead();
       Collection<Stmt> loopStmts = loop.getLoopStatements();
-      Iterator<Stmt> bIt = loopStmts.iterator();
-      while (bIt.hasNext()) {
-        Stmt tStmt = bIt.next();
-        // System.out.println("will test stmt: "+tStmt+" for loop header: "+header);
-        // System.out.println("will test with loop stmts: "+loopStmts);
-        handleLoopBodyStmt(tStmt, nset, loopStmts);
-      }
-    }
+      // System.out.println("will test stmt: "+tStmt+" for loop header: "+header);
+	// System.out.println("will test with loop stmts: "+loopStmts);
+	loopStmts.forEach(tStmt -> handleLoopBodyStmt(tStmt, nset, loopStmts));
+    });
   }
 
   private void handleLoopBodyStmt(Stmt s, NaiveSideEffectTester nset, Collection<Stmt> loopStmts) {
@@ -122,7 +117,7 @@ public class LoopInvariantFinder extends BodyTransformer {
       return;
     }
 
-    logger.debug("s : " + s + " use boxes: " + s.getUseBoxes() + " def boxes: " + s.getDefBoxes());
+    logger.debug(new StringBuilder().append("s : ").append(s).append(" use boxes: ").append(s.getUseBoxes()).append(" def boxes: ").append(s.getDefBoxes()).toString());
     // just use boxes here
     Iterator useBoxesIt = s.getUseBoxes().iterator();
     boolean result = true;
@@ -148,17 +143,16 @@ public class LoopInvariantFinder extends BodyTransformer {
         continue;
       }
 
-      logger.debug("test: " + v + " of kind: " + v.getClass());
+      logger.debug(new StringBuilder().append("test: ").append(v).append(" of kind: ").append(v.getClass()).toString());
       Iterator loopStmtsIt = loopStmts.iterator();
       while (loopStmtsIt.hasNext()) {
         Stmt next = (Stmt) loopStmtsIt.next();
-        if (nset.unitCanWriteTo(next, v)) {
-          if (!isConstant(next)) {
+        boolean condition = nset.unitCanWriteTo(next, v) && !isConstant(next);
+		if (condition) {
             logger.debug("result = false unit can be written to by: " + next);
             result = false;
             break uses;
           }
-        }
       }
 
     }
@@ -184,7 +178,7 @@ public class LoopInvariantFinder extends BodyTransformer {
         continue;
       }
 
-      logger.debug("test: " + v + " of kind: " + v.getClass());
+      logger.debug(new StringBuilder().append("test: ").append(v).append(" of kind: ").append(v.getClass()).toString());
 
       Iterator loopStmtsIt = loopStmts.iterator();
       while (loopStmtsIt.hasNext()) {
@@ -192,17 +186,16 @@ public class LoopInvariantFinder extends BodyTransformer {
         if (next.equals(s)) {
           continue;
         }
-        if (nset.unitCanWriteTo(next, v)) {
-          if (!isConstant(next)) {
+        boolean condition1 = nset.unitCanWriteTo(next, v) && !isConstant(next);
+		if (condition1) {
             logger.debug("result false: unit can be written to by: " + next);
             result = false;
             break defs;
           }
-        }
       }
 
     }
-    logger.debug("stmt: " + s + " result: " + result);
+    logger.debug(new StringBuilder().append("stmt: ").append(s).append(" result: ").append(result).toString());
     if (result) {
       s.addTag(new LoopInvariantTag("is loop invariant"));
       s.addTag(new ColorTag(ColorTag.RED, "Loop Invariant Analysis"));

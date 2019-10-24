@@ -65,9 +65,8 @@ public class JimpleIFDSSolver<D, I extends InterproceduralCFG<Unit, SootMethod>>
   }
 
   public void dumpResults() {
-    try {
-      PrintWriter out = new PrintWriter(new FileOutputStream("ideSolverDump" + System.currentTimeMillis() + ".csv"));
-      List<SortableCSVString> res = new ArrayList<SortableCSVString>();
+    try (PrintWriter out = new PrintWriter(new FileOutputStream(new StringBuilder().append("ideSolverDump").append(System.currentTimeMillis()).append(".csv").toString()))) {
+      List<SortableCSVString> res = new ArrayList<>();
       for (Cell<Unit, D, ?> entry : val.cellSet()) {
         SootMethod methodOf = (SootMethod) icfg.getMethodOf(entry.getRowKey());
         PatchingChain<Unit> units = methodOf.getActiveBody().getUnits();
@@ -80,15 +79,13 @@ public class JimpleIFDSSolver<D, I extends InterproceduralCFG<Unit, SootMethod>>
         }
 
         res.add(new SortableCSVString(
-            methodOf + ";" + entry.getRowKey() + "@" + i + ";" + entry.getColumnKey() + ";" + entry.getValue(), i));
+            new StringBuilder().append(methodOf).append(";").append(entry.getRowKey()).append("@").append(i).append(";")
+					.append(entry.getColumnKey()).append(";").append(entry.getValue()).toString(), i));
       }
       Collections.sort(res);
       // replacement is bugfix for excel view:
-      for (SortableCSVString string : res) {
-        out.println(string.value.replace("\"", "'"));
-      }
+	res.forEach(string -> out.println(string.value.replace("\"", "'")));
       out.flush();
-      out.close();
     } catch (FileNotFoundException e) {
       logger.error(e.getMessage(), e);
     }

@@ -34,7 +34,8 @@ public class CONSTANT_Class_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
+    @Override
+	public String toString() {
       return "ClassInfo: " + name();
     }
 
@@ -62,8 +63,9 @@ public class CONSTANT_Class_Info extends CONSTANT_Info {
       String name = name();
       //name = name.replace('$', '.');
       int pos = name.lastIndexOf('.');
-      if(pos == -1)
-        return "";
+      if(pos == -1) {
+		return "";
+	}
       return name.substring(0, pos);
     }
 
@@ -74,10 +76,11 @@ public class CONSTANT_Class_Info extends CONSTANT_Info {
       int pos = name.lastIndexOf('.');
       String typeName = name.substring(pos + 1, name.length());
       String packageName = pos == -1 ? "" : name.substring(0, pos);
-      if(typeName.indexOf('$') != -1)
-        return new BytecodeTypeAccess(packageName, typeName);
-      else
-        return new TypeAccess(packageName, typeName);
+      if(typeName.indexOf('$') != -1) {
+		return new BytecodeTypeAccess(packageName, typeName);
+	} else {
+		return new TypeAccess(packageName, typeName);
+	}
     }
 
 

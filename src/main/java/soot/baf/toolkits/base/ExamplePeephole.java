@@ -33,7 +33,8 @@ import soot.baf.InstanceCastInst;
  */
 
 public class ExamplePeephole implements Peephole {
-  public boolean apply(Body b) {
+  @Override
+public boolean apply(Body b) {
     boolean changed = false;
 
     Iterator<Unit> it = b.getUnits().iterator();

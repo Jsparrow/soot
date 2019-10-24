@@ -31,8 +31,6 @@ public abstract class ASTLabeledNode extends ASTNode {
   private SETNodeLabel label;
 
   public ASTLabeledNode(SETNodeLabel label) {
-    super();
-
     set_Label(label);
   }
 
@@ -44,23 +42,25 @@ public abstract class ASTLabeledNode extends ASTNode {
     this.label = label;
   }
 
-  public void perform_Analysis(ASTAnalysis a) {
+  @Override
+public void perform_Analysis(ASTAnalysis a) {
     perform_AnalysisOnSubBodies(a);
   }
 
   public void label_toString(UnitPrinter up) {
-    if (label.toString() != null) {
-      up.literal(label.toString());
-      up.literal(":");
-      up.newline();
-    }
+    if (label.toString() == null) {
+		return;
+	}
+	up.literal(label.toString());
+	up.literal(":");
+	up.newline();
   }
 
   public String label_toString() {
     if (label.toString() == null) {
-      return new String();
+      return "";
     } else {
-      StringBuffer b = new StringBuffer();
+      StringBuilder b = new StringBuilder();
 
       b.append(label.toString());
       b.append(":");

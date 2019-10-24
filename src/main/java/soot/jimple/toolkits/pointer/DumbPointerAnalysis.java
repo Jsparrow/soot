@@ -44,7 +44,8 @@ public class DumbPointerAnalysis implements PointsToAnalysis {
   }
 
   /** Returns the set of objects pointed to by variable l. */
-  public PointsToSet reachingObjects(Local l) {
+  @Override
+public PointsToSet reachingObjects(Local l) {
     Type t = l.getType();
     if (t instanceof RefType) {
       return FullObjectSet.v((RefType) t);
@@ -53,12 +54,14 @@ public class DumbPointerAnalysis implements PointsToAnalysis {
   }
 
   /** Returns the set of objects pointed to by variable l in context c. */
-  public PointsToSet reachingObjects(Context c, Local l) {
+  @Override
+public PointsToSet reachingObjects(Context c, Local l) {
     return reachingObjects(l);
   }
 
   /** Returns the set of objects pointed to by static field f. */
-  public PointsToSet reachingObjects(SootField f) {
+  @Override
+public PointsToSet reachingObjects(SootField f) {
     Type t = f.getType();
     if (t instanceof RefType) {
       return FullObjectSet.v((RefType) t);
@@ -69,28 +72,32 @@ public class DumbPointerAnalysis implements PointsToAnalysis {
   /**
    * Returns the set of objects pointed to by instance field f of the objects in the PointsToSet s.
    */
-  public PointsToSet reachingObjects(PointsToSet s, SootField f) {
+  @Override
+public PointsToSet reachingObjects(PointsToSet s, SootField f) {
     return reachingObjects(f);
   }
 
   /**
    * Returns the set of objects pointed to by instance field f of the objects pointed to by l.
    */
-  public PointsToSet reachingObjects(Local l, SootField f) {
+  @Override
+public PointsToSet reachingObjects(Local l, SootField f) {
     return reachingObjects(f);
   }
 
   /**
    * Returns the set of objects pointed to by instance field f of the objects pointed to by l in context c.
    */
-  public PointsToSet reachingObjects(Context c, Local l, SootField f) {
+  @Override
+public PointsToSet reachingObjects(Context c, Local l, SootField f) {
     return reachingObjects(f);
   }
 
   /**
    * Returns the set of objects pointed to by elements of the arrays in the PointsToSet s.
    */
-  public PointsToSet reachingObjectsOfArrayElement(PointsToSet s) {
+  @Override
+public PointsToSet reachingObjectsOfArrayElement(PointsToSet s) {
     return FullObjectSet.v();
   }
 }

@@ -59,7 +59,135 @@ import soot.jimple.Stmt;
 
 public class ReachingCopies extends StructuredAnalysis {
 
-  /***************** DEFINIING LOCAL PAIR CLASS ************************/
+  /****************************** END OF LOCAL PAIR CLASS ***********************/
+	
+	  public ReachingCopies(Object analyze) {
+	    // the input to the process method is an empty DavaFlow Set meaning
+	    // out(start) ={}
+	    DavaFlowSet temp = (DavaFlowSet) process(analyze, new DavaFlowSet());
+	  }
+
+	@Override
+	public DavaFlowSet emptyFlowSet() {
+	    return new DavaFlowSet();
+	  }
+
+	@Override
+	public void setMergeType() {
+	    MERGETYPE = INTERSECTION;
+	  }
+
+	@Override
+	  public DavaFlowSet newInitialFlow() {
+	    return new DavaFlowSet();
+	  }
+
+	@Override
+	  public DavaFlowSet cloneFlowSet(DavaFlowSet flowSet) {
+	    return ((DavaFlowSet) flowSet).clone();
+	  }
+
+	/*
+	   * By construction conditions never have assignment statements. Hence processing a condition has no effect on this analysis
+	   */
+	  @Override
+	  public DavaFlowSet processUnaryBinaryCondition(ASTUnaryBinaryCondition cond, DavaFlowSet input) {
+	    return input;
+	  }
+
+	/*
+	   * By construction the synchronized Local is a Value and can definetly not have an assignment stmt Processing a synch local
+	   * has no effect on this analysis
+	   */
+	  @Override
+	  public DavaFlowSet processSynchronizedLocal(Local local, DavaFlowSet input) {
+	    return input;
+	  }
+
+	/*
+	   * The switch key is stored as a value and hence can never have an assignment stmt Processing the switch key has no effect
+	   * on the analysis
+	   */
+	  @Override
+	  public DavaFlowSet processSwitchKey(Value key, DavaFlowSet input) {
+	    return input;
+	  }
+
+	/*
+	   * This method internally invoked by the process method decides which Statement specialized method to call
+	   */
+	  @Override
+	  public DavaFlowSet processStatement(Stmt s, DavaFlowSet input) {
+	    DavaFlowSet inSet = (DavaFlowSet) input;
+	
+	    /*
+	     * If this path will not be taken return no path straightaway
+	     */
+	    if (inSet == NOPATH) {
+	      return inSet;
+	    }
+	
+	    if (!(s instanceof DefinitionStmt)) {
+			return input;
+		}
+		DavaFlowSet toReturn = (DavaFlowSet) cloneFlowSet(inSet);
+		// x = expr;
+	      // check if expr is a local in which case this is a copy
+	      Value leftOp = ((DefinitionStmt) s).getLeftOp();
+		Value rightOp = ((DefinitionStmt) s).getRightOp();
+		if (leftOp instanceof Local) {
+	        // KILL any available copy with local since it has been
+	        // redefined
+	        kill(toReturn, (Local) leftOp);
+	      } // leftop is a local
+		if (leftOp instanceof Local && rightOp instanceof Local) {
+	        // this is a copy statement
+	        // GEN
+	        gen(toReturn, (Local) leftOp, (Local) rightOp);
+	      }
+		return toReturn;
+	  }
+
+	public void gen(DavaFlowSet in, Local left, Local right) {
+	    // adding localpair
+	    // no need to check for duplicates as the DavaFlowSet checks that
+	    LocalPair localp = new LocalPair(left, right);
+	    in.add(localp);
+	  }
+
+	public void kill(DavaFlowSet<LocalPair> in, Local redefined) {
+	    // kill any previous localpairs which have the redefined Local in the
+	    // left OR right position
+	    for (Iterator<LocalPair> listIt = in.iterator(); listIt.hasNext();) {
+	      LocalPair tempPair = listIt.next();
+	      if (tempPair.contains(redefined)) {
+	        // need to kill this from the list
+	        listIt.remove();
+	      }
+	    }
+	  }
+
+	/*
+	   * Wrapper method to get before set of an ASTNode or Statement which gives us the reaching copies at this point
+	   */
+	  public DavaFlowSet getReachingCopies(Object node) {
+	    // get the before set for this node
+	    DavaFlowSet beforeSet = getBeforeSet(node);
+	
+	    if (beforeSet == null) {
+	      throw new RuntimeException("Could not get reaching copies of node/stmt");
+	    }
+	    // Get all reachingCopies
+	
+	    /*
+	     * the list that toList of this object contains elements of type LocalPair (a,b) which means this is a copy stmt of the
+	     * form a=b
+	     */
+	
+	    return beforeSet;
+	  }
+
+/***************** DEFINIING LOCAL PAIR CLASS ************************/
   public class LocalPair {
     private final Local leftLocal;
     private final Local rightLocal;
@@ -77,14 +205,12 @@ public class ReachingCopies extends StructuredAnalysis {
       return rightLocal;
     }
 
-    public boolean equals(Object other) {
-      if (other instanceof LocalPair) {
-        if (this.leftLocal.toString().equals(((LocalPair) other).getLeftLocal().toString())) {
-          if (this.rightLocal.toString().equals(((LocalPair) other).getRightLocal().toString())) {
-            return true;
-          }
-        }
-      }
+    @Override
+	public boolean equals(Object other) {
+      boolean condition = other instanceof LocalPair && this.leftLocal.toString().equals(((LocalPair) other).getLeftLocal().toString()) && this.rightLocal.toString().equals(((LocalPair) other).getRightLocal().toString());
+	if (condition) {
+	    return true;
+	  }
       return false;
     }
 
@@ -99,142 +225,13 @@ public class ReachingCopies extends StructuredAnalysis {
       return false;
     }
 
-    public String toString() {
-      StringBuffer b = new StringBuffer();
-      b.append("<" + leftLocal.toString() + "," + rightLocal.toString() + ">");
+    @Override
+	public String toString() {
+      StringBuilder b = new StringBuilder();
+      b.append(new StringBuilder().append("<").append(leftLocal.toString()).append(",").append(rightLocal.toString()).append(">").toString());
       return b.toString();
     }
 
-  }
-
-  /****************************** END OF LOCAL PAIR CLASS ***********************/
-
-  public ReachingCopies(Object analyze) {
-    super();
-    // the input to the process method is an empty DavaFlow Set meaning
-    // out(start) ={}
-    DavaFlowSet temp = (DavaFlowSet) process(analyze, new DavaFlowSet());
-  }
-
-  public DavaFlowSet emptyFlowSet() {
-    return new DavaFlowSet();
-  }
-
-  public void setMergeType() {
-    MERGETYPE = INTERSECTION;
-  }
-
-  @Override
-  public DavaFlowSet newInitialFlow() {
-    return new DavaFlowSet();
-  }
-
-  @Override
-  public DavaFlowSet cloneFlowSet(DavaFlowSet flowSet) {
-    return ((DavaFlowSet) flowSet).clone();
-  }
-
-  /*
-   * By construction conditions never have assignment statements. Hence processing a condition has no effect on this analysis
-   */
-  @Override
-  public DavaFlowSet processUnaryBinaryCondition(ASTUnaryBinaryCondition cond, DavaFlowSet input) {
-    return input;
-  }
-
-  /*
-   * By construction the synchronized Local is a Value and can definetly not have an assignment stmt Processing a synch local
-   * has no effect on this analysis
-   */
-  @Override
-  public DavaFlowSet processSynchronizedLocal(Local local, DavaFlowSet input) {
-    return input;
-  }
-
-  /*
-   * The switch key is stored as a value and hence can never have an assignment stmt Processing the switch key has no effect
-   * on the analysis
-   */
-  @Override
-  public DavaFlowSet processSwitchKey(Value key, DavaFlowSet input) {
-    return input;
-  }
-
-  /*
-   * This method internally invoked by the process method decides which Statement specialized method to call
-   */
-  @Override
-  public DavaFlowSet processStatement(Stmt s, DavaFlowSet input) {
-    DavaFlowSet inSet = (DavaFlowSet) input;
-
-    /*
-     * If this path will not be taken return no path straightaway
-     */
-    if (inSet == NOPATH) {
-      return inSet;
-    }
-
-    if (s instanceof DefinitionStmt) {
-      DavaFlowSet toReturn = (DavaFlowSet) cloneFlowSet(inSet);
-      // x = expr;
-      // check if expr is a local in which case this is a copy
-      Value leftOp = ((DefinitionStmt) s).getLeftOp();
-      Value rightOp = ((DefinitionStmt) s).getRightOp();
-
-      if (leftOp instanceof Local) {
-        // KILL any available copy with local since it has been
-        // redefined
-        kill(toReturn, (Local) leftOp);
-      } // leftop is a local
-
-      if (leftOp instanceof Local && rightOp instanceof Local) {
-        // this is a copy statement
-        // GEN
-        gen(toReturn, (Local) leftOp, (Local) rightOp);
-      }
-      return toReturn;
-    } else {
-      return input;
-    }
-  }
-
-  public void gen(DavaFlowSet in, Local left, Local right) {
-    // adding localpair
-    // no need to check for duplicates as the DavaFlowSet checks that
-    LocalPair localp = new LocalPair(left, right);
-    in.add(localp);
-  }
-
-  public void kill(DavaFlowSet<LocalPair> in, Local redefined) {
-    // kill any previous localpairs which have the redefined Local in the
-    // left OR right position
-    for (Iterator<LocalPair> listIt = in.iterator(); listIt.hasNext();) {
-      LocalPair tempPair = listIt.next();
-      if (tempPair.contains(redefined)) {
-        // need to kill this from the list
-        listIt.remove();
-      }
-    }
-  }
-
-  /*
-   * Wrapper method to get before set of an ASTNode or Statement which gives us the reaching copies at this point
-   */
-  public DavaFlowSet getReachingCopies(Object node) {
-    // get the before set for this node
-    DavaFlowSet beforeSet = getBeforeSet(node);
-
-    if (beforeSet == null) {
-      throw new RuntimeException("Could not get reaching copies of node/stmt");
-    }
-    // Get all reachingCopies
-
-    /*
-     * the list that toList of this object contains elements of type LocalPair (a,b) which means this is a copy stmt of the
-     * form a=b
-     */
-
-    return beforeSet;
   }
 
 }

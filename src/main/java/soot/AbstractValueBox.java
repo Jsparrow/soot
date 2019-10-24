@@ -31,28 +31,33 @@ import soot.tagkit.AbstractHost;
 public abstract class AbstractValueBox extends AbstractHost implements ValueBox {
   Value value;
 
-  public void setValue(Value value) {
+  @Override
+public void setValue(Value value) {
     if (value == null) {
       throw new IllegalArgumentException("value may not be null");
     }
     if (canContainValue(value)) {
       this.value = value;
     } else {
-      throw new RuntimeException("Box " + this + " cannot contain value: " + value + "(" + value.getClass() + ")");
+      throw new RuntimeException(new StringBuilder().append("Box ").append(this).append(" cannot contain value: ").append(value).append("(").append(value.getClass()).append(")")
+			.toString());
     }
   }
 
-  public Value getValue() {
+  @Override
+public Value getValue() {
     return value;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.startValueBox(this);
     value.toString(up);
     up.endValueBox(this);
   }
 
-  public String toString() {
-    return getClass().getSimpleName() + "(" + value + ")";
+  @Override
+public String toString() {
+    return new StringBuilder().append(getClass().getSimpleName()).append("(").append(value).append(")").toString();
   }
 }

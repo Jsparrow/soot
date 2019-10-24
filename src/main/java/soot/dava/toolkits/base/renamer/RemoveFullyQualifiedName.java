@@ -31,17 +31,13 @@ import soot.util.IterableSet;
 public class RemoveFullyQualifiedName {
 
   public static boolean containsMultiple(Iterator it, String qualifiedName, Type t) {
-    /*
+    boolean condition = t != null && t instanceof ArrayType && qualifiedName.indexOf('[') >= 0;
+	/*
      * The fully qualified name might contain [] in the end if the type is an ArrayType
      */
-    if (t != null) {
-      if (t instanceof ArrayType) {
-        if (qualifiedName.indexOf('[') >= 0) {
-          qualifiedName = qualifiedName.substring(0, qualifiedName.indexOf('['));
-        }
-
-      }
-    }
+    if (condition) {
+	  qualifiedName = qualifiedName.substring(0, qualifiedName.indexOf('['));
+	}
     // get last name
     String className = getClassName(qualifiedName);
 

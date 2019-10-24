@@ -70,7 +70,8 @@ class Instruction_Newarray extends Instruction {
     name = "newarray";
   }
 
-  public String toString(cp_info constant_pool[]) {
+  @Override
+public String toString(cp_info constant_pool[]) {
     String args;
     switch (atype) {
       case T_BOOLEAN:
@@ -101,19 +102,22 @@ class Instruction_Newarray extends Instruction {
         args = Integer.toString(atype);
         break;
     }
-    return super.toString(constant_pool) + argsep + args;
+    return new StringBuilder().append(super.toString(constant_pool)).append(argsep).append(args).toString();
   }
 
-  public int nextOffset(int curr) {
+  @Override
+public int nextOffset(int curr) {
     return curr + 2;
   }
 
-  public int parse(byte bc[], int index) {
+  @Override
+public int parse(byte bc[], int index) {
     atype = bc[index];
     return index + 1;
   }
 
-  public int compile(byte bc[], int index) {
+  @Override
+public int compile(byte bc[], int index) {
     bc[index++] = code;
     bc[index] = atype;
     return index + 1;

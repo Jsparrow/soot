@@ -39,7 +39,8 @@ public class ObjExprBox extends ExprBox {
     super(value);
   }
 
-  public boolean canContainValue(Value value) {
+  @Override
+public boolean canContainValue(Value value) {
     return value instanceof ConcreteRef || value instanceof InvokeExpr || value instanceof NewArrayExpr
         || value instanceof NewMultiArrayExpr || value instanceof Local || value instanceof NullConstant
         || value instanceof StringConstant || value instanceof ClassConstant

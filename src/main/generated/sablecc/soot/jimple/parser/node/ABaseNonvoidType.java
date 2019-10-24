@@ -8,8 +8,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ABaseNonvoidType extends PNonvoidType
 {
-    private PBaseTypeNoName _baseTypeNoName_;
-    private final LinkedList<PArrayBrackets> _arrayBrackets_ = new LinkedList<PArrayBrackets>();
+    private PBaseTypeNoName baseTypeNoName;
+    private final LinkedList<PArrayBrackets> arrayBrackets = new LinkedList<>();
 
     public ABaseNonvoidType()
     {
@@ -31,8 +31,8 @@ public final class ABaseNonvoidType extends PNonvoidType
     public Object clone()
     {
         return new ABaseNonvoidType(
-            cloneNode(this._baseTypeNoName_),
-            cloneList(this._arrayBrackets_));
+            cloneNode(this.baseTypeNoName),
+            cloneList(this.arrayBrackets));
     }
 
     @Override
@@ -43,14 +43,14 @@ public final class ABaseNonvoidType extends PNonvoidType
 
     public PBaseTypeNoName getBaseTypeNoName()
     {
-        return this._baseTypeNoName_;
+        return this.baseTypeNoName;
     }
 
     public void setBaseTypeNoName(PBaseTypeNoName node)
     {
-        if(this._baseTypeNoName_ != null)
+        if(this.baseTypeNoName != null)
         {
-            this._baseTypeNoName_.parent(null);
+            this.baseTypeNoName.parent(null);
         }
 
         if(node != null)
@@ -63,54 +63,46 @@ public final class ABaseNonvoidType extends PNonvoidType
             node.parent(this);
         }
 
-        this._baseTypeNoName_ = node;
+        this.baseTypeNoName = node;
     }
 
     public LinkedList<PArrayBrackets> getArrayBrackets()
     {
-        return this._arrayBrackets_;
+        return this.arrayBrackets;
     }
 
     public void setArrayBrackets(List<?> list)
     {
-        for(PArrayBrackets e : this._arrayBrackets_)
-        {
-            e.parent(null);
-        }
-        this._arrayBrackets_.clear();
+        this.arrayBrackets.forEach(e -> e.parent(null));
+        this.arrayBrackets.clear();
 
-        for(Object obj_e : list)
-        {
-            PArrayBrackets e = (PArrayBrackets) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PArrayBrackets) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._arrayBrackets_.add(e);
-        }
+			e.parent(this);
+			this.arrayBrackets.add(e);
+		});
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._baseTypeNoName_)
-            + toString(this._arrayBrackets_);
+        return new StringBuilder().append("").append(toString(this.baseTypeNoName)).append(toString(this.arrayBrackets)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._baseTypeNoName_ == child)
+        if(this.baseTypeNoName == child)
         {
-            this._baseTypeNoName_ = null;
+            this.baseTypeNoName = null;
             return;
         }
 
-        if(this._arrayBrackets_.remove(child))
+        if(this.arrayBrackets.remove(child))
         {
             return;
         }
@@ -122,13 +114,13 @@ public final class ABaseNonvoidType extends PNonvoidType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._baseTypeNoName_ == oldChild)
+        if(this.baseTypeNoName == oldChild)
         {
             setBaseTypeNoName((PBaseTypeNoName) newChild);
             return;
         }
 
-        for(ListIterator<PArrayBrackets> i = this._arrayBrackets_.listIterator(); i.hasNext();)
+        for(ListIterator<PArrayBrackets> i = this.arrayBrackets.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {

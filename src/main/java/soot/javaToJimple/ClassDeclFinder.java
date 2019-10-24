@@ -30,15 +30,16 @@ public class ClassDeclFinder extends polyglot.visit.NodeVisitor {
 
   private final ArrayList<ClassDecl> declsFound;
 
-  public ArrayList<ClassDecl> declsFound() {
+  public ClassDeclFinder() {
+    declsFound = new ArrayList<>();
+  }
+
+public ArrayList<ClassDecl> declsFound() {
     return declsFound;
   }
 
-  public ClassDeclFinder() {
-    declsFound = new ArrayList<ClassDecl>();
-  }
-
-  public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
+@Override
+public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
 
     if (n instanceof polyglot.ast.ClassDecl) {
       declsFound.add((polyglot.ast.ClassDecl) n);

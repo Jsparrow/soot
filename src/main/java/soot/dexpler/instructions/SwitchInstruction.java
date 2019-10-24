@@ -50,14 +50,16 @@ public abstract class SwitchInstruction extends PseudoInstruction implements Def
    */
   protected abstract Stmt switchStatement(DexBody body, Instruction targetData, Local key);
 
-  public void jimplify(DexBody body) {
+  @Override
+public void jimplify(DexBody body) {
     markerUnit = Jimple.v().newNopStmt();
     unit = markerUnit;
     body.add(markerUnit);
     body.addDeferredJimplification(this);
   }
 
-  public void deferredJimplify(DexBody body) {
+  @Override
+public void deferredJimplify(DexBody body) {
     int keyRegister = ((OneRegisterInstruction) instruction).getRegisterA();
     int offset = ((OffsetInstruction) instruction).getCodeOffset();
     Local key = body.getRegisterLocal(keyRegister);

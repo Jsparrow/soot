@@ -71,10 +71,11 @@ public abstract class AbstractASMBackendTestWithSources implements Opcodes {
 	private void runSoot() {
 		G.reset();
 		// Location of the rt.jar
-		String rtJar = System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar";
+		String rtJar = new StringBuilder().append(System.getProperty("java.home")).append(File.separator).append("lib").append(File.separator).append("rt.jar")
+				.toString();
 
 		// Run Soot and print output to .asm-files.
-		Main.main(new String[] { "-cp", getClassPathFolder() + File.pathSeparator + rtJar, "-src-prec", "java",
+		Main.main(new String[] { "-cp", new StringBuilder().append(getClassPathFolder()).append(File.pathSeparator).append(rtJar).toString(), "-src-prec", "java",
 				"-output-format", "asm", "-allow-phantom-refs", "-keep-line-number", "-java-version",
 				getRequiredJavaVersion(), getTargetClass() });
 	}
@@ -100,12 +101,12 @@ public abstract class AbstractASMBackendTestWithSources implements Opcodes {
 		/*
 		 * Print output for comparison to file for debugging purposes.
 		 */
-		PrintWriter ow = new PrintWriter(new File("sootOutput/" + getTargetClass() + ".asm.compare"));
+		PrintWriter ow = new PrintWriter(new File(new StringBuilder().append("sootOutput/").append(getTargetClass()).append(".asm.compare").toString()));
 		ow.print(comparisonOutput);
 		ow.flush();
 		ow.close();
 
-		Scanner sootOutput = new Scanner(new File("sootOutput/" + getTargetClass() + ".asm"));
+		Scanner sootOutput = new Scanner(new File(new StringBuilder().append("sootOutput/").append(getTargetClass()).append(".asm").toString()));
 		Scanner compareOutput = new Scanner(comparisonOutput);
 
 		int line = 1;
@@ -118,7 +119,8 @@ public abstract class AbstractASMBackendTestWithSources implements Opcodes {
 			String output = sootOutput.nextLine();
 
 			// Compare lines
-			assertTrue("Expected line " + compare.trim() + " but got " + output.trim() + " in line " + line,
+			assertTrue(new StringBuilder().append("Expected line ").append(compare.trim()).append(" but got ").append(output.trim()).append(" in line ").append(line)
+					.toString(),
 					compare.equals(output));
 			++line;
 		}

@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class Start extends Node
 {
-    private PFile _pFile_;
-    private EOF _eof_;
+    private PFile pFile;
+    private EOF eof;
 
     public Start()
     {
@@ -27,8 +27,8 @@ public final class Start extends Node
     public Object clone()
     {
         return new Start(
-            cloneNode(this._pFile_),
-            cloneNode(this._eof_));
+            cloneNode(this.pFile),
+            cloneNode(this.eof));
     }
 
     @Override
@@ -39,14 +39,14 @@ public final class Start extends Node
 
     public PFile getPFile()
     {
-        return this._pFile_;
+        return this.pFile;
     }
 
     public void setPFile(PFile node)
     {
-        if(this._pFile_ != null)
+        if(this.pFile != null)
         {
-            this._pFile_.parent(null);
+            this.pFile.parent(null);
         }
 
         if(node != null)
@@ -59,19 +59,19 @@ public final class Start extends Node
             node.parent(this);
         }
 
-        this._pFile_ = node;
+        this.pFile = node;
     }
 
     public EOF getEOF()
     {
-        return this._eof_;
+        return this.eof;
     }
 
     public void setEOF(EOF node)
     {
-        if(this._eof_ != null)
+        if(this.eof != null)
         {
-            this._eof_.parent(null);
+            this.eof.parent(null);
         }
 
         if(node != null)
@@ -84,21 +84,21 @@ public final class Start extends Node
             node.parent(this);
         }
 
-        this._eof_ = node;
+        this.eof = node;
     }
 
     @Override
     void removeChild(Node child)
     {
-        if(this._pFile_ == child)
+        if(this.pFile == child)
         {
-            this._pFile_ = null;
+            this.pFile = null;
             return;
         }
 
-        if(this._eof_ == child)
+        if(this.eof == child)
         {
-            this._eof_ = null;
+            this.eof = null;
             return;
         }
 
@@ -108,13 +108,13 @@ public final class Start extends Node
     @Override
     void replaceChild(Node oldChild, Node newChild)
     {
-        if(this._pFile_ == oldChild)
+        if(this.pFile == oldChild)
         {
             setPFile((PFile) newChild);
             return;
         }
 
-        if(this._eof_ == oldChild)
+        if(this.eof == oldChild)
         {
             setEOF((EOF) newChild);
             return;
@@ -126,8 +126,6 @@ public final class Start extends Node
     @Override
     public String toString()
     {
-        return "" +
-            toString(this._pFile_) +
-            toString(this._eof_);
+        return new StringBuilder().append("").append(toString(this.pFile)).append(toString(this.eof)).toString();
     }
 }

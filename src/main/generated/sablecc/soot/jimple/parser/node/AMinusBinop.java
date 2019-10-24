@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AMinusBinop extends PBinop
 {
-    private TMinus _minus_;
+    private TMinus minus;
 
     public AMinusBinop()
     {
@@ -26,7 +26,7 @@ public final class AMinusBinop extends PBinop
     public Object clone()
     {
         return new AMinusBinop(
-            cloneNode(this._minus_));
+            cloneNode(this.minus));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AMinusBinop extends PBinop
 
     public TMinus getMinus()
     {
-        return this._minus_;
+        return this.minus;
     }
 
     public void setMinus(TMinus node)
     {
-        if(this._minus_ != null)
+        if(this.minus != null)
         {
-            this._minus_.parent(null);
+            this.minus.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AMinusBinop extends PBinop
             node.parent(this);
         }
 
-        this._minus_ = node;
+        this.minus = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._minus_);
+            + toString(this.minus);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._minus_ == child)
+        if(this.minus == child)
         {
-            this._minus_ = null;
+            this.minus = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AMinusBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._minus_ == oldChild)
+        if(this.minus == oldChild)
         {
             setMinus((TMinus) newChild);
             return;

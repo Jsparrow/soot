@@ -50,61 +50,70 @@ public class BooleanConditionSimplification extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
-  }
-
   public BooleanConditionSimplification() {
   }
 
-  /*
+@Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  }
+
+/*
    * The method checks whether a particular ASTBinaryCondition is a comparison of a local with a boolean If so the
    * ASTBinaryCondition is replaced by a ASTUnaryCondition
    */
-  public void outASTIfNode(ASTIfNode node) {
+  @Override
+public void outASTIfNode(ASTIfNode node) {
     ASTCondition condition = node.get_Condition();
-    if (condition instanceof ASTBinaryCondition) {
-      ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
-      Value unary = checkBooleanUse(condExpr);
-      if (unary != null) {
+    if (!(condition instanceof ASTBinaryCondition)) {
+		return;
+	}
+	ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
+	Value unary = checkBooleanUse(condExpr);
+	if (unary != null) {
         node.set_Condition(new ASTUnaryCondition(unary));
       }
-    }
   }
 
-  public void outASTIfElseNode(ASTIfElseNode node) {
+@Override
+public void outASTIfElseNode(ASTIfElseNode node) {
     ASTCondition condition = node.get_Condition();
-    if (condition instanceof ASTBinaryCondition) {
-      ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
-      Value unary = checkBooleanUse(condExpr);
-      if (unary != null) {
+    if (!(condition instanceof ASTBinaryCondition)) {
+		return;
+	}
+	ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
+	Value unary = checkBooleanUse(condExpr);
+	if (unary != null) {
         node.set_Condition(new ASTUnaryCondition(unary));
       }
-    }
   }
 
-  public void outASTWhileNode(ASTWhileNode node) {
+@Override
+public void outASTWhileNode(ASTWhileNode node) {
     ASTCondition condition = node.get_Condition();
-    if (condition instanceof ASTBinaryCondition) {
-      ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
-      Value unary = checkBooleanUse(condExpr);
-      if (unary != null) {
+    if (!(condition instanceof ASTBinaryCondition)) {
+		return;
+	}
+	ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
+	Value unary = checkBooleanUse(condExpr);
+	if (unary != null) {
         node.set_Condition(new ASTUnaryCondition(unary));
       }
-    }
   }
 
-  public void outASTDoWhileNode(ASTDoWhileNode node) {
+@Override
+public void outASTDoWhileNode(ASTDoWhileNode node) {
     ASTCondition condition = node.get_Condition();
-    if (condition instanceof ASTBinaryCondition) {
-      ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
-      Value unary = checkBooleanUse(condExpr);
-      if (unary != null) {
+    if (!(condition instanceof ASTBinaryCondition)) {
+		return;
+	}
+	ConditionExpr condExpr = ((ASTBinaryCondition) condition).getConditionExpr();
+	Value unary = checkBooleanUse(condExpr);
+	if (unary != null) {
         node.set_Condition(new ASTUnaryCondition(unary));
       }
-    }
   }
 
-  private Value checkBooleanUse(ConditionExpr condition) {
+private Value checkBooleanUse(ConditionExpr condition) {
     // check whether the condition qualifies as a boolean use
     if (condition instanceof NeExpr || condition instanceof EqExpr) {
       Value op1 = condition.getOp1();
@@ -126,7 +135,7 @@ public class BooleanConditionSimplification extends DepthFirstAdapter {
     return null; // meaning no local used as boolean found
   }
 
-  /*
+/*
    * Used to decide what the condition should be if we are converting from ConditionExpr to Value A != false/0 --> A A !=
    * true/1 --> !A A == false/0 --> !A A == true/1 --> A
    */

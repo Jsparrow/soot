@@ -80,7 +80,8 @@ public class Utf8_Enumeration implements Enumeration {
   }
 
   /** <i>true</i> if the entire string hasn't been enumerated yet. */
-  public boolean hasMoreElements() {
+  @Override
+public boolean hasMoreElements() {
     if (curindex < length) {
       return true;
     }
@@ -93,7 +94,8 @@ public class Utf8_Enumeration implements Enumeration {
    * @return <i>this</i>
    * @see Utf8_Enumeration#c
    */
-  public Object nextElement() {
+  @Override
+public Object nextElement() {
     byte b;
     b = bytes[curindex++];
     if ((b & ((byte) 0x80)) == 0) { // one-byte character

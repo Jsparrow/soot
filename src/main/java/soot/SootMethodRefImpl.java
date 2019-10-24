@@ -159,44 +159,25 @@ public class SootMethodRefImpl implements SootMethodRef {
     return parameterTypes.get(i);
   }
 
-  public class ClassResolutionFailedException extends ResolutionFailedException {
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5430199603403917938L;
-
-    public ClassResolutionFailedException() {
-      super("Class " + declaringClass + " doesn't have method " + name + "(" + (parameterTypes == null ? "" : parameterTypes)
-          + ")" + " : " + returnType + "; failed to resolve in superclasses and interfaces");
-    }
-
-    @Override
-    public String toString() {
-      final StringBuilder ret = new StringBuilder(super.toString());
-      resolve(ret);
-      return ret.toString();
-    }
-  }
-
   @Override
   public SootMethod resolve() {
     return resolve(null);
   }
 
-  @Override
+@Override
   public SootMethod tryResolve() {
     return tryResolve(null);
   }
 
-  private void checkStatic(SootMethod method) {
+private void checkStatic(SootMethod method) {
     if ((Options.v().wrong_staticness() == Options.wrong_staticness_fail
         || Options.v().wrong_staticness() == Options.wrong_staticness_fixstrict) && method.isStatic() != isStatic()
         && !method.isPhantom()) {
-      throw new ResolutionFailedException("Resolved " + this + " to " + method + " which has wrong static-ness");
+      throw new ResolutionFailedException(new StringBuilder().append("Resolved ").append(this).append(" to ").append(method).append(" which has wrong static-ness").toString());
     }
   }
 
-  protected SootMethod tryResolve(final StringBuilder trace) {
+protected SootMethod tryResolve(final StringBuilder trace) {
     SootClass selectedClass = declaringClass;
     while (selectedClass != null) {
       if (trace != null) {
@@ -248,18 +229,17 @@ public class SootMethodRefImpl implements SootMethodRef {
     }
 
     // If we don't have a method yet, we try to fix it on the fly
-    if (Scene.v().allowsPhantomRefs() && Options.v().ignore_resolution_errors()) {
-      SootMethod method = Scene.v().makeSootMethod(name, parameterTypes, returnType, isStatic() ? Modifier.STATIC : 0);
-      method.setPhantom(true);
-      method = declaringClass.getOrAddMethod(method);
-      checkStatic(method);
-      return method;
-    }
-
-    return null;
+	if (!(Scene.v().allowsPhantomRefs() && Options.v().ignore_resolution_errors())) {
+		return null;
+	}
+	SootMethod method = Scene.v().makeSootMethod(name, parameterTypes, returnType, isStatic() ? Modifier.STATIC : 0);
+	method.setPhantom(true);
+	method = declaringClass.getOrAddMethod(method);
+	checkStatic(method);
+	return method;
   }
 
-  private SootMethod resolve(final StringBuilder trace) {
+private SootMethod resolve(final StringBuilder trace) {
     SootMethod resolved = tryResolve(trace);
     if (resolved != null) {
       return resolved;
@@ -291,7 +271,7 @@ public class SootMethodRefImpl implements SootMethodRef {
     return null;
   }
 
-  /**
+/**
    * Creates a method body that throws an "unresolved compilation error" message
    *
    * @param declaringClass
@@ -325,7 +305,7 @@ public class SootMethodRefImpl implements SootMethodRef {
     SootMethodRef cref = Scene.v().makeConstructorRef(runtimeExceptionType.getSootClass(),
         Collections.<Type>singletonList(RefType.v("java.lang.String")));
     SpecialInvokeExpr constructorInvokeExpr = Jimple.v().newSpecialInvokeExpr(exceptionLocal, cref,
-        StringConstant.v("Unresolved compilation error: Method " + getSignature() + " does not exist!"));
+        StringConstant.v(new StringBuilder().append("Unresolved compilation error: Method ").append(getSignature()).append(" does not exist!").toString()));
     InvokeStmt initStmt = Jimple.v().newInvokeStmt(constructorInvokeExpr);
     body.getUnits().insertAfter(initStmt, assignStmt);
 
@@ -335,12 +315,12 @@ public class SootMethodRefImpl implements SootMethodRef {
     return declaringClass.getOrAddMethod(m);
   }
 
-  @Override
+@Override
   public String toString() {
     return getSignature();
   }
 
-  @Override
+@Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -354,7 +334,7 @@ public class SootMethodRefImpl implements SootMethodRef {
     return result;
   }
 
-  @Override
+@Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -407,6 +387,25 @@ public class SootMethodRefImpl implements SootMethodRef {
       return false;
     }
     return true;
+  }
+
+public class ClassResolutionFailedException extends ResolutionFailedException {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5430199603403917938L;
+
+    public ClassResolutionFailedException() {
+      super(new StringBuilder().append("Class ").append(declaringClass).append(" doesn't have method ").append(name).append("(")
+			.append(parameterTypes == null ? "" : parameterTypes).append(")").append(" : ").append(returnType).append("; failed to resolve in superclasses and interfaces").toString());
+    }
+
+    @Override
+    public String toString() {
+      final StringBuilder ret = new StringBuilder(super.toString());
+      resolve(ret);
+      return ret.toString();
+    }
   }
 
 }

@@ -95,37 +95,34 @@ public abstract class MethodInvocationInstruction extends DexlibAbstractInstruct
       unit = invoke;
     }
 
-    if (IDalvikTyper.ENABLE_DVKTYPER) {
-      // Debug.printDbg(IDalvikTyper.DEBUG, "constraint special invoke: "+ assign);
-
-      if (invocation instanceof InstanceInvokeExpr) {
+    // Debug.printDbg(IDalvikTyper.DEBUG, "constraint special invoke: "+ assign);
+	if (!(IDalvikTyper.ENABLE_DVKTYPER)) {
+		return;
+	}
+	if (invocation instanceof InstanceInvokeExpr) {
         Type t = invocation.getMethodRef().declaringClass().getType();
         DalvikTyper.v().setType(((InstanceInvokeExpr) invocation).getBaseBox(), t, true);
         // DalvikTyper.v().setObjectType(assign.getLeftOpBox());
       }
-      int i = 0;
-      for (Type pt : invocation.getMethodRef().parameterTypes()) {
+	int i = 0;
+	for (Type pt : invocation.getMethodRef().parameterTypes()) {
         DalvikTyper.v().setType(invocation.getArgBox(i++), pt, true);
       }
-      if (assign != null) {
+	if (assign != null) {
         DalvikTyper.v().setType(assign.getLeftOpBox(), invocation.getType(), false);
       }
-
-    }
   }
 
   @Override
   public Set<Type> introducedTypes() {
-    Set<Type> types = new HashSet<Type>();
+    Set<Type> types = new HashSet<>();
     MethodReference method = (MethodReference) (((ReferenceInstruction) instruction).getReference());
 
     types.add(DexType.toSoot(method.getDefiningClass()));
     types.add(DexType.toSoot(method.getReturnType()));
     List<? extends CharSequence> paramTypes = method.getParameterTypes();
     if (paramTypes != null) {
-      for (CharSequence type : paramTypes) {
-        types.add(DexType.toSoot(type.toString()));
-      }
+      paramTypes.forEach(type -> types.add(DexType.toSoot(type.toString())));
     }
 
     return types;
@@ -289,11 +286,9 @@ public abstract class MethodInvocationInstruction extends DexlibAbstractInstruct
    * @return The soot parameter types
    */
   protected List<Type> convertParameterTypes(List<? extends CharSequence> paramTypes) {
-    List<Type> parameterTypes = new ArrayList<Type>();
+    List<Type> parameterTypes = new ArrayList<>();
     if (paramTypes != null) {
-      for (CharSequence type : paramTypes) {
-        parameterTypes.add(DexType.toSoot(type.toString()));
-      }
+      paramTypes.forEach(type -> parameterTypes.add(DexType.toSoot(type.toString())));
     }
     return parameterTypes;
   }
@@ -328,7 +323,7 @@ public abstract class MethodInvocationInstruction extends DexlibAbstractInstruct
    * @return the converted parameters
    */
   protected List<Local> buildParameters(DexBody body, List<? extends CharSequence> paramTypes, boolean isStatic) {
-    List<Local> parameters = new ArrayList<Local>();
+    List<Local> parameters = new ArrayList<>();
     List<Integer> regs = getUsedRegistersNums();
 
     // i: index for register

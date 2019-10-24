@@ -34,12 +34,13 @@ public class JavaLangReflectProxyNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.Class defineClass0(java.lang.ClassLoader,java.lang.String,byte[],int,int)")) {
+    if ("java.lang.Class defineClass0(java.lang.ClassLoader,java.lang.String,byte[],int,int)".equals(subSignature)) {
       java_lang_reflect_Proxy_defineClass0(method, thisVar, returnVar, params);
       return;
 

@@ -33,31 +33,38 @@ public class BOrInst extends AbstractOpTypeInst implements OrInst {
     super(opType);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 2;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BOrInst(getOpType());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 2 * AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 1 * AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public final String getName() {
+  @Override
+public final String getName() {
     return "or";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseOrInst(this);
   }
 }

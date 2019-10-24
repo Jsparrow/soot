@@ -35,19 +35,23 @@ public class JCmplExpr extends AbstractJimpleIntBinopExpr implements CmplExpr {
     super(op1, op2);
   }
 
-  public final String getSymbol() {
-    return " " + Jimple.CMPL + " ";
+  @Override
+public final String getSymbol() {
+    return new StringBuilder().append(" ").append(Jimple.CMPL).append(" ").toString();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseCmplExpr(this);
   }
 
-  Object makeBafInst(Type opType) {
+  @Override
+Object makeBafInst(Type opType) {
     return Baf.v().newCmplInst(this.getOp1().getType());
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JCmplExpr(Jimple.cloneIfNecessary(getOp1()), Jimple.cloneIfNecessary(getOp2()));
   }
 

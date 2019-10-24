@@ -59,25 +59,29 @@ public class AddJSRs extends BodyTransformer implements IJbcoTransform {
 
   private static final Logger logger = LoggerFactory.getLogger(AddJSRs.class);
 
-  int jsrcount = 0;
+public static String dependancies[] = new String[] { "jtp.jbco_jl", "bb.jbco_cb2ji", "bb.jbco_ful", "bb.lp" };
 
-  public static String dependancies[] = new String[] { "jtp.jbco_jl", "bb.jbco_cb2ji", "bb.jbco_ful", "bb.lp" };
+public static String name = "bb.jbco_cb2ji";
 
-  public String[] getDependencies() {
+int jsrcount = 0;
+
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_cb2ji";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
     logger.info("{} If/Gotos replaced with JSRs.", jsrcount);
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     int weight = soot.jbco.Main.getWeight(phaseName, b.getMethod().getSignature());
     if (weight == 0) {
       return;
@@ -87,16 +91,14 @@ public class AddJSRs extends BodyTransformer implements IJbcoTransform {
     // TODO: introduce if-jsr opaque jumps that never happen?
 
     boolean fallsthrough = false;
-    HashMap<Trap, Unit> trapsToHandler = new HashMap<Trap, Unit>();
-    for (Trap t : b.getTraps()) {
-      trapsToHandler.put(t, t.getHandlerUnit());
-    }
+    HashMap<Trap, Unit> trapsToHandler = new HashMap<>();
+    b.getTraps().forEach(t -> trapsToHandler.put(t, t.getHandlerUnit()));
 
-    List<Unit> targets = new ArrayList<Unit>();
-    List<Unit> seenUts = new ArrayList<Unit>();
-    HashMap<Unit, List<Unit>> switches = new HashMap<Unit, List<Unit>>();
-    HashMap<Unit, Unit> switchDefs = new HashMap<Unit, Unit>();
-    HashMap<TargetArgInst, Unit> ignoreJumps = new HashMap<TargetArgInst, Unit>();
+    List<Unit> targets = new ArrayList<>();
+    List<Unit> seenUts = new ArrayList<>();
+    HashMap<Unit, List<Unit>> switches = new HashMap<>();
+    HashMap<Unit, Unit> switchDefs = new HashMap<>();
+    HashMap<TargetArgInst, Unit> ignoreJumps = new HashMap<>();
     PatchingChain<Unit> u = b.getUnits();
     Iterator<Unit> it = u.snapshotIterator();
     while (it.hasNext()) {
@@ -128,9 +130,9 @@ public class AddJSRs extends BodyTransformer implements IJbcoTransform {
     }
 
     it = u.snapshotIterator();
-    ArrayList<Unit> processedLabels = new ArrayList<Unit>();
-    HashMap<Unit, JSRInst> builtJsrs = new HashMap<Unit, JSRInst>();
-    HashMap<Unit, Unit> popsBuilt = new HashMap<Unit, Unit>();
+    ArrayList<Unit> processedLabels = new ArrayList<>();
+    HashMap<Unit, JSRInst> builtJsrs = new HashMap<>();
+    HashMap<Unit, Unit> popsBuilt = new HashMap<>();
     Unit prev = null;
     while (it.hasNext()) {
       Unit unit = (Unit) it.next();
@@ -200,15 +202,9 @@ public class AddJSRs extends BodyTransformer implements IJbcoTransform {
       }
     }
 
-    for (Trap t : trapsToHandler.keySet()) {
-      t.setHandlerUnit(trapsToHandler.get(t));
-    }
+    trapsToHandler.keySet().forEach(t -> t.setHandlerUnit(trapsToHandler.get(t)));
 
-    for (TargetArgInst ti : ignoreJumps.keySet()) {
-      if (popsBuilt.containsKey(ti.getTarget())) {
-        ti.setTarget(popsBuilt.get(ti.getTarget()));
-      }
-    }
+    ignoreJumps.keySet().stream().filter(ti -> popsBuilt.containsKey(ti.getTarget())).forEach(ti -> ti.setTarget(popsBuilt.get(ti.getTarget())));
 
     targets.clear();
     it = u.snapshotIterator();

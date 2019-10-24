@@ -28,17 +28,17 @@ import soot.ValueBox;
 import soot.util.Switch;
 
 public interface NewArrayExpr extends Expr, AnyNewExpr {
-  public Type getBaseType();
+  Type getBaseType();
 
-  public void setBaseType(Type type);
+  void setBaseType(Type type);
 
-  public ValueBox getSizeBox();
+  ValueBox getSizeBox();
 
-  public Value getSize();
+  Value getSize();
 
-  public void setSize(Value size);
+  void setSize(Value size);
 
-  public Type getType();
+  @Override Type getType();
 
-  public void apply(Switch sw);
+  @Override void apply(Switch sw);
 }

@@ -77,22 +77,18 @@ import soot.toolkits.scalar.Pair;
 public class SimpleMethodInfoFlowAnalysis
     extends ForwardFlowAnalysis<Unit, FlowSet<Pair<EquivalentValue, EquivalentValue>>> {
   private static final Logger logger = LoggerFactory.getLogger(SimpleMethodInfoFlowAnalysis.class);
-  SootMethod sm;
-  Value thisLocal;
-  InfoFlowAnalysis dfa;
-  boolean refOnly;
+public static int counter = 0;
+SootMethod sm;
+Value thisLocal;
+InfoFlowAnalysis dfa;
+boolean refOnly;
+MutableDirectedGraph<EquivalentValue> infoFlowGraph;
+Ref returnRef;
+FlowSet<Pair<EquivalentValue, EquivalentValue>> entrySet;
+FlowSet<Pair<EquivalentValue, EquivalentValue>> emptySet;
+boolean printMessages;
 
-  MutableDirectedGraph<EquivalentValue> infoFlowGraph;
-  Ref returnRef;
-
-  FlowSet<Pair<EquivalentValue, EquivalentValue>> entrySet;
-  FlowSet<Pair<EquivalentValue, EquivalentValue>> emptySet;
-
-  boolean printMessages;
-
-  public static int counter = 0;
-
-  public SimpleMethodInfoFlowAnalysis(UnitGraph g, InfoFlowAnalysis dfa, boolean ignoreNonRefTypeFlow) {
+public SimpleMethodInfoFlowAnalysis(UnitGraph g, InfoFlowAnalysis dfa, boolean ignoreNonRefTypeFlow) {
     this(g, dfa, ignoreNonRefTypeFlow, true);
 
     counter++;
@@ -108,12 +104,11 @@ public class SimpleMethodInfoFlowAnalysis
     }
 
     // Add every field of this class
-    for (SootField sf : sm.getDeclaringClass().getFields()) {
-      EquivalentValue fieldRefEqVal = InfoFlowAnalysis.getNodeForFieldRef(sm, sf);
-      if (!infoFlowGraph.containsNode(fieldRefEqVal)) {
-        infoFlowGraph.addNode(fieldRefEqVal);
-      }
-    }
+	sm.getDeclaringClass().getFields().stream().map(sf -> InfoFlowAnalysis.getNodeForFieldRef(sm, sf)).forEach(fieldRefEqVal -> {
+		if (!infoFlowGraph.containsNode(fieldRefEqVal)) {
+		    infoFlowGraph.addNode(fieldRefEqVal);
+		  }
+	});
 
     // Add every field of this class's superclasses
     SootClass superclass = sm.getDeclaringClass();
@@ -122,12 +117,11 @@ public class SimpleMethodInfoFlowAnalysis
     }
     while (superclass.hasSuperclass()) // we don't want to process Object
     {
-      for (SootField scField : superclass.getFields()) {
-        EquivalentValue fieldRefEqVal = InfoFlowAnalysis.getNodeForFieldRef(sm, scField);
-        if (!infoFlowGraph.containsNode(fieldRefEqVal)) {
+      superclass.getFields().stream().map(scField -> InfoFlowAnalysis.getNodeForFieldRef(sm, scField)).forEach(fieldRefEqVal -> {
+		if (!infoFlowGraph.containsNode(fieldRefEqVal)) {
           infoFlowGraph.addNode(fieldRefEqVal);
         }
-      }
+	});
       superclass = superclass.getSuperclass();
     }
 
@@ -144,15 +138,15 @@ public class SimpleMethodInfoFlowAnalysis
     }
 
     if (printMessages) {
-      logger.debug("STARTING ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+      logger.debug(new StringBuilder().append("STARTING ANALYSIS FOR ").append(g.getBody().getMethod()).append(" -----").toString());
     }
     doFlowInsensitiveAnalysis();
     if (printMessages) {
-      logger.debug("ENDING   ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+      logger.debug(new StringBuilder().append("ENDING   ANALYSIS FOR ").append(g.getBody().getMethod()).append(" -----").toString());
     }
   }
 
-  /** A constructor that doesn't run the analysis */
+/** A constructor that doesn't run the analysis */
   protected SimpleMethodInfoFlowAnalysis(UnitGraph g, InfoFlowAnalysis dfa, boolean ignoreNonRefTypeFlow,
       boolean dummyDontRunAnalysisYet) {
     super(g);
@@ -165,23 +159,21 @@ public class SimpleMethodInfoFlowAnalysis
     this.dfa = dfa;
     this.refOnly = ignoreNonRefTypeFlow;
 
-    this.infoFlowGraph = new MemoryEfficientGraph<EquivalentValue>();
+    this.infoFlowGraph = new MemoryEfficientGraph<>();
     this.returnRef = new ParameterRef(g.getBody().getMethod().getReturnType(), -1); // it's a dummy parameter ref
 
-    this.entrySet = new ArraySparseSet<Pair<EquivalentValue, EquivalentValue>>();
-    this.emptySet = new ArraySparseSet<Pair<EquivalentValue, EquivalentValue>>();
+    this.entrySet = new ArraySparseSet<>();
+    this.emptySet = new ArraySparseSet<>();
 
     printMessages = false;
   }
 
-  public void doFlowInsensitiveAnalysis() {
+public void doFlowInsensitiveAnalysis() {
     FlowSet<Pair<EquivalentValue, EquivalentValue>> fs = newInitialFlow();
     boolean flowSetChanged = true;
     while (flowSetChanged) {
       int sizebefore = fs.size();
-      Iterator<Unit> unitIt = graph.iterator();
-      while (unitIt.hasNext()) {
-        Unit u = unitIt.next();
+      for (Unit u : graph) {
         flowThrough(fs, u, fs);
       }
       if (fs.size() > sizebefore) {
@@ -192,45 +184,46 @@ public class SimpleMethodInfoFlowAnalysis
     }
   }
 
-  public MutableDirectedGraph<EquivalentValue> getMethodInfoFlowSummary() {
+public MutableDirectedGraph<EquivalentValue> getMethodInfoFlowSummary() {
     return infoFlowGraph;
   }
 
-  protected void merge(FlowSet<Pair<EquivalentValue, EquivalentValue>> in1,
+@Override
+protected void merge(FlowSet<Pair<EquivalentValue, EquivalentValue>> in1,
       FlowSet<Pair<EquivalentValue, EquivalentValue>> in2, FlowSet<Pair<EquivalentValue, EquivalentValue>> out) {
     in1.union(in2, out);
   }
 
-  protected boolean isNonRefType(Type type) {
+protected boolean isNonRefType(Type type) {
     return !(type instanceof RefLikeType);
   }
 
-  protected boolean ignoreThisDataType(Type type) {
+protected boolean ignoreThisDataType(Type type) {
     return refOnly && isNonRefType(type);
   }
 
-  // Interesting sources are summarized (and possibly printed)
+// Interesting sources are summarized (and possibly printed)
   public boolean isInterestingSource(Value source) {
     return (source instanceof Ref);
   }
 
-  // Trackable sources are added to the flow set
+// Trackable sources are added to the flow set
   public boolean isTrackableSource(Value source) {
     return isInterestingSource(source) || (source instanceof Ref);
   }
 
-  // Interesting sinks are possibly printed
+// Interesting sinks are possibly printed
   public boolean isInterestingSink(Value sink) {
     return (sink instanceof Ref);
   }
 
-  // Trackable sinks are added to the flow set
+// Trackable sinks are added to the flow set
   public boolean isTrackableSink(Value sink) {
     return isInterestingSink(sink) || (sink instanceof Ref) || (sink instanceof Local);
   }
 
-  private ArrayList<Value> getDirectSources(Value v, FlowSet<Pair<EquivalentValue, EquivalentValue>> fs) {
-    ArrayList<Value> ret = new ArrayList<Value>(); // of "interesting sources"
+private ArrayList<Value> getDirectSources(Value v, FlowSet<Pair<EquivalentValue, EquivalentValue>> fs) {
+    ArrayList<Value> ret = new ArrayList<>(); // of "interesting sources"
     EquivalentValue vEqVal = new CachedEquivalentValue(v);
     Iterator<Pair<EquivalentValue, EquivalentValue>> fsIt = fs.iterator();
     while (fsIt.hasNext()) {
@@ -242,7 +235,7 @@ public class SimpleMethodInfoFlowAnalysis
     return ret;
   }
 
-  // For when data flows to a local
+// For when data flows to a local
   protected void handleFlowsToValue(Value sink, Value initialSource, FlowSet<Pair<EquivalentValue, EquivalentValue>> fs) {
     if (!isTrackableSink(sink)) {
       return;
@@ -252,15 +245,13 @@ public class SimpleMethodInfoFlowAnalysis
     if (isTrackableSource(initialSource)) {
       sources.add(initialSource);
     }
-    Iterator<Value> sourcesIt = sources.iterator();
-    while (sourcesIt.hasNext()) {
-      Value source = sourcesIt.next();
+    for (Value source : sources) {
       EquivalentValue sinkEqVal = new CachedEquivalentValue(sink);
       EquivalentValue sourceEqVal = new CachedEquivalentValue(source);
       if (sinkEqVal.equals(sourceEqVal)) {
         continue;
       }
-      Pair<EquivalentValue, EquivalentValue> pair = new Pair<EquivalentValue, EquivalentValue>(sinkEqVal, sourceEqVal);
+      Pair<EquivalentValue, EquivalentValue> pair = new Pair<>(sinkEqVal, sourceEqVal);
       if (!fs.contains(pair)) {
         fs.add(pair);
         if (isInterestingSource(source) && isInterestingSink(sink)) {
@@ -272,14 +263,14 @@ public class SimpleMethodInfoFlowAnalysis
           }
           infoFlowGraph.addEdge(sourceEqVal, sinkEqVal);
           if (printMessages) {
-            logger.debug("      Found " + source + " flows to " + sink);
+            logger.debug(new StringBuilder().append("      Found ").append(source).append(" flows to ").append(sink).toString());
           }
         }
       }
     }
   }
 
-  // for when data flows to the data structure pointed to by a local
+// for when data flows to the data structure pointed to by a local
   protected void handleFlowsToDataStructure(Value base, Value initialSource,
       FlowSet<Pair<EquivalentValue, EquivalentValue>> fs) {
     List<Value> sinks = getDirectSources(base, fs);
@@ -290,13 +281,9 @@ public class SimpleMethodInfoFlowAnalysis
     if (isTrackableSource(initialSource)) {
       sources.add(initialSource);
     }
-    Iterator<Value> sourcesIt = sources.iterator();
-    while (sourcesIt.hasNext()) {
-      Value source = sourcesIt.next();
+    for (Value source : sources) {
       EquivalentValue sourceEqVal = new CachedEquivalentValue(source);
-      Iterator<Value> sinksIt = sinks.iterator();
-      while (sinksIt.hasNext()) {
-        Value sink = sinksIt.next();
+      for (Value sink : sinks) {
         if (!isTrackableSink(sink)) {
           continue;
         }
@@ -304,7 +291,7 @@ public class SimpleMethodInfoFlowAnalysis
         if (sinkEqVal.equals(sourceEqVal)) {
           continue;
         }
-        Pair<EquivalentValue, EquivalentValue> pair = new Pair<EquivalentValue, EquivalentValue>(sinkEqVal, sourceEqVal);
+        Pair<EquivalentValue, EquivalentValue> pair = new Pair<>(sinkEqVal, sourceEqVal);
         if (!fs.contains(pair)) {
           fs.add(pair);
           if (isInterestingSource(source) && isInterestingSink(sink)) {
@@ -316,7 +303,7 @@ public class SimpleMethodInfoFlowAnalysis
             }
             infoFlowGraph.addEdge(sourceEqVal, sinkEqVal);
             if (printMessages) {
-              logger.debug("      Found " + source + " flows to " + sink);
+              logger.debug(new StringBuilder().append("      Found ").append(source).append(" flows to ").append(sink).toString());
             }
           }
         }
@@ -324,7 +311,7 @@ public class SimpleMethodInfoFlowAnalysis
     }
   }
 
-  // handles the invoke expression AND returns a list of the return value's sources
+// handles the invoke expression AND returns a list of the return value's sources
   // for each node
   // if the node is a parameter
   // source = argument <Immediate>
@@ -356,7 +343,7 @@ public class SimpleMethodInfoFlowAnalysis
     // ClassInfoFlowAnalysis.printDataFlowGraph(infoFlowGraph);
     // }
 
-    List<Value> returnValueSources = new ArrayList<Value>();
+    List<Value> returnValueSources = new ArrayList<>();
 
     Iterator<EquivalentValue> nodeIt = dataFlowGraph.getNodes().iterator();
     while (nodeIt.hasNext()) {
@@ -364,7 +351,7 @@ public class SimpleMethodInfoFlowAnalysis
 
       if (!(nodeEqVal.getValue() instanceof Ref)) {
         throw new RuntimeException(
-            "Illegal node type in data flow graph:" + nodeEqVal.getValue() + " should be an object of type Ref.");
+            new StringBuilder().append("Illegal node type in data flow graph:").append(nodeEqVal.getValue()).append(" should be an object of type Ref.").toString());
       }
 
       Ref node = (Ref) nodeEqVal.getValue();
@@ -408,7 +395,8 @@ public class SimpleMethodInfoFlowAnalysis
     return returnValueSources;
   }
 
-  protected void flowThrough(FlowSet<Pair<EquivalentValue, EquivalentValue>> in, Unit unit,
+@Override
+protected void flowThrough(FlowSet<Pair<EquivalentValue, EquivalentValue>> in, Unit unit,
       FlowSet<Pair<EquivalentValue, EquivalentValue>> out) {
     Stmt stmt = (Stmt) unit;
 
@@ -498,7 +486,7 @@ public class SimpleMethodInfoFlowAnalysis
         }
       }
 
-      List<Value> sources = new ArrayList<Value>();
+      List<Value> sources = new ArrayList<>();
       boolean interestingFlow = true;
 
       if (rv instanceof Local) {
@@ -571,45 +559,48 @@ public class SimpleMethodInfoFlowAnalysis
     // changedFlow.union(out, out); - OBSELETE optimization
   }
 
-  protected void copy(FlowSet<Pair<EquivalentValue, EquivalentValue>> source,
+@Override
+protected void copy(FlowSet<Pair<EquivalentValue, EquivalentValue>> source,
       FlowSet<Pair<EquivalentValue, EquivalentValue>> dest) {
     source.copy(dest);
 
   }
 
-  protected FlowSet<Pair<EquivalentValue, EquivalentValue>> entryInitialFlow() {
+@Override
+protected FlowSet<Pair<EquivalentValue, EquivalentValue>> entryInitialFlow() {
     return entrySet.clone();
   }
 
-  protected FlowSet<Pair<EquivalentValue, EquivalentValue>> newInitialFlow() {
+@Override
+protected FlowSet<Pair<EquivalentValue, EquivalentValue>> newInitialFlow() {
     return emptySet.clone();
   }
 
-  public void addToEntryInitialFlow(Value source, Value sink) {
+public void addToEntryInitialFlow(Value source, Value sink) {
     EquivalentValue sinkEqVal = new CachedEquivalentValue(sink);
     EquivalentValue sourceEqVal = new CachedEquivalentValue(source);
     if (sinkEqVal.equals(sourceEqVal)) {
       return;
     }
-    Pair<EquivalentValue, EquivalentValue> pair = new Pair<EquivalentValue, EquivalentValue>(sinkEqVal, sourceEqVal);
+    Pair<EquivalentValue, EquivalentValue> pair = new Pair<>(sinkEqVal, sourceEqVal);
     if (!entrySet.contains(pair)) {
       entrySet.add(pair);
     }
   }
 
-  public void addToNewInitialFlow(Value source, Value sink) {
+public void addToNewInitialFlow(Value source, Value sink) {
     EquivalentValue sinkEqVal = new CachedEquivalentValue(sink);
     EquivalentValue sourceEqVal = new CachedEquivalentValue(source);
     if (sinkEqVal.equals(sourceEqVal)) {
       return;
     }
-    Pair<EquivalentValue, EquivalentValue> pair = new Pair<EquivalentValue, EquivalentValue>(sinkEqVal, sourceEqVal);
+    Pair<EquivalentValue, EquivalentValue> pair = new Pair<>(sinkEqVal, sourceEqVal);
     if (!emptySet.contains(pair)) {
       emptySet.add(pair);
     }
   }
 
-  public Value getThisLocal() {
+public Value getThisLocal() {
     return thisLocal;
   }
 }

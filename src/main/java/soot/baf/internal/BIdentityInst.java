@@ -40,43 +40,64 @@ public class BIdentityInst extends AbstractInst implements IdentityInst {
 
   List defBoxes;
 
-  public Value getLeftOp() {
+  public BIdentityInst(Value local, Value identityValue) {
+    this(Baf.v().newLocalBox(local), Baf.v().newIdentityRefBox(identityValue));
+  }
+
+protected BIdentityInst(ValueBox localBox, ValueBox identityValueBox) {
+    this.leftBox = localBox;
+    this.rightBox = identityValueBox;
+
+    defBoxes = Collections.singletonList(leftBox);
+  }
+
+@Override
+public Value getLeftOp() {
     return leftBox.getValue();
   }
 
-  public int getInCount() {
+@Override
+public int getInCount() {
     return 0;
   }
 
-  public int getInMachineCount() {
+@Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public int getOutCount() {
+@Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+@Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  public Value getRightOp() {
+@Override
+public Value getRightOp() {
     return rightBox.getValue();
   }
 
-  public ValueBox getLeftOpBox() {
+@Override
+public ValueBox getLeftOpBox() {
     return leftBox;
   }
 
-  public ValueBox getRightOpBox() {
+@Override
+public ValueBox getRightOpBox() {
     return rightBox;
   }
 
-  public List getDefBoxes() {
+@Override
+public List getDefBoxes() {
     return defBoxes;
   }
 
-  public List getUseBoxes() {
+@Override
+public List getUseBoxes() {
     List list = new ArrayList();
 
     list.addAll(rightBox.getValue().getUseBoxes());
@@ -86,44 +107,40 @@ public class BIdentityInst extends AbstractInst implements IdentityInst {
     return list;
   }
 
-  public BIdentityInst(Value local, Value identityValue) {
-    this(Baf.v().newLocalBox(local), Baf.v().newIdentityRefBox(identityValue));
-  }
-
-  protected BIdentityInst(ValueBox localBox, ValueBox identityValueBox) {
-    this.leftBox = localBox;
-    this.rightBox = identityValueBox;
-
-    defBoxes = Collections.singletonList(leftBox);
-  }
-
-  public Object clone() {
+@Override
+public Object clone() {
     return new BIdentityInst(getLeftOp(), getRightOp());
   }
 
-  public String toString() {
-    return leftBox.getValue().toString() + " := " + rightBox.getValue().toString();
+@Override
+public String toString() {
+    return new StringBuilder().append(leftBox.getValue().toString()).append(" := ").append(rightBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public void toString(UnitPrinter up) {
     leftBox.toString(up);
     up.literal(" := ");
     rightBox.toString(up);
   }
 
-  final public String getName() {
+@Override
+public final String getName() {
     return ":=";
   }
 
-  public void setLeftOp(Value local) {
+@Override
+public void setLeftOp(Value local) {
     leftBox.setValue(local);
   }
 
-  public void setRightOp(Value identityRef) {
+@Override
+public void setRightOp(Value identityRef) {
     rightBox.setValue(identityRef);
   }
 
-  public void apply(Switch sw) {
+@Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseIdentityInst(this);
   }
 }

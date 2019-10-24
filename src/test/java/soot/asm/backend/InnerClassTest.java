@@ -49,7 +49,7 @@ public class InnerClassTest extends AbstractASMBackendTest {
 
 		{
 			fv = visitor.visitField(ACC_FINAL + ACC_STATIC, "a", "I", null,
-					new Integer(3));
+					Integer.valueOf(3));
 			fv.visitEnd();
 		}
 		{

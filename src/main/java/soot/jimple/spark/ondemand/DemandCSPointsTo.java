@@ -86,121 +86,108 @@ import soot.util.NumberedString;
 public final class DemandCSPointsTo implements PointsToAnalysis {
   private static final Logger logger = LoggerFactory.getLogger(DemandCSPointsTo.class);
 
-  @SuppressWarnings("serial")
-  protected static final class AllocAndContextCache extends HashMap<AllocAndContext, Map<VarNode, CallingContextSet>> {
-  }
+public static boolean DEBUG = false;
 
-  protected static final class CallingContextSet extends ArraySet<ImmutableStack<Integer>> {
-  }
+protected static final int DEBUG_NESTING = 15;
 
-  protected final static class CallSiteAndContext extends Pair<Integer, ImmutableStack<Integer>> {
+protected static final int DEBUG_PASS = -1;
 
-    public CallSiteAndContext(Integer callSite, ImmutableStack<Integer> callingContext) {
-      super(callSite, callingContext);
-    }
-  }
+protected static final boolean DEBUG_VIRT = DEBUG && true;
 
-  protected static final class CallSiteToTargetsMap extends HashSetMultiMap<CallSiteAndContext, SootMethod> {
-  }
+protected static final int DEFAULT_MAX_PASSES = 10;
 
-  protected static abstract class IncomingEdgeHandler {
+protected static final int DEFAULT_MAX_TRAVERSAL = 75000;
 
-    public abstract void handleAlloc(AllocNode allocNode, VarAndContext origVarAndContext);
+protected static final boolean DEFAULT_LAZY = true;
 
-    public abstract void handleMatchSrc(VarNode matchSrc, PointsToSetInternal intersection, VarNode loadBase,
-        VarNode storeBase, VarAndContext origVarAndContext, SparkField field, boolean refine);
+protected static final ImmutableStack<Integer> EMPTY_CALLSTACK = ImmutableStack.<Integer>emptyStack();
 
-    abstract Object getResult();
-
-    abstract void handleAssignSrc(VarAndContext newVarAndContext, VarAndContext origVarAndContext, AssignEdge assignEdge);
-
-    abstract boolean shouldHandleSrc(VarNode src);
-
-    boolean terminate() {
-      return false;
-    }
-
-  }
-
-  protected static class VarAndContext {
-
-    final ImmutableStack<Integer> context;
-
-    final VarNode var;
-
-    public VarAndContext(VarNode var, ImmutableStack<Integer> context) {
-      assert var != null;
-      assert context != null;
-      this.var = var;
-      this.context = context;
-    }
-
-    public boolean equals(Object o) {
-      if (o != null && o.getClass() == VarAndContext.class) {
-        VarAndContext other = (VarAndContext) o;
-        return var.equals(other.var) && context.equals(other.context);
-      }
-      return false;
-    }
-
-    public int hashCode() {
-      return var.hashCode() + context.hashCode();
-    }
-
-    public String toString() {
-      return var + " " + context;
-    }
-  }
-
-  protected final static class VarContextAndUp extends VarAndContext {
-
-    final ImmutableStack<Integer> upContext;
-
-    public VarContextAndUp(VarNode var, ImmutableStack<Integer> context, ImmutableStack<Integer> upContext) {
-      super(var, context);
-      this.upContext = upContext;
-    }
-
-    public boolean equals(Object o) {
-      if (o != null && o.getClass() == VarContextAndUp.class) {
-        VarContextAndUp other = (VarContextAndUp) o;
-        return var.equals(other.var) && context.equals(other.context) && upContext.equals(other.upContext);
-      }
-
-      return false;
-    }
-
-    public int hashCode() {
-      return var.hashCode() + context.hashCode() + upContext.hashCode();
-    }
-
-    public String toString() {
-      return var + " " + context + " up " + upContext;
-    }
-  }
-
-  public static boolean DEBUG = false;
-
-  protected static final int DEBUG_NESTING = 15;
-
-  protected static final int DEBUG_PASS = -1;
-
-  protected static final boolean DEBUG_VIRT = DEBUG && true;
-
-  protected static final int DEFAULT_MAX_PASSES = 10;
-
-  protected static final int DEFAULT_MAX_TRAVERSAL = 75000;
-
-  protected static final boolean DEFAULT_LAZY = true;
-
-  /**
+/**
    * if <code>true</code>, refine the pre-computed call graph
    */
   private boolean refineCallGraph = true;
 
-  protected static final ImmutableStack<Integer> EMPTY_CALLSTACK = ImmutableStack.<Integer>emptyStack();
+protected final AllocAndContextCache allocAndContextCache = new AllocAndContextCache();
 
-  /**
+protected Stack<Pair<Integer, ImmutableStack<Integer>>> callGraphStack
+      = new Stack<>();
+
+protected final CallSiteToTargetsMap callSiteToResolvedTargets = new CallSiteToTargetsMap();
+
+protected HashMap<List<Object>, Set<SootMethod>> callTargetsArgCache = new HashMap<>();
+
+protected final Stack<VarAndContext> contextForAllocsStack = new Stack<>();
+
+protected Map<VarAndContext, Pair<PointsToSetInternal, AllocAndContextSet>> contextsForAllocsCache
+      = new HashMap<>();
+
+protected final ContextSensitiveInfo csInfo;
+
+/**
+   * if <code>true</code>, compute full points-to set for queried variable
+   */
+  protected boolean doPointsTo;
+
+protected FieldCheckHeuristic fieldCheckHeuristic;
+
+protected HeuristicType heuristicType;
+
+protected FieldToEdgesMap fieldToLoads;
+
+protected FieldToEdgesMap fieldToStores;
+
+protected final int maxNodesPerPass;
+
+protected final int maxPasses;
+
+protected int nesting = 0;
+
+protected int numNodesTraversed;
+
+protected int numPasses = 0;
+
+protected final PAG pag;
+
+protected AllocAndContextSet pointsTo = null;
+
+protected final Set<CallSiteAndContext> queriedCallSites = new HashSet<>();
+
+protected int recursionDepth = -1;
+
+protected boolean refiningCallSite = false;
+
+protected OTFMethodSCCManager sccManager;
+
+protected Map<VarContextAndUp, Map<AllocAndContext, CallingContextSet>> upContextCache
+      = new HashMap<>();
+
+protected ValidMatches vMatches;
+
+protected Map<Local, PointsToSet> reachingObjectsCache;
+
+protected Map<Local, PointsToSet> reachingObjectsCacheNoCGRefinement;
+
+protected boolean useCache;
+
+private final boolean lazy;
+
+public DemandCSPointsTo(ContextSensitiveInfo csInfo, PAG pag) {
+    this(csInfo, pag, DEFAULT_MAX_TRAVERSAL, DEFAULT_MAX_PASSES, DEFAULT_LAZY);
+  }
+
+public DemandCSPointsTo(ContextSensitiveInfo csInfo, PAG pag, int maxTraversal, int maxPasses, boolean lazy) {
+    this.csInfo = csInfo;
+    this.pag = pag;
+    this.maxPasses = maxPasses;
+    this.lazy = lazy;
+    this.maxNodesPerPass = maxTraversal / maxPasses;
+    this.heuristicType = HeuristicType.INCR;
+    this.reachingObjectsCache = new HashMap<>();
+    this.reachingObjectsCacheNoCGRefinement = new HashMap<>();
+    this.useCache = true;
+  }
+
+/**
    * Make a default analysis. Assumes Spark has already run.
    *
    * @return
@@ -209,97 +196,20 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return makeWithBudget(DEFAULT_MAX_TRAVERSAL, DEFAULT_MAX_PASSES, DEFAULT_LAZY);
   }
 
-  public static DemandCSPointsTo makeWithBudget(int maxTraversal, int maxPasses, boolean lazy) {
+public static DemandCSPointsTo makeWithBudget(int maxTraversal, int maxPasses, boolean lazy) {
     PAG pag = (PAG) Scene.v().getPointsToAnalysis();
     ContextSensitiveInfo csInfo = new ContextSensitiveInfo(pag);
     return new DemandCSPointsTo(csInfo, pag, maxTraversal, maxPasses, lazy);
   }
 
-  protected final AllocAndContextCache allocAndContextCache = new AllocAndContextCache();
-
-  protected Stack<Pair<Integer, ImmutableStack<Integer>>> callGraphStack
-      = new Stack<Pair<Integer, ImmutableStack<Integer>>>();
-
-  protected final CallSiteToTargetsMap callSiteToResolvedTargets = new CallSiteToTargetsMap();
-
-  protected HashMap<List<Object>, Set<SootMethod>> callTargetsArgCache = new HashMap<List<Object>, Set<SootMethod>>();
-
-  protected final Stack<VarAndContext> contextForAllocsStack = new Stack<VarAndContext>();
-
-  protected Map<VarAndContext, Pair<PointsToSetInternal, AllocAndContextSet>> contextsForAllocsCache
-      = new HashMap<VarAndContext, Pair<PointsToSetInternal, AllocAndContextSet>>();
-
-  protected final ContextSensitiveInfo csInfo;
-
-  /**
-   * if <code>true</code>, compute full points-to set for queried variable
-   */
-  protected boolean doPointsTo;
-
-  protected FieldCheckHeuristic fieldCheckHeuristic;
-
-  protected HeuristicType heuristicType;
-
-  protected FieldToEdgesMap fieldToLoads;
-
-  protected FieldToEdgesMap fieldToStores;
-
-  protected final int maxNodesPerPass;
-
-  protected final int maxPasses;
-
-  protected int nesting = 0;
-
-  protected int numNodesTraversed;
-
-  protected int numPasses = 0;
-
-  protected final PAG pag;
-
-  protected AllocAndContextSet pointsTo = null;
-
-  protected final Set<CallSiteAndContext> queriedCallSites = new HashSet<CallSiteAndContext>();
-
-  protected int recursionDepth = -1;
-
-  protected boolean refiningCallSite = false;
-
-  protected OTFMethodSCCManager sccManager;
-
-  protected Map<VarContextAndUp, Map<AllocAndContext, CallingContextSet>> upContextCache
-      = new HashMap<VarContextAndUp, Map<AllocAndContext, CallingContextSet>>();
-
-  protected ValidMatches vMatches;
-
-  protected Map<Local, PointsToSet> reachingObjectsCache, reachingObjectsCacheNoCGRefinement;
-
-  protected boolean useCache;
-
-  private final boolean lazy;
-
-  public DemandCSPointsTo(ContextSensitiveInfo csInfo, PAG pag) {
-    this(csInfo, pag, DEFAULT_MAX_TRAVERSAL, DEFAULT_MAX_PASSES, DEFAULT_LAZY);
-  }
-
-  public DemandCSPointsTo(ContextSensitiveInfo csInfo, PAG pag, int maxTraversal, int maxPasses, boolean lazy) {
-    this.csInfo = csInfo;
-    this.pag = pag;
-    this.maxPasses = maxPasses;
-    this.lazy = lazy;
-    this.maxNodesPerPass = maxTraversal / maxPasses;
-    this.heuristicType = HeuristicType.INCR;
-    this.reachingObjectsCache = new HashMap<Local, PointsToSet>();
-    this.reachingObjectsCacheNoCGRefinement = new HashMap<Local, PointsToSet>();
-    this.useCache = true;
-  }
-
-  private void init() {
+private void init() {
     this.fieldToStores = SootUtil.storesOnField(pag);
     this.fieldToLoads = SootUtil.loadsOnField(pag);
     this.vMatches = new ValidMatches(pag, fieldToStores);
   }
 
-  public PointsToSet reachingObjects(Local l) {
+@Override
+public PointsToSet reachingObjects(Local l) {
     if (lazy) {
       /*
        * create a lazy points-to set; this will not actually compute context information until we ask whether this points-to
@@ -313,7 +223,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  public PointsToSet doReachingObjects(Local l) {
+public PointsToSet doReachingObjects(Local l) {
     // lazy initialization
     if (fieldToStores == null) {
       init();
@@ -336,7 +246,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return result;
   }
 
-  /**
+/**
    * Returns <code>false</code> if an inconsistent computation occurred, i.e. if result differs from the result computed by
    * {@link #computeReachingObjects(Local)} on l.
    */
@@ -351,7 +261,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return new PointsToSetEqualsWrapper(eq1).equals(new PointsToSetEqualsWrapper(eq2));
   }
 
-  /**
+/**
    * Computes the possibly refined set of reaching objects for l.
    */
   protected PointsToSet computeReachingObjects(Local l) {
@@ -369,7 +279,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  /**
+/**
    * Computes the refined set of reaching objects for l. Returns <code>null</code> if refinement failed.
    */
   protected PointsToSet computeRefinedReachingObjects(VarNode v) {
@@ -405,7 +315,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return contextSensitiveResult;
   }
 
-  protected boolean callEdgeInSCC(AssignEdge assignEdge) {
+protected boolean callEdgeInSCC(AssignEdge assignEdge) {
     boolean sameSCCAlready = false;
     assert assignEdge.isCallEdge();
     // assert assignEdge.getSrc() instanceof LocalVarNode :
@@ -421,7 +331,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return sameSCCAlready;
   }
 
-  protected CallingContextSet checkAllocAndContextCache(AllocAndContext allocAndContext, VarNode targetVar) {
+protected CallingContextSet checkAllocAndContextCache(AllocAndContext allocAndContext, VarNode targetVar) {
     if (allocAndContextCache.containsKey(allocAndContext)) {
       Map<VarNode, CallingContextSet> m = allocAndContextCache.get(allocAndContext);
       if (m.containsKey(targetVar)) {
@@ -433,15 +343,11 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return null;
   }
 
-  protected PointsToSetInternal checkContextsForAllocsCache(VarAndContext varAndContext, AllocAndContextSet ret,
+protected PointsToSetInternal checkContextsForAllocsCache(VarAndContext varAndContext, AllocAndContextSet ret,
       PointsToSetInternal locs) {
     PointsToSetInternal retSet = null;
     if (contextsForAllocsCache.containsKey(varAndContext)) {
-      for (AllocAndContext allocAndContext : contextsForAllocsCache.get(varAndContext).getO2()) {
-        if (locs.contains(allocAndContext.alloc)) {
-          ret.add(allocAndContext);
-        }
-      }
+      contextsForAllocsCache.get(varAndContext).getO2().stream().filter(allocAndContext -> locs.contains(allocAndContext.alloc)).forEach(ret::add);
       final PointsToSetInternal oldLocs = contextsForAllocsCache.get(varAndContext).getO1();
       final PointsToSetInternal tmpSet = new HybridPointsToSet(locs.getType(), pag);
       locs.forall(new P2SetVisitor() {
@@ -459,13 +365,13 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
       PointsToSetInternal storedSet = new HybridPointsToSet(locs.getType(), pag);
       storedSet.addAll(locs, null);
       contextsForAllocsCache.put(varAndContext,
-          new Pair<PointsToSetInternal, AllocAndContextSet>(storedSet, new AllocAndContextSet()));
+          new Pair<>(storedSet, new AllocAndContextSet()));
       retSet = locs;
     }
     return retSet;
   }
 
-  /**
+/**
    * check the computed points-to set of a variable against some predicate
    *
    * @param v
@@ -500,7 +406,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
       try {
         success = refineP2Set(new VarAndContext(v, EMPTY_CALLSTACK), null);
       } catch (TerminateEarlyException e) {
-        success = false;
+        logger.error(e.getMessage(), e);
+		success = false;
       }
       if (success) {
         if (p2setPred.test(pointsTo)) {
@@ -515,7 +422,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
 
   }
 
-  // protected boolean upContextsSane(CallingContextSet ret, AllocAndContext
+// protected boolean upContextsSane(CallingContextSet ret, AllocAndContext
   // allocAndContext, VarContextAndUp varContextAndUp) {
   // for (ImmutableStack<Integer> context : ret) {
   // ImmutableStack<Integer> fixedContext = fixUpContext(context,
@@ -553,12 +460,12 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         return allocAndContextMap.get(allocAndContext);
       }
     } else {
-      upContextCache.put(varContextAndUp, new HashMap<AllocAndContext, CallingContextSet>());
+      upContextCache.put(varContextAndUp, new HashMap<>());
     }
     return null;
   }
 
-  protected void clearState() {
+protected void clearState() {
     allocAndContextCache.clear();
     callGraphStack.clear();
     callSiteToResolvedTargets.clear();
@@ -573,7 +480,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     recursionDepth = -1;
   }
 
-  /**
+/**
    * compute a flows-to set for an allocation site. for now, we use a simple refinement strategy; just refine as much as
    * possible, maintaining the smallest set of flows-to vars
    *
@@ -604,32 +511,30 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
       } catch (TerminateEarlyException e) {
         logger.debug(e.getMessage(), e);
       }
-      if (result != null) {
-        if (smallest == null || result.size() < smallest.size()) {
-          smallest = result;
-        }
-      }
+      boolean condition = result != null && (smallest == null || result.size() < smallest.size());
+	if (condition) {
+	  smallest = result;
+	}
       if (!fieldCheckHeuristic.runNewPass()) {
         return smallest;
       }
     }
   }
 
-  protected void debugPrint(String str) {
-    if (nesting <= DEBUG_NESTING) {
-      if (DEBUG_PASS == -1 || DEBUG_PASS == numPasses) {
-        logger.debug(":" + nesting + " " + str);
+protected void debugPrint(String str) {
+    boolean condition = nesting <= DEBUG_NESTING && (DEBUG_PASS == -1 || DEBUG_PASS == numPasses);
+	if (condition) {
+        logger.debug(new StringBuilder().append(":").append(nesting).append(" ").append(str).toString());
       }
-    }
   }
 
-  /*
+/*
    * (non-Javadoc)
    *
    * @see AAA.summary.Refiner#dumpPathForBadLoc(soot.jimple.spark.pag.VarNode, soot.jimple.spark.pag.AllocNode)
    */
   protected void dumpPathForLoc(VarNode v, final AllocNode badLoc, String filePrefix) {
-    final HashSet<VarNode> visited = new HashSet<VarNode>();
+    final HashSet<VarNode> visited = new HashSet<>();
     final DotPointerGraph dotGraph = new DotPointerGraph();
     final class Helper {
       boolean handle(VarNode curNode) {
@@ -676,10 +581,10 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     Helper h = new Helper();
     h.handle(v);
     // logger.debug(""+dotGraph.numEdges() + " edges on path");
-    dotGraph.dump("tmp/" + filePrefix + v.getNumber() + "_" + badLoc.getNumber() + ".dot");
+    dotGraph.dump(new StringBuilder().append("tmp/").append(filePrefix).append(v.getNumber()).append("_").append(badLoc.getNumber()).append(".dot").toString());
   }
 
-  protected Collection<AssignEdge> filterAssigns(final VarNode v, final ImmutableStack<Integer> callingContext,
+protected Collection<AssignEdge> filterAssigns(final VarNode v, final ImmutableStack<Integer> callingContext,
       boolean forward, boolean refineVirtCalls) {
     Set<AssignEdge> assigns = forward ? csInfo.getAssignEdges(v) : csInfo.getAssignBarEdges(v);
     Collection<AssignEdge> realAssigns;
@@ -687,8 +592,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     final boolean backward = !forward;
     if (exitNode && !callingContext.isEmpty()) {
       Integer topCallSite = callingContext.peek();
-      realAssigns = new ArrayList<AssignEdge>();
-      for (AssignEdge assignEdge : assigns) {
+      realAssigns = new ArrayList<>();
+      assigns.forEach(assignEdge -> {
         assert (forward && assignEdge.isParamEdge()) || (backward && assignEdge.isReturnEdge()) : assignEdge;
 
         Integer assignEdgeCallSite = assignEdge.getCallSite();
@@ -698,10 +603,11 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         }
       }
       // assert realAssigns.size() == 1;
+);
     } else {
       if (assigns.size() > 1) {
-        realAssigns = new ArrayList<AssignEdge>();
-        for (AssignEdge assignEdge : assigns) {
+        realAssigns = new ArrayList<>();
+        assigns.forEach(assignEdge -> {
           boolean enteringCall = forward ? assignEdge.isReturnEdge() : assignEdge.isParamEdge();
           if (enteringCall) {
             Integer callSite = assignEdge.getCallSite();
@@ -718,7 +624,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           } else {
             realAssigns.add(assignEdge);
           }
-        }
+        });
       } else {
         realAssigns = assigns;
       }
@@ -726,7 +632,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return realAssigns;
   }
 
-  protected AllocAndContextSet findContextsForAllocs(final VarAndContext varAndContext, PointsToSetInternal locs) {
+protected AllocAndContextSet findContextsForAllocs(final VarAndContext varAndContext, PointsToSetInternal locs) {
     if (contextForAllocsStack.contains(varAndContext)) {
       // recursion; check depth
       // we're fine for x = x.next
@@ -758,20 +664,21 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
       debugPrint("finding alloc contexts for " + varAndContext);
     }
     try {
-      final Set<VarAndContext> marked = new HashSet<VarAndContext>();
-      final Stack<VarAndContext> worklist = new Stack<VarAndContext>();
-      final Propagator<VarAndContext> p = new Propagator<VarAndContext>(marked, worklist);
+      final Set<VarAndContext> marked = new HashSet<>();
+      final Stack<VarAndContext> worklist = new Stack<>();
+      final Propagator<VarAndContext> p = new Propagator<>(marked, worklist);
       p.prop(varAndContext);
       IncomingEdgeHandler edgeHandler = new IncomingEdgeHandler() {
 
         @Override
         public void handleAlloc(AllocNode allocNode, VarAndContext origVarAndContext) {
-          if (realLocs.contains(allocNode)) {
-            if (DEBUG) {
-              debugPrint("found alloc " + allocNode);
-            }
-            ret.add(new AllocAndContext(allocNode, origVarAndContext.context));
-          }
+          if (!realLocs.contains(allocNode)) {
+			return;
+		}
+		if (DEBUG) {
+		  debugPrint("found alloc " + allocNode);
+		}
+		ret.add(new AllocAndContext(allocNode, origVarAndContext.context));
         }
 
         @Override
@@ -790,7 +697,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           if (DEBUG) {
             debugPrint("alloc contexts " + allocContexts);
           }
-          for (AllocAndContext allocAndContext : allocContexts) {
+          allocContexts.forEach(allocAndContext -> {
             if (DEBUG) {
               debugPrint("alloc and context " + allocAndContext);
             }
@@ -801,18 +708,16 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
             } else {
               matchSrcContexts = findVarContextsFromAlloc(allocAndContext, storeBase);
             }
-            for (ImmutableStack<Integer> matchSrcContext : matchSrcContexts) {
-              // ret
-              // .add(new Pair<AllocNode,
-              // ImmutableStack<Integer>>(
-              // (AllocNode) n,
-              // matchSrcContext));
-              // ret.addAll(findContextsForAllocs(matchSrc,
-              // matchSrcContext, locs));
-              p.prop(new VarAndContext(matchSrc, matchSrcContext));
-            }
+            // ret
+			// .add(new Pair<AllocNode,
+			// ImmutableStack<Integer>>(
+			// (AllocNode) n,
+			// matchSrcContext));
+			// ret.addAll(findContextsForAllocs(matchSrc,
+			// matchSrcContext, locs));
+			matchSrcContexts.forEach(matchSrcContext -> p.prop(new VarAndContext(matchSrc, matchSrcContext)));
 
-          }
+          });
 
         }
 
@@ -843,14 +748,14 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           }
           contextsForAllocsCache.remove(varAndContext);
         } else {
-          assert contextForAllocsStack.size() == recursionDepth : recursionDepth + " " + contextForAllocsStack;
+          assert contextForAllocsStack.size() == recursionDepth : new StringBuilder().append(recursionDepth).append(" ").append(contextForAllocsStack).toString();
           recursionDepth = -1;
           if (contextsForAllocsCache.containsKey(varAndContext)) {
             contextsForAllocsCache.get(varAndContext).getO2().addAll(ret);
           } else {
             PointsToSetInternal storedSet = new HybridPointsToSet(locs.getType(), pag);
             storedSet.addAll(locs, null);
-            contextsForAllocsCache.put(varAndContext, new Pair<PointsToSetInternal, AllocAndContextSet>(storedSet, ret));
+            contextsForAllocsCache.put(varAndContext, new Pair<>(storedSet, ret));
 
           }
         }
@@ -860,7 +765,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         } else {
           PointsToSetInternal storedSet = new HybridPointsToSet(locs.getType(), pag);
           storedSet.addAll(locs, null);
-          contextsForAllocsCache.put(varAndContext, new Pair<PointsToSetInternal, AllocAndContextSet>(storedSet, ret));
+          contextsForAllocsCache.put(varAndContext, new Pair<>(storedSet, ret));
 
         }
       }
@@ -874,7 +779,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  protected CallingContextSet findUpContextsForVar(AllocAndContext allocAndContext, VarContextAndUp varContextAndUp) {
+protected CallingContextSet findUpContextsForVar(AllocAndContext allocAndContext, VarContextAndUp varContextAndUp) {
     final AllocNode alloc = allocAndContext.alloc;
     final ImmutableStack<Integer> allocContext = allocAndContext.context;
     CallingContextSet tmpSet = checkUpContextCache(varContextAndUp, allocAndContext);
@@ -885,12 +790,12 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     upContextCache.get(varContextAndUp).put(allocAndContext, ret);
     nesting++;
     if (DEBUG) {
-      debugPrint("finding up context for " + varContextAndUp + " to " + alloc + " " + allocContext);
+      debugPrint(new StringBuilder().append("finding up context for ").append(varContextAndUp).append(" to ").append(alloc).append(" ").append(allocContext).toString());
     }
     try {
-      final Set<VarAndContext> marked = new HashSet<VarAndContext>();
-      final Stack<VarAndContext> worklist = new Stack<VarAndContext>();
-      final Propagator<VarAndContext> p = new Propagator<VarAndContext>(marked, worklist);
+      final Set<VarAndContext> marked = new HashSet<>();
+      final Stack<VarAndContext> worklist = new Stack<>();
+      final Propagator<VarAndContext> p = new Propagator<>(marked, worklist);
       p.prop(varContextAndUp);
       class UpContextEdgeHandler extends IncomingEdgeHandler {
 
@@ -940,7 +845,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
                 ImmutableStack<Integer> trueAllocContext = allocContext.popAll(discoveredAllocContext);
                 AllocAndContextSet allocAndContexts
                     = findContextsForAllocs(new VarAndContext(storeBase, trueAllocContext), intersection);
-                for (AllocAndContext allocAndContext : allocAndContexts) {
+                allocAndContexts.forEach(allocAndContext -> {
                   // if (DEBUG)
                   // logger.debug("alloc context "
                   // + newAllocContext);
@@ -951,16 +856,12 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
                   } else {
                     CallingContextSet tmpContexts = findVarContextsFromAlloc(allocAndContext, loadBase);
                     // upContexts = new CallingContextSet();
-                    for (ImmutableStack<Integer> tmpContext : tmpContexts) {
-                      if (tmpContext.topMatches(contextAndUp.context)) {
-                        ImmutableStack<Integer> reverse = contextAndUp.upContext.reverse();
-                        ImmutableStack<Integer> toAdd = tmpContext.popAll(contextAndUp.context).pushAll(reverse);
-                        ret.add(toAdd);
-                      }
-
-                    }
+					tmpContexts.stream().filter(tmpContext -> tmpContext.topMatches(contextAndUp.context)).map(tmpContext -> {
+						ImmutableStack<Integer> reverse = contextAndUp.upContext.reverse();
+						return tmpContext.popAll(contextAndUp.context).pushAll(reverse);
+					}).forEach(ret::add);
                   }
-                }
+                });
               }
             }
           }
@@ -981,7 +882,6 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
             if (upContext.size() < ImmutableStack.getMaxSize()) {
               newUpContext = pushWithRecursionCheck(upContext, assignEdge);
             }
-            ;
           }
           p.prop(new VarContextAndUp(newVarAndContext.var, newVarAndContext.context, newUpContext));
         }
@@ -999,7 +899,6 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         }
 
       }
-      ;
       UpContextEdgeHandler edgeHandler = new UpContextEdgeHandler();
       processIncomingEdges(edgeHandler, worklist);
       nesting--;
@@ -1016,7 +915,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  protected CallingContextSet findVarContextsFromAlloc(AllocAndContext allocAndContext, VarNode targetVar) {
+protected CallingContextSet findVarContextsFromAlloc(AllocAndContext allocAndContext, VarNode targetVar) {
 
     CallingContextSet tmpSet = checkAllocAndContextCache(allocAndContext, targetVar);
     if (tmpSet != null) {
@@ -1025,9 +924,9 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     CallingContextSet ret = new CallingContextSet();
     allocAndContextCache.get(allocAndContext).put(targetVar, ret);
     try {
-      HashSet<VarAndContext> marked = new HashSet<VarAndContext>();
-      Stack<VarAndContext> worklist = new Stack<VarAndContext>();
-      Propagator<VarAndContext> p = new Propagator<VarAndContext>(marked, worklist);
+      HashSet<VarAndContext> marked = new HashSet<>();
+      Stack<VarAndContext> worklist = new Stack<>();
+      Propagator<VarAndContext> p = new Propagator<>(marked, worklist);
       AllocNode alloc = allocAndContext.alloc;
       ImmutableStack<Integer> allocContext = allocAndContext.context;
       Node[] newBarNodes = pag.allocLookup(alloc);
@@ -1054,7 +953,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           if (assignEdge.isReturnEdge()) {
             if (!curContext.isEmpty()) {
               if (!callEdgeInSCC(assignEdge)) {
-                assert assignEdge.getCallSite().equals(curContext.peek()) : assignEdge + " " + curContext;
+                assert assignEdge.getCallSite().equals(curContext.peek()) : new StringBuilder().append(assignEdge).append(" ").append(curContext).toString();
                 newContext = curContext.pop();
               } else {
                 newContext = popRecursiveCallSites(curContext);
@@ -1089,8 +988,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           final VarNode storeBase = frNode.getBase();
           SparkField field = frNode.getField();
           // Pair<VarNode, FieldRefNode> putfield = new Pair<VarNode,
-          // FieldRefNode>(curVar, frNode);
-          for (Pair<VarNode, VarNode> load : fieldToLoads.get(field)) {
+		// FieldRefNode>(curVar, frNode);
+		fieldToLoads.get(field).forEach(load -> {
             final VarNode loadBase = load.getO2();
             final PointsToSetInternal loadBaseP2Set = loadBase.getP2Set();
             final PointsToSetInternal storeBaseP2Set = storeBase.getP2Set();
@@ -1105,7 +1004,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
               if (checkField) {
                 AllocAndContextSet sharedAllocContexts
                     = findContextsForAllocs(new VarAndContext(storeBase, curContext), intersection);
-                for (AllocAndContext curAllocAndContext : sharedAllocContexts) {
+                sharedAllocContexts.forEach(curAllocAndContext -> {
                   CallingContextSet upContexts;
                   if (fieldCheckHeuristic.validFromBothEnds(field)) {
                     upContexts = findUpContextsForVar(curAllocAndContext,
@@ -1113,10 +1012,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
                   } else {
                     upContexts = findVarContextsFromAlloc(curAllocAndContext, loadBase);
                   }
-                  for (ImmutableStack<Integer> upContext : upContexts) {
-                    p.prop(new VarAndContext(matchTgt, upContext));
-                  }
-                }
+                  upContexts.forEach(upContext -> p.prop(new VarAndContext(matchTgt, upContext)));
+                });
               } else {
                 p.prop(new VarAndContext(matchTgt, EMPTY_CALLSTACK));
               }
@@ -1126,7 +1023,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
               // if (h.terminate())
               // return;
             }
-          }
+          });
 
         }
       }
@@ -1137,7 +1034,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   protected Set<SootMethod> getCallTargets(PointsToSetInternal p2Set, NumberedString methodStr, Type receiverType,
       Set<SootMethod> possibleTargets) {
     List<Object> args = Arrays.asList(p2Set, methodStr, receiverType, possibleTargets);
@@ -1145,15 +1042,13 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
       return callTargetsArgCache.get(args);
     }
     Set<Type> types = p2Set.possibleTypes();
-    Set<SootMethod> ret = new HashSet<SootMethod>();
-    for (Type type : types) {
-      ret.addAll(getCallTargetsForType(type, methodStr, receiverType, possibleTargets));
-    }
+    Set<SootMethod> ret = new HashSet<>();
+    types.forEach(type -> ret.addAll(getCallTargetsForType(type, methodStr, receiverType, possibleTargets)));
     callTargetsArgCache.put(args, ret);
     return ret;
   }
 
-  protected Set<SootMethod> getCallTargetsForType(Type type, NumberedString methodStr, Type receiverType,
+protected Set<SootMethod> getCallTargetsForType(Type type, NumberedString methodStr, Type receiverType,
       Set<SootMethod> possibleTargets) {
     if (!pag.getTypeManager().castNeverFails(type, receiverType)) {
       return Collections.<SootMethod>emptySet();
@@ -1181,13 +1076,13 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
 
   }
 
-  protected Set<VarNode> getFlowsToHelper(AllocAndContext allocAndContext) {
-    Set<VarNode> ret = new ArraySet<VarNode>();
+protected Set<VarNode> getFlowsToHelper(AllocAndContext allocAndContext) {
+    Set<VarNode> ret = new ArraySet<>();
 
     try {
-      HashSet<VarAndContext> marked = new HashSet<VarAndContext>();
-      Stack<VarAndContext> worklist = new Stack<VarAndContext>();
-      Propagator<VarAndContext> p = new Propagator<VarAndContext>(marked, worklist);
+      HashSet<VarAndContext> marked = new HashSet<>();
+      Stack<VarAndContext> worklist = new Stack<>();
+      Propagator<VarAndContext> p = new Propagator<>(marked, worklist);
       AllocNode alloc = allocAndContext.alloc;
       ImmutableStack<Integer> allocContext = allocAndContext.context;
       Node[] newBarNodes = pag.allocLookup(alloc);
@@ -1213,7 +1108,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           if (assignEdge.isReturnEdge()) {
             if (!curContext.isEmpty()) {
               if (!callEdgeInSCC(assignEdge)) {
-                assert assignEdge.getCallSite().equals(curContext.peek()) : assignEdge + " " + curContext;
+                assert assignEdge.getCallSite().equals(curContext.peek()) : new StringBuilder().append(assignEdge).append(" ").append(curContext).toString();
                 newContext = curContext.pop();
               } else {
                 newContext = popRecursiveCallSites(curContext);
@@ -1248,8 +1143,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           final VarNode storeBase = frNode.getBase();
           SparkField field = frNode.getField();
           // Pair<VarNode, FieldRefNode> putfield = new Pair<VarNode,
-          // FieldRefNode>(curVar, frNode);
-          for (Pair<VarNode, VarNode> load : fieldToLoads.get(field)) {
+		// FieldRefNode>(curVar, frNode);
+		fieldToLoads.get(field).forEach(load -> {
             final VarNode loadBase = load.getO2();
             final PointsToSetInternal loadBaseP2Set = loadBase.getP2Set();
             final PointsToSetInternal storeBaseP2Set = storeBase.getP2Set();
@@ -1264,7 +1159,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
               if (checkField) {
                 AllocAndContextSet sharedAllocContexts
                     = findContextsForAllocs(new VarAndContext(storeBase, curContext), intersection);
-                for (AllocAndContext curAllocAndContext : sharedAllocContexts) {
+                sharedAllocContexts.forEach(curAllocAndContext -> {
                   CallingContextSet upContexts;
                   if (fieldCheckHeuristic.validFromBothEnds(field)) {
                     upContexts = findUpContextsForVar(curAllocAndContext,
@@ -1272,10 +1167,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
                   } else {
                     upContexts = findVarContextsFromAlloc(curAllocAndContext, loadBase);
                   }
-                  for (ImmutableStack<Integer> upContext : upContexts) {
-                    p.prop(new VarAndContext(matchTgt, upContext));
-                  }
-                }
+                  upContexts.forEach(upContext -> p.prop(new VarAndContext(matchTgt, upContext)));
+                });
               } else {
                 p.prop(new VarAndContext(matchTgt, EMPTY_CALLSTACK));
               }
@@ -1285,7 +1178,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
               // if (h.terminate())
               // return;
             }
-          }
+          });
 
         }
       }
@@ -1296,50 +1189,49 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  protected int getMaxPasses() {
+protected int getMaxPasses() {
     return maxPasses;
   }
 
-  protected void incrementNodesTraversed() {
+protected void incrementNodesTraversed() {
     numNodesTraversed++;
     if (numNodesTraversed > maxNodesPerPass) {
       throw new TerminateEarlyException();
     }
   }
 
-  @SuppressWarnings("unused")
+@SuppressWarnings("unused")
   protected boolean isRecursive(ImmutableStack<Integer> context, AssignEdge assignEdge) {
     boolean sameSCCAlready = callEdgeInSCC(assignEdge);
     if (sameSCCAlready) {
       return true;
     }
     Integer callSite = assignEdge.getCallSite();
-    if (context.contains(callSite)) {
-      Set<SootMethod> toBeCollapsed = new ArraySet<SootMethod>();
-      int callSiteInd = 0;
-      for (; callSiteInd < context.size() && !context.get(callSiteInd).equals(callSite); callSiteInd++) {
-        ;
+    if (!context.contains(callSite)) {
+		return false;
+	}
+	Set<SootMethod> toBeCollapsed = new ArraySet<>();
+	int callSiteInd = 0;
+	for (; callSiteInd < context.size() && !context.get(callSiteInd).equals(callSite); callSiteInd++) {
       }
-      for (; callSiteInd < context.size(); callSiteInd++) {
+	for (; callSiteInd < context.size(); callSiteInd++) {
         toBeCollapsed.add(csInfo.getInvokingMethod(context.get(callSiteInd)));
       }
-      sccManager.makeSameSCC(toBeCollapsed);
-      return true;
-    }
-    return false;
+	sccManager.makeSameSCC(toBeCollapsed);
+	return true;
   }
 
-  protected boolean isRecursiveCallSite(Integer callSite) {
+protected boolean isRecursiveCallSite(Integer callSite) {
     SootMethod invokingMethod = csInfo.getInvokingMethod(callSite);
     SootMethod invokedMethod = csInfo.getInvokedMethod(callSite);
     return sccManager.inSameSCC(invokingMethod, invokedMethod);
   }
 
-  @SuppressWarnings("unused")
+@SuppressWarnings("unused")
   protected Set<VarNode> nodesPropagatedThrough(final VarNode source, final PointsToSetInternal allocs) {
-    final Set<VarNode> marked = new HashSet<VarNode>();
-    final Stack<VarNode> worklist = new Stack<VarNode>();
-    Propagator<VarNode> p = new Propagator<VarNode>(marked, worklist);
+    final Set<VarNode> marked = new HashSet<>();
+    final Stack<VarNode> worklist = new Stack<>();
+    Propagator<VarNode> p = new Propagator<>(marked, worklist);
     p.prop(source);
     while (!worklist.isEmpty()) {
       VarNode curNode = worklist.pop();
@@ -1351,16 +1243,12 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         }
       }
       Set<VarNode> matchSources = vMatches.vMatchInvLookup(curNode);
-      for (VarNode matchSrc : matchSources) {
-        if (matchSrc.getP2Set().hasNonEmptyIntersection(allocs)) {
-          p.prop(matchSrc);
-        }
-      }
+      matchSources.stream().filter(matchSrc -> matchSrc.getP2Set().hasNonEmptyIntersection(allocs)).forEach(p::prop);
     }
     return marked;
   }
 
-  protected ImmutableStack<Integer> popRecursiveCallSites(ImmutableStack<Integer> context) {
+protected ImmutableStack<Integer> popRecursiveCallSites(ImmutableStack<Integer> context) {
     ImmutableStack<Integer> ret = context;
     while (!ret.isEmpty() && isRecursiveCallSite(ret.peek())) {
       ret = ret.pop();
@@ -1368,7 +1256,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return ret;
   }
 
-  protected void processIncomingEdges(IncomingEdgeHandler h, Stack<VarAndContext> worklist) {
+protected void processIncomingEdges(IncomingEdgeHandler h, Stack<VarAndContext> worklist) {
     while (!worklist.isEmpty()) {
       incrementNodesTraversed();
       VarAndContext varAndContext = worklist.pop();
@@ -1396,7 +1284,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           if (assignEdge.isParamEdge()) {
             if (!callingContext.isEmpty()) {
               if (!callEdgeInSCC(assignEdge)) {
-                assert assignEdge.getCallSite().equals(callingContext.peek()) : assignEdge + " " + callingContext;
+                assert assignEdge.getCallSite().equals(callingContext.peek()) : new StringBuilder().append(assignEdge).append(" ").append(callingContext).toString();
                 newContext = callingContext.pop();
               } else {
                 newContext = popRecursiveCallSites(callingContext);
@@ -1457,27 +1345,25 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           final PointsToSetInternal storeBaseP2Set = storeBase.getP2Set();
           final PointsToSetInternal loadBaseP2Set = loadBase.getP2Set();
           final VarNode matchSrc = store.getO1();
-          if (matchSources.contains(matchSrc)) {
-            if (h.shouldHandleSrc(matchSrc)) {
-              if (DEBUG) {
-                debugPrint("match source " + matchSrc);
-              }
-              PointsToSetInternal intersection = SootUtil.constructIntersection(storeBaseP2Set, loadBaseP2Set, pag);
+          if (matchSources.contains(matchSrc) && h.shouldHandleSrc(matchSrc)) {
+		  if (DEBUG) {
+		    debugPrint("match source " + matchSrc);
+		  }
+		  PointsToSetInternal intersection = SootUtil.constructIntersection(storeBaseP2Set, loadBaseP2Set, pag);
 
-              boolean checkGetfield = fieldCheckHeuristic.validateMatchesForField(field);
+		  boolean checkGetfield = fieldCheckHeuristic.validateMatchesForField(field);
 
-              h.handleMatchSrc(matchSrc, intersection, loadBase, storeBase, varAndContext, field, checkGetfield);
-              if (h.terminate()) {
-                return;
-              }
-            }
-          }
+		  h.handleMatchSrc(matchSrc, intersection, loadBase, storeBase, varAndContext, field, checkGetfield);
+		  if (h.terminate()) {
+		    return;
+		  }
+		}
         }
       }
     }
   }
 
-  protected ImmutableStack<Integer> pushWithRecursionCheck(ImmutableStack<Integer> context, AssignEdge assignEdge) {
+protected ImmutableStack<Integer> pushWithRecursionCheck(ImmutableStack<Integer> context, AssignEdge assignEdge) {
     boolean foundRecursion = callEdgeInSCC(assignEdge);
     if (!foundRecursion) {
       Integer callSite = assignEdge.getCallSite();
@@ -1490,10 +1376,9 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         if (true) {
           throw new TerminateEarlyException();
         }
-        Set<SootMethod> toBeCollapsed = new ArraySet<SootMethod>();
+        Set<SootMethod> toBeCollapsed = new ArraySet<>();
         int callSiteInd = 0;
         for (; callSiteInd < context.size() && !context.get(callSiteInd).equals(callSite); callSiteInd++) {
-          ;
         }
         // int numToPop = 0;
         for (; callSiteInd < context.size(); callSiteInd++) {
@@ -1511,18 +1396,17 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         // return poppedContext;
       }
     }
-    if (foundRecursion) {
-      ImmutableStack<Integer> popped = popRecursiveCallSites(context);
-      if (DEBUG) {
+    if (!foundRecursion) {
+		return context.push(assignEdge.getCallSite());
+	}
+	ImmutableStack<Integer> popped = popRecursiveCallSites(context);
+	if (DEBUG) {
         debugPrint("popped stack " + popped);
       }
-      return popped;
-    } else {
-      return context.push(assignEdge.getCallSite());
-    }
+	return popped;
   }
 
-  protected boolean refineAlias(VarNode v1, VarNode v2, PointsToSetInternal intersection, HeuristicType heuristic) {
+protected boolean refineAlias(VarNode v1, VarNode v2, PointsToSetInternal intersection, HeuristicType heuristic) {
     if (refineAliasInternal(v1, v2, intersection, heuristic)) {
       return true;
     }
@@ -1532,7 +1416,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return false;
   }
 
-  protected boolean refineAliasInternal(VarNode v1, VarNode v2, PointsToSetInternal intersection, HeuristicType heuristic) {
+protected boolean refineAliasInternal(VarNode v1, VarNode v2, PointsToSetInternal intersection, HeuristicType heuristic) {
     this.fieldCheckHeuristic = HeuristicType.getHeuristic(heuristic, pag.getTypeManager(), getMaxPasses());
     numPasses = 0;
     while (true) {
@@ -1562,10 +1446,11 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         }
         success = emptyIntersection;
       } catch (TerminateEarlyException e) {
-        success = false;
+        logger.error(e.getMessage(), e);
+		success = false;
       }
       if (success) {
-        logger.debug("took " + numPasses + " passes");
+        logger.debug(new StringBuilder().append("took ").append(numPasses).append(" passes").toString());
         return true;
       } else {
         if (!fieldCheckHeuristic.runNewPass()) {
@@ -1575,7 +1460,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  protected Set<SootMethod> refineCallSite(Integer callSite, ImmutableStack<Integer> origContext) {
+protected Set<SootMethod> refineCallSite(Integer callSite, ImmutableStack<Integer> origContext) {
     CallSiteAndContext callSiteAndContext = new CallSiteAndContext(callSite, origContext);
     if (queriedCallSites.contains(callSiteAndContext)) {
       // if (DEBUG_VIRT) {
@@ -1604,10 +1489,10 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
       return allTargets;
     }
     if (DEBUG_VIRT) {
-      debugPrint("refining call to " + invokedMethod + " on " + receiver + " " + origContext);
+      debugPrint(new StringBuilder().append("refining call to ").append(invokedMethod).append(" on ").append(receiver).append(" ").append(origContext).toString());
     }
-    final HashSet<VarAndContext> marked = new HashSet<VarAndContext>();
-    final Stack<VarAndContext> worklist = new Stack<VarAndContext>();
+    final HashSet<VarAndContext> marked = new HashSet<>();
+    final Stack<VarAndContext> worklist = new Stack<>();
     final class Helper {
 
       void prop(VarAndContext varAndContext) {
@@ -1616,7 +1501,6 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         }
       }
     }
-    ;
     final Helper h = new Helper();
     h.prop(new VarAndContext(receiver, origContext));
     while (!worklist.isEmpty()) {
@@ -1638,9 +1522,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
       Node[] newNodes = pag.allocInvLookup(curVar);
       for (int i = 0; i < newNodes.length; i++) {
         AllocNode allocNode = (AllocNode) newNodes[i];
-        for (SootMethod method : getCallTargetsForType(allocNode.getType(), methodSig, receiverType, allTargets)) {
-          callSiteToResolvedTargets.put(callSiteAndContext, method);
-        }
+        getCallTargetsForType(allocNode.getType(), methodSig, receiverType, allTargets).forEach(method -> callSiteToResolvedTargets.put(callSiteAndContext, method));
       }
       Collection<AssignEdge> assigns = filterAssigns(curVar, curContext, true, true);
       for (AssignEdge assignEdge : assigns) {
@@ -1695,9 +1577,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
               Set<SootMethod> matchSrcCallTargets = getCallTargets(matchSrcPTo, methodSig, receiverType, allTargets);
               if (matchSrcCallTargets.size() <= 1) {
                 skipMatch = true;
-                for (SootMethod method : matchSrcCallTargets) {
-                  callSiteToResolvedTargets.put(callSiteAndContext, method);
-                }
+                matchSrcCallTargets.forEach(method -> callSiteToResolvedTargets.put(callSiteAndContext, method));
               }
             }
             if (!skipMatch) {
@@ -1709,13 +1589,14 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
                 refiningCallSite = true;
                 allocContexts = findContextsForAllocs(new VarAndContext(loadBase, curContext), intersection);
               } catch (CallSiteException e) {
-                callSiteToResolvedTargets.putAll(callSiteAndContext, allTargets);
+                logger.error(e.getMessage(), e);
+				callSiteToResolvedTargets.putAll(callSiteAndContext, allTargets);
                 continue;
               } finally {
                 refiningCallSite = oldRefining;
                 nesting = oldNesting;
               }
-              for (AllocAndContext allocAndContext : allocContexts) {
+              allocContexts.forEach(allocAndContext -> {
                 CallingContextSet matchSrcContexts;
                 if (fieldCheckHeuristic.validFromBothEnds(field)) {
                   matchSrcContexts = findUpContextsForVar(allocAndContext,
@@ -1723,11 +1604,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
                 } else {
                   matchSrcContexts = findVarContextsFromAlloc(allocAndContext, storeBase);
                 }
-                for (ImmutableStack<Integer> matchSrcContext : matchSrcContexts) {
-                  VarAndContext newVarAndContext = new VarAndContext(matchSrc, matchSrcContext);
-                  h.prop(newVarAndContext);
-                }
-              }
+                matchSrcContexts.stream().map(matchSrcContext -> new VarAndContext(matchSrc, matchSrcContext)).forEach(h::prop);
+              });
 
             }
 
@@ -1737,8 +1615,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
 
     }
     if (DEBUG_VIRT) {
-      debugPrint("call of " + invokedMethod + " on " + receiver + " " + origContext + " goes to "
-          + callSiteToResolvedTargets.get(callSiteAndContext));
+      debugPrint(new StringBuilder().append("call of ").append(invokedMethod).append(" on ").append(receiver).append(" ").append(origContext).append(" goes to ")
+			.append(callSiteToResolvedTargets.get(callSiteAndContext)).toString());
     }
     callGraphStack.pop();
     queriedCallSites.add(callSiteAndContext);
@@ -1746,14 +1624,14 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
 
   }
 
-  protected boolean refineP2Set(VarAndContext varAndContext, final PointsToSetInternal badLocs) {
+protected boolean refineP2Set(VarAndContext varAndContext, final PointsToSetInternal badLocs) {
     nesting++;
     if (DEBUG) {
       debugPrint("refining " + varAndContext);
     }
-    final Set<VarAndContext> marked = new HashSet<VarAndContext>();
-    final Stack<VarAndContext> worklist = new Stack<VarAndContext>();
-    final Propagator<VarAndContext> p = new Propagator<VarAndContext>(marked, worklist);
+    final Set<VarAndContext> marked = new HashSet<>();
+    final Stack<VarAndContext> worklist = new Stack<>();
+    final Propagator<VarAndContext> p = new Propagator<>(marked, worklist);
     p.prop(varAndContext);
     IncomingEdgeHandler edgeHandler = new IncomingEdgeHandler() {
 
@@ -1775,7 +1653,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           VarAndContext origVarAndContext, SparkField field, boolean refine) {
         AllocAndContextSet allocContexts
             = findContextsForAllocs(new VarAndContext(loadBase, origVarAndContext.context), intersection);
-        for (AllocAndContext allocAndContext : allocContexts) {
+        allocContexts.forEach(allocAndContext -> {
           if (DEBUG) {
             debugPrint("alloc and context " + allocAndContext);
           }
@@ -1786,17 +1664,17 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
           } else {
             matchSrcContexts = findVarContextsFromAlloc(allocAndContext, storeBase);
           }
-          for (ImmutableStack<Integer> matchSrcContext : matchSrcContexts) {
-            if (DEBUG) {
+          matchSrcContexts.stream().map(matchSrcContext -> {
+			if (DEBUG) {
               debugPrint("match source context " + matchSrcContext);
             }
-            VarAndContext newVarAndContext = new VarAndContext(matchSrc, matchSrcContext);
-            p.prop(newVarAndContext);
-          }
-        }
+			return new VarAndContext(matchSrc, matchSrcContext);
+		}).forEach(p::prop);
+        });
       }
 
-      Object getResult() {
+      @Override
+	Object getResult() {
         return Boolean.valueOf(success);
       }
 
@@ -1814,7 +1692,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         }
       }
 
-      boolean terminate() {
+      @Override
+	boolean terminate() {
         return !success;
       }
     };
@@ -1823,7 +1702,7 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     return (Boolean) edgeHandler.getResult();
   }
 
-  /*
+/*
    * (non-Javadoc)
    *
    * @see AAA.summary.Refiner#refineP2Set(soot.jimple.spark.pag.VarNode, soot.jimple.spark.sets.PointsToSetInternal)
@@ -1851,7 +1730,8 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
         try {
           success = refineP2Set(new VarAndContext(v, EMPTY_CALLSTACK), badLocs);
         } catch (TerminateEarlyException e) {
-          success = false;
+          logger.error(e.getMessage(), e);
+		success = false;
         }
         if (success) {
 
@@ -1866,100 +1746,106 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     }
   }
 
-  protected boolean weirdCall(Integer callSite) {
+protected boolean weirdCall(Integer callSite) {
     SootMethod invokedMethod = csInfo.getInvokedMethod(callSite);
     return SootUtil.isThreadStartMethod(invokedMethod) || SootUtil.isNewInstanceMethod(invokedMethod);
   }
 
-  /**
+/**
    * Currently not implemented.
    *
    * @throws UnsupportedOperationException
    *           always
    */
-  public PointsToSet reachingObjects(Context c, Local l) {
+  @Override
+public PointsToSet reachingObjects(Context c, Local l) {
     throw new UnsupportedOperationException();
   }
 
-  /**
+/**
    * Currently not implemented.
    *
    * @throws UnsupportedOperationException
    *           always
    */
-  public PointsToSet reachingObjects(Context c, Local l, SootField f) {
+  @Override
+public PointsToSet reachingObjects(Context c, Local l, SootField f) {
     throw new UnsupportedOperationException();
   }
 
-  /**
+/**
    * Currently not implemented.
    *
    * @throws UnsupportedOperationException
    *           always
    */
-  public PointsToSet reachingObjects(Local l, SootField f) {
+  @Override
+public PointsToSet reachingObjects(Local l, SootField f) {
     throw new UnsupportedOperationException();
   }
 
-  /**
+/**
    * Currently not implemented.
    *
    * @throws UnsupportedOperationException
    *           always
    */
-  public PointsToSet reachingObjects(PointsToSet s, SootField f) {
+  @Override
+public PointsToSet reachingObjects(PointsToSet s, SootField f) {
     throw new UnsupportedOperationException();
   }
 
-  /**
+/**
    * Currently not implemented.
    *
    * @throws UnsupportedOperationException
    *           always
    */
-  public PointsToSet reachingObjects(SootField f) {
+  @Override
+public PointsToSet reachingObjects(SootField f) {
     throw new UnsupportedOperationException();
   }
 
-  /**
+/**
    * Currently not implemented.
    *
    * @throws UnsupportedOperationException
    *           always
    */
-  public PointsToSet reachingObjectsOfArrayElement(PointsToSet s) {
+  @Override
+public PointsToSet reachingObjectsOfArrayElement(PointsToSet s) {
     throw new UnsupportedOperationException();
   }
 
-  /**
+/**
    * @return returns the (SPARK) pointer assignment graph
    */
   public PAG getPAG() {
     return pag;
   }
 
-  /**
+/**
    * @return <code>true</code> is caching is enabled
    */
   public boolean usesCache() {
     return useCache;
   }
 
-  /**
+/**
    * enables caching
    */
   public void enableCache() {
     useCache = true;
   }
 
-  /**
+/**
    * disables caching
    */
   public void disableCache() {
     useCache = false;
   }
 
-  /**
+/**
    * clears the cache
    */
   public void clearCache() {
@@ -1967,20 +1853,118 @@ public final class DemandCSPointsTo implements PointsToAnalysis {
     reachingObjectsCacheNoCGRefinement.clear();
   }
 
-  public boolean isRefineCallGraph() {
+public boolean isRefineCallGraph() {
     return refineCallGraph;
   }
 
-  public void setRefineCallGraph(boolean refineCallGraph) {
+public void setRefineCallGraph(boolean refineCallGraph) {
     this.refineCallGraph = refineCallGraph;
   }
 
-  public HeuristicType getHeuristicType() {
+public HeuristicType getHeuristicType() {
     return heuristicType;
   }
 
-  public void setHeuristicType(HeuristicType heuristicType) {
+public void setHeuristicType(HeuristicType heuristicType) {
     this.heuristicType = heuristicType;
     clearCache();
+  }
+
+  @SuppressWarnings("serial")
+  protected static final class AllocAndContextCache extends HashMap<AllocAndContext, Map<VarNode, CallingContextSet>> {
+  }
+
+  protected static final class CallingContextSet extends ArraySet<ImmutableStack<Integer>> {
+  }
+
+  protected static final class CallSiteAndContext extends Pair<Integer, ImmutableStack<Integer>> {
+
+    public CallSiteAndContext(Integer callSite, ImmutableStack<Integer> callingContext) {
+      super(callSite, callingContext);
+    }
+  }
+
+  protected static final class CallSiteToTargetsMap extends HashSetMultiMap<CallSiteAndContext, SootMethod> {
+  }
+
+  protected abstract static class IncomingEdgeHandler {
+
+    public abstract void handleAlloc(AllocNode allocNode, VarAndContext origVarAndContext);
+
+    public abstract void handleMatchSrc(VarNode matchSrc, PointsToSetInternal intersection, VarNode loadBase,
+        VarNode storeBase, VarAndContext origVarAndContext, SparkField field, boolean refine);
+
+    abstract Object getResult();
+
+    abstract void handleAssignSrc(VarAndContext newVarAndContext, VarAndContext origVarAndContext, AssignEdge assignEdge);
+
+    abstract boolean shouldHandleSrc(VarNode src);
+
+    boolean terminate() {
+      return false;
+    }
+
+  }
+
+  protected static class VarAndContext {
+
+    final ImmutableStack<Integer> context;
+
+    final VarNode var;
+
+    public VarAndContext(VarNode var, ImmutableStack<Integer> context) {
+      assert var != null;
+      assert context != null;
+      this.var = var;
+      this.context = context;
+    }
+
+    @Override
+	public boolean equals(Object o) {
+      if (!(o != null && o.getClass() == VarAndContext.class)) {
+		return false;
+	}
+	VarAndContext other = (VarAndContext) o;
+	return var.equals(other.var) && context.equals(other.context);
+    }
+
+    @Override
+	public int hashCode() {
+      return var.hashCode() + context.hashCode();
+    }
+
+    @Override
+	public String toString() {
+      return new StringBuilder().append(var).append(" ").append(context).toString();
+    }
+  }
+
+  protected static final class VarContextAndUp extends VarAndContext {
+
+    final ImmutableStack<Integer> upContext;
+
+    public VarContextAndUp(VarNode var, ImmutableStack<Integer> context, ImmutableStack<Integer> upContext) {
+      super(var, context);
+      this.upContext = upContext;
+    }
+
+    @Override
+	public boolean equals(Object o) {
+      if (!(o != null && o.getClass() == VarContextAndUp.class)) {
+		return false;
+	}
+	VarContextAndUp other = (VarContextAndUp) o;
+	return var.equals(other.var) && context.equals(other.context) && upContext.equals(other.upContext);
+    }
+
+    @Override
+	public int hashCode() {
+      return var.hashCode() + context.hashCode() + upContext.hashCode();
+    }
+
+    @Override
+	public String toString() {
+      return new StringBuilder().append(var).append(" ").append(context).append(" up ").append(upContext).toString();
+    }
   }
 }

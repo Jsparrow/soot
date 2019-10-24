@@ -121,7 +121,7 @@ public class JimpleAST {
    * argument.
    */
   private void stashBodiesForClass(SootClass sc) {
-    HashMap<SootMethod, JimpleBody> methodToBodyMap = new HashMap<SootMethod, JimpleBody>();
+    HashMap<SootMethod, JimpleBody> methodToBodyMap = new HashMap<>();
 
     Walker w = new BodyExtractorWalker(sc, SootResolver.v(), methodToBodyMap);
 

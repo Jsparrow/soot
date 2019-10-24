@@ -40,27 +40,31 @@ import soot.shimple.ShimpleBody;
 import soot.shimple.toolkits.graph.ValueGraph.Node;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.CompleteBlockGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SimpleGlobalValueNumberer implements GlobalValueNumberer {
-  protected BlockGraph cfg;
+  private static final Logger logger = LoggerFactory.getLogger(SimpleGlobalValueNumberer.class);
+protected BlockGraph cfg;
   protected ValueGraph vg;
   protected Set<Partition> partitions;
   protected Map<Node, Partition> nodeToPartition;
 
   protected int currentPartitionNumber;
+protected List<Partition> newPartitions;
 
-  public SimpleGlobalValueNumberer(BlockGraph cfg) {
+public SimpleGlobalValueNumberer(BlockGraph cfg) {
     this.cfg = cfg;
     vg = new ValueGraph(cfg);
-    partitions = new HashSet<Partition>(); // not deterministic
-    nodeToPartition = new HashMap<Node, Partition>();
+    partitions = new HashSet<>(); // not deterministic
+    nodeToPartition = new HashMap<>();
     currentPartitionNumber = 0;
 
     initPartition();
     iterPartition();
   }
 
-  // testing
+// testing
   public static void main(String[] args) {
     // assumes 2 args: Class + Method
 
@@ -71,23 +75,25 @@ public class SimpleGlobalValueNumberer implements GlobalValueNumberer {
     ShimpleBody sb = Shimple.v().newBody(b);
     CompleteBlockGraph cfg = new CompleteBlockGraph(sb);
     SimpleGlobalValueNumberer sgvn = new SimpleGlobalValueNumberer(cfg);
-    System.out.println(sgvn);
+    logger.info(String.valueOf(sgvn));
   }
 
-  public int getGlobalValueNumber(Local local) {
+@Override
+public int getGlobalValueNumber(Local local) {
     Node node = vg.getNode(local);
     return nodeToPartition.get(node).getPartitionNumber();
   }
 
-  public boolean areEqual(Local local1, Local local2) {
+@Override
+public boolean areEqual(Local local1, Local local2) {
     Node node1 = vg.getNode(local1);
     Node node2 = vg.getNode(local2);
 
     return (nodeToPartition.get(node1) == nodeToPartition.get(node2));
   }
 
-  protected void initPartition() {
-    Map<String, Partition> labelToPartition = new HashMap<String, Partition>();
+protected void initPartition() {
+    Map<String, Partition> labelToPartition = new HashMap<>();
 
     Iterator<Node> topNodesIt = vg.getTopNodes().iterator();
     while (topNodesIt.hasNext()) {
@@ -106,21 +112,15 @@ public class SimpleGlobalValueNumberer implements GlobalValueNumberer {
     }
   }
 
-  protected List<Partition> newPartitions;
+protected void iterPartition() {
+    newPartitions = new ArrayList<>();
 
-  protected void iterPartition() {
-    newPartitions = new ArrayList<Partition>();
-
-    Iterator<Partition> partitionsIt = partitions.iterator();
-    while (partitionsIt.hasNext()) {
-      Partition partition = partitionsIt.next();
-      processPartition(partition);
-    }
+    partitions.forEach(this::processPartition);
 
     partitions.addAll(newPartitions);
   }
 
-  protected void processPartition(Partition partition) {
+protected void processPartition(Partition partition) {
     int size = partition.size();
 
     if (size == 0) {
@@ -149,7 +149,7 @@ public class SimpleGlobalValueNumberer implements GlobalValueNumberer {
     }
   }
 
-  protected boolean childrenAreInSamePartition(Node node1, Node node2) {
+protected boolean childrenAreInSamePartition(Node node1, Node node2) {
     boolean ordered = node1.isOrdered();
     if (ordered != node2.isOrdered()) {
       throw new RuntimeException("Assertion failed.");
@@ -196,15 +196,16 @@ public class SimpleGlobalValueNumberer implements GlobalValueNumberer {
     return true;
   }
 
-  public String toString() {
-    StringBuffer tmp = new StringBuffer();
+@Override
+public String toString() {
+    StringBuilder tmp = new StringBuilder();
 
     Body b = cfg.getBody();
     Iterator localsIt = b.getLocals().iterator();
 
     while (localsIt.hasNext()) {
       Local local = (Local) localsIt.next();
-      tmp.append(local + "\t" + getGlobalValueNumber(local) + "\n");
+      tmp.append(new StringBuilder().append(local).append("\t").append(getGlobalValueNumber(local)).append("\n").toString());
     }
 
     /*
@@ -223,7 +224,6 @@ public class SimpleGlobalValueNumberer implements GlobalValueNumberer {
     protected int partitionNumber;
 
     protected Partition() {
-      super();
       partitionNumber = currentPartitionNumber++;
     }
 

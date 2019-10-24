@@ -131,7 +131,8 @@ public class SiteInliner {
         // the argument passed to the method is not the same type.
         // For instance, Bottle.price_static takes a cost.
         // Cost is an interface implemented by Bottle.
-        SootClass localType, parameterType;
+        SootClass localType;
+		SootClass parameterType;
         localType = ((RefType) ((InstanceInvokeExpr) ie).getBase().getType()).getSootClass();
         parameterType = inlinee.getDeclaringClass();
 
@@ -196,12 +197,12 @@ public class SiteInliner {
     Stmt exitPoint = (Stmt) containerUnits.getSuccOf(toInline);
 
     // First, clone all of the inlinee's units & locals.
-    HashMap<Local, Local> oldLocalsToNew = new HashMap<Local, Local>();
-    HashMap<Stmt, Stmt> oldUnitsToNew = new HashMap<Stmt, Stmt>();
+    HashMap<Local, Local> oldLocalsToNew = new HashMap<>();
+    HashMap<Stmt, Stmt> oldUnitsToNew = new HashMap<>();
     {
       Stmt cursor = toInline;
-      for (Iterator<Unit> currIt = inlineeUnits.iterator(); currIt.hasNext();) {
-        final Stmt curr = (Stmt) currIt.next();
+      for (Unit inlineeUnit : inlineeUnits) {
+        final Stmt curr = (Stmt) inlineeUnit;
         Stmt currPrime = (Stmt) curr.clone();
         if (currPrime == null) {
           throw new RuntimeException("getting null from clone!");
@@ -262,8 +263,9 @@ public class SiteInliner {
     {
       Trap prevTrap = null;
       for (Trap t : inlineeB.getTraps()) {
-        Stmt newBegin = oldUnitsToNew.get(t.getBeginUnit()), newEnd = oldUnitsToNew.get(t.getEndUnit()),
-            newHandler = oldUnitsToNew.get(t.getHandlerUnit());
+        Stmt newBegin = oldUnitsToNew.get(t.getBeginUnit());
+		Stmt newEnd = oldUnitsToNew.get(t.getEndUnit());
+		Stmt newHandler = oldUnitsToNew.get(t.getHandlerUnit());
 
         if (newBegin == null || newEnd == null || newHandler == null) {
           throw new RuntimeException("couldn't map trap!");
@@ -282,7 +284,7 @@ public class SiteInliner {
     // Handle identity stmt's and returns.
     {
       Iterator<Unit> it = containerUnits.iterator(containerUnits.getSuccOf(toInline), containerUnits.getPredOf(exitPoint));
-      ArrayList<Unit> cuCopy = new ArrayList<Unit>();
+      ArrayList<Unit> cuCopy = new ArrayList<>();
 
       while (it.hasNext()) {
         cuCopy.add(it.next());
@@ -326,7 +328,7 @@ public class SiteInliner {
       }
     }
 
-    List<Unit> newStmts = new ArrayList<Unit>();
+    List<Unit> newStmts = new ArrayList<>();
     for (Iterator<Unit> i
         = containerUnits.iterator(containerUnits.getSuccOf(toInline), containerUnits.getPredOf(exitPoint)); i.hasNext();) {
       newStmts.add(i.next());

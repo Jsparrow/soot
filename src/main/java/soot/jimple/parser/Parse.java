@@ -59,7 +59,7 @@ public class Parse {
    * SootClass you want fill it's method bodies. If you want to create a SootClass for the inputStream set the 2nd arg to
    * null.
    */
-  static public SootClass parse(InputStream istream, SootClass sc) {
+  public static SootClass parse(InputStream istream, SootClass sc) {
     Start tree = null;
 
     Parser p = new Parser(
@@ -103,8 +103,8 @@ public class Parse {
     for (String arg : args) {
       if (arg.startsWith("-")) {
         arg = arg.substring(1);
-        if (arg.equals("d")) {
-        } else if (arg.equals("v")) {
+        if ("d".equals(arg)) {
+        } else if ("v".equals(arg)) {
           verbose = true;
         }
       } else {
@@ -115,7 +115,8 @@ public class Parse {
           }
           inFile = new FileInputStream(arg);
         } catch (FileNotFoundException e) {
-          if (arg.endsWith(EXT)) {
+          logger.error(e.getMessage(), e);
+		if (arg.endsWith(EXT)) {
             logger.debug(" *** can't find " + arg);
             continue;
           }
@@ -126,7 +127,8 @@ public class Parse {
             }
             inFile = new BufferedInputStream(new FileInputStream(arg));
           } catch (FileNotFoundException ee) {
-            logger.debug(" *** can't find " + arg);
+            logger.error(ee.getMessage(), ee);
+			logger.debug(" *** can't find " + arg);
             continue;
           }
         }

@@ -34,14 +34,14 @@ public interface FlowUniverse<E> extends Iterable<E> {
    *
    * @return the size of the universe.
    */
-  public int size();
+  int size();
 
   /**
    * returns an iterator over the elements of the universe.
    *
    * @return an Iterator over the elements.
    */
-  public Iterator<E> iterator();
+  @Override Iterator<E> iterator();
 
   /**
    * returns the elements of the universe in form of an array.<br>
@@ -49,5 +49,5 @@ public interface FlowUniverse<E> extends Iterable<E> {
    *
    * @return the elements of the universe.
    */
-  public E[] toArray();
+  E[] toArray();
 }

@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ARetStatement extends PStatement
 {
-    private TRet _ret_;
-    private PImmediate _immediate_;
-    private TSemicolon _semicolon_;
+    private TRet ret;
+    private PImmediate immediate;
+    private TSemicolon semicolon;
 
     public ARetStatement()
     {
@@ -34,9 +34,9 @@ public final class ARetStatement extends PStatement
     public Object clone()
     {
         return new ARetStatement(
-            cloneNode(this._ret_),
-            cloneNode(this._immediate_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.ret),
+            cloneNode(this.immediate),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class ARetStatement extends PStatement
 
     public TRet getRet()
     {
-        return this._ret_;
+        return this.ret;
     }
 
     public void setRet(TRet node)
     {
-        if(this._ret_ != null)
+        if(this.ret != null)
         {
-            this._ret_.parent(null);
+            this.ret.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class ARetStatement extends PStatement
             node.parent(this);
         }
 
-        this._ret_ = node;
+        this.ret = node;
     }
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class ARetStatement extends PStatement
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class ARetStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._ret_)
-            + toString(this._immediate_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.ret)).append(toString(this.immediate)).append(toString(this.semicolon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._ret_ == child)
+        if(this.ret == child)
         {
-            this._ret_ = null;
+            this.ret = null;
             return;
         }
 
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class ARetStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._ret_ == oldChild)
+        if(this.ret == oldChild)
         {
             setRet((TRet) newChild);
             return;
         }
 
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

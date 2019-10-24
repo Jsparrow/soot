@@ -83,7 +83,7 @@ public class FillArrayDataInstruction extends PseudoInstruction {
     Instruction referenceTable = body.instructionAtAddress(targetAddress).instruction;
 
     if (!(referenceTable instanceof ArrayPayload)) {
-      throw new RuntimeException("Address " + targetAddress + "refers to an invalid PseudoInstruction.");
+      throw new RuntimeException(new StringBuilder().append("Address ").append(targetAddress).append("refers to an invalid PseudoInstruction.").toString());
     }
 
     ArrayPayload arrayTable = (ArrayPayload) referenceTable;
@@ -125,7 +125,7 @@ public class FillArrayDataInstruction extends PseudoInstruction {
   private NumericConstant getArrayElement(Number element, DexBody body, int arrayRegister) {
 
     List<DexlibAbstractInstruction> instructions = body.instructionsBefore(this);
-    Set<Integer> usedRegisters = new HashSet<Integer>();
+    Set<Integer> usedRegisters = new HashSet<>();
     usedRegisters.add(arrayRegister);
 
     Type elementType = null;
@@ -211,8 +211,7 @@ public class FillArrayDataInstruction extends PseudoInstruction {
     Instruction referenceTable = body.instructionAtAddress(targetAddress).instruction;
 
     if (!(referenceTable instanceof ArrayPayload)) {
-      throw new RuntimeException("Address 0x" + Integer.toHexString(targetAddress)
-          + " refers to an invalid PseudoInstruction (" + referenceTable.getClass() + ").");
+      throw new RuntimeException(new StringBuilder().append("Address 0x").append(Integer.toHexString(targetAddress)).append(" refers to an invalid PseudoInstruction (").append(referenceTable.getClass()).append(").").toString());
     }
 
     ArrayPayload arrayTable = (ArrayPayload) referenceTable;

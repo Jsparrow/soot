@@ -54,12 +54,12 @@ public class ArrayPackedSet<T> extends AbstractBoundedFlowSet<T> {
 
   @Override
   public ArrayPackedSet<T> clone() {
-    return new ArrayPackedSet<T>(map, (BitSet) bits.clone());
+    return new ArrayPackedSet<>(map, (BitSet) bits.clone());
   }
 
   @Override
   public FlowSet<T> emptySet() {
-    return new ArrayPackedSet<T>(map);
+    return new ArrayPackedSet<>(map);
   }
 
   @Override
@@ -104,7 +104,7 @@ public class ArrayPackedSet<T> extends AbstractBoundedFlowSet<T> {
         return singletonList(map.getObject((base - 1) + bits.length()));
 
       default:
-        List<T> elements = new ArrayList<T>(len);
+        List<T> elements = new ArrayList<>(len);
 
         int i = bits.nextSetBit(0);
         do {
@@ -164,14 +164,13 @@ public class ArrayPackedSet<T> extends AbstractBoundedFlowSet<T> {
     if (other == this) {
       return true;
     }
-    if (sameType(other)) {
-      ArrayPackedSet<T> o = (ArrayPackedSet<T>) other;
-
-      BitSet tmp = (BitSet) o.bits.clone();
-      tmp.andNot(bits);
-      return tmp.isEmpty();
-    }
-    return super.isSubSet(other);
+    if (!sameType(other)) {
+		return super.isSubSet(other);
+	}
+	ArrayPackedSet<T> o = (ArrayPackedSet<T>) other;
+	BitSet tmp = (BitSet) o.bits.clone();
+	tmp.andNot(bits);
+	return tmp.isEmpty();
   }
 
   @Override

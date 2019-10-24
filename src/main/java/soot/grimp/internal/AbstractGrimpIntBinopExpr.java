@@ -33,7 +33,7 @@ import soot.jimple.DivExpr;
 import soot.jimple.SubExpr;
 import soot.jimple.internal.AbstractIntBinopExpr;
 
-abstract public class AbstractGrimpIntBinopExpr extends AbstractIntBinopExpr implements Precedence {
+public abstract class AbstractGrimpIntBinopExpr extends AbstractIntBinopExpr implements Precedence {
   public AbstractGrimpIntBinopExpr(Value op1, Value op2) {
     this(Grimp.v().newArgBox(op1), Grimp.v().newArgBox(op2));
   }
@@ -43,28 +43,33 @@ abstract public class AbstractGrimpIntBinopExpr extends AbstractIntBinopExpr imp
     this.op2Box = op2Box;
   }
 
-  abstract public int getPrecedence();
+  @Override
+public abstract int getPrecedence();
 
   private String toString(Value op1, Value op2, String leftOp, String rightOp) {
     if (op1 instanceof Precedence && ((Precedence) op1).getPrecedence() < getPrecedence()) {
-      leftOp = "(" + leftOp + ")";
+      leftOp = new StringBuilder().append("(").append(leftOp).append(")").toString();
     }
 
     if (op2 instanceof Precedence) {
-      int opPrec = ((Precedence) op2).getPrecedence(), myPrec = getPrecedence();
+      int opPrec = ((Precedence) op2).getPrecedence();
+	int myPrec = getPrecedence();
 
       if ((opPrec < myPrec) || ((opPrec == myPrec) && ((this instanceof SubExpr) || (this instanceof DivExpr)
           || (this instanceof DCmpExpr) || (this instanceof DCmpgExpr) || (this instanceof DCmplExpr)))) {
-        rightOp = "(" + rightOp + ")";
+        rightOp = new StringBuilder().append("(").append(rightOp).append(")").toString();
       }
     }
 
-    return leftOp + getSymbol() + rightOp;
+    return new StringBuilder().append(leftOp).append(getSymbol()).append(rightOp).toString();
   }
 
-  public String toString() {
-    Value op1 = op1Box.getValue(), op2 = op2Box.getValue();
-    String leftOp = op1.toString(), rightOp = op2.toString();
+  @Override
+public String toString() {
+    Value op1 = op1Box.getValue();
+	Value op2 = op2Box.getValue();
+    String leftOp = op1.toString();
+	String rightOp = op2.toString();
 
     return toString(op1, op2, leftOp, rightOp);
   }

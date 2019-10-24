@@ -35,40 +35,40 @@ import soot.jimple.spark.pag.VarNode;
  */
 
 public class TopoSorter {
-  /** Actually perform the topological sort on the PAG. */
-  public void sort() {
-    for (VarNode v : pag.getVarNodeNumberer()) {
-      dfsVisit(v);
-    }
-    visited = null;
-  }
-
-  public TopoSorter(PAG pag, boolean ignoreTypes) {
-    this.pag = pag;
-    this.ignoreTypes = ignoreTypes;
-    // this.visited = new NumberedSet( pag.getVarNodeNumberer() );
-    this.visited = new HashSet<VarNode>();
-  }
-
   /* End of public methods. */
-  /* End of package methods. */
+	  /* End of package methods. */
+	
+	  protected boolean ignoreTypes;
+	protected PAG pag;
+	protected int nextFinishNumber = 1;
+	protected HashSet<VarNode> visited;
 
-  protected boolean ignoreTypes;
-  protected PAG pag;
-  protected int nextFinishNumber = 1;
-  protected HashSet<VarNode> visited;
+	public TopoSorter(PAG pag, boolean ignoreTypes) {
+	    this.pag = pag;
+	    this.ignoreTypes = ignoreTypes;
+	    // this.visited = new NumberedSet( pag.getVarNodeNumberer() );
+	    this.visited = new HashSet<>();
+	  }
 
-  protected void dfsVisit(VarNode n) {
-    if (visited.contains(n)) {
-      return;
-    }
-    visited.add(n);
-    Node[] succs = pag.simpleLookup(n);
-    for (Node element : succs) {
-      if (ignoreTypes || pag.getTypeManager().castNeverFails(n.getType(), element.getType())) {
-        dfsVisit((VarNode) element);
-      }
-    }
-    n.setFinishingNumber(nextFinishNumber++);
-  }
+	/** Actually perform the topological sort on the PAG. */
+	  public void sort() {
+	    for (VarNode v : pag.getVarNodeNumberer()) {
+	      dfsVisit(v);
+	    }
+	    visited = null;
+	  }
+
+	protected void dfsVisit(VarNode n) {
+	    if (visited.contains(n)) {
+	      return;
+	    }
+	    visited.add(n);
+	    Node[] succs = pag.simpleLookup(n);
+	    for (Node element : succs) {
+	      if (ignoreTypes || pag.getTypeManager().castNeverFails(n.getType(), element.getType())) {
+	        dfsVisit((VarNode) element);
+	      }
+	    }
+	    n.setFinishingNumber(nextFinishNumber++);
+	  }
 }

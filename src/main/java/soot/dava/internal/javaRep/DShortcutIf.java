@@ -43,12 +43,14 @@ public class DShortcutIf implements Expr {
     falseExprBox = right;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     // does not work
     return this;
   }
 
-  public List getUseBoxes() {
+  @Override
+public List getUseBoxes() {
     List toReturn = new ArrayList();
     toReturn.addAll(testExprBox.getValue().getUseBoxes());
     toReturn.add(testExprBox);
@@ -59,11 +61,13 @@ public class DShortcutIf implements Expr {
     return toReturn;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return exprType;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     String toReturn = "";
     toReturn += testExprBox.getValue().toString();
     toReturn += " ? ";
@@ -73,7 +77,8 @@ public class DShortcutIf implements Expr {
     return toReturn;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     testExprBox.getValue().toString(up);
     up.literal(" ? ");
     trueExprBox.getValue().toString(up);
@@ -81,17 +86,20 @@ public class DShortcutIf implements Expr {
     falseExprBox.getValue().toString(up);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     // TODO Auto-generated method stub
 
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     // TODO Auto-generated method stub
     return false;
   }
 
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     int toReturn = 0;
     toReturn += testExprBox.getValue().equivHashCode();
     toReturn += trueExprBox.getValue().equivHashCode();

@@ -141,7 +141,7 @@ public class DexClassLoader {
 
           // Get the outer class name
           String outer = DexInnerClassParser.getOuterClassNameFromTag(ict);
-          if (outer == null || outer.length() == 0) {
+          if (outer == null || outer.isEmpty()) {
             // If we don't have any clue what the outer class is, we
             // just remove the reference entirely
             innerTagIt.remove();
@@ -189,14 +189,13 @@ public class DexClassLoader {
           // DexPrinter will copy it back if we do dex->dex.
           innerTagIt.remove();
 
-          // Add the InnerClassTag to the inner class. This tag will
+          boolean condition = !sc.hasTag("InnerClassTag") && ((InnerClassTag) t).getInnerClass().replaceAll("/", ".").equals(sc.toString());
+		// Add the InnerClassTag to the inner class. This tag will
           // be put in an InnerClassAttribute
           // within the PackManager in method handleInnerClasses().
-          if (!sc.hasTag("InnerClassTag")) {
-            if (((InnerClassTag) t).getInnerClass().replaceAll("/", ".").equals(sc.toString())) {
-              sc.addTag(t);
-            }
-          }
+          if (condition) {
+		  sc.addTag(t);
+		}
         }
       }
       // remove tag if empty

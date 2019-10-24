@@ -39,7 +39,8 @@ public class ReturnVoidInstruction extends DexlibAbstractInstruction {
     super(instruction, codeAdress);
   }
 
-  public void jimplify(DexBody body) {
+  @Override
+public void jimplify(DexBody body) {
     ReturnVoidStmt returnStmt = Jimple.v().newReturnVoidStmt();
     setUnit(returnStmt);
     addTags(returnStmt);

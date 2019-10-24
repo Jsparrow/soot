@@ -25,35 +25,35 @@ package soot.jimple;
 import soot.util.Switch;
 
 public interface StmtSwitch extends Switch {
-  public abstract void caseBreakpointStmt(BreakpointStmt stmt);
+  abstract void caseBreakpointStmt(BreakpointStmt stmt);
 
-  public abstract void caseInvokeStmt(InvokeStmt stmt);
+  abstract void caseInvokeStmt(InvokeStmt stmt);
 
-  public abstract void caseAssignStmt(AssignStmt stmt);
+  abstract void caseAssignStmt(AssignStmt stmt);
 
-  public abstract void caseIdentityStmt(IdentityStmt stmt);
+  abstract void caseIdentityStmt(IdentityStmt stmt);
 
-  public abstract void caseEnterMonitorStmt(EnterMonitorStmt stmt);
+  abstract void caseEnterMonitorStmt(EnterMonitorStmt stmt);
 
-  public abstract void caseExitMonitorStmt(ExitMonitorStmt stmt);
+  abstract void caseExitMonitorStmt(ExitMonitorStmt stmt);
 
-  public abstract void caseGotoStmt(GotoStmt stmt);
+  abstract void caseGotoStmt(GotoStmt stmt);
 
-  public abstract void caseIfStmt(IfStmt stmt);
+  abstract void caseIfStmt(IfStmt stmt);
 
-  public abstract void caseLookupSwitchStmt(LookupSwitchStmt stmt);
+  abstract void caseLookupSwitchStmt(LookupSwitchStmt stmt);
 
-  public abstract void caseNopStmt(NopStmt stmt);
+  abstract void caseNopStmt(NopStmt stmt);
 
-  public abstract void caseRetStmt(RetStmt stmt);
+  abstract void caseRetStmt(RetStmt stmt);
 
-  public abstract void caseReturnStmt(ReturnStmt stmt);
+  abstract void caseReturnStmt(ReturnStmt stmt);
 
-  public abstract void caseReturnVoidStmt(ReturnVoidStmt stmt);
+  abstract void caseReturnVoidStmt(ReturnVoidStmt stmt);
 
-  public abstract void caseTableSwitchStmt(TableSwitchStmt stmt);
+  abstract void caseTableSwitchStmt(TableSwitchStmt stmt);
 
-  public abstract void caseThrowStmt(ThrowStmt stmt);
+  abstract void caseThrowStmt(ThrowStmt stmt);
 
-  public abstract void defaultCase(Object obj);
+  abstract void defaultCase(Object obj);
 }

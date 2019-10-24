@@ -64,145 +64,175 @@ public class ASTParentNodeFinder extends DepthFirstAdapter {
   Stack<ASTNode> parentStack;
 
   public ASTParentNodeFinder() {
-    parentOf = new HashMap<Unit, ASTNode>();
-    parentStack = new Stack<ASTNode>();
+    parentOf = new HashMap<>();
+    parentStack = new Stack<>();
   }
 
   public ASTParentNodeFinder(boolean verbose) {
     super(verbose);
-    parentOf = new HashMap<Unit, ASTNode>();
-    parentStack = new Stack<ASTNode>();
+    parentOf = new HashMap<>();
+    parentStack = new Stack<>();
   }
 
-  public void inASTMethodNode(ASTMethodNode node) {
+  @Override
+public void inASTMethodNode(ASTMethodNode node) {
     parentOf.put(node, null);
     parentStack.push(node);
   }
 
-  public void outASTMethodNode(ASTMethodNode node) {
+  @Override
+public void outASTMethodNode(ASTMethodNode node) {
     parentStack.pop();
   }
 
-  public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
+  @Override
+public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
+  @Override
+public void outASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
     parentStack.pop();
   }
 
-  public void inASTLabeledBlockNode(ASTLabeledBlockNode node) {
+  @Override
+public void inASTLabeledBlockNode(ASTLabeledBlockNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
+  @Override
+public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
     parentStack.pop();
   }
 
-  public void inASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
+  @Override
+public void inASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
+  @Override
+public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
     parentStack.pop();
   }
 
-  public void inASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void inASTSwitchNode(ASTSwitchNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void outASTSwitchNode(ASTSwitchNode node) {
     parentStack.pop();
   }
 
-  public void inASTIfNode(ASTIfNode node) {
+  @Override
+public void inASTIfNode(ASTIfNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTIfNode(ASTIfNode node) {
+  @Override
+public void outASTIfNode(ASTIfNode node) {
     parentStack.pop();
   }
 
-  public void inASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void inASTIfElseNode(ASTIfElseNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void outASTIfElseNode(ASTIfElseNode node) {
     parentStack.pop();
   }
 
-  public void inASTWhileNode(ASTWhileNode node) {
+  @Override
+public void inASTWhileNode(ASTWhileNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTWhileNode(ASTWhileNode node) {
+  @Override
+public void outASTWhileNode(ASTWhileNode node) {
     parentStack.pop();
   }
 
-  public void inASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void inASTForLoopNode(ASTForLoopNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void outASTForLoopNode(ASTForLoopNode node) {
     parentStack.pop();
   }
 
-  public void inASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void inASTDoWhileNode(ASTDoWhileNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void outASTDoWhileNode(ASTDoWhileNode node) {
     parentStack.pop();
   }
 
-  public void inASTTryNode(ASTTryNode node) {
+  @Override
+public void inASTTryNode(ASTTryNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTTryNode(ASTTryNode node) {
+  @Override
+public void outASTTryNode(ASTTryNode node) {
     parentStack.pop();
   }
 
-  public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
     parentOf.put(node, parentStack.peek());
     parentStack.push(node);
   }
 
-  public void outASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void outASTStatementSequenceNode(ASTStatementSequenceNode node) {
     parentStack.pop();
   }
 
-  public void inDefinitionStmt(DefinitionStmt s) {
+  @Override
+public void inDefinitionStmt(DefinitionStmt s) {
     parentOf.put(s, parentStack.peek());
   }
 
-  public void inReturnStmt(ReturnStmt s) {
+  @Override
+public void inReturnStmt(ReturnStmt s) {
     parentOf.put(s, parentStack.peek());
   }
 
-  public void inInvokeStmt(InvokeStmt s) {
+  @Override
+public void inInvokeStmt(InvokeStmt s) {
     parentOf.put(s, parentStack.peek());
   }
 
-  public void inThrowStmt(ThrowStmt s) {
+  @Override
+public void inThrowStmt(ThrowStmt s) {
     parentOf.put(s, parentStack.peek());
   }
 
-  public void inDVariableDeclarationStmt(DVariableDeclarationStmt s) {
+  @Override
+public void inDVariableDeclarationStmt(DVariableDeclarationStmt s) {
     parentOf.put(s, parentStack.peek());
   }
 
-  public void inStmt(Stmt s) {
+  @Override
+public void inStmt(Stmt s) {
     parentOf.put(s, parentStack.peek());
   }
 

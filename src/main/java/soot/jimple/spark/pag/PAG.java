@@ -98,12 +98,56 @@ import soot.util.queue.QueueReader;
  */
 public class PAG implements PointsToAnalysis {
   private static final Logger logger = LoggerFactory.getLogger(PAG.class);
+protected static final Node[] EMPTY_NODE_ARRAY = new Node[0];
+protected P2SetFactory setFactory;
+protected boolean somethingMerged = false;
+ChunkedQueue<AllocNode> newAllocNodes = new ChunkedQueue<>();
+protected ChunkedQueue<Node> edgeQueue = new ChunkedQueue<>();
+private final ArrayNumberer<AllocNode> allocNodeNumberer = new ArrayNumberer<>();
+private final ArrayNumberer<VarNode> varNodeNumberer = new ArrayNumberer<>();
+private final ArrayNumberer<FieldRefNode> fieldRefNodeNumberer = new ArrayNumberer<>();
+private final ArrayNumberer<AllocDotField> allocDotFieldNodeNumberer = new ArrayNumberer<>();
+/* End of package methods. */
 
-  public PAG(final SparkOptions opts) {
+  protected SparkOptions opts;
+protected CGOptions cgOpts;
+protected ClientAccessibilityOracle accessibilityOracle = Scene.v().getClientAccessibilityOracle();
+protected Map<VarNode, Object> simple = new HashMap<>();
+protected Map<FieldRefNode, Object> load = new HashMap<>();
+protected Map<VarNode, Object> store = new HashMap<>();
+protected Map<AllocNode, Object> alloc = new HashMap<>();
+protected Map<VarNode, Object> newInstance = new HashMap<>();
+protected Map<NewInstanceNode, Object> assignInstance = new HashMap<>();
+protected Map<VarNode, Object> simpleInv = new HashMap<>();
+protected Map<VarNode, Object> loadInv = new HashMap<>();
+protected Map<FieldRefNode, Object> storeInv = new HashMap<>();
+protected Map<VarNode, Object> allocInv = new HashMap<>();
+protected Map<NewInstanceNode, Object> newInstanceInv = new HashMap<>();
+protected Map<VarNode, Object> assignInstanceInv = new HashMap<>();
+private boolean runGeomPTA = false;
+protected MultiMap<Pair<Node, Node>, Edge> assign2edges = new HashMultiMap<>();
+private final Map<Object, LocalVarNode> valToLocalVarNode = new HashMap<>(1000);
+private final Map<Object, GlobalVarNode> valToGlobalVarNode = new HashMap<>(1000);
+private final Map<Object, AllocNode> valToAllocNode = new HashMap<>(1000);
+private final Table<Object, Type, AllocNode> valToReflAllocNode = HashBasedTable.create();
+private OnFlyCallGraph ofcg;
+private final ArrayList<VarNode> dereferences = new ArrayList<>();
+protected TypeManager typeManager;
+private final LargeNumberedMap<Local, LocalVarNode> localToNodeMap = new LargeNumberedMap<>(Scene.v().getLocalNumberer());
+private final Map<Value, NewInstanceNode> newInstToNodeMap = new HashMap<>();
+public int maxFinishNumber = 0;
+private Map<Node, Tag> nodeToTag;
+private final GlobalNodeFactory nodeFactory = new GlobalNodeFactory(this);
+public NativeMethodDriver nativeMethodDriver;
+public HashMultiMap<InvokeExpr, Pair<Node, Node>> callAssigns = new HashMultiMap<>();
+public Map<InvokeExpr, SootMethod> callToMethod = new HashMap<>();
+public Map<InvokeExpr, Node> virtualCallsToReceivers = new HashMap<>();
+
+public PAG(final SparkOptions opts) {
     this.opts = opts;
     this.cgOpts = new CGOptions(PhaseOptions.v().getPhaseOptions("cg"));
     if (opts.add_tags()) {
-      nodeToTag = new HashMap<Node, Tag>();
+      nodeToTag = new HashMap<>();
     }
     if (opts.rta() && opts.on_fly_cg()) {
       throw new RuntimeException("Incompatible options rta:true and on-fly-cg:true for cg.spark. Use -p cg-"
@@ -187,8 +231,9 @@ public class PAG implements PointsToAnalysis {
     runGeomPTA = opts.geom_pta();
   }
 
-  /** Returns the set of objects pointed to by variable l. */
-  public PointsToSet reachingObjects(Local l) {
+/** Returns the set of objects pointed to by variable l. */
+  @Override
+public PointsToSet reachingObjects(Local l) {
     VarNode n = findLocalVarNode(l);
     if (n == null) {
       return EmptyPointsToSet.v();
@@ -196,8 +241,9 @@ public class PAG implements PointsToAnalysis {
     return n.getP2Set();
   }
 
-  /** Returns the set of objects pointed to by variable l in context c. */
-  public PointsToSet reachingObjects(Context c, Local l) {
+/** Returns the set of objects pointed to by variable l in context c. */
+  @Override
+public PointsToSet reachingObjects(Context c, Local l) {
     VarNode n = findContextVarNode(l, c);
     if (n == null) {
       return EmptyPointsToSet.v();
@@ -205,8 +251,9 @@ public class PAG implements PointsToAnalysis {
     return n.getP2Set();
   }
 
-  /** Returns the set of objects pointed to by static field f. */
-  public PointsToSet reachingObjects(SootField f) {
+/** Returns the set of objects pointed to by static field f. */
+  @Override
+public PointsToSet reachingObjects(SootField f) {
     if (!f.isStatic()) {
       throw new RuntimeException("The parameter f must be a *static* field.");
     }
@@ -217,10 +264,11 @@ public class PAG implements PointsToAnalysis {
     return n.getP2Set();
   }
 
-  /**
+/**
    * Returns the set of objects pointed to by instance field f of the objects in the PointsToSet s.
    */
-  public PointsToSet reachingObjects(PointsToSet s, final SootField f) {
+  @Override
+public PointsToSet reachingObjects(PointsToSet s, final SootField f) {
     if (f.isStatic()) {
       throw new RuntimeException("The parameter f must be an *instance* field.");
     }
@@ -228,14 +276,15 @@ public class PAG implements PointsToAnalysis {
     return reachingObjectsInternal(s, f);
   }
 
-  /**
+/**
    * Returns the set of objects pointed to by elements of the arrays in the PointsToSet s.
    */
-  public PointsToSet reachingObjectsOfArrayElement(PointsToSet s) {
+  @Override
+public PointsToSet reachingObjectsOfArrayElement(PointsToSet s) {
     return reachingObjectsInternal(s, ArrayElement.v());
   }
 
-  private PointsToSet reachingObjectsInternal(PointsToSet s, final SparkField f) {
+private PointsToSet reachingObjectsInternal(PointsToSet s, final SparkField f) {
     if (getOpts().field_based() || getOpts().vta()) {
       VarNode n = findGlobalVarNode(f);
       if (n == null) {
@@ -250,7 +299,8 @@ public class PAG implements PointsToAnalysis {
     PointsToSetInternal bases = (PointsToSetInternal) s;
     final PointsToSetInternal ret = setFactory.newSet((f instanceof SootField) ? ((SootField) f).getType() : null, this);
     bases.forall(new P2SetVisitor() {
-      public final void visit(Node n) {
+      @Override
+	public final void visit(Node n) {
         Node nDotF = ((AllocNode) n).dot(f);
         if (nDotF != null) {
           ret.addAll(nDotF.getP2Set(), null);
@@ -260,17 +310,15 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  public P2SetFactory getSetFactory() {
+public P2SetFactory getSetFactory() {
     return setFactory;
   }
 
-  private <K extends Node> void lookupInMap(Map<K, Object> map) {
-    for (K object : map.keySet()) {
-      lookup(map, object);
-    }
+private <K extends Node> void lookupInMap(Map<K, Object> map) {
+    map.keySet().forEach(object -> lookup(map, object));
   }
 
-  public void cleanUpMerges() {
+public void cleanUpMerges() {
     if (opts.verbose()) {
       logger.debug("Cleaning up graph for merged nodes");
     }
@@ -289,31 +337,31 @@ public class PAG implements PointsToAnalysis {
     }
   }
 
-  public boolean doAddSimpleEdge(VarNode from, VarNode to) {
+public boolean doAddSimpleEdge(VarNode from, VarNode to) {
     return addToMap(simple, from, to) | addToMap(simpleInv, to, from);
   }
 
-  public boolean doAddStoreEdge(VarNode from, FieldRefNode to) {
+public boolean doAddStoreEdge(VarNode from, FieldRefNode to) {
     return addToMap(store, from, to) | addToMap(storeInv, to, from);
   }
 
-  public boolean doAddLoadEdge(FieldRefNode from, VarNode to) {
+public boolean doAddLoadEdge(FieldRefNode from, VarNode to) {
     return addToMap(load, from, to) | addToMap(loadInv, to, from);
   }
 
-  public boolean doAddAllocEdge(AllocNode from, VarNode to) {
+public boolean doAddAllocEdge(AllocNode from, VarNode to) {
     return addToMap(alloc, from, to) | addToMap(allocInv, to, from);
   }
 
-  public boolean doAddNewInstanceEdge(VarNode from, NewInstanceNode to) {
+public boolean doAddNewInstanceEdge(VarNode from, NewInstanceNode to) {
     return addToMap(newInstance, from, to) | addToMap(newInstanceInv, to, from);
   }
 
-  public boolean doAddAssignInstanceEdge(NewInstanceNode from, VarNode to) {
+public boolean doAddAssignInstanceEdge(NewInstanceNode from, VarNode to) {
     return addToMap(assignInstance, from, to) | addToMap(assignInstanceInv, to, from);
   }
 
-  /** Node uses this to notify PAG that n2 has been merged into n1. */
+/** Node uses this to notify PAG that n2 has been merged into n1. */
   void mergedWith(Node n1, Node n2) {
     if (n1.equals(n2)) {
       throw new RuntimeException("oops");
@@ -372,7 +420,7 @@ public class PAG implements PointsToAnalysis {
         System.arraycopy(ret, 0, newArray, 0, j);
         m.put(n1, ret = newArray);
       } else {
-        HashSet<Node> s = new HashSet<Node>(size1 + size2);
+        HashSet<Node> s = new HashSet<>(size1 + size2);
         for (Object o : os) {
           if (o == null) {
             continue;
@@ -392,9 +440,7 @@ public class PAG implements PointsToAnalysis {
     }
   }
 
-  protected final static Node[] EMPTY_NODE_ARRAY = new Node[0];
-
-  protected <K extends Node> Node[] lookup(Map<K, Object> m, K key) {
+protected <K extends Node> Node[] lookup(Map<K, Object> m, K key) {
     Object valueList = m.get(key);
     if (valueList == null) {
       return EMPTY_NODE_ARRAY;
@@ -406,7 +452,7 @@ public class PAG implements PointsToAnalysis {
         for (Iterator it = ((Set) valueList).iterator(); it.hasNext();) {
           logger.debug("" + it.next());
         }
-        throw new RuntimeException("" + valueList + e);
+        throw new RuntimeException(new StringBuilder().append("").append(valueList).append(e).toString());
       }
     }
     Node[] ret = (Node[]) valueList;
@@ -435,7 +481,7 @@ public class PAG implements PointsToAnalysis {
             System.arraycopy(ret, 0, newArray, 0, j);
             m.put(key, ret = newArray);
           } else {
-            s = new HashSet<Node>(ret.length * 2);
+            s = new HashSet<>(ret.length * 2);
             for (int j = 0; j < i; j++) {
               s.add(ret[j]);
             }
@@ -454,119 +500,119 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  public Node[] simpleLookup(VarNode key) {
+public Node[] simpleLookup(VarNode key) {
     return lookup(simple, key);
   }
 
-  public Node[] simpleInvLookup(VarNode key) {
+public Node[] simpleInvLookup(VarNode key) {
     return lookup(simpleInv, key);
   }
 
-  public Node[] loadLookup(FieldRefNode key) {
+public Node[] loadLookup(FieldRefNode key) {
     return lookup(load, key);
   }
 
-  public Node[] loadInvLookup(VarNode key) {
+public Node[] loadInvLookup(VarNode key) {
     return lookup(loadInv, key);
   }
 
-  public Node[] storeLookup(VarNode key) {
+public Node[] storeLookup(VarNode key) {
     return lookup(store, key);
   }
 
-  public Node[] newInstanceLookup(VarNode key) {
+public Node[] newInstanceLookup(VarNode key) {
     return lookup(newInstance, key);
   }
 
-  public Node[] assignInstanceLookup(NewInstanceNode key) {
+public Node[] assignInstanceLookup(NewInstanceNode key) {
     return lookup(assignInstance, key);
   }
 
-  public Node[] storeInvLookup(FieldRefNode key) {
+public Node[] storeInvLookup(FieldRefNode key) {
     return lookup(storeInv, key);
   }
 
-  public Node[] allocLookup(AllocNode key) {
+public Node[] allocLookup(AllocNode key) {
     return lookup(alloc, key);
   }
 
-  public Node[] allocInvLookup(VarNode key) {
+public Node[] allocInvLookup(VarNode key) {
     return lookup(allocInv, key);
   }
 
-  public Set<VarNode> simpleSources() {
+public Set<VarNode> simpleSources() {
     return simple.keySet();
   }
 
-  public Set<AllocNode> allocSources() {
+public Set<AllocNode> allocSources() {
     return alloc.keySet();
   }
 
-  public Set<VarNode> storeSources() {
+public Set<VarNode> storeSources() {
     return store.keySet();
   }
 
-  public Set<FieldRefNode> loadSources() {
+public Set<FieldRefNode> loadSources() {
     return load.keySet();
   }
 
-  public Set<VarNode> newInstanceSources() {
+public Set<VarNode> newInstanceSources() {
     return newInstance.keySet();
   }
 
-  public Set<NewInstanceNode> assignInstanceSources() {
+public Set<NewInstanceNode> assignInstanceSources() {
     return assignInstance.keySet();
   }
 
-  public Set<VarNode> simpleInvSources() {
+public Set<VarNode> simpleInvSources() {
     return simpleInv.keySet();
   }
 
-  public Set<VarNode> allocInvSources() {
+public Set<VarNode> allocInvSources() {
     return allocInv.keySet();
   }
 
-  public Set<FieldRefNode> storeInvSources() {
+public Set<FieldRefNode> storeInvSources() {
     return storeInv.keySet();
   }
 
-  public Set<VarNode> loadInvSources() {
+public Set<VarNode> loadInvSources() {
     return loadInv.keySet();
   }
 
-  public Iterator<VarNode> simpleSourcesIterator() {
+public Iterator<VarNode> simpleSourcesIterator() {
     return simple.keySet().iterator();
   }
 
-  public Iterator<AllocNode> allocSourcesIterator() {
+public Iterator<AllocNode> allocSourcesIterator() {
     return alloc.keySet().iterator();
   }
 
-  public Iterator<VarNode> storeSourcesIterator() {
+public Iterator<VarNode> storeSourcesIterator() {
     return store.keySet().iterator();
   }
 
-  public Iterator<FieldRefNode> loadSourcesIterator() {
+public Iterator<FieldRefNode> loadSourcesIterator() {
     return load.keySet().iterator();
   }
 
-  public Iterator<VarNode> simpleInvSourcesIterator() {
+public Iterator<VarNode> simpleInvSourcesIterator() {
     return simpleInv.keySet().iterator();
   }
 
-  public Iterator<VarNode> allocInvSourcesIterator() {
+public Iterator<VarNode> allocInvSourcesIterator() {
     return allocInv.keySet().iterator();
   }
 
-  public Iterator<FieldRefNode> storeInvSourcesIterator() {
+public Iterator<FieldRefNode> storeInvSourcesIterator() {
     return storeInv.keySet().iterator();
   }
 
-  public Iterator<VarNode> loadInvSourcesIterator() {
+public Iterator<VarNode> loadInvSourcesIterator() {
     return loadInv.keySet().iterator();
   }
 
-  static private int getSize(Object set) {
+private static int getSize(Object set) {
     if (set instanceof Set) {
       return ((Set<?>) set).size();
     } else if (set == null) {
@@ -576,36 +622,36 @@ public class PAG implements PointsToAnalysis {
     }
   }
 
-  protected P2SetFactory setFactory;
-  protected boolean somethingMerged = false;
-
-  /**
+/**
    * Returns the set of objects pointed to by instance field f of the objects pointed to by l.
    */
-  public PointsToSet reachingObjects(Local l, SootField f) {
+  @Override
+public PointsToSet reachingObjects(Local l, SootField f) {
     return reachingObjects(reachingObjects(l), f);
   }
 
-  /**
+/**
    * Returns the set of objects pointed to by instance field f of the objects pointed to by l in context c.
    */
-  public PointsToSet reachingObjects(Context c, Local l, SootField f) {
+  @Override
+public PointsToSet reachingObjects(Context c, Local l, SootField f) {
     return reachingObjects(reachingObjects(c, l), f);
   }
 
-  private void addNodeTag(Node node, SootMethod m) {
-    if (nodeToTag != null) {
-      Tag tag;
-      if (m == null) {
+private void addNodeTag(Node node, SootMethod m) {
+    if (nodeToTag == null) {
+		return;
+	}
+	Tag tag;
+	if (m == null) {
         tag = new StringTag(node.toString());
       } else {
         tag = new LinkTag(node.toString(), m, m.getDeclaringClass().getName());
       }
-      nodeToTag.put(node, tag);
-    }
+	nodeToTag.put(node, tag);
   }
 
-  public AllocNode makeAllocNode(Object newExpr, Type type, SootMethod m) {
+public AllocNode makeAllocNode(Object newExpr, Type type, SootMethod m) {
     if (opts.types_for_sites() || opts.vta()) {
       newExpr = type;
     }
@@ -620,7 +666,8 @@ public class PAG implements PointsToAnalysis {
       }
       // For a normal "new" expression, there may only be one type
       else if (!(ret.getType().equals(type))) {
-        throw new RuntimeException("NewExpr " + newExpr + " of type " + type + " previously had type " + ret.getType());
+        throw new RuntimeException(new StringBuilder().append("NewExpr ").append(newExpr).append(" of type ").append(type).append(" previously had type ").append(ret.getType())
+				.toString());
       }
     }
     // Check for reflective allocation sites
@@ -635,7 +682,7 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  public AllocNode makeStringConstantNode(String s) {
+public AllocNode makeStringConstantNode(String s) {
     if (opts.types_for_sites() || opts.vta()) {
       return makeAllocNode(RefType.v("java.lang.String"), RefType.v("java.lang.String"), null);
     }
@@ -648,7 +695,7 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  public AllocNode makeClassConstantNode(ClassConstant cc) {
+public AllocNode makeClassConstantNode(ClassConstant cc) {
     if (opts.types_for_sites() || opts.vta()) {
       return makeAllocNode(RefType.v("java.lang.Class"), RefType.v("java.lang.Class"), null);
     }
@@ -661,13 +708,11 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  ChunkedQueue<AllocNode> newAllocNodes = new ChunkedQueue<AllocNode>();
-
-  public QueueReader<AllocNode> allocNodeListener() {
+public QueueReader<AllocNode> allocNodeListener() {
     return newAllocNodes.reader();
   }
 
-  /** Finds the GlobalVarNode for the variable value, or returns null. */
+/** Finds the GlobalVarNode for the variable value, or returns null. */
   public GlobalVarNode findGlobalVarNode(Object value) {
     if (opts.rta()) {
       value = null;
@@ -675,7 +720,7 @@ public class PAG implements PointsToAnalysis {
     return valToGlobalVarNode.get(value);
   }
 
-  /** Finds the LocalVarNode for the variable value, or returns null. */
+/** Finds the LocalVarNode for the variable value, or returns null. */
   public LocalVarNode findLocalVarNode(Object value) {
     if (opts.rta()) {
       value = null;
@@ -685,7 +730,7 @@ public class PAG implements PointsToAnalysis {
     return valToLocalVarNode.get(value);
   }
 
-  /**
+/**
    * Finds or creates the GlobalVarNode for the variable value, of type type.
    */
   public GlobalVarNode makeGlobalVarNode(Object value, Type type) {
@@ -697,25 +742,24 @@ public class PAG implements PointsToAnalysis {
     if (ret == null) {
       valToGlobalVarNode.put(value, ret = new GlobalVarNode(this, value, type));
 
-      // if library mode is activated, add allocation of every possible
+      boolean condition = cgOpts.library() != CGOptions.library_disabled && value instanceof SootField;
+	// if library mode is activated, add allocation of every possible
       // type to accessible fields
-      if (cgOpts.library() != CGOptions.library_disabled) {
-        if (value instanceof SootField) {
-          SootField sf = (SootField) value;
+      if (condition) {
+	  SootField sf = (SootField) value;
 
-          if (accessibilityOracle.isAccessible(sf)) {
-            type.apply(new SparkLibraryHelper(this, ret, null));
-          }
-        }
-      }
+	  if (accessibilityOracle.isAccessible(sf)) {
+	    type.apply(new SparkLibraryHelper(this, ret, null));
+	  }
+	}
       addNodeTag(ret, null);
     } else if (!(ret.getType().equals(type))) {
-      throw new RuntimeException("Value " + value + " of type " + type + " previously had type " + ret.getType());
+      throw new RuntimeException(new StringBuilder().append("Value ").append(value).append(" of type ").append(type).append(" previously had type ").append(ret.getType()).toString());
     }
     return ret;
   }
 
-  /**
+/**
    * Finds or creates the LocalVarNode for the variable value, of type type.
    */
   public LocalVarNode makeLocalVarNode(Object value, Type type, SootMethod method) {
@@ -733,7 +777,8 @@ public class PAG implements PointsToAnalysis {
         localToNodeMap.put((Local) value, ret = new LocalVarNode(this, value, type, method));
         addNodeTag(ret, method);
       } else if (!(ret.getType().equals(type))) {
-        throw new RuntimeException("Value " + value + " of type " + type + " previously had type " + ret.getType());
+        throw new RuntimeException(new StringBuilder().append("Value ").append(value).append(" of type ").append(type).append(" previously had type ").append(ret.getType())
+				.toString());
       }
       return ret;
     }
@@ -742,12 +787,12 @@ public class PAG implements PointsToAnalysis {
       valToLocalVarNode.put(value, ret = new LocalVarNode(this, value, type, method));
       addNodeTag(ret, method);
     } else if (!(ret.getType().equals(type))) {
-      throw new RuntimeException("Value " + value + " of type " + type + " previously had type " + ret.getType());
+      throw new RuntimeException(new StringBuilder().append("Value ").append(value).append(" of type ").append(type).append(" previously had type ").append(ret.getType()).toString());
     }
     return ret;
   }
 
-  public NewInstanceNode makeNewInstanceNode(Value value, Type type, SootMethod method) {
+public NewInstanceNode makeNewInstanceNode(Value value, Type type, SootMethod method) {
     NewInstanceNode node = newInstToNodeMap.get(value);
     if (node == null) {
       node = new NewInstanceNode(this, value, type);
@@ -757,7 +802,7 @@ public class PAG implements PointsToAnalysis {
     return node;
   }
 
-  /**
+/**
    * Finds the ContextVarNode for base variable value and context context, or returns null.
    */
   public ContextVarNode findContextVarNode(Object baseValue, Context context) {
@@ -768,7 +813,7 @@ public class PAG implements PointsToAnalysis {
     return base.context(context);
   }
 
-  /**
+/**
    * Finds or creates the ContextVarNode for base variable baseValue and context context, of type type.
    */
   public ContextVarNode makeContextVarNode(Object baseValue, Type baseType, Context context, SootMethod method) {
@@ -776,7 +821,7 @@ public class PAG implements PointsToAnalysis {
     return makeContextVarNode(base, context);
   }
 
-  /**
+/**
    * Finds or creates the ContextVarNode for base variable base and context context, of type type.
    */
   public ContextVarNode makeContextVarNode(LocalVarNode base, Context context) {
@@ -788,7 +833,7 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  /**
+/**
    * Finds the FieldRefNode for base variable value and field field, or returns null.
    */
   public FieldRefNode findLocalFieldRefNode(Object baseValue, SparkField field) {
@@ -799,7 +844,7 @@ public class PAG implements PointsToAnalysis {
     return base.dot(field);
   }
 
-  /**
+/**
    * Finds the FieldRefNode for base variable value and field field, or returns null.
    */
   public FieldRefNode findGlobalFieldRefNode(Object baseValue, SparkField field) {
@@ -810,29 +855,28 @@ public class PAG implements PointsToAnalysis {
     return base.dot(field);
   }
 
-  /**
+/**
    * Finds or creates the FieldRefNode for base variable baseValue and field field, of type type.
    */
   public FieldRefNode makeLocalFieldRefNode(Object baseValue, Type baseType, SparkField field, SootMethod method) {
     VarNode base = makeLocalVarNode(baseValue, baseType, method);
     FieldRefNode ret = makeFieldRefNode(base, field);
 
-    // if library mode is activated, add allocation of every possible type
+    boolean condition = cgOpts.library() != CGOptions.library_disabled && field instanceof SootField;
+	// if library mode is activated, add allocation of every possible type
     // to accessible fields
-    if (cgOpts.library() != CGOptions.library_disabled) {
-      if (field instanceof SootField) {
+    if (condition) {
         SootField sf = (SootField) field;
         Type type = sf.getType();
         if (accessibilityOracle.isAccessible(sf)) {
           type.apply(new SparkLibraryHelper(this, ret, method));
         }
       }
-    }
 
     return ret;
   }
 
-  /**
+/**
    * Finds or creates the FieldRefNode for base variable baseValue and field field, of type type.
    */
   public FieldRefNode makeGlobalFieldRefNode(Object baseValue, Type baseType, SparkField field) {
@@ -840,7 +884,7 @@ public class PAG implements PointsToAnalysis {
     return makeFieldRefNode(base, field);
   }
 
-  /**
+/**
    * Finds or creates the FieldRefNode for base variable base and field field, of type type.
    */
   public FieldRefNode makeFieldRefNode(VarNode base, SparkField field) {
@@ -857,14 +901,14 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  /**
+/**
    * Finds the AllocDotField for base AllocNode an and field field, or returns null.
    */
   public AllocDotField findAllocDotField(AllocNode an, SparkField field) {
     return an.dot(field);
   }
 
-  /**
+/**
    * Finds or creates the AllocDotField for base variable baseValue and field field, of type t.
    */
   public AllocDotField makeAllocDotField(AllocNode an, SparkField field) {
@@ -875,80 +919,73 @@ public class PAG implements PointsToAnalysis {
     return ret;
   }
 
-  public boolean addSimpleEdge(VarNode from, VarNode to) {
+public boolean addSimpleEdge(VarNode from, VarNode to) {
     boolean ret = false;
     if (doAddSimpleEdge(from, to)) {
       edgeQueue.add(from);
       edgeQueue.add(to);
       ret = true;
     }
-    if (opts.simple_edges_bidirectional()) {
-      if (doAddSimpleEdge(to, from)) {
+    if (opts.simple_edges_bidirectional() && doAddSimpleEdge(to, from)) {
         edgeQueue.add(to);
         edgeQueue.add(from);
         ret = true;
       }
-    }
     return ret;
   }
 
-  public boolean addStoreEdge(VarNode from, FieldRefNode to) {
-    if (!opts.rta()) {
-      if (doAddStoreEdge(from, to)) {
+public boolean addStoreEdge(VarNode from, FieldRefNode to) {
+    boolean condition = !opts.rta() && doAddStoreEdge(from, to);
+	if (condition) {
         edgeQueue.add(from);
         edgeQueue.add(to);
         return true;
       }
-    }
     return false;
   }
 
-  public boolean addLoadEdge(FieldRefNode from, VarNode to) {
-    if (!opts.rta()) {
-      if (doAddLoadEdge(from, to)) {
+public boolean addLoadEdge(FieldRefNode from, VarNode to) {
+    boolean condition = !opts.rta() && doAddLoadEdge(from, to);
+	if (condition) {
         edgeQueue.add(from);
         edgeQueue.add(to);
         return true;
       }
-    }
     return false;
   }
 
-  public boolean addAllocEdge(AllocNode from, VarNode to) {
+public boolean addAllocEdge(AllocNode from, VarNode to) {
     FastHierarchy fh = typeManager.getFastHierarchy();
-    if (fh == null || to.getType() == null || fh.canStoreType(from.getType(), to.getType())) {
-      if (doAddAllocEdge(from, to)) {
+    boolean condition = (fh == null || to.getType() == null || fh.canStoreType(from.getType(), to.getType())) && doAddAllocEdge(from, to);
+	if (condition) {
         edgeQueue.add(from);
         edgeQueue.add(to);
         return true;
       }
-    }
     return false;
   }
 
-  public boolean addNewInstanceEdge(VarNode from, NewInstanceNode to) {
-    if (!opts.rta()) {
-      if (doAddNewInstanceEdge(from, to)) {
+public boolean addNewInstanceEdge(VarNode from, NewInstanceNode to) {
+    boolean condition = !opts.rta() && doAddNewInstanceEdge(from, to);
+	if (condition) {
         edgeQueue.add(from);
         edgeQueue.add(to);
         return true;
       }
-    }
     return false;
   }
 
-  public boolean addAssignInstanceEdge(NewInstanceNode from, VarNode to) {
-    if (!opts.rta()) {
-      if (doAddAssignInstanceEdge(from, to)) {
+public boolean addAssignInstanceEdge(NewInstanceNode from, VarNode to) {
+    boolean condition = !opts.rta() && doAddAssignInstanceEdge(from, to);
+	if (condition) {
         edgeQueue.add(from);
         edgeQueue.add(to);
         return true;
       }
-    }
     return false;
   }
 
-  /** Adds an edge to the graph, returning false if it was already there. */
+/** Adds an edge to the graph, returning false if it was already there. */
   public boolean addEdge(Node from, Node to) {
     from = from.getReplacement();
     to = to.getReplacement();
@@ -972,96 +1009,86 @@ public class PAG implements PointsToAnalysis {
     }
   }
 
-  protected ChunkedQueue<Node> edgeQueue = new ChunkedQueue<Node>();
-
-  public QueueReader<Node> edgeReader() {
+public QueueReader<Node> edgeReader() {
     return edgeQueue.reader();
   }
 
-  public int getNumAllocNodes() {
+public int getNumAllocNodes() {
     return allocNodeNumberer.size();
   }
 
-  public TypeManager getTypeManager() {
+public TypeManager getTypeManager() {
     return typeManager;
   }
 
-  public void setOnFlyCallGraph(OnFlyCallGraph ofcg) {
+public void setOnFlyCallGraph(OnFlyCallGraph ofcg) {
     this.ofcg = ofcg;
   }
 
-  public OnFlyCallGraph getOnFlyCallGraph() {
+public OnFlyCallGraph getOnFlyCallGraph() {
     return ofcg;
   }
 
-  public OnFlyCallGraph ofcg() {
+public OnFlyCallGraph ofcg() {
     return ofcg;
   }
 
-  /**
+/**
    * Adds the base of a dereference to the list of dereferenced variables.
    */
   public void addDereference(VarNode base) {
     dereferences.add(base);
   }
 
-  /** Returns list of dereferences variables. */
+/** Returns list of dereferences variables. */
   public List<VarNode> getDereferences() {
     return dereferences;
   }
 
-  public Map<Node, Tag> getNodeTags() {
+public Map<Node, Tag> getNodeTags() {
     return nodeToTag;
   }
 
-  private final ArrayNumberer<AllocNode> allocNodeNumberer = new ArrayNumberer<AllocNode>();
-
-  public ArrayNumberer<AllocNode> getAllocNodeNumberer() {
+public ArrayNumberer<AllocNode> getAllocNodeNumberer() {
     return allocNodeNumberer;
   }
 
-  private final ArrayNumberer<VarNode> varNodeNumberer = new ArrayNumberer<VarNode>();
-
-  public ArrayNumberer<VarNode> getVarNodeNumberer() {
+public ArrayNumberer<VarNode> getVarNodeNumberer() {
     return varNodeNumberer;
   }
 
-  private final ArrayNumberer<FieldRefNode> fieldRefNodeNumberer = new ArrayNumberer<FieldRefNode>();
-
-  public ArrayNumberer<FieldRefNode> getFieldRefNodeNumberer() {
+public ArrayNumberer<FieldRefNode> getFieldRefNodeNumberer() {
     return fieldRefNodeNumberer;
   }
 
-  private final ArrayNumberer<AllocDotField> allocDotFieldNodeNumberer = new ArrayNumberer<AllocDotField>();
-
-  public ArrayNumberer<AllocDotField> getAllocDotFieldNodeNumberer() {
+public ArrayNumberer<AllocDotField> getAllocDotFieldNodeNumberer() {
     return allocDotFieldNodeNumberer;
   }
 
-  /** Returns SparkOptions for this graph. */
+/** Returns SparkOptions for this graph. */
   public SparkOptions getOpts() {
     return opts;
   }
 
-  /** Returns CGOptions for this graph. */
+/** Returns CGOptions for this graph. */
   public CGOptions getCGOpts() {
     return cgOpts;
   }
 
-  // Must be simple edges
+// Must be simple edges
   public Pair<Node, Node> addInterproceduralAssignment(Node from, Node to, Edge e) {
-    Pair<Node, Node> val = new Pair<Node, Node>(from, to);
+    Pair<Node, Node> val = new Pair<>(from, to);
     if (runGeomPTA) {
       assign2edges.put(val, e);
     }
     return val;
   }
 
-  public Set<Edge> lookupEdgesForAssignment(Pair<Node, Node> val) {
+public Set<Edge> lookupEdgesForAssignment(Pair<Node, Node> val) {
     return assign2edges.get(val);
   }
 
-  public void addCallTarget(Edge e) {
+public void addCallTarget(Edge e) {
     if (!e.passesParameters()) {
       return;
     }
@@ -1336,7 +1363,7 @@ public class PAG implements PointsToAnalysis {
     }
   }
 
-  /**
+/**
    * Adds method target as a possible target of the invoke expression in s. If target is null, only creates the nodes for the
    * call site, without actually connecting them to any target method.
    **/
@@ -1387,9 +1414,11 @@ public class PAG implements PointsToAnalysis {
         virtualCallsToReceivers.put(ie, baseNode);
       }
     }
-    if (s instanceof AssignStmt) {
-      Value dest = ((AssignStmt) s).getLeftOp();
-      if (dest.getType() instanceof RefLikeType && !(dest instanceof NullConstant)) {
+    if (!(s instanceof AssignStmt)) {
+		return;
+	}
+	Value dest = ((AssignStmt) s).getLeftOp();
+	if (dest.getType() instanceof RefLikeType && !(dest instanceof NullConstant)) {
 
         Node destNode = srcnf.getNode(dest);
         destNode = srcmpag.parameterize(destNode, srcContext);
@@ -1404,10 +1433,9 @@ public class PAG implements PointsToAnalysis {
         callAssigns.put(ie, pval);
         callToMethod.put(ie, srcmpag.getMethod());
       }
-    }
   }
 
-  /**
+/**
    * Delete all the assignment edges.
    */
   public void cleanPAG() {
@@ -1421,34 +1449,14 @@ public class PAG implements PointsToAnalysis {
     allocInv.clear();
   }
 
-  /* End of package methods. */
-
-  protected SparkOptions opts;
-  protected CGOptions cgOpts;
-  protected ClientAccessibilityOracle accessibilityOracle = Scene.v().getClientAccessibilityOracle();
-
-  protected Map<VarNode, Object> simple = new HashMap<VarNode, Object>();
-  protected Map<FieldRefNode, Object> load = new HashMap<FieldRefNode, Object>();
-  protected Map<VarNode, Object> store = new HashMap<VarNode, Object>();
-  protected Map<AllocNode, Object> alloc = new HashMap<AllocNode, Object>();
-  protected Map<VarNode, Object> newInstance = new HashMap<VarNode, Object>();
-  protected Map<NewInstanceNode, Object> assignInstance = new HashMap<NewInstanceNode, Object>();
-
-  protected Map<VarNode, Object> simpleInv = new HashMap<VarNode, Object>();
-  protected Map<VarNode, Object> loadInv = new HashMap<VarNode, Object>();
-  protected Map<FieldRefNode, Object> storeInv = new HashMap<FieldRefNode, Object>();
-  protected Map<VarNode, Object> allocInv = new HashMap<VarNode, Object>();
-  protected Map<NewInstanceNode, Object> newInstanceInv = new HashMap<NewInstanceNode, Object>();
-  protected Map<VarNode, Object> assignInstanceInv = new HashMap<VarNode, Object>();
-
-  protected <K extends Node> boolean addToMap(Map<K, Object> m, K key, Node value) {
+protected <K extends Node> boolean addToMap(Map<K, Object> m, K key, Node value) {
     Object valueList = m.get(key);
 
     if (valueList == null) {
       m.put(key, valueList = new HashSet(4));
     } else if (!(valueList instanceof Set)) {
       Node[] ar = (Node[]) valueList;
-      HashSet<Node> vl = new HashSet<Node>(ar.length + 4);
+      HashSet<Node> vl = new HashSet<>(ar.length + 4);
       m.put(key, vl);
       for (Node element : ar) {
         vl.add(element);
@@ -1458,29 +1466,8 @@ public class PAG implements PointsToAnalysis {
     return ((Set<Node>) valueList).add(value);
   }
 
-  private boolean runGeomPTA = false;
-  protected MultiMap<Pair<Node, Node>, Edge> assign2edges = new HashMultiMap<>();
-  private final Map<Object, LocalVarNode> valToLocalVarNode = new HashMap<>(1000);
-  private final Map<Object, GlobalVarNode> valToGlobalVarNode = new HashMap<>(1000);
-  private final Map<Object, AllocNode> valToAllocNode = new HashMap<>(1000);
-  private final Table<Object, Type, AllocNode> valToReflAllocNode = HashBasedTable.create();
-  private OnFlyCallGraph ofcg;
-  private final ArrayList<VarNode> dereferences = new ArrayList<VarNode>();
-  protected TypeManager typeManager;
-  private final LargeNumberedMap<Local, LocalVarNode> localToNodeMap = new LargeNumberedMap<>(Scene.v().getLocalNumberer());
-  private final Map<Value, NewInstanceNode> newInstToNodeMap = new HashMap<>();
-  public int maxFinishNumber = 0;
-  private Map<Node, Tag> nodeToTag;
-  private final GlobalNodeFactory nodeFactory = new GlobalNodeFactory(this);
-
-  public GlobalNodeFactory nodeFactory() {
+public GlobalNodeFactory nodeFactory() {
     return nodeFactory;
   }
-
-  public NativeMethodDriver nativeMethodDriver;
-
-  public HashMultiMap<InvokeExpr, Pair<Node, Node>> callAssigns = new HashMultiMap<InvokeExpr, Pair<Node, Node>>();
-  public Map<InvokeExpr, SootMethod> callToMethod = new HashMap<InvokeExpr, SootMethod>();
-  public Map<InvokeExpr, Node> virtualCallsToReceivers = new HashMap<InvokeExpr, Node>();
 
 }

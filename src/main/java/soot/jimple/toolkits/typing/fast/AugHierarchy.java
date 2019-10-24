@@ -39,7 +39,8 @@ import soot.Type;
  * @author Ben Bellamy
  */
 public class AugHierarchy implements IHierarchy {
-  public Collection<Type> lcas(Type a, Type b) {
+  @Override
+public Collection<Type> lcas(Type a, Type b) {
     return lcas_(a, b);
   }
 
@@ -75,7 +76,8 @@ public class AugHierarchy implements IHierarchy {
     }
   }
 
-  public boolean ancestor(Type ancestor, Type child) {
+  @Override
+public boolean ancestor(Type ancestor, Type child) {
     return ancestor_(ancestor, child);
   }
 

@@ -42,7 +42,8 @@ public class DNewMultiArrayExpr extends AbstractNewMultiArrayExpr {
     }
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     List clonedSizes = new ArrayList(getSizeCount());
 
     for (int i = 0; i < getSizeCount(); i++) {
@@ -52,7 +53,8 @@ public class DNewMultiArrayExpr extends AbstractNewMultiArrayExpr {
     return new DNewMultiArrayExpr(getBaseType(), clonedSizes);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal("new");
     up.literal(" ");
     up.type(getBaseType().baseType);
@@ -67,14 +69,15 @@ public class DNewMultiArrayExpr extends AbstractNewMultiArrayExpr {
     }
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
     buffer.append("new " + getBaseType().baseType);
     List sizes = getSizes();
     Iterator it = getSizes().iterator();
     while (it.hasNext()) {
-      buffer.append("[" + it.next().toString() + "]");
+      buffer.append(new StringBuilder().append("[").append(it.next().toString()).append("]").toString());
     }
 
     for (int i = getSizeCount(); i < getBaseType().numDimensions; i++) {

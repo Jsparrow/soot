@@ -56,23 +56,22 @@ import soot.util.Switch;
  **/
 public class SPhiExpr implements PhiExpr {
   private static final Logger logger = LoggerFactory.getLogger(SPhiExpr.class);
-  protected List<ValueUnitPair> argPairs = new ArrayList<ValueUnitPair>();
-  protected Map<Unit, ValueUnitPair> predToPair = new HashMap<Unit, ValueUnitPair>(); // cache
+  protected List<ValueUnitPair> argPairs = new ArrayList<>();
+  protected Map<Unit, ValueUnitPair> predToPair = new HashMap<>(); // cache
   protected Type type;
+int blockId = -1;
 
-  /**
+/**
    * Create a trivial Phi expression for leftLocal. preds is an ordered list of the control flow predecessor Blocks of the
    * PhiExpr.
    **/
   public SPhiExpr(Local leftLocal, List<Block> preds) {
     type = leftLocal.getType();
 
-    for (Block pred : preds) {
-      addArg(leftLocal, pred);
-    }
+    preds.forEach(pred -> addArg(leftLocal, pred));
   }
 
-  /**
+/**
    * Create a Phi expression from the given list of Values and Blocks.
    **/
   public SPhiExpr(List<Value> args, List<Unit> preds) {
@@ -85,11 +84,9 @@ public class SPhiExpr implements PhiExpr {
     }
 
     type = args.get(0).getType();
-    Iterator<Value> argsIt = args.iterator();
     Iterator<Unit> predsIt = preds.iterator();
 
-    while (argsIt.hasNext()) {
-      Value arg = argsIt.next();
+    for (Value arg : args) {
       Object pred = predsIt.next();
 
       if (pred instanceof Block) {
@@ -102,44 +99,44 @@ public class SPhiExpr implements PhiExpr {
     }
   }
 
-  /* get-accessor implementations */
+/* get-accessor implementations */
 
-  public List<ValueUnitPair> getArgs() {
+  @Override
+public List<ValueUnitPair> getArgs() {
     return Collections.unmodifiableList(argPairs);
   }
 
-  public List<Value> getValues() {
-    List<Value> args = new ArrayList<Value>();
-    for (ValueUnitPair vup : argPairs) {
-      Value arg = vup.getValue();
-      args.add(arg);
-    }
+@Override
+public List<Value> getValues() {
+    List<Value> args = new ArrayList<>();
+    argPairs.stream().map(ValueUnitPair::getValue).forEach(args::add);
 
     return args;
   }
 
-  public List<Unit> getPreds() {
-    List<Unit> preds = new ArrayList<Unit>();
-    for (ValueUnitPair up : argPairs) {
-      Unit arg = up.getUnit();
-      preds.add(arg);
-    }
+@Override
+public List<Unit> getPreds() {
+    List<Unit> preds = new ArrayList<>();
+    argPairs.stream().map(ValueUnitPair::getUnit).forEach(preds::add);
 
     return preds;
   }
 
-  public int getArgCount() {
+@Override
+public int getArgCount() {
     return argPairs.size();
   }
 
-  public ValueUnitPair getArgBox(int index) {
+@Override
+public ValueUnitPair getArgBox(int index) {
     if (index < 0 || index >= argPairs.size()) {
       return null;
     }
     return (ValueUnitPair) argPairs.get(index);
   }
 
-  public Value getValue(int index) {
+@Override
+public Value getValue(int index) {
     ValueUnitPair arg = getArgBox(index);
     if (arg == null) {
       return null;
@@ -147,7 +144,8 @@ public class SPhiExpr implements PhiExpr {
     return arg.getValue();
   }
 
-  public Unit getPred(int index) {
+@Override
+public Unit getPred(int index) {
     ValueUnitPair arg = getArgBox(index);
     if (arg == null) {
       return null;
@@ -155,12 +153,14 @@ public class SPhiExpr implements PhiExpr {
     return arg.getUnit();
   }
 
-  public int getArgIndex(Unit predTailUnit) {
+@Override
+public int getArgIndex(Unit predTailUnit) {
     ValueUnitPair pair = getArgBox(predTailUnit);
     return argPairs.indexOf(pair); // (-1 on null)
   }
 
-  public ValueUnitPair getArgBox(Unit predTailUnit) {
+@Override
+public ValueUnitPair getArgBox(Unit predTailUnit) {
     ValueUnitPair vup = predToPair.get(predTailUnit);
 
     // we pay a penalty for misses but hopefully the common case
@@ -177,7 +177,8 @@ public class SPhiExpr implements PhiExpr {
     return vup;
   }
 
-  public Value getValue(Unit predTailUnit) {
+@Override
+public Value getValue(Unit predTailUnit) {
     ValueBox vb = getArgBox(predTailUnit);
     if (vb == null) {
       return null;
@@ -185,12 +186,14 @@ public class SPhiExpr implements PhiExpr {
     return vb.getValue();
   }
 
-  public int getArgIndex(Block pred) {
+@Override
+public int getArgIndex(Block pred) {
     ValueUnitPair box = getArgBox(pred);
     return argPairs.indexOf(box); // (-1 on null)
   }
 
-  public ValueUnitPair getArgBox(Block pred) {
+@Override
+public ValueUnitPair getArgBox(Block pred) {
     Unit predTailUnit = pred.getTail();
     ValueUnitPair box = getArgBox(predTailUnit);
 
@@ -208,7 +211,8 @@ public class SPhiExpr implements PhiExpr {
     return box;
   }
 
-  public Value getValue(Block pred) {
+@Override
+public Value getValue(Block pred) {
     ValueBox vb = getArgBox(pred);
     if (vb == null) {
       return null;
@@ -216,9 +220,10 @@ public class SPhiExpr implements PhiExpr {
     return vb.getValue();
   }
 
-  /* set-accessor implementations */
+/* set-accessor implementations */
 
-  public boolean setArg(int index, Value arg, Unit predTailUnit) {
+  @Override
+public boolean setArg(int index, Value arg, Unit predTailUnit) {
     boolean ret1 = setValue(index, arg);
     boolean ret2 = setPred(index, predTailUnit);
     if (ret1 != ret2) {
@@ -227,11 +232,13 @@ public class SPhiExpr implements PhiExpr {
     return ret1;
   }
 
-  public boolean setArg(int index, Value arg, Block pred) {
+@Override
+public boolean setArg(int index, Value arg, Block pred) {
     return setArg(index, arg, pred.getTail());
   }
 
-  public boolean setValue(int index, Value arg) {
+@Override
+public boolean setValue(int index, Value arg) {
     ValueUnitPair argPair = getArgBox(index);
     if (argPair == null) {
       return false;
@@ -240,17 +247,20 @@ public class SPhiExpr implements PhiExpr {
     return true;
   }
 
-  public boolean setValue(Unit predTailUnit, Value arg) {
+@Override
+public boolean setValue(Unit predTailUnit, Value arg) {
     int index = getArgIndex(predTailUnit);
     return setValue(index, arg);
   }
 
-  public boolean setValue(Block pred, Value arg) {
+@Override
+public boolean setValue(Block pred, Value arg) {
     int index = getArgIndex(pred);
     return setValue(index, arg);
   }
 
-  public boolean setPred(int index, Unit predTailUnit) {
+@Override
+public boolean setPred(int index, Unit predTailUnit) {
     ValueUnitPair argPair = getArgBox(index);
     if (argPair == null) {
       return false;
@@ -258,8 +268,8 @@ public class SPhiExpr implements PhiExpr {
 
     int other = getArgIndex(predTailUnit);
     if (other != -1) {
-      logger.warn("An argument with control flow predecessor " + predTailUnit + " already exists in " + this + "!");
-      logger.warn("setPred resulted in deletion of " + argPair + " from " + this + ".");
+      logger.warn(new StringBuilder().append("An argument with control flow predecessor ").append(predTailUnit).append(" already exists in ").append(this).append("!").toString());
+      logger.warn(new StringBuilder().append("setPred resulted in deletion of ").append(argPair).append(" from ").append(this).append(".").toString());
       removeArg(argPair);
       return false;
     }
@@ -268,44 +278,50 @@ public class SPhiExpr implements PhiExpr {
     return true;
   }
 
-  public boolean setPred(int index, Block pred) {
+@Override
+public boolean setPred(int index, Block pred) {
     return setPred(index, pred.getTail());
   }
 
-  /* add/remove implementations */
+/* add/remove implementations */
 
-  public boolean removeArg(int index) {
+  @Override
+public boolean removeArg(int index) {
     ValueUnitPair arg = getArgBox(index);
     return removeArg(arg);
   }
 
-  public boolean removeArg(Unit predTailUnit) {
+@Override
+public boolean removeArg(Unit predTailUnit) {
     ValueUnitPair arg = getArgBox(predTailUnit);
     return removeArg(arg);
   }
 
-  public boolean removeArg(Block pred) {
+@Override
+public boolean removeArg(Block pred) {
     ValueUnitPair arg = getArgBox(pred);
     return removeArg(arg);
   }
 
-  public boolean removeArg(ValueUnitPair arg) {
-    if (argPairs.remove(arg)) {
-      // update cache
+@Override
+public boolean removeArg(ValueUnitPair arg) {
+    if (!argPairs.remove(arg)) {
+		return false;
+	}
+	// update cache
       predToPair.remove(arg.getUnit());
-      // remove back-pointer
+	// remove back-pointer
       arg.getUnit().removeBoxPointingToThis(arg);
-      return true;
-    }
-
-    return false;
+	return true;
   }
 
-  public boolean addArg(Value arg, Block pred) {
+@Override
+public boolean addArg(Value arg, Block pred) {
     return addArg(arg, pred.getTail());
   }
 
-  public boolean addArg(Value arg, Unit predTailUnit) {
+@Override
+public boolean addArg(Value arg, Unit predTailUnit) {
     // Do not allow phi nodes for dummy blocks
     if (predTailUnit == null) {
       return false;
@@ -324,54 +340,50 @@ public class SPhiExpr implements PhiExpr {
     return true;
   }
 
-  int blockId = -1;
-
-  public void setBlockId(int blockId) {
+@Override
+public void setBlockId(int blockId) {
     this.blockId = blockId;
   }
 
-  public int getBlockId() {
+@Override
+public int getBlockId() {
     if (blockId == -1) {
       throw new RuntimeException("Assertion failed:  Block Id unknown.");
     }
     return blockId;
   }
 
-  /* misc */
+/* misc */
 
   /**
    * Update predToPair cache map which could be out-of-sync due to external setUnit or clone operations on the UnitBoxes.
    **/
   protected void updateCache() {
     int needed = argPairs.size();
-    predToPair = new HashMap<Unit, ValueUnitPair>(needed << 1, 1.0F); // Always attempt to allocate the next power of 2 sized
+    predToPair = new HashMap<>(needed << 1, 1.0F); // Always attempt to allocate the next power of 2 sized
                                                                       // map
-    for (ValueUnitPair vup : argPairs) {
-      predToPair.put(vup.getUnit(), vup);
-    }
+	argPairs.forEach(vup -> predToPair.put(vup.getUnit(), vup));
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof SPhiExpr) {
-      SPhiExpr pe = (SPhiExpr) o;
-
-      if (getArgCount() != pe.getArgCount()) {
+@Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof SPhiExpr)) {
+		return false;
+	}
+	SPhiExpr pe = (SPhiExpr) o;
+	if (getArgCount() != pe.getArgCount()) {
         return false;
       }
-
-      for (int i = 0; i < getArgCount(); i++) {
+	for (int i = 0; i < getArgCount(); i++) {
         if (!getArgBox(i).equivTo(pe.getArgBox(i))) {
           return false;
         }
       }
-
-      return true;
-    }
-
-    return false;
+	return true;
   }
 
-  public int equivHashCode() {
+@Override
+public int equivHashCode() {
     int hashcode = 1;
 
     for (int i = 0; i < getArgCount(); i++) {
@@ -381,38 +393,38 @@ public class SPhiExpr implements PhiExpr {
     return hashcode;
   }
 
-  @Override
+@Override
   public List<UnitBox> getUnitBoxes() {
-    Set<UnitBox> boxes = new HashSet<UnitBox>(argPairs.size());
-    for (ValueUnitPair up : argPairs) {
-      boxes.add(up);
-    }
-    return new ArrayList<UnitBox>(boxes);
+    Set<UnitBox> boxes = new HashSet<>(argPairs.size());
+    argPairs.forEach(boxes::add);
+    return new ArrayList<>(boxes);
   }
 
-  public void clearUnitBoxes() {
-    for (UnitBox box : getUnitBoxes()) {
-      box.setUnit(null);
-    }
+@Override
+public void clearUnitBoxes() {
+    getUnitBoxes().forEach(box -> box.setUnit(null));
   }
 
-  public List<ValueBox> getUseBoxes() {
-    Set<ValueBox> set = new HashSet<ValueBox>();
+@Override
+public List<ValueBox> getUseBoxes() {
+    Set<ValueBox> set = new HashSet<>();
 
-    for (ValueUnitPair argPair : argPairs) {
+    argPairs.forEach(argPair -> {
       set.addAll(argPair.getValue().getUseBoxes());
       set.add(argPair);
-    }
+    });
 
-    return new ArrayList<ValueBox>(set);
+    return new ArrayList<>(set);
   }
 
-  public Type getType() {
+@Override
+public Type getType() {
     return type;
   }
 
-  public String toString() {
-    StringBuffer expr = new StringBuffer(Shimple.PHI + "(");
+@Override
+public String toString() {
+    StringBuilder expr = new StringBuilder(Shimple.PHI + "(");
     boolean isFirst = true;
     for (ValueUnitPair vuPair : argPairs) {
       if (!isFirst) {
@@ -428,7 +440,8 @@ public class SPhiExpr implements PhiExpr {
     return expr.toString();
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public void toString(UnitPrinter up) {
     up.literal(Shimple.PHI);
     up.literal("(");
 
@@ -444,11 +457,13 @@ public class SPhiExpr implements PhiExpr {
     up.literal(")");
   }
 
-  public void apply(Switch sw) {
+@Override
+public void apply(Switch sw) {
     ((ShimpleExprSwitch) sw).casePhiExpr(this);
   }
 
-  public Object clone() {
+@Override
+public Object clone() {
     // Note to self: Do not try to "fix" this *again*. Yes, it
     // should be a shallow copy in order to conform with the rest
     // of Soot. When a body is cloned, the Values are cloned

@@ -124,7 +124,10 @@ public class method_info {
    * @return the prototype (access + return + name + parameters) of this method.
    */
   public String prototype(cp_info constant_pool[]) {
-    String access, rt, name, params;
+    String access;
+	String rt;
+	String name;
+	String params;
     Code_attribute c = locate_code_attribute();
 
     access = ClassFile.access_string(access_flags, " ");
@@ -132,9 +135,10 @@ public class method_info {
     name = toName(constant_pool);
     params = ClassFile.parseMethodDesc_params(cp_info.getTypeDescr(constant_pool, descriptor_index));
     if (access.length() > 0) {
-      return access + " " + rt + " " + name + "(" + params + ")";
+      return new StringBuilder().append(access).append(" ").append(rt).append(" ").append(name).append("(").append(params)
+			.append(")").toString();
     }
-    return rt + " " + name + "(" + params + ")";
+    return new StringBuilder().append(rt).append(" ").append(name).append("(").append(params).append(")").toString();
   }
 
   /**

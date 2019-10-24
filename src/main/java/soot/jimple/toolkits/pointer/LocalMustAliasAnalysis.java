@@ -113,21 +113,17 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Va
   public LocalMustAliasAnalysis(UnitGraph g, boolean tryTrackFieldAssignments) {
     super(g);
     this.container = g.getBody().getMethod();
-    this.localsAndFieldRefs = new HashSet<Value>();
+    this.localsAndFieldRefs = new HashSet<>();
 
     // add all locals
-    for (Local l : (Collection<Local>) g.getBody().getLocals()) {
-      if (l.getType() instanceof RefLikeType) {
-        this.localsAndFieldRefs.add(l);
-      }
-    }
+	((Collection<Local>) g.getBody().getLocals()).stream().filter(l -> l.getType() instanceof RefLikeType).forEach(l -> this.localsAndFieldRefs.add(l));
 
     if (tryTrackFieldAssignments) {
       this.localsAndFieldRefs.addAll(trackableFields());
     }
 
-    this.rhsToNumber = new HashMap<Value, Integer>();
-    this.mergePointToValueToNumber = new HashMap<Unit, Map<Value, Integer>>();
+    this.rhsToNumber = new HashMap<>();
+    this.mergePointToValueToNumber = new HashMap<>();
 
     doAnalysis();
 
@@ -141,20 +137,19 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Va
    * method or any method transitively called by this method.
    */
   private Set<Value> trackableFields() {
-    Set<Value> usedFieldRefs = new HashSet<Value>();
+    Set<Value> usedFieldRefs = new HashSet<>();
     // add all field references that are in use boxes
     for (Unit unit : this.graph) {
       Stmt s = (Stmt) unit;
       List<ValueBox> useBoxes = s.getUseBoxes();
-      for (ValueBox useBox : useBoxes) {
-        Value val = useBox.getValue();
-        if (val instanceof FieldRef) {
+      useBoxes.stream().map(ValueBox::getValue).forEach(val -> {
+		if (val instanceof FieldRef) {
           FieldRef fieldRef = (FieldRef) val;
           if (fieldRef.getType() instanceof RefLikeType) {
             usedFieldRefs.add(new EquivalentValue(fieldRef));
           }
         }
-      }
+	});
     }
 
     // prune all fields that are written to
@@ -174,15 +169,11 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Va
         // exclude static initializer of same class (assume that it has already been executed)
             !(m.getName().equals(SootMethod.staticInitializerName)
                 && m.getDeclaringClass().equals(container.getDeclaringClass()))) {
-          for (Unit u : m.getActiveBody().getUnits()) {
-            List<ValueBox> defBoxes = u.getDefBoxes();
-            for (ValueBox defBox : defBoxes) {
-              Value value = defBox.getValue();
-              if (value instanceof FieldRef) {
-                usedFieldRefs.remove(new EquivalentValue(value));
-              }
-            }
-          }
+          m.getActiveBody().getUnits().stream().map(Unit::getDefBoxes).flatMap(List::stream).map(ValueBox::getValue).forEach(value -> {
+			if (value instanceof FieldRef) {
+				usedFieldRefs.remove(new EquivalentValue(value));
+			}
+		});
         }
       }
     }
@@ -193,8 +184,9 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Va
   @Override
   protected void merge(Unit succUnit, HashMap<Value, Integer> inMap1, HashMap<Value, Integer> inMap2,
       HashMap<Value, Integer> outMap) {
-    for (Value l : localsAndFieldRefs) {
-      Integer i1 = inMap1.get(l), i2 = inMap2.get(l);
+    localsAndFieldRefs.forEach(l -> {
+      Integer i1 = inMap1.get(l);
+	Integer i2 = inMap2.get(l);
       if (i1 == null) {
         outMap.put(l, i2);
       } else if (i2 == null) {
@@ -221,7 +213,7 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Va
         Map<Value, Integer> valueToNumber = mergePointToValueToNumber.get(succUnit);
         Integer number = null;
         if (valueToNumber == null) {
-          valueToNumber = new HashMap<Value, Integer>();
+          valueToNumber = new HashMap<>();
           mergePointToValueToNumber.put(succUnit, valueToNumber);
         } else {
           number = valueToNumber.get(l);
@@ -233,7 +225,7 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Va
         }
         outMap.put(l, number);
       }
-    }
+    });
   }
 
   @Override
@@ -311,13 +303,13 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Va
   /** Initial most conservative value: We leave it away to save memory, implicitly UNKNOWN. */
   @Override
   protected HashMap<Value, Integer> entryInitialFlow() {
-    return new HashMap<Value, Integer>();
+    return new HashMap<>();
   }
 
   /** Initial bottom value: objects have no definitions. */
   @Override
   protected HashMap<Value, Integer> newInitialFlow() {
-    return new HashMap<Value, Integer>();
+    return new HashMap<>();
   }
 
   /**

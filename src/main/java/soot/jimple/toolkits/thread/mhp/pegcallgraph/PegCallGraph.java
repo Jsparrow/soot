@@ -37,6 +37,8 @@ import soot.jimple.toolkits.callgraph.Edge;
 import soot.toolkits.graph.DirectedGraph;
 import soot.util.Chain;
 import soot.util.HashChain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -50,7 +52,8 @@ import soot.util.HashChain;
 // -Richard L. Halpert, 2006-11-30
 
 public class PegCallGraph implements DirectedGraph {
-  List heads;
+  private static final Logger logger = LoggerFactory.getLogger(PegCallGraph.class);
+List heads;
   List tails;
   Chain chain;
   // protected Map methodToSuccs;
@@ -79,11 +82,11 @@ public class PegCallGraph implements DirectedGraph {
   }
 
   protected void testChain() {
-    System.out.println("******** chain of pegcallgraph********");
+    logger.info("******** chain of pegcallgraph********");
     Iterator it = chain.iterator();
     while (it.hasNext()) {
       SootMethod sm = (SootMethod) it.next();
-      System.out.println(sm);
+      logger.info(String.valueOf(sm));
       // System.out.println("name: "+sm.getName());
     }
   }
@@ -96,7 +99,7 @@ public class PegCallGraph implements DirectedGraph {
     Iterator it = cg.sourceMethods();
     while (it.hasNext()) {
       SootMethod sm = (SootMethod) it.next();
-      if (sm.getName().equals("main")) {
+      if ("main".equals(sm.getName())) {
         heads.add(sm);
       }
       // if (sm.isConcrete() && !sm.getDeclaringClass().isLibraryClass()){
@@ -140,10 +143,8 @@ public class PegCallGraph implements DirectedGraph {
       while (chainIt.hasNext()) {
         SootMethod sm = (SootMethod) chainIt.next();
 
-        if (!methodToSuccs.containsKey(sm)) {
-          methodToSuccs.put(sm, new ArrayList());
-          // System.out.println("put: "+sm+"into methodToSuccs");
-        }
+        // System.out.println("put: "+sm+"into methodToSuccs");
+		methodToSuccs.putIfAbsent(sm, new ArrayList());
       }
     }
     // remove the entry for those who's preds are null.
@@ -209,7 +210,7 @@ public class PegCallGraph implements DirectedGraph {
             try {
               predList.add(s);
             } catch (NullPointerException e) {
-              System.out.println(s + "successor: " + successor);
+              logger.info(new StringBuilder().append(s).append("successor: ").append(successor).toString());
               throw e;
             }
           }
@@ -238,7 +239,7 @@ public class PegCallGraph implements DirectedGraph {
     for (Iterator iter = maps.iterator(); iter.hasNext();) {
       Map.Entry entry = (Map.Entry) iter.next();
       List list = (List) entry.getValue();
-      List<Object> newList = new ArrayList<Object>();
+      List<Object> newList = new ArrayList<>();
       Iterator it = list.iterator();
       while (it.hasNext()) {
         Object obj = it.next();
@@ -250,11 +251,13 @@ public class PegCallGraph implements DirectedGraph {
     }
   }
 
-  public List getHeads() {
+  @Override
+public List getHeads() {
     return heads;
   }
 
-  public List getTails() {
+  @Override
+public List getTails() {
     return tails;
   }
 
@@ -266,7 +269,8 @@ public class PegCallGraph implements DirectedGraph {
     return methodToSuccsTrim.get(s);
   }
 
-  public List getSuccsOf(Object s) {
+  @Override
+public List getSuccsOf(Object s) {
     if (!methodToSuccs.containsKey(s)) {
       return java.util.Collections.EMPTY_LIST;
     }
@@ -274,7 +278,8 @@ public class PegCallGraph implements DirectedGraph {
     return methodToSuccs.get(s);
   }
 
-  public List getPredsOf(Object s) {
+  @Override
+public List getPredsOf(Object s) {
     if (!methodToPreds.containsKey(s)) {
       return java.util.Collections.EMPTY_LIST;
     }
@@ -282,54 +287,56 @@ public class PegCallGraph implements DirectedGraph {
     return methodToPreds.get(s);
   }
 
-  public Iterator iterator() {
+  @Override
+public Iterator iterator() {
     return chain.iterator();
   }
 
-  public int size() {
+  @Override
+public int size() {
     return chain.size();
   }
 
   protected void testMethodToSucc() {
-    System.out.println("=====test methodToSucc ");
+    logger.info("=====test methodToSucc ");
     Set maps = methodToSuccs.entrySet();
     for (Iterator iter = maps.iterator(); iter.hasNext();) {
       Map.Entry entry = (Map.Entry) iter.next();
-      System.out.println("---key=  " + entry.getKey());
+      logger.info("---key=  " + entry.getKey());
       List list = (List) entry.getValue();
       if (list.size() > 0) {
 
-        System.out.println("**succ set:");
+        logger.info("**succ set:");
         Iterator it = list.iterator();
         while (it.hasNext()) {
-          System.out.println(it.next());
+          logger.info(String.valueOf(it.next()));
 
         }
 
       }
     }
-    System.out.println("=========methodToSucc--ends--------");
+    logger.info("=========methodToSucc--ends--------");
   }
 
   protected void testMethodToPred() {
-    System.out.println("=====test methodToPred ");
+    logger.info("=====test methodToPred ");
     Set maps = methodToPreds.entrySet();
     for (Iterator iter = maps.iterator(); iter.hasNext();) {
       Map.Entry entry = (Map.Entry) iter.next();
-      System.out.println("---key=  " + entry.getKey());
+      logger.info("---key=  " + entry.getKey());
       List list = (List) entry.getValue();
       if (list.size() > 0) {
 
-        System.out.println("**pred set:");
+        logger.info("**pred set:");
         Iterator it = list.iterator();
         while (it.hasNext()) {
-          System.out.println(it.next());
+          logger.info(String.valueOf(it.next()));
 
         }
 
       }
     }
-    System.out.println("=========methodToPred--ends--------");
+    logger.info("=========methodToPred--ends--------");
   }
 
 }

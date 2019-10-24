@@ -71,25 +71,18 @@ public class CriticalSectionInterferenceGraph {
 
   public void calculateGroups() {
     nextGroup = 1;
-    groups = new ArrayList<CriticalSectionGroup>();
+    groups = new ArrayList<>();
     groups.add(new CriticalSectionGroup(0)); // dummy group
 
     if (optionOneGlobalLock) // use one group for all transactions
     {
       CriticalSectionGroup onlyGroup = new CriticalSectionGroup(nextGroup);
-      Iterator<CriticalSection> tnIt1 = criticalSections.iterator();
-      while (tnIt1.hasNext()) {
-        CriticalSection tn1 = tnIt1.next();
-        onlyGroup.add(tn1);
-      }
+      criticalSections.forEach(onlyGroup::add);
       nextGroup++;
       groups.add(onlyGroup);
     } else // calculate separate groups for transactions
     {
-      Iterator<CriticalSection> tnIt1 = criticalSections.iterator();
-      while (tnIt1.hasNext()) {
-        CriticalSection tn1 = tnIt1.next();
-
+      for (CriticalSection tn1 : criticalSections) {
         // if this transaction has somehow already been marked for deletion
         if (tn1.setNumber == -1) {
           continue;
@@ -102,10 +95,7 @@ public class CriticalSectionInterferenceGraph {
           // the synchronized keyword in our language... because java guarantees memory
           // barriers at certain points in synchronized blocks)
         } else {
-          Iterator<CriticalSection> tnIt2 = criticalSections.iterator();
-          while (tnIt2.hasNext()) {
-            CriticalSection tn2 = tnIt2.next();
-
+          for (CriticalSection tn2 : criticalSections) {
             // check if this transactional region is going to be deleted
             if (tn2.setNumber == -1) {
               continue;
@@ -229,16 +219,16 @@ public class CriticalSectionInterferenceGraph {
   }
 
   public boolean mayHappenInParallel(CriticalSection tn1, CriticalSection tn2) {
-    if (mhp == null) {
-      if (optionLeaveOriginalLocks) {
+    if (mhp != null) {
+		return mhp.mayHappenInParallel(tn1.method, tn2.method);
+	}
+	if (optionLeaveOriginalLocks) {
         return true;
       }
-      ReachableMethods rm = Scene.v().getReachableMethods();
-      if (!rm.contains(tn1.method) || !rm.contains(tn2.method)) {
+	ReachableMethods rm = Scene.v().getReachableMethods();
+	if (!rm.contains(tn1.method) || !rm.contains(tn2.method)) {
         return false;
       }
-      return true;
-    }
-    return mhp.mayHappenInParallel(tn1.method, tn2.method);
+	return true;
   }
 }

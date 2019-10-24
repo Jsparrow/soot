@@ -32,48 +32,55 @@ import soot.SootMethod;
  * object.
  */
 public class PurityMethodNode implements PurityNode {
-  /** Method that created the node */
-  private SootMethod id;
-
   /** gives a unique id, for pretty-printing purposes */
-  private static final Map<SootMethod, Integer> nMap = new HashMap<SootMethod, Integer>();
-  private static int n = 0;
+	  private static final Map<SootMethod, Integer> nMap = new HashMap<>();
 
-  PurityMethodNode(SootMethod id) {
-    this.id = id;
-    if (!nMap.containsKey(id)) {
-      nMap.put(id, new Integer(n));
-      n++;
-    }
-  }
+	private static int n = 0;
 
-  public String toString() {
-    return "M_" + nMap.get(id);
-    // return ""+id;
-  }
+	/** Method that created the node */
+	  private SootMethod id;
 
-  public int hashCode() {
-    return id.hashCode();
-  }
+	PurityMethodNode(SootMethod id) {
+	    this.id = id;
+	    if (!nMap.containsKey(id)) {
+	      nMap.put(id, Integer.valueOf(n));
+	      n++;
+	    }
+	  }
 
-  public boolean equals(Object o) {
-    if (o instanceof PurityMethodNode) {
-      PurityMethodNode oo = (PurityMethodNode) o;
-      return id.equals(oo.id);
-    } else {
-      return false;
-    }
-  }
+	@Override
+	public String toString() {
+	    return "M_" + nMap.get(id);
+	    // return ""+id;
+	  }
 
-  public boolean isInside() {
-    return true;
-  }
+	@Override
+	public int hashCode() {
+	    return id.hashCode();
+	  }
 
-  public boolean isLoad() {
-    return false;
-  }
+	@Override
+	public boolean equals(Object o) {
+	    if (o instanceof PurityMethodNode) {
+	      PurityMethodNode oo = (PurityMethodNode) o;
+	      return id.equals(oo.id);
+	    } else {
+	      return false;
+	    }
+	  }
 
-  public boolean isParam() {
-    return false;
-  }
+	@Override
+	public boolean isInside() {
+	    return true;
+	  }
+
+	@Override
+	public boolean isLoad() {
+	    return false;
+	  }
+
+	@Override
+	public boolean isParam() {
+	    return false;
+	  }
 }

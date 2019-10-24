@@ -58,7 +58,7 @@ public class SootASMClassWriterTest {
 
 	@Before
 	public void setUp()
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			throws NoSuchFieldException, IllegalAccessException {
 		mockStatic(Scene.class);
 		mockStatic(RefType.class);
 		mockStatic(UnknownType.class);

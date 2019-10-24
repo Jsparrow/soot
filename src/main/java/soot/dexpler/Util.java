@@ -83,7 +83,7 @@ public class Util {
         Type ty = getType(t);
         return ty == null ? "" : getType(t).toString();
       }
-      throw new IllegalArgumentException("typeDescriptor is not a class typedescriptor: '" + typeDescriptor + "'");
+      throw new IllegalArgumentException(new StringBuilder().append("typeDescriptor is not a class typedescriptor: '").append(typeDescriptor).append("'").toString());
     }
     String t = typeDescriptor;
     int idx = 0;
@@ -169,7 +169,7 @@ public class Util {
           break;
 
         default:
-          throw new RuntimeException("unknown type: '" + type + "'");
+          throw new RuntimeException(new StringBuilder().append("unknown type: '").append(type).append("'").toString());
       }
       idx++;
     }
@@ -223,17 +223,15 @@ public class Util {
    */
   public static void emptyBody(Body jBody) {
     // identity statements
-    List<Unit> idStmts = new ArrayList<Unit>();
-    List<Local> idLocals = new ArrayList<Local>();
-    for (Unit u : jBody.getUnits()) {
-      if (u instanceof IdentityStmt) {
+    List<Unit> idStmts = new ArrayList<>();
+    List<Local> idLocals = new ArrayList<>();
+    jBody.getUnits().stream().filter(u -> u instanceof IdentityStmt).forEach(u -> {
         IdentityStmt i = (IdentityStmt) u;
         if (i.getRightOp() instanceof ParameterRef || i.getRightOp() instanceof ThisRef) {
           idStmts.add(u);
           idLocals.add((Local) i.getLeftOp());
         }
-      }
-    }
+      });
 
     jBody.getUnits().clear();
     jBody.getLocals().clear();
@@ -241,12 +239,8 @@ public class Util {
 
     final LocalGenerator lg = new LocalGenerator(jBody);
 
-    for (Unit u : idStmts) {
-      jBody.getUnits().add(u);
-    }
-    for (Local l : idLocals) {
-      jBody.getLocals().add(l);
-    }
+    idStmts.forEach(u -> jBody.getUnits().add(u));
+    idLocals.forEach(l -> jBody.getLocals().add(l));
 
     Type rType = jBody.getMethod().getReturnType();
 
@@ -272,7 +266,7 @@ public class Util {
       } else if (t instanceof BooleanType || t instanceof ByteType || t instanceof CharType || t instanceof ShortType) {
         ass = Jimple.v().newAssignStmt(l, IntConstant.v(0));
       } else {
-        throw new RuntimeException("error: return type unknown: " + t + " class: " + t.getClass());
+        throw new RuntimeException(new StringBuilder().append("error: return type unknown: ").append(t).append(" class: ").append(t.getClass()).toString());
       }
       jBody.getUnits().add(ass);
       jBody.getUnits().add(Jimple.v().newReturnStmt(l));
@@ -288,7 +282,7 @@ public class Util {
     LocalCreation lc = new LocalCreation(b.getLocals());
     Local l = lc.newLocal(RefType.v(exceptionType));
 
-    List<Unit> newUnits = new ArrayList<Unit>();
+    List<Unit> newUnits = new ArrayList<>();
     Unit u1 = Jimple.v().newAssignStmt(l, Jimple.v().newNewExpr(RefType.v(exceptionType)));
     Unit u2
         = Jimple.v()
@@ -305,7 +299,7 @@ public class Util {
   }
 
   public static List<String> splitParameters(String parameters) {
-    List<String> pList = new ArrayList<String>();
+    List<String> pList = new ArrayList<>();
 
     int idx = 0;
     boolean object = false;

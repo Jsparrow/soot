@@ -30,11 +30,11 @@ import soot.jimple.spark.pag.Node;
  * @author Ondrej Lhotak
  */
 public abstract class P2SetVisitor {
-  public abstract void visit(Node n);
-
-  public boolean getReturnValue() {
-    return returnValue;
-  }
-
   protected boolean returnValue = false;
+
+	public abstract void visit(Node n);
+
+	public boolean getReturnValue() {
+	    return returnValue;
+	  }
 }

@@ -57,11 +57,13 @@ public class JArrayRef implements ArrayRef, ConvertToBaf {
     this.indexBox = indexBox;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JArrayRef(Jimple.cloneIfNecessary(getBase()), Jimple.cloneIfNecessary(getIndex()));
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (o instanceof ArrayRef) {
       return (getBase().equivTo(((ArrayRef) o).getBase()) && getIndex().equivTo(((ArrayRef) o).getIndex()));
     }
@@ -69,46 +71,56 @@ public class JArrayRef implements ArrayRef, ConvertToBaf {
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return getBase().equivHashCode() * 101 + getIndex().equivHashCode() + 17;
   }
 
-  public String toString() {
-    return baseBox.getValue().toString() + "[" + indexBox.getValue().toString() + "]";
+  @Override
+public String toString() {
+    return new StringBuilder().append(baseBox.getValue().toString()).append("[").append(indexBox.getValue().toString()).append("]").toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     baseBox.toString(up);
     up.literal("[");
     indexBox.toString(up);
     up.literal("]");
   }
 
-  public Value getBase() {
+  @Override
+public Value getBase() {
     return baseBox.getValue();
   }
 
-  public void setBase(Local base) {
+  @Override
+public void setBase(Local base) {
     baseBox.setValue(base);
   }
 
-  public ValueBox getBaseBox() {
+  @Override
+public ValueBox getBaseBox() {
     return baseBox;
   }
 
-  public Value getIndex() {
+  @Override
+public Value getIndex() {
     return indexBox.getValue();
   }
 
-  public void setIndex(Value index) {
+  @Override
+public void setIndex(Value index) {
     indexBox.setValue(index);
   }
 
-  public ValueBox getIndexBox() {
+  @Override
+public ValueBox getIndexBox() {
     return indexBox;
   }
 
-  public List getUseBoxes() {
+  @Override
+public List getUseBoxes() {
     List useBoxes = new ArrayList();
 
     useBoxes.addAll(baseBox.getValue().getUseBoxes());
@@ -120,7 +132,8 @@ public class JArrayRef implements ArrayRef, ConvertToBaf {
     return useBoxes;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     Value base = baseBox.getValue();
     Type type = base.getType();
 
@@ -148,11 +161,13 @@ public class JArrayRef implements ArrayRef, ConvertToBaf {
     }
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((RefSwitch) sw).caseArrayRef(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) getBase()).convertToBaf(context, out);
     ((ConvertToBaf) getIndex()).convertToBaf(context, out);
 

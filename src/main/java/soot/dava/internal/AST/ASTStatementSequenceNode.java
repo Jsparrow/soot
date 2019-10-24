@@ -37,21 +37,19 @@ public class ASTStatementSequenceNode extends ASTNode {
   private List<AugmentedStmt> statementSequence;
 
   public ASTStatementSequenceNode(List<AugmentedStmt> statementSequence) {
-    super();
-
     this.statementSequence = statementSequence;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ASTStatementSequenceNode(statementSequence);
   }
 
-  public void perform_Analysis(ASTAnalysis a) {
+  @Override
+public void perform_Analysis(ASTAnalysis a) {
     if (a.getAnalysisDepth() > ASTAnalysis.ANALYSE_AST) {
 
-      for (AugmentedStmt as : statementSequence) {
-        ASTWalker.v().walk_stmt(a, as.get_Stmt());
-      }
+      statementSequence.forEach(as -> ASTWalker.v().walk_stmt(a, as.get_Stmt()));
     }
 
     if (a instanceof TryContentsFinder) {
@@ -59,26 +57,27 @@ public class ASTStatementSequenceNode extends ASTNode {
     }
   }
 
-  public void toString(UnitPrinter up) {
-    for (AugmentedStmt as : statementSequence) {
-      // System.out.println("Stmt is:"+as.get_Stmt());
-      Unit u = as.get_Stmt();
-      up.startUnit(u);
-      u.toString(up);
-      up.literal(";");
-      up.endUnit(u);
-      up.newline();
-    }
+  @Override
+public void toString(UnitPrinter up) {
+    // System.out.println("Stmt is:"+as.get_Stmt());
+	statementSequence.stream().map(AugmentedStmt::get_Stmt).forEach(u -> {
+		up.startUnit(u);
+		u.toString(up);
+		up.literal(";");
+		up.endUnit(u);
+		up.newline();
+	});
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
-    for (AugmentedStmt as : statementSequence) {
+    statementSequence.forEach(as -> {
       b.append(as.get_Stmt().toString());
       b.append(";");
       b.append(NEWLINE);
-    }
+    });
 
     return b.toString();
   }
@@ -91,7 +90,8 @@ public class ASTStatementSequenceNode extends ASTNode {
     return statementSequence;
   }
 
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTStatementSequenceNode(this);
   }
 

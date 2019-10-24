@@ -93,14 +93,15 @@ public class CopyPropagator extends BodyTransformer {
    *
    * Does not propagate stack locals when the "only-regular-locals" option is true.
    */
-  protected void internalTransform(Body b, String phaseName, Map<String, String> opts) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> opts) {
     CPOptions options = new CPOptions(opts);
     StmtBody stmtBody = (StmtBody) b;
     int fastCopyPropagationCount = 0;
     int slowCopyPropagationCount = 0;
 
     if (Options.v().verbose()) {
-      logger.debug("[" + stmtBody.getMethod().getName() + "] Propagating copies...");
+      logger.debug(new StringBuilder().append("[").append(stmtBody.getMethod().getName()).append("] Propagating copies...").toString());
     }
 
     if (Options.v().time()) {
@@ -109,21 +110,20 @@ public class CopyPropagator extends BodyTransformer {
 
     Chain<Unit> units = stmtBody.getUnits();
 
-    Map<Local, Integer> localToDefCount = new HashMap<Local, Integer>();
+    Map<Local, Integer> localToDefCount = new HashMap<>();
 
     // Count number of definitions for each local.
-    for (Unit u : units) {
-      Stmt s = (Stmt) u;
-      if (s instanceof DefinitionStmt && ((DefinitionStmt) s).getLeftOp() instanceof Local) {
-        Local l = (Local) ((DefinitionStmt) s).getLeftOp();
+	units.stream().map(u -> (Stmt) u).forEach(s -> {
+		if (s instanceof DefinitionStmt && ((DefinitionStmt) s).getLeftOp() instanceof Local) {
+		    Local l = (Local) ((DefinitionStmt) s).getLeftOp();
 
-        if (!localToDefCount.containsKey(l)) {
-          localToDefCount.put(l, new Integer(1));
-        } else {
-          localToDefCount.put(l, new Integer(localToDefCount.get(l).intValue() + 1));
-        }
-      }
-    }
+		    if (!localToDefCount.containsKey(l)) {
+		      localToDefCount.put(l, Integer.valueOf(1));
+		    } else {
+		      localToDefCount.put(l, Integer.valueOf(localToDefCount.get(l).intValue() + 1));
+		    }
+		  }
+	});
 
     if (throwAnalysis == null) {
       throwAnalysis = Scene.v().getDefaultThrowAnalysis();
@@ -202,11 +202,9 @@ public class CopyPropagator extends BodyTransformer {
                 if (ce.getCastType() instanceof RefLikeType) {
                   boolean isConstNull = ce.getOp() instanceof IntConstant && ((IntConstant) ce.getOp()).value == 0;
                   isConstNull |= ce.getOp() instanceof LongConstant && ((LongConstant) ce.getOp()).value == 0;
-                  if (isConstNull) {
-                    if (useBox.canContainValue(NullConstant.v())) {
-                      useBox.setValue(NullConstant.v());
-                    }
-                  }
+                  if (isConstNull && useBox.canContainValue(NullConstant.v())) {
+				  useBox.setValue(NullConstant.v());
+				}
 
                 }
               } else if (def.getRightOp() instanceof Local) {
@@ -215,7 +213,7 @@ public class CopyPropagator extends BodyTransformer {
                 if (l != m) {
                   Integer defCount = localToDefCount.get(m);
                   if (defCount == null || defCount == 0) {
-                    throw new RuntimeException("Variable " + m + " used without definition!");
+                    throw new RuntimeException(new StringBuilder().append("Variable ").append(m).append(" used without definition!").toString());
                   }
 
                   if (defCount == 1) {
@@ -251,12 +249,11 @@ public class CopyPropagator extends BodyTransformer {
 
                         break;
                       }
-                      if (s instanceof DefinitionStmt) {
-                        if (((DefinitionStmt) s).getLeftOp() == m) {
-                          isRedefined = true;
-                          break;
-                        }
-                      }
+                      boolean condition = s instanceof DefinitionStmt && ((DefinitionStmt) s).getLeftOp() == m;
+					if (condition) {
+					  isRedefined = true;
+					  break;
+					}
                     }
 
                     if (isRedefined) {
@@ -276,8 +273,8 @@ public class CopyPropagator extends BodyTransformer {
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + stmtBody.getMethod().getName() + "]     Propagated: " + fastCopyPropagationCount + " fast copies  "
-          + slowCopyPropagationCount + " slow copies");
+      logger.debug(new StringBuilder().append("[").append(stmtBody.getMethod().getName()).append("]     Propagated: ").append(fastCopyPropagationCount).append(" fast copies  ").append(slowCopyPropagationCount).append(" slow copies")
+			.toString());
     }
 
     if (Options.v().time()) {

@@ -44,6 +44,8 @@ import soot.dava.internal.AST.ASTTryNode;
 import soot.dava.internal.AST.ASTUnconditionalLoopNode;
 import soot.dava.internal.AST.ASTWhileNode;
 import soot.dava.toolkits.base.AST.analysis.DepthFirstAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
   Nomair A. Naeem 21-FEB-2005
@@ -63,21 +65,25 @@ import soot.dava.toolkits.base.AST.analysis.DepthFirstAdapter;
 
 public class LoopStrengthener extends DepthFirstAdapter {
 
-  public LoopStrengthener() {
+  private static final Logger logger = LoggerFactory.getLogger(LoopStrengthener.class);
+
+public LoopStrengthener() {
   }
 
   public LoopStrengthener(boolean verbose) {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
   /*
    * Note the ASTNode in this case can be any of the following: ASTMethodNode ASTSwitchNode ASTIfNode ASTIfElseNode
    * ASTUnconditionalWhileNode ASTWhileNode ASTDoWhileNode ASTForLoopNode ASTLabeledBlockNode ASTSynchronizedBlockNode
    */
-  public void normalRetrieving(ASTNode node) {
+  @Override
+public void normalRetrieving(ASTNode node) {
     if (node instanceof ASTSwitchNode) {
       dealWithSwitchNode((ASTSwitchNode) node);
       return;
@@ -124,7 +130,8 @@ public class LoopStrengthener extends DepthFirstAdapter {
     } // end of going over subBodies
   }
 
-  public void caseASTTryNode(ASTTryNode node) {
+  @Override
+public void caseASTTryNode(ASTTryNode node) {
     inASTTryNode(node);
 
     // get try body
@@ -235,20 +242,16 @@ public class LoopStrengthener extends DepthFirstAdapter {
     List<Object> indexList = node.getIndexList();
     Map<Object, List<Object>> index2BodyList = node.getIndex2BodyList();
 
-    Iterator<Object> it = indexList.iterator();
-    while (it.hasNext()) {
-      // going through all the cases of the switch statement
-      Object currentIndex = it.next();
+    indexList.forEach(currentIndex -> {
       List<Object> body = index2BodyList.get(currentIndex);
 
       if (body != null) {
         // this body is a list of ASTNodes
 
-        Iterator<Object> itBody = body.iterator();
         int nodeNumber = 0;
         // go over the ASTNodes and apply
-        while (itBody.hasNext()) {
-          ASTNode temp = (ASTNode) itBody.next();
+		for (Object aBody : body) {
+          ASTNode temp = (ASTNode) aBody;
           if (temp instanceof ASTWhileNode || temp instanceof ASTUnconditionalLoopNode || temp instanceof ASTDoWhileNode) {
 
             ASTNode oneNode = getOnlySubNode(temp);
@@ -281,7 +284,7 @@ public class LoopStrengthener extends DepthFirstAdapter {
           nodeNumber++;
         }
       }
-    }
+    });
   }
 
   /*
@@ -412,7 +415,7 @@ public class LoopStrengthener extends DepthFirstAdapter {
   public static List<Object> createNewSubBody(List<Object> oldSubBody, int nodeNumber, ASTNode oldNode,
       List<ASTNode> newNode) {
     // create a new SubBody
-    List<Object> newSubBody = new ArrayList<Object>();
+    List<Object> newSubBody = new ArrayList<>();
 
     // this is an iterator of ASTNodes
     Iterator<Object> it = oldSubBody.iterator();
@@ -431,7 +434,7 @@ public class LoopStrengthener extends DepthFirstAdapter {
     // just to make sure check this
     ASTNode toRemove = (ASTNode) it.next();
     if (toRemove.toString().compareTo(oldNode.toString()) != 0) {
-      System.out.println("The replace nodes dont match please report benchmark to developer");
+      logger.info("The replace nodes dont match please report benchmark to developer");
       return null;
     } else {
       // not adding the oldNode into the newSubBody but adding its replacement

@@ -31,12 +31,14 @@ public class DeprecatedTag implements Tag {
   public DeprecatedTag() {
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "Deprecated";
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "DeprecatedTag";
   }
 
@@ -45,7 +47,8 @@ public class DeprecatedTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("DeprecatedTag has no value for bytecode");
   }
 }

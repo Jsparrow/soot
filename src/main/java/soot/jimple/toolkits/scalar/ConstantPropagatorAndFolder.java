@@ -64,19 +64,20 @@ public class ConstantPropagatorAndFolder extends BodyTransformer {
     return G.v().soot_jimple_toolkits_scalar_ConstantPropagatorAndFolder();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     int numFolded = 0;
     int numPropagated = 0;
 
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "] Propagating and folding constants...");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("] Propagating and folding constants...").toString());
     }
 
     UnitGraph g = new ExceptionalUnitGraph(b);
     LocalDefs localDefs = LocalDefs.Factory.newLocalDefs(g);
 
     // Perform a constant/local propagation pass.
-    Orderer<Unit> orderer = new PseudoTopologicalOrderer<Unit>();
+    Orderer<Unit> orderer = new PseudoTopologicalOrderer<>();
 
     // go through each use box in each statement
     for (Unit u : orderer.newList(g, false)) {
@@ -109,20 +110,19 @@ public class ConstantPropagatorAndFolder extends BodyTransformer {
       // folding pass
       for (ValueBox useBox : u.getUseBoxes()) {
         Value value = useBox.getValue();
-        if (!(value instanceof Constant)) {
-          if (Evaluator.isValueConstantValued(value)) {
+        boolean condition = !(value instanceof Constant) && Evaluator.isValueConstantValued(value);
+		if (condition) {
             Value constValue = Evaluator.getConstantValueOf(value);
             if (useBox.canContainValue(constValue)) {
               useBox.setValue(constValue);
               numFolded++;
             }
           }
-        }
       }
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     Propagated: " + numPropagated + ", Folded:  " + numFolded);
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     Propagated: ").append(numPropagated).append(", Folded:  ").append(numFolded).toString());
     }
 
   } // optimizeConstants

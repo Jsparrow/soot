@@ -40,172 +40,210 @@ import soot.Singletons;
  */
 public class SlowPseudoTopologicalOrderer<N> implements Orderer<N> {
 
-  public SlowPseudoTopologicalOrderer(Singletons.Global g) {
-  }
+  private static final int WHITE = 0;
 
-  public static SlowPseudoTopologicalOrderer v() {
-    return G.v().soot_toolkits_graph_SlowPseudoTopologicalOrderer();
-  }
+private static final int GRAY = 1;
 
-  public SlowPseudoTopologicalOrderer() {
-  }
+private static final int BLACK = 2;
 
-  public SlowPseudoTopologicalOrderer(boolean isReversed) {
-    mIsReversed = isReversed;
-  }
+	private Map<N, Integer> stmtToColor;
 
-  private Map<N, Integer> stmtToColor;
+	private LinkedList<N> order;
 
-  private static final int WHITE = 0, GRAY = 1, BLACK = 2;
+	private boolean mIsReversed = false;
 
-  private LinkedList<N> order;
+	private DirectedGraph<N> graph;
 
-  private boolean mIsReversed = false;
+	private List<N> reverseOrder;
 
-  private DirectedGraph<N> graph;
+	private final HashMap<N, List<N>> succsMap = new HashMap<>();
 
-  private List<N> reverseOrder;
+	public SlowPseudoTopologicalOrderer(Singletons.Global g) {
+	  }
 
-  private final HashMap<N, List<N>> succsMap = new HashMap<N, List<N>>();
+	public SlowPseudoTopologicalOrderer() {
+	  }
 
-  /**
-   * {@inheritDoc}
-   */
-  public List<N> newList(DirectedGraph<N> g, boolean reverse) {
-    mIsReversed = reverse;
-    return computeOrder(g);
-  }
+	public SlowPseudoTopologicalOrderer(boolean isReversed) {
+	    mIsReversed = isReversed;
+	  }
 
-  /**
-   * Orders in pseudo-topological order.
-   *
-   * @param g
-   *          a DirectedGraph instance we want to order the nodes for.
-   * @return an ordered list of the graph's nodes.
-   */
-  LinkedList<N> computeOrder(DirectedGraph<N> g) {
-    stmtToColor = new HashMap<N, Integer>();
+	public static SlowPseudoTopologicalOrderer v() {
+	    return G.v().soot_toolkits_graph_SlowPseudoTopologicalOrderer();
+	  }
 
-    order = new LinkedList<N>();
-    graph = g;
+	/**
+	   * {@inheritDoc}
+	   */
+	  @Override
+	public List<N> newList(DirectedGraph<N> g, boolean reverse) {
+	    mIsReversed = reverse;
+	    return computeOrder(g);
+	  }
 
-    PseudoTopologicalReverseOrderer<N> orderer = new PseudoTopologicalReverseOrderer<N>();
+	/**
+	   * Orders in pseudo-topological order.
+	   *
+	   * @param g
+	   *          a DirectedGraph instance we want to order the nodes for.
+	   * @return an ordered list of the graph's nodes.
+	   */
+	  LinkedList<N> computeOrder(DirectedGraph<N> g) {
+	    stmtToColor = new HashMap<>();
+	
+	    order = new LinkedList<>();
+	    graph = g;
+	
+	    PseudoTopologicalReverseOrderer<N> orderer = new PseudoTopologicalReverseOrderer<>();
+	
+	    reverseOrder = orderer.newList(g);
+	
+	    // Color all nodes white
+	    {
+	
+	      for (N s : g) {
+	        stmtToColor.put(s, WHITE);
+	      }
+	    }
+	
+	    // Visit each node
+	    {
+	      for (N s : g) {
+	        if (stmtToColor.get(s) == WHITE) {
+	          visitNode(s);
+	        }
+	      }
+	    }
+	
+	    return order;
+	  }
 
-    reverseOrder = orderer.newList(g);
+	// Unfortunately, the nice recursive solution fails because of stack
+	  // overflows. Fill in the 'order' list with a pseudo topological order
+	  // (possibly reversed) list of statements starting at s.
+	  // Simulates recursion with a stack.
+	  private void visitNode(N startStmt) {
+	    LinkedList<N> stmtStack = new LinkedList<>();
+	    LinkedList<Integer> indexStack = new LinkedList<>();
+	
+	    stmtToColor.put(startStmt, GRAY);
+	
+	    stmtStack.addLast(startStmt);
+	    indexStack.addLast(-1);
+	
+	    while (!stmtStack.isEmpty()) {
+	      int toVisitIndex = indexStack.removeLast();
+	      N toVisitNode = stmtStack.getLast();
+	
+	      toVisitIndex++;
+	
+	      indexStack.addLast(toVisitIndex);
+	
+	      if (toVisitIndex >= graph.getSuccsOf(toVisitNode).size()) {
+	        // Visit this node now that we ran out of children
+	        if (mIsReversed) {
+	          order.addLast(toVisitNode);
+	        } else {
+	          order.addFirst(toVisitNode);
+	        }
+	
+	        stmtToColor.put(toVisitNode, BLACK);
+	
+	        // Pop this node off
+	        stmtStack.removeLast();
+	        indexStack.removeLast();
+	      } else {
+	        List<N> orderedSuccs = succsMap.get(toVisitNode);
+	        if (orderedSuccs == null) {
+	          orderedSuccs = new LinkedList<>();
+	          succsMap.put(toVisitNode, orderedSuccs);
+	          /* make ordered succs */
+	
+	          List<N> allsuccs = graph.getSuccsOf(toVisitNode);
+	
+	          for (N cur : allsuccs) {
+	            int j = 0;
+	
+	            for (; j < orderedSuccs.size(); j++) {
+	              N comp = orderedSuccs.get(j);
+	
+	              int idx1 = reverseOrder.indexOf(cur);
+	              int idx2 = reverseOrder.indexOf(comp);
+	
+	              if (idx1 < idx2) {
+	                break;
+	              }
+	            }
+	
+	            orderedSuccs.add(j, cur);
+	          }
+	        }
+	
+	        N childNode = orderedSuccs.get(toVisitIndex);
+	
+	        // Visit this child next if not already visited (or on stack)
+	        if (stmtToColor.get(childNode) == WHITE) {
+	          stmtToColor.put(childNode, GRAY);
+	
+	          stmtStack.addLast(childNode);
+	          indexStack.addLast(-1);
+	        }
+	      }
+	    }
+	  }
 
-    // Color all nodes white
-    {
+	// deprecated methods follow
+	  /**
+	   * @param g
+	   *          a DirectedGraph instance whose nodes we wish to order.
+	   * @return a pseudo-topologically ordered list of the graph's nodes.
+	   * @deprecated use {@link #newList(DirectedGraph, boolean))} instead
+	   */
+	  @Deprecated
+	  public List<N> newList(DirectedGraph<N> g) {
+	    return computeOrder(g);
+	  }
 
-      Iterator<N> stmtIt = g.iterator();
-      while (stmtIt.hasNext()) {
-        N s = stmtIt.next();
-        stmtToColor.put(s, WHITE);
-      }
-    }
+	/**
+	   * Set the ordering for the orderer.
+	   *
+	   * @param isReverse
+	   *          specify if we want reverse pseudo-topological ordering, or not.
+	   * @deprecated use {@link #newList(DirectedGraph, boolean))} instead
+	   */
+	  @Deprecated
+	  public void setReverseOrder(boolean isReversed) {
+	    mIsReversed = isReversed;
+	  }
 
-    // Visit each node
-    {
-      Iterator<N> stmtIt = g.iterator();
-      while (stmtIt.hasNext()) {
-        N s = stmtIt.next();
-        if (stmtToColor.get(s) == WHITE) {
-          visitNode(s);
-        }
-      }
-    }
+	/**
+	   * Check the ordering for the orderer.
+	   *
+	   * @return true if we have reverse pseudo-topological ordering, false otherwise.
+	   * @deprecated use {@link #newList(DirectedGraph, boolean))} instead
+	   */
+	  @Deprecated
+	  public boolean isReverseOrder() {
+	    return mIsReversed;
+	  }
 
-    return order;
-  }
+private class PseudoTopologicalReverseOrderer<N> {
 
-  // Unfortunately, the nice recursive solution fails because of stack
-  // overflows. Fill in the 'order' list with a pseudo topological order
-  // (possibly reversed) list of statements starting at s.
-  // Simulates recursion with a stack.
-  private void visitNode(N startStmt) {
-    LinkedList<N> stmtStack = new LinkedList<N>();
-    LinkedList<Integer> indexStack = new LinkedList<Integer>();
+    private static final int WHITE = 0;
 
-    stmtToColor.put(startStmt, GRAY);
+	private static final int GRAY = 1;
 
-    stmtStack.addLast(startStmt);
-    indexStack.addLast(-1);
+	private static final int BLACK = 2;
 
-    while (!stmtStack.isEmpty()) {
-      int toVisitIndex = indexStack.removeLast();
-      N toVisitNode = stmtStack.getLast();
+	private Map<N, Integer> stmtToColor;
 
-      toVisitIndex++;
+	private LinkedList<N> order;
 
-      indexStack.addLast(toVisitIndex);
+	private final boolean mIsReversed = false;
 
-      if (toVisitIndex >= graph.getSuccsOf(toVisitNode).size()) {
-        // Visit this node now that we ran out of children
-        if (mIsReversed) {
-          order.addLast(toVisitNode);
-        } else {
-          order.addFirst(toVisitNode);
-        }
+	private DirectedGraph<N> graph;
 
-        stmtToColor.put(toVisitNode, BLACK);
-
-        // Pop this node off
-        stmtStack.removeLast();
-        indexStack.removeLast();
-      } else {
-        List<N> orderedSuccs = succsMap.get(toVisitNode);
-        if (orderedSuccs == null) {
-          orderedSuccs = new LinkedList<N>();
-          succsMap.put(toVisitNode, orderedSuccs);
-          /* make ordered succs */
-
-          List<N> allsuccs = graph.getSuccsOf(toVisitNode);
-
-          for (int i = 0; i < allsuccs.size(); i++) {
-            N cur = allsuccs.get(i);
-
-            int j = 0;
-
-            for (; j < orderedSuccs.size(); j++) {
-              N comp = orderedSuccs.get(j);
-
-              int idx1 = reverseOrder.indexOf(cur);
-              int idx2 = reverseOrder.indexOf(comp);
-
-              if (idx1 < idx2) {
-                break;
-              }
-            }
-
-            orderedSuccs.add(j, cur);
-          }
-        }
-
-        N childNode = orderedSuccs.get(toVisitIndex);
-
-        // Visit this child next if not already visited (or on stack)
-        if (stmtToColor.get(childNode) == WHITE) {
-          stmtToColor.put(childNode, GRAY);
-
-          stmtStack.addLast(childNode);
-          indexStack.addLast(-1);
-        }
-      }
-    }
-  }
-
-  private class PseudoTopologicalReverseOrderer<N> {
-
-    private Map<N, Integer> stmtToColor;
-
-    private static final int WHITE = 0, GRAY = 1, BLACK = 2;
-
-    private LinkedList<N> order;
-
-    private final boolean mIsReversed = false;
-
-    private DirectedGraph<N> graph;
-
-    /**
+	/**
      * @param g
      *          a DirectedGraph instance whose nodes we which to order.
      * @return a pseudo-topologically ordered list of the graph's nodes.
@@ -214,7 +252,7 @@ public class SlowPseudoTopologicalOrderer<N> implements Orderer<N> {
       return computeOrder(g);
     }
 
-    /**
+	/**
      * Orders in pseudo-topological order.
      *
      * @param g
@@ -222,28 +260,21 @@ public class SlowPseudoTopologicalOrderer<N> implements Orderer<N> {
      * @return an ordered list of the graph's nodes.
      */
     LinkedList<N> computeOrder(DirectedGraph<N> g) {
-      stmtToColor = new HashMap<N, Integer>();
+      stmtToColor = new HashMap<>();
 
-      order = new LinkedList<N>();
+      order = new LinkedList<>();
       graph = g;
 
       // Color all nodes white
       {
-        Iterator<N> stmtIt = g.iterator();
-        while (stmtIt.hasNext()) {
-          N s = stmtIt.next();
-
+        for (N s : g) {
           stmtToColor.put(s, WHITE);
         }
       }
 
       // Visit each node
       {
-        Iterator<N> stmtIt = g.iterator();
-
-        while (stmtIt.hasNext()) {
-          N s = stmtIt.next();
-
+        for (N s : g) {
           if (stmtToColor.get(s) == WHITE) {
             visitNode(s);
           }
@@ -253,9 +284,9 @@ public class SlowPseudoTopologicalOrderer<N> implements Orderer<N> {
       return order;
     }
 
-    private void visitNode(N startStmt) {
-      LinkedList<N> stmtStack = new LinkedList<N>();
-      LinkedList<Integer> indexStack = new LinkedList<Integer>();
+	private void visitNode(N startStmt) {
+      LinkedList<N> stmtStack = new LinkedList<>();
+      LinkedList<Integer> indexStack = new LinkedList<>();
 
       stmtToColor.put(startStmt, GRAY);
 
@@ -297,41 +328,6 @@ public class SlowPseudoTopologicalOrderer<N> implements Orderer<N> {
       }
     }
 
-  }
-
-  // deprecated methods follow
-  /**
-   * @param g
-   *          a DirectedGraph instance whose nodes we wish to order.
-   * @return a pseudo-topologically ordered list of the graph's nodes.
-   * @deprecated use {@link #newList(DirectedGraph, boolean))} instead
-   */
-  @Deprecated
-  public List<N> newList(DirectedGraph<N> g) {
-    return computeOrder(g);
-  }
-
-  /**
-   * Set the ordering for the orderer.
-   *
-   * @param isReverse
-   *          specify if we want reverse pseudo-topological ordering, or not.
-   * @deprecated use {@link #newList(DirectedGraph, boolean))} instead
-   */
-  @Deprecated
-  public void setReverseOrder(boolean isReversed) {
-    mIsReversed = isReversed;
-  }
-
-  /**
-   * Check the ordering for the orderer.
-   *
-   * @return true if we have reverse pseudo-topological ordering, false otherwise.
-   * @deprecated use {@link #newList(DirectedGraph, boolean))} instead
-   */
-  @Deprecated
-  public boolean isReverseOrder() {
-    return mIsReversed;
   }
 
 }

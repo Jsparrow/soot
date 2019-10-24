@@ -121,7 +121,8 @@ public class GeomEvaluator {
    * Summarize the geometric points-to analysis and report the basic metrics.
    */
   public void profileGeomBasicMetrics(boolean testSpark) {
-    int n_legal_var = 0, n_alloc_dot_fields = 0;
+    int n_legal_var = 0;
+	int n_alloc_dot_fields = 0;
 
     int[] limits = new int[] { 1, 5, 10, 25, 50, 75, 100 };
     evalRes.pts_size_bar_geom = new Histogram(limits);
@@ -196,11 +197,11 @@ public class GeomEvaluator {
     outputer.printf("Reachable User Methods: %d (%d)\n", ptsProvider.n_reach_user_methods,
         ptsProvider.n_reach_spark_user_methods);
     outputer.println("#All Pointers: " + ptsProvider.getNumberOfPointers());
-    outputer.println("#Core Pointers: " + n_legal_var + ", in which #AllocDot Fields: " + n_alloc_dot_fields);
+    outputer.println(new StringBuilder().append("#Core Pointers: ").append(n_legal_var).append(", in which #AllocDot Fields: ").append(n_alloc_dot_fields).toString());
     outputer.printf("Total/Average Projected Points-to Tuples [core pointers]: %d (%d) / %.3f (%.3f) \n",
         evalRes.total_geom_ins_pts, evalRes.total_spark_pts, evalRes.avg_geom_ins_pts, evalRes.avg_spark_pts);
     outputer.println(
-        "The largest points-to set size [core pointers]: " + evalRes.max_pts_geom + " (" + evalRes.max_pts_spark + ")");
+        new StringBuilder().append("The largest points-to set size [core pointers]: ").append(evalRes.max_pts_geom).append(" (").append(evalRes.max_pts_spark).append(")").toString());
 
     outputer.println();
     evalRes.pts_size_bar_geom.printResult(outputer, "Points-to Set Sizes Distribution [core pointers]:",
@@ -211,22 +212,21 @@ public class GeomEvaluator {
    * We assess the quality of building the 1-cfa call graph with the geometric points-to result.
    */
   private void test_1cfa_call_graph(LocalVarNode vn, SootMethod caller, SootMethod callee_signature, Histogram ce_range) {
-    long l, r;
+    long l;
+	long r;
     IVarAbstraction pn = ptsProvider.findInternalNode(vn);
     if (pn == null) {
       return;
     }
     pn = pn.getRepresentative();
-    Set<SootMethod> tgts = new HashSet<SootMethod>();
+    Set<SootMethod> tgts = new HashSet<>();
     Set<AllocNode> set = pn.get_all_points_to_objects();
 
     LinkedList<CgEdge> list = ptsProvider.getCallEdgesInto(ptsProvider.getIDFromSootMethod(caller));
 
     FastHierarchy hierarchy = Scene.v().getOrMakeFastHierarchy();
 
-    for (Iterator<CgEdge> it = list.iterator(); it.hasNext();) {
-      CgEdge p = it.next();
-
+    for (CgEdge p : list) {
       l = p.map_offset;
       r = l + ptsProvider.max_context_size_block[p.s];
       tgts.clear();
@@ -342,8 +342,8 @@ public class GeomEvaluator {
    * Count how many aliased base pointers appeared in all user's functions.
    */
   public void checkAliasAnalysis() {
-    Set<IVarAbstraction> access_expr = new HashSet<IVarAbstraction>();
-    ArrayList<IVarAbstraction> al = new ArrayList<IVarAbstraction>();
+    Set<IVarAbstraction> access_expr = new HashSet<>();
+    ArrayList<IVarAbstraction> al = new ArrayList<>();
     Value[] values = new Value[2];
 
     for (SootMethod sm : ptsProvider.getAllReachableMethods()) {
@@ -508,7 +508,8 @@ public class GeomEvaluator {
             // Second is the SPARK result
             solved = true;
             node.getP2Set().forall(new P2SetVisitor() {
-              public void visit(Node arg0) {
+              @Override
+			public void visit(Node arg0) {
                 if (solved == false) {
                   return;
                 }
@@ -527,15 +528,15 @@ public class GeomEvaluator {
     ptsProvider.ps.println();
     ptsProvider.ps.println("-----------> Static Casts Safety Evaluation <------------");
     ptsProvider.ps.println("Total casts (app code): " + evalRes.total_casts);
-    ptsProvider.ps.println("Safe casts: Geom = " + evalRes.geom_solved_casts + ", SPARK = " + evalRes.spark_solved_casts);
+    ptsProvider.ps.println(new StringBuilder().append("Safe casts: Geom = ").append(evalRes.geom_solved_casts).append(", SPARK = ").append(evalRes.spark_solved_casts).toString());
   }
 
   /**
    * Estimate the size of the def-use graph for the heap memory. The heap graph is estimated without context information.
    */
   public void estimateHeapDefuseGraph() {
-    final Map<IVarAbstraction, int[]> defUseCounterForGeom = new HashMap<IVarAbstraction, int[]>();
-    final Map<AllocDotField, int[]> defUseCounterForSpark = new HashMap<AllocDotField, int[]>();
+    final Map<IVarAbstraction, int[]> defUseCounterForGeom = new HashMap<>();
+    final Map<AllocDotField, int[]> defUseCounterForSpark = new HashMap<>();
 
     Date begin = new Date();
 
@@ -615,35 +616,29 @@ public class GeomEvaluator {
           // Geom
 
           Set<AllocNode> objsSet = pn.get_all_points_to_objects();
-          for (AllocNode obj : objsSet) {
-            /*
-             * We will create a lot of instance fields. Because in points-to analysis, we concern only the reference type
-             * fields. But here, we concern all the fields read write including the primitive type fields.
-             */
-            IVarAbstraction padf = ptsProvider.findAndInsertInstanceField(obj, field);
-            int[] defUseUnit = defUseCounterForGeom.get(padf);
-            if (defUseUnit == null) {
+          /*
+		             * We will create a lot of instance fields. Because in points-to analysis, we concern only the reference type
+		             * fields. But here, we concern all the fields read write including the primitive type fields.
+		             */
+		objsSet.stream().map(obj -> ptsProvider.findAndInsertInstanceField(obj, field)).forEach(padf -> {
+			int[] defUseUnit = defUseCounterForGeom.get(padf);
+			if (defUseUnit == null) {
               defUseUnit = new int[2];
               defUseCounterForGeom.put(padf, defUseUnit);
             }
-
-            if (lValue instanceof InstanceFieldRef) {
+			if (lValue instanceof InstanceFieldRef) {
               defUseUnit[0]++;
             } else {
               defUseUnit[1]++;
             }
-          }
+		});
         }
       }
     }
 
-    for (int[] defUseUnit : defUseCounterForSpark.values()) {
-      evalRes.n_spark_du_pairs += ((long) defUseUnit[0]) * defUseUnit[1];
-    }
+    defUseCounterForSpark.values().forEach(defUseUnit -> evalRes.n_spark_du_pairs += ((long) defUseUnit[0]) * defUseUnit[1]);
 
-    for (int[] defUseUnit : defUseCounterForGeom.values()) {
-      evalRes.n_geom_du_pairs += ((long) defUseUnit[0]) * defUseUnit[1];
-    }
+    defUseCounterForGeom.values().forEach(defUseUnit -> evalRes.n_geom_du_pairs += ((long) defUseUnit[0]) * defUseUnit[1]);
 
     Date end = new Date();
 
@@ -659,25 +654,35 @@ public class GeomEvaluator {
 class EvalResults {
   // Basic metrics
   public int loc = 0;
-  public long total_geom_ins_pts = 0, total_spark_pts = 0;
-  public double avg_geom_ins_pts = .0, avg_spark_pts = .0;
-  public int max_pts_geom = 0, max_pts_spark = 0;
-  public Histogram pts_size_bar_geom = null, pts_size_bar_spark = null;
+  public long total_geom_ins_pts = 0;
+public long total_spark_pts = 0;
+  public double avg_geom_ins_pts = .0;
+public double avg_spark_pts = .0;
+  public int max_pts_geom = 0;
+public int max_pts_spark = 0;
+  public Histogram pts_size_bar_geom = null;
+public Histogram pts_size_bar_spark = null;
 
   // Call graph metrics
-  public int n_callsites = 0, n_user_callsites = 0;
-  public int n_geom_call_edges = 0, n_geom_user_edges = 0;
-  public int n_geom_solved_all = 0, n_geom_solved_app = 0;
+  public int n_callsites = 0;
+public int n_user_callsites = 0;
+  public int n_geom_call_edges = 0;
+public int n_geom_user_edges = 0;
+  public int n_geom_solved_all = 0;
+public int n_geom_solved_app = 0;
   public Histogram total_call_edges = null;
 
   // Alias metrics
   public long n_alias_pairs = 0;
-  public long n_hs_alias = 0, n_hi_alias = 0;
+  public long n_hs_alias = 0;
+public long n_hi_alias = 0;
 
   // Static cast metrics
   public int total_casts = 0;
-  public int geom_solved_casts = 0, spark_solved_casts = 0;
+  public int geom_solved_casts = 0;
+public int spark_solved_casts = 0;
 
   // Heap def-use graph metrics
-  public long n_geom_du_pairs = 0, n_spark_du_pairs = 0;
+  public long n_geom_du_pairs = 0;
+public long n_spark_du_pairs = 0;
 }

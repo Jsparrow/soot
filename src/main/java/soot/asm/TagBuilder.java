@@ -35,6 +35,8 @@ import soot.tagkit.AnnotationTag;
 import soot.tagkit.GenericAttribute;
 import soot.tagkit.Host;
 import soot.tagkit.VisibilityAnnotationTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tag builder.
@@ -43,7 +45,9 @@ import soot.tagkit.VisibilityAnnotationTag;
  */
 final class TagBuilder {
 
-  private VisibilityAnnotationTag invisibleTag, visibleTag;
+  private static final Logger logger = LoggerFactory.getLogger(TagBuilder.class);
+private VisibilityAnnotationTag invisibleTag;
+private VisibilityAnnotationTag visibleTag;
   private final Host host;
   private final SootClassBuilder scb;
 
@@ -97,6 +101,7 @@ final class TagBuilder {
       fld.setAccessible(true);
       value = (byte[]) fld.get(attr);
     } catch (Exception ex) {
+		logger.error(ex.getMessage(), ex);
       // Just carry on
     }
     host.addTag(new GenericAttribute(attr.type, value));

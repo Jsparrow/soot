@@ -32,6 +32,8 @@ import org.junit.rules.ExpectedException;
 
 import soot.G;
 import soot.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test for the correct determination of the required Java version
@@ -41,6 +43,7 @@ import soot.Main;
  */
 public class MinimalJavaVersionTest {
 
+	private static final Logger logger = LoggerFactory.getLogger(MinimalJavaVersionTest.class);
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
@@ -58,6 +61,7 @@ public class MinimalJavaVersionTest {
 			runSoot("soot.asm.backend.targets.AnnotatedClass", "1.7");
 			return;
 		} catch (RuntimeException e) {
+			logger.error(e.getMessage(), e);
 			fail("Version 1.7 should be sufficient for features of pkg.AnnotatedClass!");
 		}
 	}
@@ -75,10 +79,11 @@ public class MinimalJavaVersionTest {
 	protected void runSoot(String className, String version) {
 		G.reset();
 		// Location of the rt.jar
-		String rtJar = System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar";
+		String rtJar = new StringBuilder().append(System.getProperty("java.home")).append(File.separator).append("lib").append(File.separator).append("rt.jar")
+				.toString();
 
 		// Run Soot and print output to .asm-files.
-		Main.v().run(new String[] { "-cp", getClassPathFolder() + File.pathSeparator + rtJar, "-src-prec", "only-class",
+		Main.v().run(new String[] { "-cp", new StringBuilder().append(getClassPathFolder()).append(File.pathSeparator).append(rtJar).toString(), "-src-prec", "only-class",
 				"-output-format", "asm", "-allow-phantom-refs", "-java-version", version, className });
 	}
 

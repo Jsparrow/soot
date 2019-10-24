@@ -53,8 +53,8 @@ public enum JimpleTrapValidator implements BodyValidator {
    */
   @Override
   public void validate(Body body, List<ValidationException> exceptions) {
-    Set<Unit> caughtUnits = new HashSet<Unit>();
-    for (Trap trap : body.getTraps()) {
+    Set<Unit> caughtUnits = new HashSet<>();
+    body.getTraps().forEach(trap -> {
       caughtUnits.add(trap.getHandlerUnit());
 
       if (!(trap.getHandlerUnit() instanceof IdentityStmt)) {
@@ -65,19 +65,14 @@ public enum JimpleTrapValidator implements BodyValidator {
           exceptions.add(new ValidationException(trap, "Trap handler does not start with caught " + "exception reference"));
         }
       }
-    }
-    for (Unit u : body.getUnits()) {
-      if (u instanceof IdentityStmt) {
-        IdentityStmt id = (IdentityStmt) u;
-        if (id.getRightOp() instanceof CaughtExceptionRef) {
-          if (!caughtUnits.contains(id)) {
+    });
+    body.getUnits().stream().filter(u -> u instanceof IdentityStmt).map(u -> (IdentityStmt) u).forEach(id -> {
+		boolean condition = id.getRightOp() instanceof CaughtExceptionRef && !caughtUnits.contains(id);
+		if (condition) {
             exceptions.add(new ValidationException(id, "Could not find a corresponding trap using this statement as handler",
-                "Body of method " + body.getMethod().getSignature() + " contains a caught exception reference,"
-                    + "but not a corresponding trap using this statement as handler"));
+                new StringBuilder().append("Body of method ").append(body.getMethod().getSignature()).append(" contains a caught exception reference,").append("but not a corresponding trap using this statement as handler").toString()));
           }
-        }
-      }
-    }
+	});
   }
 
   @Override

@@ -32,120 +32,120 @@ import soot.options.Options;
 public class Timers {
   private static final Logger logger = LoggerFactory.getLogger(Timers.class);
 
-  public Timers(Singletons.Global g) {
+public int totalFlowNodes;
+
+public int totalFlowComputations;
+
+public Timer copiesTimer = new Timer("copies");
+
+public Timer defsTimer = new Timer("defs");
+
+public Timer usesTimer = new Timer("uses");
+
+public Timer liveTimer = new Timer("live");
+
+public Timer splitTimer = new Timer("split");
+
+public Timer packTimer = new Timer("pack");
+
+public Timer cleanup1Timer = new Timer("cleanup1");
+
+public Timer cleanup2Timer = new Timer("cleanup2");
+
+public Timer conversionTimer = new Timer("conversion");
+
+public Timer cleanupAlgorithmTimer = new Timer("cleanupAlgorithm");
+
+public Timer graphTimer = new Timer("graphTimer");
+
+public Timer assignTimer = new Timer("assignTimer");
+
+public Timer resolveTimer = new Timer("resolveTimer");
+
+public Timer totalTimer = new Timer("totalTimer");
+
+public Timer splitPhase1Timer = new Timer("splitPhase1");
+
+public Timer splitPhase2Timer = new Timer("splitPhase2");
+
+public Timer usePhase1Timer = new Timer("usePhase1");
+
+public Timer usePhase2Timer = new Timer("usePhase2");
+
+public Timer usePhase3Timer = new Timer("usePhase3");
+
+public Timer defsSetupTimer = new Timer("defsSetup");
+
+public Timer defsAnalysisTimer = new Timer("defsAnalysis");
+
+public Timer defsPostTimer = new Timer("defsPost");
+
+public Timer liveSetupTimer = new Timer("liveSetup");
+
+public Timer liveAnalysisTimer = new Timer("liveAnalysis");
+
+public Timer livePostTimer = new Timer("livePost");
+
+public Timer aggregationTimer = new Timer("aggregation");
+
+public Timer grimpAggregationTimer = new Timer("grimpAggregation");
+
+public Timer deadCodeTimer = new Timer("deadCode");
+
+public Timer propagatorTimer = new Timer("propagator");
+
+public Timer buildJasminTimer = new Timer("buildjasmin");
+
+public Timer assembleJasminTimer = new Timer("assembling jasmin");
+
+public Timer resolverTimer = new Timer("resolver");
+
+public int conversionLocalCount;
+
+public int cleanup1LocalCount;
+
+public int splitLocalCount;
+
+public int assignLocalCount;
+
+public int packLocalCount;
+
+public int cleanup2LocalCount;
+
+public int conversionStmtCount;
+
+public int cleanup1StmtCount;
+
+public int splitStmtCount;
+
+public int assignStmtCount;
+
+public int packStmtCount;
+
+public int cleanup2StmtCount;
+
+public long stmtCount;
+
+public Timer fieldTimer = new soot.Timer();
+
+public Timer methodTimer = new soot.Timer();
+
+public Timer attributeTimer = new soot.Timer();
+
+public Timer locatorTimer = new soot.Timer();
+
+public Timer readTimer = new soot.Timer();
+
+public Timer orderComputation = new soot.Timer("orderComputation");
+
+public Timers(Singletons.Global g) {
   }
 
-  public static Timers v() {
+public static Timers v() {
     return G.v().soot_Timers();
   }
 
-  public int totalFlowNodes;
-
-  public int totalFlowComputations;
-
-  public Timer copiesTimer = new Timer("copies");
-
-  public Timer defsTimer = new Timer("defs");
-
-  public Timer usesTimer = new Timer("uses");
-
-  public Timer liveTimer = new Timer("live");
-
-  public Timer splitTimer = new Timer("split");
-
-  public Timer packTimer = new Timer("pack");
-
-  public Timer cleanup1Timer = new Timer("cleanup1");
-
-  public Timer cleanup2Timer = new Timer("cleanup2");
-
-  public Timer conversionTimer = new Timer("conversion");
-
-  public Timer cleanupAlgorithmTimer = new Timer("cleanupAlgorithm");
-
-  public Timer graphTimer = new Timer("graphTimer");
-
-  public Timer assignTimer = new Timer("assignTimer");
-
-  public Timer resolveTimer = new Timer("resolveTimer");
-
-  public Timer totalTimer = new Timer("totalTimer");
-
-  public Timer splitPhase1Timer = new Timer("splitPhase1");
-
-  public Timer splitPhase2Timer = new Timer("splitPhase2");
-
-  public Timer usePhase1Timer = new Timer("usePhase1");
-
-  public Timer usePhase2Timer = new Timer("usePhase2");
-
-  public Timer usePhase3Timer = new Timer("usePhase3");
-
-  public Timer defsSetupTimer = new Timer("defsSetup");
-
-  public Timer defsAnalysisTimer = new Timer("defsAnalysis");
-
-  public Timer defsPostTimer = new Timer("defsPost");
-
-  public Timer liveSetupTimer = new Timer("liveSetup");
-
-  public Timer liveAnalysisTimer = new Timer("liveAnalysis");
-
-  public Timer livePostTimer = new Timer("livePost");
-
-  public Timer aggregationTimer = new Timer("aggregation");
-
-  public Timer grimpAggregationTimer = new Timer("grimpAggregation");
-
-  public Timer deadCodeTimer = new Timer("deadCode");
-
-  public Timer propagatorTimer = new Timer("propagator");
-
-  public Timer buildJasminTimer = new Timer("buildjasmin");
-
-  public Timer assembleJasminTimer = new Timer("assembling jasmin");
-
-  public Timer resolverTimer = new Timer("resolver");
-
-  public int conversionLocalCount;
-
-  public int cleanup1LocalCount;
-
-  public int splitLocalCount;
-
-  public int assignLocalCount;
-
-  public int packLocalCount;
-
-  public int cleanup2LocalCount;
-
-  public int conversionStmtCount;
-
-  public int cleanup1StmtCount;
-
-  public int splitStmtCount;
-
-  public int assignStmtCount;
-
-  public int packStmtCount;
-
-  public int cleanup2StmtCount;
-
-  public long stmtCount;
-
-  public Timer fieldTimer = new soot.Timer();
-
-  public Timer methodTimer = new soot.Timer();
-
-  public Timer attributeTimer = new soot.Timer();
-
-  public Timer locatorTimer = new soot.Timer();
-
-  public Timer readTimer = new soot.Timer();
-
-  public Timer orderComputation = new soot.Timer("orderComputation");
-
-  public void printProfilingInformation() {
+public void printProfilingInformation() {
     long totalTime = totalTimer.getTime();
 
     logger.debug("Time measurements");
@@ -205,14 +205,13 @@ public class Timers {
         logger.debug("           forcedGC:" + toTimeString(G.v().Timer_forcedGarbageCollectionTimer, totalTime));
       }
 
-      logger.debug("stmtCount: " + stmtCount + "(" + toFormattedString(stmtCount / timeInSecs) + " stmt/s)");
+      logger.debug(new StringBuilder().append("stmtCount: ").append(stmtCount).append("(").append(toFormattedString(stmtCount / timeInSecs)).append(" stmt/s)").toString());
 
-      logger.debug("totalFlowNodes: " + totalFlowNodes + " totalFlowComputations: " + totalFlowComputations + " avg: "
-          + truncatedOf((double) totalFlowComputations / totalFlowNodes, 2));
+      logger.debug(new StringBuilder().append("totalFlowNodes: ").append(totalFlowNodes).append(" totalFlowComputations: ").append(totalFlowComputations).append(" avg: ").append(truncatedOf((double) totalFlowComputations / totalFlowNodes, 2)).toString());
     }
   }
 
-  private String toTimeString(Timer timer, long totalTime) {
+private String toTimeString(Timer timer, long totalTime) {
     DecimalFormat format = new DecimalFormat("00.0");
     DecimalFormat percFormat = new DecimalFormat("00.0");
 
@@ -221,14 +220,14 @@ public class Timers {
     String timeString = format.format(time / 1000.0); // paddedLeftOf(new Double(truncatedOf(time / 1000.0, 1)).toString(),
                                                       // 5);
 
-    return (timeString + "s" + " (" + percFormat.format(time * 100.0 / totalTime) + "%" + ")");
+    return (new StringBuilder().append(timeString).append("s").append(" (").append(percFormat.format(time * 100.0 / totalTime)).append("%").append(")").toString());
   }
 
-  private String toFormattedString(double value) {
-    return paddedLeftOf(new Double(truncatedOf(value, 2)).toString(), 5);
+private String toFormattedString(double value) {
+    return paddedLeftOf(Double.toString(truncatedOf(value, 2)), 5);
   }
 
-  public double truncatedOf(double d, int numDigits) {
+public double truncatedOf(double d, int numDigits) {
     double multiplier = 1;
 
     for (int i = 0; i < numDigits; i++) {
@@ -238,7 +237,7 @@ public class Timers {
     return ((long) (d * multiplier)) / multiplier;
   }
 
-  public String paddedLeftOf(String s, int length) {
+public String paddedLeftOf(String s, int length) {
     if (s.length() >= length) {
       return s;
     } else {

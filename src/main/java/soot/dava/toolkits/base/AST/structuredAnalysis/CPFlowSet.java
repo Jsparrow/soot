@@ -36,7 +36,6 @@ import soot.toolkits.scalar.FlowSet;
 public class CPFlowSet extends DavaFlowSet<CPTuple> {
 
   public CPFlowSet() {
-    super();
   }
 
   /*
@@ -208,7 +207,8 @@ public class CPFlowSet extends DavaFlowSet<CPTuple> {
    *
    *
    */
-  public void intersection(FlowSet otherFlow, FlowSet destFlow) {
+  @Override
+public void intersection(FlowSet otherFlow, FlowSet destFlow) {
     // System.out.println("In specialized intersection for CopyPropagation");
     if (!(otherFlow instanceof CPFlowSet && destFlow instanceof CPFlowSet)) {
       super.intersection(otherFlow, destFlow);
@@ -378,13 +378,15 @@ public class CPFlowSet extends DavaFlowSet<CPTuple> {
     } // end going through other elements
   }
 
-  public CPFlowSet clone() {
+  @Override
+public CPFlowSet clone() {
 
     return new CPFlowSet(this);
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     b.append("Printing CPFlowSet: ");
     for (int i = 0; i < this.numElements; i++) {
       b.append("\n" + ((CPTuple) elements[i]).toString());

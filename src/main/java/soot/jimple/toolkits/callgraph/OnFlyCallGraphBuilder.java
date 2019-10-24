@@ -172,30 +172,30 @@ public final class OnFlyCallGraphBuilder {
   protected final RefType clHandler = RefType.v("android.os.Handler");
   /** context-insensitive stuff */
   private final CallGraph cicg = Scene.v().internalMakeCallGraph();
-  private final HashSet<SootMethod> analyzedMethods = new HashSet<SootMethod>();
+  private final HashSet<SootMethod> analyzedMethods = new HashSet<>();
 
   // end type based reflection resolution
   private final LargeNumberedMap<Local, List<VirtualCallSite>> receiverToSites
-      = new LargeNumberedMap<Local, List<VirtualCallSite>>(Scene.v().getLocalNumberer()); // Local -> List(VirtualCallSite)
+      = new LargeNumberedMap<>(Scene.v().getLocalNumberer()); // Local -> List(VirtualCallSite)
   private final LargeNumberedMap<SootMethod, List<Local>> methodToReceivers
-      = new LargeNumberedMap<SootMethod, List<Local>>(Scene.v().getMethodNumberer()); // SootMethod -> List(Local)
+      = new LargeNumberedMap<>(Scene.v().getMethodNumberer()); // SootMethod -> List(Local)
   private final LargeNumberedMap<SootMethod, List<Local>> methodToInvokeBases
-      = new LargeNumberedMap<SootMethod, List<Local>>(Scene.v().getMethodNumberer());
+      = new LargeNumberedMap<>(Scene.v().getMethodNumberer());
   private final LargeNumberedMap<SootMethod, List<Local>> methodToInvokeArgs
-      = new LargeNumberedMap<SootMethod, List<Local>>(Scene.v().getMethodNumberer());
+      = new LargeNumberedMap<>(Scene.v().getMethodNumberer());
   private final MultiMap<Local, InvokeCallSite> baseToInvokeSite = new HashMultiMap<>();
   private final MultiMap<Local, InvokeCallSite> invokeArgsToInvokeSite = new HashMultiMap<>();
   private final Map<Local, BitSet> invokeArgsToSize = new IdentityHashMap<>();
   private final MultiMap<AllocDotField, Local> allocDotFieldToLocal = new HashMultiMap<>();
   private final MultiMap<Local, Type> reachingArgTypes = new HashMultiMap<>();
   private final MultiMap<Local, Type> reachingBaseTypes = new HashMultiMap<>();
-  private final SmallNumberedMap<List<VirtualCallSite>> stringConstToSites = new SmallNumberedMap<List<VirtualCallSite>>();
+  private final SmallNumberedMap<List<VirtualCallSite>> stringConstToSites = new SmallNumberedMap<>();
   // Local
   // ->
   // List(VirtualCallSite)
   private final LargeNumberedMap<SootMethod, List<Local>> methodToStringConstants
-      = new LargeNumberedMap<SootMethod, List<Local>>(Scene.v().getMethodNumberer()); // SootMethod -> List(Local)
-  private final ChunkedQueue<SootMethod> targetsQueue = new ChunkedQueue<SootMethod>();
+      = new LargeNumberedMap<>(Scene.v().getMethodNumberer()); // SootMethod -> List(Local)
+  private final ChunkedQueue<SootMethod> targetsQueue = new ChunkedQueue<>();
   private final QueueReader<SootMethod> targets = targetsQueue.reader();
   ReflectionModel reflectionModel;
   private CGOptions options;
@@ -215,11 +215,10 @@ public final class OnFlyCallGraphBuilder {
     worklist = rm.listener();
     options = new CGOptions(PhaseOptions.v().getPhaseOptions("cg"));
     if (!options.verbose()) {
-      logger.debug("" + "[Call Graph] For information on where the call graph may be incomplete,"
-          + "use the verbose option to the cg phase.");
+      logger.debug(new StringBuilder().append("").append("[Call Graph] For information on where the call graph may be incomplete,").append("use the verbose option to the cg phase.").toString());
     }
 
-    if (options.reflection_log() == null || options.reflection_log().length() == 0) {
+    if (options.reflection_log() == null || options.reflection_log().isEmpty()) {
       if (options.types_for_invoke() && new SparkOptions(PhaseOptions.v().getPhaseOptions("cg.spark")).enabled()) {
         reflectionModel = new TypeBasedReflectionModel();
       } else {
@@ -279,42 +278,43 @@ public final class OnFlyCallGraphBuilder {
   public void addBaseType(Local base, Context context, Type ty) {
     assert context == null;
     final Set<InvokeCallSite> invokeSites = baseToInvokeSite.get(base);
-    if (invokeSites != null) {
-      if (reachingBaseTypes.put(base, ty)) {
+    boolean condition = invokeSites != null && reachingBaseTypes.put(base, ty);
+	if (condition) {
         resolveInvoke(invokeSites);
       }
-    }
   }
 
   public void addInvokeArgType(Local argArray, Context context, Type t) {
     assert context == null;
     final Set<InvokeCallSite> invokeSites = invokeArgsToInvokeSite.get(argArray);
-    if (invokeSites != null) {
-      if (reachingArgTypes.put(argArray, t)) {
+    boolean condition = invokeSites != null && reachingArgTypes.put(argArray, t);
+	if (condition) {
         resolveInvoke(invokeSites);
       }
-    }
   }
 
   public void setArgArrayNonDetSize(Local argArray, Context context) {
     assert context == null;
     final Set<InvokeCallSite> invokeSites = invokeArgsToInvokeSite.get(argArray);
-    if (invokeSites != null) {
-      if (invokeArgsToSize.containsKey(argArray)) {
+    if (invokeSites == null) {
+		return;
+	}
+	if (invokeArgsToSize.containsKey(argArray)) {
         return;
       }
-      invokeArgsToSize.put(argArray, null);
-      resolveInvoke(invokeSites);
-    }
+	invokeArgsToSize.put(argArray, null);
+	resolveInvoke(invokeSites);
   }
 
   public void addPossibleArgArraySize(Local argArray, int value, Context context) {
     assert context == null;
     final Set<InvokeCallSite> invokeSites = invokeArgsToInvokeSite.get(argArray);
-    if (invokeSites != null) {
-      // non-det size
+    if (invokeSites == null) {
+		return;
+	}
+	// non-det size
       BitSet sizeSet = invokeArgsToSize.get(argArray);
-      if (sizeSet != null && sizeSet.isEmpty()) {
+	if (sizeSet != null && sizeSet.isEmpty()) {
         return;
       } else {
         if (sizeSet == null) {
@@ -325,12 +325,11 @@ public final class OnFlyCallGraphBuilder {
           resolveInvoke(invokeSites);
         }
       }
-    }
   }
   
   private Set<Type> resolveToClasses(Set<Type> rawTypes) {
-    Set<Type> toReturn = new HashSet<Type>();
-    for (Type ty : rawTypes) {
+    Set<Type> toReturn = new HashSet<>();
+    rawTypes.forEach(ty -> {
       if (ty instanceof AnySubType) {
         AnySubType anySubType = (AnySubType) ty;
         RefType base = anySubType.getBase();
@@ -344,7 +343,7 @@ public final class OnFlyCallGraphBuilder {
       } else if (ty instanceof ArrayType || ty instanceof RefType) {
         toReturn.add(ty);
       }
-    }
+    });
     return toReturn;
   }
 
@@ -378,16 +377,17 @@ public final class OnFlyCallGraphBuilder {
       // yet, then generate nullary methods
       if (mustBeNull || (ics.nullnessCode() == InvokeCallSite.MAY_BE_NULL
           && (!invokeArgsToSize.containsKey(ics.argArray()) || !reachingArgTypes.containsKey(ics.argArray())))) {
-        for (Type bType : resolveToClasses(s)) {
-          assert bType instanceof RefType;
-          SootClass baseClass = ((RefType) bType).getSootClass();
-          assert !baseClass.isInterface();
-          Iterator<SootMethod> mIt = getPublicNullaryMethodIterator(baseClass);
-          while (mIt.hasNext()) {
-            SootMethod sm = mIt.next();
-            cm.addVirtualEdge(ics.container(), ics.stmt(), sm, Kind.REFL_INVOKE, null);
-          }
-        }
+        resolveToClasses(s).stream().map(bType -> {
+			assert bType instanceof RefType;
+			return ((RefType) bType).getSootClass();
+		}).forEach(baseClass -> {
+			assert !baseClass.isInterface();
+			Iterator<SootMethod> mIt = getPublicNullaryMethodIterator(baseClass);
+			while (mIt.hasNext()) {
+			    SootMethod sm = mIt.next();
+			    cm.addVirtualEdge(ics.container(), ics.stmt(), sm, Kind.REFL_INVOKE, null);
+			  }
+		});
       } else {
         /*
          * In this branch, either the invoke arg must not be null, or may be null and we have size and type information.
@@ -428,14 +428,13 @@ public final class OnFlyCallGraphBuilder {
 
   private void resolveStaticTypes(Set<Type> s, InvokeCallSite ics) {
     ArrayTypes at = ics.reachingTypes();
-    for (Type bType : resolveToClasses(s)) {
-      SootClass baseClass = ((RefType) bType).getSootClass();
-      Iterator<SootMethod> mIt = getPublicMethodIterator(baseClass, at);
-      while (mIt.hasNext()) {
-        SootMethod sm = mIt.next();
-        cm.addVirtualEdge(ics.container(), ics.stmt(), sm, Kind.REFL_INVOKE, null);
-      }
-    }
+    resolveToClasses(s).stream().map(bType -> ((RefType) bType).getSootClass()).forEach(baseClass -> {
+		Iterator<SootMethod> mIt = getPublicMethodIterator(baseClass, at);
+		while (mIt.hasNext()) {
+		    SootMethod sm = mIt.next();
+		    cm.addVirtualEdge(ics.container(), ics.stmt(), sm, Kind.REFL_INVOKE, null);
+		  }
+	});
   }
 
   private Iterator<SootMethod> getPublicMethodIterator(SootClass baseClass, final ArrayTypes at) {
@@ -531,12 +530,7 @@ public final class OnFlyCallGraphBuilder {
           }
         }
         List<Type> t = n.getParameterTypes();
-        for (Type pTy : t) {
-          if (!isReflectionCompatible(pTy, reachingTypes)) {
-            return false;
-          }
-        }
-        return true;
+        return t.stream().allMatch(pTy -> isReflectionCompatible(pTy, reachingTypes));
       }
 
     };
@@ -625,8 +619,7 @@ public final class OnFlyCallGraphBuilder {
       final VirtualCallSite site = siteIt.next();
       if (constant == null) {
         if (options.verbose()) {
-          logger.debug("" + "Warning: Method " + site.container() + " is reachable, and calls Class.forName on a"
-              + " non-constant String; graph will be incomplete!" + " Use safe-forname option for a conservative result.");
+          logger.debug(new StringBuilder().append("").append("Warning: Method ").append(site.container()).append(" is reachable, and calls Class.forName on a").append(" non-constant String; graph will be incomplete!").append(" Use safe-forname option for a conservative result.").toString());
         }
       } else {
         if (constant.length() > 0 && constant.charAt(0) == '[') {
@@ -638,8 +631,7 @@ public final class OnFlyCallGraphBuilder {
         }
         if (!Scene.v().containsClass(constant)) {
           if (options.verbose()) {
-            logger.debug("" + "Warning: Class " + constant + " is" + " a dynamic class, and you did not specify"
-                + " it as such; graph will be incomplete!");
+            logger.debug(new StringBuilder().append("").append("Warning: Class ").append(constant).append(" is").append(" a dynamic class, and you did not specify").append(" it as such; graph will be incomplete!").toString());
           }
         } else {
           SootClass sootcls = Scene.v().getSootClass(constant);
@@ -662,9 +654,7 @@ public final class OnFlyCallGraphBuilder {
     if (!allocDotFieldToLocal.containsKey(df)) {
       return;
     }
-    for (Local l : allocDotFieldToLocal.get(df)) {
-      addInvokeArgType(l, context, type);
-    }
+    allocDotFieldToLocal.get(df).forEach(l -> addInvokeArgType(l, context, type));
   }
 
   public boolean wantInvokeArg(Local receiver) {
@@ -738,10 +728,10 @@ public final class OnFlyCallGraphBuilder {
       Kind kind) {
     List<VirtualCallSite> sites = receiverToSites.get(receiver);
     if (sites == null) {
-      receiverToSites.put(receiver, sites = new ArrayList<VirtualCallSite>());
+      receiverToSites.put(receiver, sites = new ArrayList<>());
       List<Local> receivers = methodToReceivers.get(m);
       if (receivers == null) {
-        methodToReceivers.put(m, receivers = new ArrayList<Local>());
+        methodToReceivers.put(m, receivers = new ArrayList<>());
       }
       receivers.add(receiver);
     }
@@ -789,15 +779,15 @@ public final class OnFlyCallGraphBuilder {
           }
         } else if (ie instanceof DynamicInvokeExpr) {
           if (options.verbose()) {
-            logger.debug("" + "WARNING: InvokeDynamic to " + ie + " not resolved during call-graph construction.");
+            logger.debug(new StringBuilder().append("").append("WARNING: InvokeDynamic to ").append(ie).append(" not resolved during call-graph construction.").toString());
           }
         } else {
           SootMethod tgt = ie.getMethod();
           if (tgt != null) {
             addEdge(m, s, tgt);
             String signature = tgt.getSignature();
-            if (signature
-                .equals("<java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>")
+            if ("<java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>"
+                .equals(signature)
                 || signature.equals("<java.security.AccessController: java.lang.Object doPrivileged"
                     + "(java.security.PrivilegedExceptionAction)>")
                 || signature.equals("<java.security.AccessController: java.lang.Object doPrivileged"
@@ -811,7 +801,7 @@ public final class OnFlyCallGraphBuilder {
           } else {
             if (!Options.v().ignore_resolution_errors()) {
               throw new InternalError(
-                  "Unresolved target " + ie.getMethod() + ". Resolution error should have occured earlier.");
+                  new StringBuilder().append("Unresolved target ").append(ie.getMethod()).append(". Resolution error should have occured earlier.").toString());
             }
           }
         }
@@ -824,7 +814,7 @@ public final class OnFlyCallGraphBuilder {
     if (!source.isConcrete()) {
       return;
     }
-    if (source.getSubSignature().indexOf("<init>") >= 0) {
+    if (source.getSubSignature().contains("<init>")) {
       handleInit(source, scl);
     }
     Body b = source.retrieveActiveBody();
@@ -835,18 +825,18 @@ public final class OnFlyCallGraphBuilder {
         SootMethodRef methodRef = ie.getMethodRef();
         switch (methodRef.declaringClass().getName()) {
           case "java.lang.reflect.Method":
-            if (methodRef.getSubSignature().getString()
-                .equals("java.lang.Object invoke(java.lang.Object,java.lang.Object[])")) {
+            if ("java.lang.Object invoke(java.lang.Object,java.lang.Object[])"
+                .equals(methodRef.getSubSignature().getString())) {
               reflectionModel.methodInvoke(source, s);
             }
             break;
           case "java.lang.Class":
-            if (methodRef.getSubSignature().getString().equals("java.lang.Object newInstance()")) {
+            if ("java.lang.Object newInstance()".equals(methodRef.getSubSignature().getString())) {
               reflectionModel.classNewInstance(source, s);
             }
             break;
           case "java.lang.reflect.Constructor":
-            if (methodRef.getSubSignature().getString().equals("java.lang.Object newInstance(java.lang.Object[])")) {
+            if ("java.lang.Object newInstance(java.lang.Object[])".equals(methodRef.getSubSignature().getString())) {
               reflectionModel.contructorNewInstance(source, s);
             }
             break;
@@ -916,8 +906,7 @@ public final class OnFlyCallGraphBuilder {
     } else {
       if (!Scene.v().containsClass(cls)) {
         if (options.verbose()) {
-          logger.warn("Class " + cls + " is" + " a dynamic class, and you did not specify"
-              + " it as such; graph will be incomplete!");
+          logger.warn(new StringBuilder().append("Class ").append(cls).append(" is").append(" a dynamic class, and you did not specify").append(" it as such; graph will be incomplete!").toString());
         }
       } else {
         SootClass sootcls = Scene.v().getSootClass(cls);
@@ -954,13 +943,13 @@ public final class OnFlyCallGraphBuilder {
 
     protected CGOptions options = new CGOptions(PhaseOptions.v().getPhaseOptions("cg"));
 
-    protected HashSet<SootMethod> warnedAlready = new HashSet<SootMethod>();
+    protected HashSet<SootMethod> warnedAlready = new HashSet<>();
 
     @Override
     public void classForName(SootMethod source, Stmt s) {
       List<Local> stringConstants = methodToStringConstants.get(source);
       if (stringConstants == null) {
-        methodToStringConstants.put(source, stringConstants = new ArrayList<Local>());
+        methodToStringConstants.put(source, stringConstants = new ArrayList<>());
       }
       InvokeExpr ie = s.getInvokeExpr();
       Value className = ie.getArg(0);
@@ -970,19 +959,17 @@ public final class OnFlyCallGraphBuilder {
       } else if (className instanceof Local) {
         Local constant = (Local) className;
         if (options.safe_forname()) {
-          for (SootMethod tgt : EntryPoints.v().clinits()) {
-            addEdge(source, s, tgt, Kind.CLINIT);
-          }
+          EntryPoints.v().clinits().forEach(tgt -> addEdge(source, s, tgt, Kind.CLINIT));
         } else {
-          for (SootClass cls : Scene.v().dynamicClasses()) {
+          Scene.v().dynamicClasses().forEach(cls -> {
             for (SootMethod clinit : EntryPoints.v().clinitsOf(cls)) {
               addEdge(source, s, clinit, Kind.CLINIT);
             }
-          }
+          });
           VirtualCallSite site = new VirtualCallSite(s, source, null, null, Kind.CLINIT);
           List<VirtualCallSite> sites = stringConstToSites.get(constant);
           if (sites == null) {
-            stringConstToSites.put(constant, sites = new ArrayList<VirtualCallSite>());
+            stringConstToSites.put(constant, sites = new ArrayList<>());
             stringConstants.add(constant);
           }
           sites.add(site);
@@ -993,20 +980,16 @@ public final class OnFlyCallGraphBuilder {
     @Override
     public void classNewInstance(SootMethod source, Stmt s) {
       if (options.safe_newinstance()) {
-        for (SootMethod tgt : EntryPoints.v().inits()) {
-          addEdge(source, s, tgt, Kind.NEWINSTANCE);
-        }
+        EntryPoints.v().inits().forEach(tgt -> addEdge(source, s, tgt, Kind.NEWINSTANCE));
       } else {
-        for (SootClass cls : Scene.v().dynamicClasses()) {
-          SootMethod sm = cls.getMethodUnsafe(sigInit);
-          if (sm != null) {
-            addEdge(source, s, sm, Kind.NEWINSTANCE);
-          }
-        }
+        Scene.v().dynamicClasses().stream().map(cls -> cls.getMethodUnsafe(sigInit)).forEach(sm -> {
+			if (sm != null) {
+			    addEdge(source, s, sm, Kind.NEWINSTANCE);
+			  }
+		});
 
         if (options.verbose()) {
-          logger.warn("Method " + source + " is reachable, and calls Class.newInstance;" + " graph will be incomplete!"
-              + " Use safe-newinstance option for a conservative result.");
+          logger.warn(new StringBuilder().append("Method ").append(source).append(" is reachable, and calls Class.newInstance;").append(" graph will be incomplete!").append(" Use safe-newinstance option for a conservative result.").toString());
         }
       }
     }
@@ -1014,32 +997,25 @@ public final class OnFlyCallGraphBuilder {
     @Override
     public void contructorNewInstance(SootMethod source, Stmt s) {
       if (options.safe_newinstance()) {
-        for (SootMethod tgt : EntryPoints.v().allInits()) {
-          addEdge(source, s, tgt, Kind.NEWINSTANCE);
-        }
+        EntryPoints.v().allInits().forEach(tgt -> addEdge(source, s, tgt, Kind.NEWINSTANCE));
       } else {
-        for (SootClass cls : Scene.v().dynamicClasses()) {
-          for (SootMethod m : cls.getMethods()) {
-            if (m.getName().equals("<init>")) {
-              addEdge(source, s, m, Kind.NEWINSTANCE);
-            }
-          }
-        }
+        Scene.v().dynamicClasses().forEach(cls -> cls.getMethods().stream().filter(m -> "<init>".equals(m.getName()))
+				.forEach(m -> addEdge(source, s, m, Kind.NEWINSTANCE)));
         if (options.verbose()) {
-          logger.warn("Method " + source + " is reachable, and calls Constructor.newInstance;" + " graph will be incomplete!"
-              + " Use safe-newinstance option for a conservative result.");
+          logger.warn(new StringBuilder().append("Method ").append(source).append(" is reachable, and calls Constructor.newInstance;").append(" graph will be incomplete!").append(" Use safe-newinstance option for a conservative result.").toString());
         }
       }
     }
 
     @Override
     public void methodInvoke(SootMethod container, Stmt invokeStmt) {
-      if (!warnedAlready(container)) {
-        if (options.verbose()) {
-          logger.warn("call to " + "java.lang.reflect.Method: invoke() from " + container + "; graph will be incomplete!");
-        }
-        markWarned(container);
-      }
+      if (warnedAlready(container)) {
+		return;
+	}
+	if (options.verbose()) {
+	  logger.warn(new StringBuilder().append("call to ").append("java.lang.reflect.Method: invoke() from ").append(container).append("; graph will be incomplete!").toString());
+	}
+	markWarned(container);
     }
 
     private void markWarned(SootMethod m) {
@@ -1079,7 +1055,7 @@ public final class OnFlyCallGraphBuilder {
     private boolean registeredTransformation = false;
 
     private TraceBasedReflectionModel() {
-      guards = new HashSet<Guard>();
+      guards = new HashSet<>();
 
       String logFile = options.reflection_log();
       if (logFile == null) {
@@ -1099,9 +1075,7 @@ public final class OnFlyCallGraphBuilder {
         registerGuard(container, forNameInvokeStmt,
             "Class.forName() call site; Soot did not expect this site to be reached");
       } else {
-        for (String clsName : classNames) {
-          constantForName(clsName, container, forNameInvokeStmt);
-        }
+        classNames.forEach(clsName -> constantForName(clsName, container, forNameInvokeStmt));
       }
     }
 
@@ -1115,13 +1089,12 @@ public final class OnFlyCallGraphBuilder {
         registerGuard(container, newInstanceInvokeStmt,
             "Class.newInstance() call site; Soot did not expect this site to be reached");
       } else {
-        for (String clsName : classNames) {
-          SootClass cls = Scene.v().getSootClass(clsName);
-          SootMethod constructor = cls.getMethodUnsafe(sigInit);
-          if (constructor != null) {
-            addEdge(container, newInstanceInvokeStmt, constructor, Kind.REFL_CLASS_NEWINSTANCE);
-          }
-        }
+        classNames.stream().map(clsName -> Scene.v().getSootClass(clsName)).forEach(cls -> {
+			SootMethod constructor = cls.getMethodUnsafe(sigInit);
+			if (constructor != null) {
+			    addEdge(container, newInstanceInvokeStmt, constructor, Kind.REFL_CLASS_NEWINSTANCE);
+			  }
+		});
       }
     }
 
@@ -1140,10 +1113,7 @@ public final class OnFlyCallGraphBuilder {
         registerGuard(container, newInstanceInvokeStmt,
             "Constructor.newInstance(..) call site; Soot did not expect this site to be reached");
       } else {
-        for (String constructorSignature : constructorSignatures) {
-          SootMethod constructor = Scene.v().getMethod(constructorSignature);
-          addEdge(container, newInstanceInvokeStmt, constructor, Kind.REFL_CONSTR_NEWINSTANCE);
-        }
+        constructorSignatures.stream().map(constructorSignature -> Scene.v().getMethod(constructorSignature)).forEach(constructor -> addEdge(container, newInstanceInvokeStmt, constructor, Kind.REFL_CONSTR_NEWINSTANCE));
       }
     }
 
@@ -1161,10 +1131,7 @@ public final class OnFlyCallGraphBuilder {
       if (methodSignatures == null || methodSignatures.isEmpty()) {
         registerGuard(container, invokeStmt, "Method.invoke(..) call site; Soot did not expect this site to be reached");
       } else {
-        for (String methodSignature : methodSignatures) {
-          SootMethod method = Scene.v().getMethod(methodSignature);
-          addEdge(container, invokeStmt, method, Kind.REFL_INVOKE);
-        }
+        methodSignatures.stream().map(methodSignature -> Scene.v().getMethod(methodSignature)).forEach(method -> addEdge(container, invokeStmt, method, Kind.REFL_INVOKE));
       }
     }
 
@@ -1172,14 +1139,13 @@ public final class OnFlyCallGraphBuilder {
       guards.add(new Guard(container, stmt, string));
 
       if (options.verbose()) {
-        logger.debug("Incomplete trace file: Class.forName() is called in method '" + container
-            + "' but trace contains no information about the receiver class of this call.");
-        if (options.guards().equals("ignore")) {
+        logger.debug(new StringBuilder().append("Incomplete trace file: Class.forName() is called in method '").append(container).append("' but trace contains no information about the receiver class of this call.").toString());
+        if ("ignore".equals(options.guards())) {
           logger.debug("Guarding strategy is set to 'ignore'. Will ignore this problem.");
-        } else if (options.guards().equals("print")) {
+        } else if ("print".equals(options.guards())) {
           logger.debug("Guarding strategy is set to 'print'. "
               + "Program will print a stack trace if this location is reached during execution.");
-        } else if (options.guards().equals("throw")) {
+        } else if ("throw".equals(options.guards())) {
           logger.debug("Guarding strategy is set to 'throw'. Program will throw an "
               + "Error if this location is reached during execution.");
         } else {
@@ -1187,30 +1153,29 @@ public final class OnFlyCallGraphBuilder {
         }
       }
 
-      if (!registeredTransformation) {
-        registeredTransformation = true;
-        PackManager.v().getPack("wjap").add(new Transform("wjap.guards", new SceneTransformer() {
+      if (registeredTransformation) {
+		return;
+	}
+	registeredTransformation = true;
+	PackManager.v().getPack("wjap").add(new Transform("wjap.guards", new SceneTransformer() {
 
-          @Override
-          protected void internalTransform(String phaseName, Map<String, String> options) {
-            for (Guard g : guards) {
-              insertGuard(g);
-            }
-          }
-        }));
-        PhaseOptions.v().setPhaseOption("wjap.guards", "enabled");
-      }
+	  @Override
+	  protected void internalTransform(String phaseName, Map<String, String> options) {
+	    guards.forEach(g -> insertGuard(g));
+	  }
+	}));
+	PhaseOptions.v().setPhaseOption("wjap.guards", "enabled");
     }
 
     private void insertGuard(Guard guard) {
-      if (options.guards().equals("ignore")) {
+      if ("ignore".equals(options.guards())) {
         return;
       }
 
       SootMethod container = guard.container;
       Stmt insertionPoint = guard.stmt;
       if (!container.hasActiveBody()) {
-        logger.warn("Tried to insert guard into " + container + " but couldn't because method has no body.");
+        logger.warn(new StringBuilder().append("Tried to insert guard into ").append(container).append(" but couldn't because method has no body.").toString());
       } else {
         Body body = container.getActiveBody();
 
@@ -1230,13 +1195,13 @@ public final class OnFlyCallGraphBuilder {
         InvokeStmt initStmt = Jimple.v().newInvokeStmt(constructorInvokeExpr);
         body.getUnits().insertAfter(initStmt, assignStmt);
 
-        if (options.guards().equals("print")) {
+        if ("print".equals(options.guards())) {
           // logger.error(exc.getMessage(), exc);
           VirtualInvokeExpr printStackTraceExpr = Jimple.v().newVirtualInvokeExpr(exceptionLocal, Scene.v()
               .getSootClass("java.lang.Throwable").getMethod("printStackTrace", Collections.<Type>emptyList()).makeRef());
           InvokeStmt printStackTraceStmt = Jimple.v().newInvokeStmt(printStackTraceExpr);
           body.getUnits().insertAfter(printStackTraceStmt, initStmt);
-        } else if (options.guards().equals("throw")) {
+        } else if ("throw".equals(options.guards())) {
           body.getUnits().insertAfter(Jimple.v().newThrowStmt(exceptionLocal), initStmt);
         } else {
           throw new RuntimeException("Invalid value for phase option (guarding): " + options.guards());
@@ -1291,7 +1256,7 @@ public final class OnFlyCallGraphBuilder {
           return;
         }
         if (currClass.hasSuperclass() && !currClass.getSuperclass().isPhantom()
-            && !currClass.getSuperclass().getName().equals("java.lang.Object")) {
+            && !"java.lang.Object".equals(currClass.getSuperclass().getName())) {
           currClass = currClass.getSuperclass();
           methodIterator = currClass.methodIterator();
           continue;

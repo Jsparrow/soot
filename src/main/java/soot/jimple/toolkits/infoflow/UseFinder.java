@@ -60,10 +60,10 @@ public class UseFinder {
   Map<SootClass, ArrayList> classToIntCalls;
 
   public UseFinder() {
-    classToExtFieldAccesses = new HashMap<SootClass, List>();
-    classToIntFieldAccesses = new HashMap<SootClass, ArrayList>();
-    classToExtCalls = new HashMap<SootClass, List>();
-    classToIntCalls = new HashMap<SootClass, ArrayList>();
+    classToExtFieldAccesses = new HashMap<>();
+    classToIntFieldAccesses = new HashMap<>();
+    classToExtCalls = new HashMap<>();
+    classToIntCalls = new HashMap<>();
 
     rm = Scene.v().getReachableMethods();
 
@@ -71,10 +71,10 @@ public class UseFinder {
   }
 
   public UseFinder(ReachableMethods rm) {
-    classToExtFieldAccesses = new HashMap<SootClass, List>();
-    classToIntFieldAccesses = new HashMap<SootClass, ArrayList>();
-    classToExtCalls = new HashMap<SootClass, List>();
-    classToIntCalls = new HashMap<SootClass, ArrayList>();
+    classToExtFieldAccesses = new HashMap<>();
+    classToIntFieldAccesses = new HashMap<>();
+    classToExtCalls = new HashMap<>();
+    classToIntCalls = new HashMap<>();
 
     this.rm = rm;
 
@@ -113,7 +113,7 @@ public class UseFinder {
   public List<SootMethod> getExtMethods(SootClass sc) {
     if (classToExtCalls.containsKey(sc)) {
       List extCalls = classToExtCalls.get(sc);
-      List<SootMethod> extMethods = new ArrayList<SootMethod>();
+      List<SootMethod> extMethods = new ArrayList<>();
       for (Iterator callIt = extCalls.iterator(); callIt.hasNext();) {
         Pair call = (Pair) callIt.next();
         SootMethod calledMethod = ((Stmt) call.getO2()).getInvokeExpr().getMethod();
@@ -129,7 +129,7 @@ public class UseFinder {
   public List<SootField> getExtFields(SootClass sc) {
     if (classToExtFieldAccesses.containsKey(sc)) {
       List extAccesses = classToExtFieldAccesses.get(sc);
-      List<SootField> extFields = new ArrayList<SootField>();
+      List<SootField> extFields = new ArrayList<>();
       for (Iterator accessIt = extAccesses.iterator(); accessIt.hasNext();) {
         Pair access = (Pair) accessIt.next();
         SootField accessedField = ((Stmt) access.getO2()).getFieldRef().getField();
@@ -187,7 +187,7 @@ public class UseFinder {
                 // ref to some other class is considered external
                 List<Pair> otherClassList = classToExtFieldAccesses.get(fr.getFieldRef().resolve().getDeclaringClass());
                 if (otherClassList == null) {
-                  otherClassList = new ArrayList<Pair>();
+                  otherClassList = new ArrayList<>();
                   classToExtFieldAccesses.put(fr.getFieldRef().resolve().getDeclaringClass(), otherClassList);
                 }
                 otherClassList.add(new Pair(method, s));
@@ -214,7 +214,7 @@ public class UseFinder {
                 // ref to some other class is considered external
                 List<Pair> otherClassList = classToExtCalls.get(ie.getMethodRef().resolve().getDeclaringClass());
                 if (otherClassList == null) {
-                  otherClassList = new ArrayList<Pair>();
+                  otherClassList = new ArrayList<>();
                   classToExtCalls.put(ie.getMethodRef().resolve().getDeclaringClass(), otherClassList);
                 }
                 otherClassList.add(new Pair(method, s));

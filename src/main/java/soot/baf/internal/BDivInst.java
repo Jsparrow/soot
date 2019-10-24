@@ -33,31 +33,38 @@ public class BDivInst extends AbstractOpTypeInst implements DivInst {
     super(opType);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 2;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BDivInst(getOpType());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 2 * AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 1 * AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public final String getName() {
+  @Override
+public final String getName() {
     return "div";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseDivInst(this);
   }
 }

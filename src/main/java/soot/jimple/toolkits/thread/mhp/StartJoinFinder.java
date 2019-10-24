@@ -54,13 +54,13 @@ public class StartJoinFinder {
   Map<Stmt, SootMethod> startToContainingMethod;
 
   public StartJoinFinder(CallGraph callGraph, PAG pag) {
-    startStatements = new HashSet<Stmt>();
-    joinStatements = new HashSet<Stmt>();
+    startStatements = new HashSet<>();
+    joinStatements = new HashSet<>();
 
-    startToRunMethods = new HashMap<Stmt, List<SootMethod>>();
-    startToAllocNodes = new HashMap<Stmt, List<AllocNode>>();
-    startToJoin = new HashMap<Stmt, Stmt>();
-    startToContainingMethod = new HashMap<Stmt, SootMethod>();
+    startToRunMethods = new HashMap<>();
+    startToAllocNodes = new HashMap<>();
+    startToJoin = new HashMap<>();
+    startToContainingMethod = new HashMap<>();
 
     Iterator runAnalysisClassesIt = Scene.v().getApplicationClasses().iterator();
     while (runAnalysisClassesIt.hasNext()) {
@@ -74,7 +74,7 @@ public class StartJoinFinder {
         Iterator edgesIt = callGraph.edgesOutOf(method);
         while (edgesIt.hasNext()) {
           SootMethod target = ((Edge) edgesIt.next()).tgt();
-          if (target.getName().equals("start") || target.getName().equals("run")) {
+          if ("start".equals(target.getName()) || "run".equals(target.getName())) {
             mayHaveStartStmt = true;
           }
         }

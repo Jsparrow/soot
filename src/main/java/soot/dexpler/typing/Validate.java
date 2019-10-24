@@ -57,31 +57,34 @@ import soot.jimple.toolkits.scalar.NopEliminator;
 import soot.jimple.toolkits.scalar.UnreachableCodeEliminator;
 import soot.toolkits.scalar.LocalDefs;
 import soot.toolkits.scalar.UnusedLocalEliminator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Validate {
 
-  public static void validateArrays(Body b) {
+  private static final Logger logger = LoggerFactory.getLogger(Validate.class);
 
-    Set<DefinitionStmt> definitions = new HashSet<DefinitionStmt>();
-    Set<Unit> unitWithArrayRef = new HashSet<Unit>();
+public static void validateArrays(Body b) {
 
-    for (Unit u : b.getUnits()) {
+    Set<DefinitionStmt> definitions = new HashSet<>();
+    Set<Unit> unitWithArrayRef = new HashSet<>();
+
+    b.getUnits().forEach(u -> {
       if (u instanceof DefinitionStmt) {
         DefinitionStmt s = (DefinitionStmt) u;
         definitions.add(s);
       }
       List<ValueBox> uses = u.getUseBoxes();
-      for (ValueBox vb : uses) {
-        Value v = vb.getValue();
-        if (v instanceof ArrayRef) {
+      uses.stream().map(ValueBox::getValue).forEach(v -> {
+		if (v instanceof ArrayRef) {
           unitWithArrayRef.add(u);
         }
-      }
-    }
+	});
+    });
 
     final LocalDefs localDefs = LocalDefs.Factory.newLocalDefs(b, true);
 
-    Set<Unit> toReplace = new HashSet<Unit>();
+    Set<Unit> toReplace = new HashSet<>();
 
     for (Unit u : unitWithArrayRef) {
       boolean ok = false;
@@ -94,7 +97,7 @@ public class Validate {
           List<Unit> defs = localDefs.getDefsOfAt(base, u);
 
           // add aliases
-          Set<Unit> alreadyHandled = new HashSet<Unit>();
+          Set<Unit> alreadyHandled = new HashSet<>();
           while (true) {
             boolean isMore = false;
             for (Unit d : defs) {
@@ -196,7 +199,7 @@ public class Validate {
 
     int i = 0;
     for (Unit u : toReplace) {
-      System.out.println("warning: incorrect array def, replacing unit " + u);
+      logger.info("warning: incorrect array def, replacing unit " + u);
       // new object
       RefType throwableType = RefType.v("java.lang.Throwable");
       Local ttt = Jimple.v().newLocal("ttt_" + ++i, throwableType);
@@ -205,11 +208,11 @@ public class Validate {
       Unit initLocalUnit = Jimple.v().newAssignStmt(ttt, r);
 
       // call <init> method with a string parameter for message
-      List<String> pTypes = new ArrayList<String>();
+      List<String> pTypes = new ArrayList<>();
       pTypes.add("java.lang.String");
       boolean isStatic = false;
       SootMethodRef mRef = Validate.makeMethodRef("java.lang.Throwable", "<init>", "", pTypes, isStatic);
-      List<Value> parameters = new ArrayList<Value>();
+      List<Value> parameters = new ArrayList<>();
       parameters.add(StringConstant.v("Soot updated this instruction"));
       InvokeExpr ie = Jimple.v().newSpecialInvokeExpr(ttt, mRef, parameters);
       Unit initMethod = Jimple.v().newInvokeStmt(ie);
@@ -235,15 +238,13 @@ public class Validate {
       boolean isStatic) {
     SootClass sc = SootResolver.v().makeClassRef(cName);
     Type returnType = null;
-    if (rType == "") {
+    if (rType.equals("")) {
       returnType = VoidType.v();
     } else {
       returnType = RefType.v(rType);
     }
-    List<Type> parameterTypes = new ArrayList<Type>();
-    for (String p : pTypes) {
-      parameterTypes.add(RefType.v(p));
-    }
+    List<Type> parameterTypes = new ArrayList<>();
+    pTypes.forEach(p -> parameterTypes.add(RefType.v(p)));
     return Scene.v().makeMethodRef(sc, mName, parameterTypes, returnType, isStatic);
   }
 }

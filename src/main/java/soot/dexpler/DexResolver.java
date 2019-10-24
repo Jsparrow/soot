@@ -38,7 +38,7 @@ import soot.javaToJimple.IInitialResolver.Dependencies;
 
 public class DexResolver {
 
-  protected Map<File, DexlibWrapper> cache = new TreeMap<File, DexlibWrapper>();
+  protected Map<File, DexlibWrapper> cache = new TreeMap<>();
 
   public DexResolver(Singletons.Global g) {
   }

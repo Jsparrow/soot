@@ -18,17 +18,51 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @production Block : {@link Stmt} ::= <span class="component">{@link Stmt}*</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:197
  */
-public class Block extends Stmt implements Cloneable, VariableScope {
-  /**
+public class Block extends Stmt implements VariableScope {
+  private static final Logger logger = LoggerFactory.getLogger(Block.class);
+protected java.util.Map checkReturnDA_Variable_values;
+protected java.util.Map isDAafter_Variable_values;
+protected java.util.Map checkReturnDU_Variable_values;
+protected java.util.Map isDUafter_Variable_values;
+protected java.util.Map localVariableDeclaration_String_values;
+/**
+   * @apilevel internal
+   */
+  protected boolean canCompleteNormally_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected boolean canCompleteNormally_value;
+protected java.util.Map lookupType_String_values;
+protected java.util.Map lookupVariable_String_values;
+/**
+   * @ast method 
+   * 
+   */
+  public Block() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public Block(List<Stmt> p0) {
+    setChild(p0, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     checkReturnDA_Variable_values = null;
     isDAafter_Variable_values = null;
@@ -39,16 +73,18 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     lookupType_String_values = null;
     lookupVariable_String_values = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Block clone() throws CloneNotSupportedException {
     Block node = (Block)super.clone();
     node.checkReturnDA_Variable_values = null;
@@ -63,29 +99,33 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Block copy() {
     try {
       Block node = (Block) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Block fullCopy() {
     Block tree = (Block) copy();
     if (children != null) {
@@ -99,7 +139,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect DeclareBeforeUse
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DeclareBeforeUse.jrag:21
@@ -109,7 +149,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     int indexUse = use.varChildIndex(this);
     return indexDecl <= indexUse;
   }
-  /**
+/**
    * @ast method 
    * @aspect DeclareBeforeUse
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DeclareBeforeUse.jrag:26
@@ -118,12 +158,13 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     int indexDecl = ((ASTNode)decl).varChildIndex(this);
     return indexDecl <= indexUse;
   }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:526
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     String indent = indent();
     s.append(shouldHaveIndent() ? indent : "");
     s.append("{");
@@ -133,25 +174,18 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     s.append(shouldHaveIndent() ? indent : indent.substring(0, indent.length()-2));
     s.append("}");
   }
-  /**
+/**
    * @ast method 
    * @aspect Statements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Statements.jrag:15
    */
-  public void jimplify2(Body b) {
-    for(int i = 0; i < getNumStmt(); i++)
-      getStmt(i).jimplify2(b);
+  @Override
+public void jimplify2(Body b) {
+    for(int i = 0; i < getNumStmt(); i++) {
+		getStmt(i).jimplify2(b);
+	}
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public Block() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -159,34 +193,30 @@ public class Block extends Stmt implements Cloneable, VariableScope {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[1];
     setChild(new List(), 0);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public Block(List<Stmt> p0) {
-    setChild(p0, 0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 1;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Stmt list.
    * @param list The new list node to be used as the Stmt list.
    * @apilevel high-level
@@ -196,7 +226,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public void setStmtList(List<Stmt> list) {
     setChild(list, 0);
   }
-  /**
+/**
    * Retrieves the number of children in the Stmt list.
    * @return Number of children in the Stmt list.
    * @apilevel high-level
@@ -206,7 +236,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public int getNumStmt() {
     return getStmtList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the Stmt list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the Stmt list.
@@ -217,7 +247,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public int getNumStmtNoTransform() {
     return getStmtListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the Stmt list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the Stmt list.
@@ -229,7 +259,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public Stmt getStmt(int i) {
     return (Stmt)getStmtList().getChild(i);
   }
-  /**
+/**
    * Append an element to the Stmt list.
    * @param node The element to append to the Stmt list.
    * @apilevel high-level
@@ -240,7 +270,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     List<Stmt> list = (parent == null || state == null) ? getStmtListNoTransform() : getStmtList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -249,7 +279,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     List<Stmt> list = getStmtListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the Stmt list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -261,7 +291,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     List<Stmt> list = getStmtList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the Stmt list.
    * @return The node representing the Stmt list.
    * @apilevel high-level
@@ -271,7 +301,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public List<Stmt> getStmts() {
     return getStmtList();
   }
-  /**
+/**
    * Retrieves the Stmt list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Stmt list.
@@ -282,7 +312,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public List<Stmt> getStmtsNoTransform() {
     return getStmtListNoTransform();
   }
-  /**
+/**
    * Retrieves the Stmt list.
    * @return The node representing the Stmt list.
    * @apilevel high-level
@@ -295,7 +325,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the Stmt list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Stmt list.
@@ -307,8 +337,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public List<Stmt> getStmtListNoTransform() {
     return (List<Stmt>)getChildNoTransform(0);
   }
-  protected java.util.Map checkReturnDA_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:300
@@ -316,7 +345,9 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   @SuppressWarnings({"unchecked", "cast"})
   public boolean checkReturnDA(Variable v) {
     Object _parameters = v;
-    if(checkReturnDA_Variable_values == null) checkReturnDA_Variable_values = new java.util.HashMap(4);
+    if(checkReturnDA_Variable_values == null) {
+		checkReturnDA_Variable_values = new java.util.HashMap(4);
+	}
     if(checkReturnDA_Variable_values.containsKey(_parameters)) {
       return ((Boolean)checkReturnDA_Variable_values.get(_parameters)).booleanValue();
     }
@@ -324,10 +355,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean checkReturnDA_Variable_value = checkReturnDA_compute(v);
-      if(isFinal && num == state().boundariesCrossed) checkReturnDA_Variable_values.put(_parameters, Boolean.valueOf(checkReturnDA_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		checkReturnDA_Variable_values.put(_parameters, Boolean.valueOf(checkReturnDA_Variable_value));
+	}
     return checkReturnDA_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean checkReturnDA_compute(Variable v) {
@@ -337,22 +370,25 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       Object o = iter.next();
       if(o instanceof ReturnStmt) {
         ReturnStmt stmt = (ReturnStmt)o;
-        if(!stmt.isDAafterReachedFinallyBlocks(v))
-          return false;
+        if(!stmt.isDAafterReachedFinallyBlocks(v)) {
+			return false;
+		}
       }
     }
     return true;
   }
-  protected java.util.Map isDAafter_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:441
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean isDAafter(Variable v) {
     Object _parameters = v;
-    if(isDAafter_Variable_values == null) isDAafter_Variable_values = new java.util.HashMap(4);
+    if(isDAafter_Variable_values == null) {
+		isDAafter_Variable_values = new java.util.HashMap(4);
+	}
     if(isDAafter_Variable_values.containsKey(_parameters)) {
       return ((Boolean)isDAafter_Variable_values.get(_parameters)).booleanValue();
     }
@@ -360,14 +396,16 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean isDAafter_Variable_value = isDAafter_compute(v);
-      if(isFinal && num == state().boundariesCrossed) isDAafter_Variable_values.put(_parameters, Boolean.valueOf(isDAafter_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		isDAafter_Variable_values.put(_parameters, Boolean.valueOf(isDAafter_Variable_value));
+	}
     return isDAafter_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isDAafter_compute(Variable v) {  return getNumStmt() == 0 ? isDAbefore(v) : getStmt(getNumStmt()-1).isDAafter(v);  }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:447
@@ -378,8 +416,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     finally {
     }
   }
-  protected java.util.Map checkReturnDU_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:757
@@ -387,7 +424,9 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   @SuppressWarnings({"unchecked", "cast"})
   public boolean checkReturnDU(Variable v) {
     Object _parameters = v;
-    if(checkReturnDU_Variable_values == null) checkReturnDU_Variable_values = new java.util.HashMap(4);
+    if(checkReturnDU_Variable_values == null) {
+		checkReturnDU_Variable_values = new java.util.HashMap(4);
+	}
     if(checkReturnDU_Variable_values.containsKey(_parameters)) {
       return ((Boolean)checkReturnDU_Variable_values.get(_parameters)).booleanValue();
     }
@@ -395,10 +434,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean checkReturnDU_Variable_value = checkReturnDU_compute(v);
-      if(isFinal && num == state().boundariesCrossed) checkReturnDU_Variable_values.put(_parameters, Boolean.valueOf(checkReturnDU_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		checkReturnDU_Variable_values.put(_parameters, Boolean.valueOf(checkReturnDU_Variable_value));
+	}
     return checkReturnDU_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean checkReturnDU_compute(Variable v) {
@@ -408,22 +449,25 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       Object o = iter.next();
       if(o instanceof ReturnStmt) {
         ReturnStmt stmt = (ReturnStmt)o;
-        if(!stmt.isDUafterReachedFinallyBlocks(v))
-          return false;
+        if(!stmt.isDUafterReachedFinallyBlocks(v)) {
+			return false;
+		}
       }
     }
     return true;
   }
-  protected java.util.Map isDUafter_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:870
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean isDUafter(Variable v) {
     Object _parameters = v;
-    if(isDUafter_Variable_values == null) isDUafter_Variable_values = new java.util.HashMap(4);
+    if(isDUafter_Variable_values == null) {
+		isDUafter_Variable_values = new java.util.HashMap(4);
+	}
     if(isDUafter_Variable_values.containsKey(_parameters)) {
       return ((Boolean)isDUafter_Variable_values.get(_parameters)).booleanValue();
     }
@@ -431,15 +475,16 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean isDUafter_Variable_value = isDUafter_compute(v);
-      if(isFinal && num == state().boundariesCrossed) isDUafter_Variable_values.put(_parameters, Boolean.valueOf(isDUafter_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		isDUafter_Variable_values.put(_parameters, Boolean.valueOf(isDUafter_Variable_value));
+	}
     return isDUafter_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isDUafter_compute(Variable v) {  return getNumStmt() == 0 ? isDUbefore(v) : getStmt(getNumStmt()-1).isDUafter(v);  }
-  protected java.util.Map localVariableDeclaration_String_values;
-  /**
+/**
    * @attribute syn
    * @aspect VariableScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupVariable.jrag:116
@@ -447,7 +492,9 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   @SuppressWarnings({"unchecked", "cast"})
   public VariableDeclaration localVariableDeclaration(String name) {
     Object _parameters = name;
-    if(localVariableDeclaration_String_values == null) localVariableDeclaration_String_values = new java.util.HashMap(4);
+    if(localVariableDeclaration_String_values == null) {
+		localVariableDeclaration_String_values = new java.util.HashMap(4);
+	}
     if(localVariableDeclaration_String_values.containsKey(_parameters)) {
       return (VariableDeclaration)localVariableDeclaration_String_values.get(_parameters);
     }
@@ -455,30 +502,35 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     VariableDeclaration localVariableDeclaration_String_value = localVariableDeclaration_compute(name);
-      if(isFinal && num == state().boundariesCrossed) localVariableDeclaration_String_values.put(_parameters, localVariableDeclaration_String_value);
+      if(isFinal && num == state().boundariesCrossed) {
+		localVariableDeclaration_String_values.put(_parameters, localVariableDeclaration_String_value);
+	}
     return localVariableDeclaration_String_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private VariableDeclaration localVariableDeclaration_compute(String name) {
-    for(int i = 0; i < getNumStmt(); i++)
-      if(getStmt(i).declaresVariable(name))
-        return (VariableDeclaration)getStmt(i);
+    for(int i = 0; i < getNumStmt(); i++) {
+		if(getStmt(i).declaresVariable(name)) {
+			return (VariableDeclaration)getStmt(i);
+		}
+	}
     return null;
   }
-  /**
+/**
    * @attribute syn
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:758
    */
-  public boolean addsIndentationLevel() {
+  @Override
+public boolean addsIndentationLevel() {
     ASTNode$State state = state();
     try {  return shouldHaveIndent();  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:765
@@ -489,20 +541,13 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean canCompleteNormally_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected boolean canCompleteNormally_value;
-  /**
+/**
    * @attribute syn
    * @aspect UnreachableStatements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:37
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean canCompleteNormally() {
     if(canCompleteNormally_computed) {
       return canCompleteNormally_value;
@@ -511,39 +556,46 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     canCompleteNormally_value = canCompleteNormally_compute();
-      if(isFinal && num == state().boundariesCrossed) canCompleteNormally_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		canCompleteNormally_computed = true;
+	}
     return canCompleteNormally_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean canCompleteNormally_compute() {  return getNumStmt() == 0 ? reachable() : getStmt(getNumStmt() - 1).canCompleteNormally();  }
-  /**
+/**
    * @attribute syn
    * @aspect PreciseRethrow
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/PreciseRethrow.jrag:55
    */
-  public boolean modifiedInScope(Variable var) {
+  @Override
+public boolean modifiedInScope(Variable var) {
     ASTNode$State state = state();
     try {
-		for (Stmt stmt : getStmtList())
-			if (stmt.modifiedInScope(var))
+		for (Stmt stmt : getStmtList()) {
+			if (stmt.modifiedInScope(var)) {
 				return true;
+			}
+		}
 		return false;
 	}
     finally {
     }
   }
-  protected java.util.Map lookupType_String_values;
-  /**
+/**
    * @attribute inh
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:263
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public SimpleSet lookupType(String name) {
     Object _parameters = name;
-    if(lookupType_String_values == null) lookupType_String_values = new java.util.HashMap(4);
+    if(lookupType_String_values == null) {
+		lookupType_String_values = new java.util.HashMap(4);
+	}
     if(lookupType_String_values.containsKey(_parameters)) {
       return (SimpleSet)lookupType_String_values.get(_parameters);
     }
@@ -551,19 +603,23 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     SimpleSet lookupType_String_value = getParent().Define_SimpleSet_lookupType(this, null, name);
-      if(isFinal && num == state().boundariesCrossed) lookupType_String_values.put(_parameters, lookupType_String_value);
+      if(isFinal && num == state().boundariesCrossed) {
+		lookupType_String_values.put(_parameters, lookupType_String_value);
+	}
     return lookupType_String_value;
   }
-  protected java.util.Map lookupVariable_String_values;
-  /**
+/**
    * @attribute inh
    * @aspect VariableScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupVariable.jrag:17
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public SimpleSet lookupVariable(String name) {
     Object _parameters = name;
-    if(lookupVariable_String_values == null) lookupVariable_String_values = new java.util.HashMap(4);
+    if(lookupVariable_String_values == null) {
+		lookupVariable_String_values = new java.util.HashMap(4);
+	}
     if(lookupVariable_String_values.containsKey(_parameters)) {
       return (SimpleSet)lookupVariable_String_values.get(_parameters);
     }
@@ -571,25 +627,29 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     SimpleSet lookupVariable_String_value = getParent().Define_SimpleSet_lookupVariable(this, null, name);
-      if(isFinal && num == state().boundariesCrossed) lookupVariable_String_values.put(_parameters, lookupVariable_String_value);
+      if(isFinal && num == state().boundariesCrossed) {
+		lookupVariable_String_values.put(_parameters, lookupVariable_String_value);
+	}
     return lookupVariable_String_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect UnreachableStatements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:28
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean reachable() {
     ASTNode$State state = state();
     boolean reachable_value = getParent().Define_boolean_reachable(this, null);
     return reachable_value;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:52
    * @apilevel internal
    */
-  public boolean Define_boolean_isIncOrDec(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isIncOrDec(ASTNode caller, ASTNode child) {
     if(caller == getStmtListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return false;
@@ -597,11 +657,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     else {      return getParent().Define_boolean_isIncOrDec(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:444
    * @apilevel internal
    */
-  public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
+  @Override
+public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
     if(caller == getStmtListNoTransform())  {
     int index = caller.getIndexOfChild(child);
     return index == 0 ? isDAbefore(v) : getStmt(index - 1).isDAafter(v);
@@ -609,11 +670,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     else {      return getParent().Define_boolean_isDAbefore(this, caller, v);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:871
    * @apilevel internal
    */
-  public boolean Define_boolean_isDUbefore(ASTNode caller, ASTNode child, Variable v) {
+  @Override
+public boolean Define_boolean_isDUbefore(ASTNode caller, ASTNode child, Variable v) {
     if(caller == getStmtListNoTransform())  {
     int index = caller.getIndexOfChild(child);
     return index == 0 ? isDUbefore(v) : getStmt(index - 1).isDUafter(v);
@@ -621,11 +683,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     else {      return getParent().Define_boolean_isDUbefore(this, caller, v);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:380
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
     if(caller == getStmtListNoTransform())  { 
     int index = caller.getIndexOfChild(child);
     {
@@ -638,37 +701,41 @@ public class Block extends Stmt implements Cloneable, VariableScope {
         }
       }
     }
-    if(!c.isEmpty())
-      return c;
+    if(!c.isEmpty()) {
+		return c;
+	}
     return lookupType(name);
   }
   }
     else {      return getParent().Define_SimpleSet_lookupType(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupVariable.jrag:68
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
     if(caller == getStmtListNoTransform())  { 
     int index = caller.getIndexOfChild(child);
     {
     VariableDeclaration v = localVariableDeclaration(name);
     // declare before use and shadowing
-    if(v != null && declaredBeforeUse(v, index))
-      return v;
+    if(v != null && declaredBeforeUse(v, index)) {
+		return v;
+	}
     return lookupVariable(name);
   }
   }
     else {      return getParent().Define_SimpleSet_lookupVariable(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:296
    * @apilevel internal
    */
-  public VariableScope Define_VariableScope_outerScope(ASTNode caller, ASTNode child) {
+  @Override
+public VariableScope Define_VariableScope_outerScope(ASTNode caller, ASTNode child) {
     if(caller == getStmtListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return this;
@@ -676,11 +743,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     else {      return getParent().Define_VariableScope_outerScope(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:116
    * @apilevel internal
    */
-  public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
+  @Override
+public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
     if(caller == getStmtListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return NameType.EXPRESSION_NAME;
@@ -688,11 +756,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     else {      return getParent().Define_NameType_nameType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:38
    * @apilevel internal
    */
-  public boolean Define_boolean_reachable(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_reachable(ASTNode caller, ASTNode child) {
     if(caller == getStmtListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return childIndex == 0 ? reachable() : getStmt(childIndex-1).canCompleteNormally();
@@ -700,11 +769,12 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     else {      return getParent().Define_boolean_reachable(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/UnreachableStatements.jrag:148
    * @apilevel internal
    */
-  public boolean Define_boolean_reportUnreachable(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_reportUnreachable(ASTNode caller, ASTNode child) {
     if(caller == getStmtListNoTransform())  {
     int i = caller.getIndexOfChild(child);
     return i == 0 ? reachable() : getStmt(i-1).reachable();
@@ -712,10 +782,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     else {      return getParent().Define_boolean_reportUnreachable(this, caller);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

@@ -43,24 +43,24 @@ import soot.util.Chain;
 
 public class UnconditionalBranchFolder extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(UnconditionalBranchFolder.class);
+static final int JUMPOPT_TYPES = 6;
+int numFound[];
+int numFixed[];
+HashMap<Stmt, Stmt> stmtMap;
 
-  public UnconditionalBranchFolder(Singletons.Global g) {
+public UnconditionalBranchFolder(Singletons.Global g) {
   }
 
-  public static UnconditionalBranchFolder v() {
+public static UnconditionalBranchFolder v() {
     return G.v().soot_jimple_toolkits_scalar_UnconditionalBranchFolder();
   }
 
-  static final int JUMPOPT_TYPES = 6;
-  int numFound[], numFixed[];
-
-  HashMap<Stmt, Stmt> stmtMap;
-
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     StmtBody body = (StmtBody) b;
 
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Folding unconditional branches...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Folding unconditional branches...").toString());
     }
 
     // allocate counters once only
@@ -75,24 +75,25 @@ public class UnconditionalBranchFolder extends BodyTransformer {
     }
 
     Chain<Unit> units = body.getUnits();
-    stmtMap = new HashMap<Stmt, Stmt>();
+    stmtMap = new HashMap<>();
 
     // find goto and if-goto statements
     Iterator<Unit> stmtIt = units.iterator();
-    Stmt stmt, target, newTarget;
+    Stmt stmt;
+	Stmt target;
+	Stmt newTarget;
     while (stmtIt.hasNext()) {
       stmt = (Stmt) stmtIt.next();
       if (stmt instanceof GotoStmt) {
 
         target = (Stmt) ((GotoStmt) stmt).getTarget();
 
-        if (stmtIt.hasNext()) {
-          // check for goto -> next statement
-          if (units.getSuccOf(stmt) == target) {
+        boolean condition = stmtIt.hasNext() && units.getSuccOf(stmt) == target;
+		// check for goto -> next statement
+		if (condition) {
             stmtIt.remove();
             updateCounters(6, true);
           }
-        }
 
         if (target instanceof GotoStmt) {
           newTarget = getFinalTarget(target);
@@ -120,12 +121,13 @@ public class UnconditionalBranchFolder extends BodyTransformer {
       }
     }
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "]     " + numFixed[0] + " of " + numFound[0] + " branches folded.");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("]     ").append(numFixed[0]).append(" of ")
+			.append(numFound[0]).append(" branches folded.").toString());
     }
 
   } // optimizeJumps
 
-  private void updateCounters(int type, boolean fixed) {
+private void updateCounters(int type, boolean fixed) {
 
     if ((type < 0) || (type > JUMPOPT_TYPES)) {
       return;
@@ -133,14 +135,16 @@ public class UnconditionalBranchFolder extends BodyTransformer {
 
     numFound[0]++;
     numFound[type]++;
-    if (fixed) {
-      numFixed[0]++;
-      numFixed[type]++;
-    }
+    if (!fixed) {
+		return;
+	}
+	numFixed[0]++;
+	numFixed[type]++;
   }
 
-  private Stmt getFinalTarget(Stmt stmt) {
-    Stmt finalTarget = null, target;
+private Stmt getFinalTarget(Stmt stmt) {
+    Stmt finalTarget = null;
+	Stmt target;
 
     // if not a goto, this is the final target
     if (!(stmt instanceof GotoStmt)) {

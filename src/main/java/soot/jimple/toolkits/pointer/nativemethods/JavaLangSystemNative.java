@@ -40,36 +40,37 @@ public class JavaLangSystemNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("void arraycopy(java.lang.Object,int,java.lang.Object,int,int)")) {
+    if ("void arraycopy(java.lang.Object,int,java.lang.Object,int,int)".equals(subSignature)) {
       java_lang_System_arraycopy(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("void setIn0(java.io.InputStream)")) {
+    } else if ("void setIn0(java.io.InputStream)".equals(subSignature)) {
       java_lang_System_setIn0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("void setOut0(java.io.PrintStream)")) {
+    } else if ("void setOut0(java.io.PrintStream)".equals(subSignature)) {
       java_lang_System_setOut0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("void setErr0(java.io.PrintStream)")) {
+    } else if ("void setErr0(java.io.PrintStream)".equals(subSignature)) {
       java_lang_System_setErr0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.util.Properties initProperties(java.util.Properties)")) {
+    } else if ("java.util.Properties initProperties(java.util.Properties)".equals(subSignature)) {
       java_lang_System_initProperties(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.String mapLibraryName(java.lang.String)")) {
+    } else if ("java.lang.String mapLibraryName(java.lang.String)".equals(subSignature)) {
       java_lang_System_mapLibraryName(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class getCallerClass()")) {
+    } else if ("java.lang.Class getCallerClass()".equals(subSignature)) {
       java_lang_System_getCallerClass(method, thisVar, returnVar, params);
       return;
 

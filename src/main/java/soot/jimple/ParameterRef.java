@@ -46,28 +46,33 @@ public class ParameterRef implements IdentityRef {
     this.paramType = paramType;
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (o instanceof ParameterRef) {
       return n == ((ParameterRef) o).n && paramType.equals(((ParameterRef) o).paramType);
     }
     return false;
   }
 
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return n * 101 + paramType.hashCode() * 17;
   }
 
   /** Create a new ParameterRef object with the same paramType and number. */
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ParameterRef(paramType, n);
   }
 
   /** Converts the given ParameterRef into a String i.e. <code>@parameter0: .int</code>. */
-  public String toString() {
-    return "@parameter" + n + ": " + paramType;
+  @Override
+public String toString() {
+    return new StringBuilder().append("@parameter").append(n).append(": ").append(paramType).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.identityRef(this);
   }
 
@@ -87,12 +92,14 @@ public class ParameterRef implements IdentityRef {
   }
 
   /** Returns the type of this ParameterRef. */
-  public Type getType() {
+  @Override
+public Type getType() {
     return paramType;
   }
 
   /** Used with RefSwitch. */
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((RefSwitch) sw).caseParameterRef(this);
   }
 }

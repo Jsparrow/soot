@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AAndBinop extends PBinop
 {
-    private TAnd _and_;
+    private TAnd and;
 
     public AAndBinop()
     {
@@ -26,7 +26,7 @@ public final class AAndBinop extends PBinop
     public Object clone()
     {
         return new AAndBinop(
-            cloneNode(this._and_));
+            cloneNode(this.and));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AAndBinop extends PBinop
 
     public TAnd getAnd()
     {
-        return this._and_;
+        return this.and;
     }
 
     public void setAnd(TAnd node)
     {
-        if(this._and_ != null)
+        if(this.and != null)
         {
-            this._and_.parent(null);
+            this.and.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AAndBinop extends PBinop
             node.parent(this);
         }
 
-        this._and_ = node;
+        this.and = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._and_);
+            + toString(this.and);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._and_ == child)
+        if(this.and == child)
         {
-            this._and_ = null;
+            this.and = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AAndBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._and_ == oldChild)
+        if(this.and == oldChild)
         {
             setAnd((TAnd) newChild);
             return;

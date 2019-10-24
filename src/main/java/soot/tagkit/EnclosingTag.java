@@ -29,7 +29,8 @@ package soot.tagkit;
 public class EnclosingTag extends SyntheticParamTag {
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "EnclosingTag";
   }
 

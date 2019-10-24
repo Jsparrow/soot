@@ -37,8 +37,9 @@ public class AnnotationClassElem extends AnnotationElem {
     this.desc = s;
   }
 
-  public String toString() {
-    return super.toString() + " decription: " + desc;
+  @Override
+public String toString() {
+    return new StringBuilder().append(super.toString()).append(" decription: ").append(desc).toString();
   }
 
   public String getDesc() {

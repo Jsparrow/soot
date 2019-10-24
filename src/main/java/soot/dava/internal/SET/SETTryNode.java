@@ -55,7 +55,7 @@ public class SETTryNode extends SETNode {
 
     add_SubBody(en.get_TryBody());
 
-    cb2clone = new HashMap<IterableSet, IterableSet>();
+    cb2clone = new HashMap<>();
 
     Iterator it = en.get_CatchList().iterator();
     while (it.hasNext()) {
@@ -84,7 +84,8 @@ public class SETTryNode extends SETNode {
     }
   }
 
-  public AugmentedStmt get_EntryStmt() {
+  @Override
+public AugmentedStmt get_EntryStmt() {
     if (entryStmt != null) {
       return entryStmt;
     } else {
@@ -95,13 +96,13 @@ public class SETTryNode extends SETNode {
     // en.get_TryBody())).getFirst()).get_EntryStmt();
   }
 
-  public IterableSet get_NaturalExits() {
+  @Override
+public IterableSet get_NaturalExits() {
     IterableSet c = new IterableSet();
 
-    Iterator<IterableSet> it = subBodies.iterator();
-    while (it.hasNext()) {
+    for (IterableSet subBodie : subBodies) {
 
-      Iterator eit = ((SETNode) body2childChain.get(it.next()).getLast()).get_NaturalExits().iterator();
+      Iterator eit = ((SETNode) body2childChain.get(subBodie).getLast()).get_NaturalExits().iterator();
       while (eit.hasNext()) {
         Object o = eit.next();
 
@@ -114,9 +115,11 @@ public class SETTryNode extends SETNode {
     return c;
   }
 
-  public ASTNode emit_AST() {
-    LinkedList<Object> catchList = new LinkedList<Object>();
-    HashMap<Object, Object> exceptionMap = new HashMap<Object, Object>(), paramMap = new HashMap<Object, Object>();
+  @Override
+public ASTNode emit_AST() {
+    LinkedList<Object> catchList = new LinkedList<>();
+    HashMap<Object, Object> exceptionMap = new HashMap<>();
+	HashMap<Object, Object> paramMap = new HashMap<>();
 
     Iterator it = en.get_CatchList().iterator();
     while (it.hasNext()) {
@@ -147,7 +150,8 @@ public class SETTryNode extends SETNode {
         if (s instanceof IdentityStmt) {
           IdentityStmt ids = (IdentityStmt) s;
 
-          Value rightOp = ids.getRightOp(), leftOp = ids.getLeftOp();
+          Value rightOp = ids.getRightOp();
+		Value leftOp = ids.getLeftOp();
 
           if (rightOp instanceof CaughtExceptionRef) {
             paramMap.put(astBody, leftOp);
@@ -161,7 +165,8 @@ public class SETTryNode extends SETNode {
         paramMap);
   }
 
-  protected boolean resolve(SETNode parent) {
+  @Override
+protected boolean resolve(SETNode parent) {
     Iterator<IterableSet> sbit = parent.get_SubBodies().iterator();
     while (sbit.hasNext()) {
 

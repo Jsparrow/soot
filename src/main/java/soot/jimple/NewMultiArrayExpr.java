@@ -31,21 +31,21 @@ import soot.ValueBox;
 import soot.util.Switch;
 
 public interface NewMultiArrayExpr extends Expr, AnyNewExpr {
-  public ArrayType getBaseType();
+  ArrayType getBaseType();
 
-  public void setBaseType(ArrayType baseType);
+  void setBaseType(ArrayType baseType);
 
-  public ValueBox getSizeBox(int index);
+  ValueBox getSizeBox(int index);
 
-  public int getSizeCount();
+  int getSizeCount();
 
-  public Value getSize(int index);
+  Value getSize(int index);
 
-  public List<Value> getSizes();
+  List<Value> getSizes();
 
-  public void setSize(int index, Value size);
+  void setSize(int index, Value size);
 
-  public Type getType();
+  @Override Type getType();
 
-  public void apply(Switch sw);
+  @Override void apply(Switch sw);
 }

@@ -51,7 +51,8 @@ public class JimpleClassSource extends ClassSource {
     this.foundFile = foundFile;
   }
 
-  public Dependencies resolve(SootClass sc) {
+  @Override
+public Dependencies resolve(SootClass sc) {
     if (Options.v().verbose()) {
       logger.debug("resolving [from .jimple]: " + className);
     }
@@ -92,21 +93,19 @@ public class JimpleClassSource extends ClassSource {
       // Construct the type dependencies of the class
       Dependencies deps = new Dependencies();
       // The method documentation states it returns RefTypes only, so this is a transformation safe
-      for (String t : jimpAST.getCstPool()) {
-        deps.typesToSignature.add(RefType.v(t));
-      }
+	jimpAST.getCstPool().forEach(t -> deps.typesToSignature.add(RefType.v(t)));
       if (outerClassName != null) {
         deps.typesToSignature.add(RefType.v(outerClassName));
       }
 
       return deps;
     } catch (IOException e) {
-      throw new RuntimeException("Error: Failed to create JimpleAST from source input stream for class " + className + ".",
+      throw new RuntimeException(new StringBuilder().append("Error: Failed to create JimpleAST from source input stream for class ").append(className).append(".").toString(),
           e);
     } catch (ParserException e) {
-      throw new RuntimeException("Error: Failed when parsing class " + className + ".", e);
+      throw new RuntimeException(new StringBuilder().append("Error: Failed when parsing class ").append(className).append(".").toString(), e);
     } catch (LexerException e) {
-      throw new RuntimeException("Error: Failed when lexing class " + className + ".", e);
+      throw new RuntimeException(new StringBuilder().append("Error: Failed when lexing class ").append(className).append(".").toString(), e);
     } finally {
       try {
         if (classFile != null) {
@@ -123,10 +122,11 @@ public class JimpleClassSource extends ClassSource {
 
   @Override
   public void close() {
-    if (foundFile != null) {
-      foundFile.close();
-      foundFile = null;
-    }
+    if (foundFile == null) {
+		return;
+	}
+	foundFile.close();
+	foundFile = null;
   }
 
 }

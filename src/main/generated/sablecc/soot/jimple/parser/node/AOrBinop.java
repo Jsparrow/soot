@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AOrBinop extends PBinop
 {
-    private TOr _or_;
+    private TOr or;
 
     public AOrBinop()
     {
@@ -26,7 +26,7 @@ public final class AOrBinop extends PBinop
     public Object clone()
     {
         return new AOrBinop(
-            cloneNode(this._or_));
+            cloneNode(this.or));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AOrBinop extends PBinop
 
     public TOr getOr()
     {
-        return this._or_;
+        return this.or;
     }
 
     public void setOr(TOr node)
     {
-        if(this._or_ != null)
+        if(this.or != null)
         {
-            this._or_.parent(null);
+            this.or.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AOrBinop extends PBinop
             node.parent(this);
         }
 
-        this._or_ = node;
+        this.or = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._or_);
+            + toString(this.or);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._or_ == child)
+        if(this.or == child)
         {
-            this._or_ = null;
+            this.or = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AOrBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._or_ == oldChild)
+        if(this.or == oldChild)
         {
             setOr((TOr) newChild);
             return;

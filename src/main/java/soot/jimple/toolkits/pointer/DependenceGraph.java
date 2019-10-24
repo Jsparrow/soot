@@ -27,27 +27,8 @@ import java.util.HashSet;
 import soot.tagkit.Attribute;
 
 public class DependenceGraph implements Attribute {
-  private final static String NAME = "DependenceGraph";
-  HashSet<Edge> edges = new HashSet<Edge>();
-
-  protected class Edge {
-    short from;
-    short to;
-
-    Edge(short from, short to) {
-      this.from = from;
-      this.to = to;
-    }
-
-    public int hashCode() {
-      return (((from) << 16) + to);
-    }
-
-    public boolean equals(Object other) {
-      Edge o = (Edge) other;
-      return from == o.from && to == o.to;
-    }
-  }
+  private static final String NAME = "DependenceGraph";
+  HashSet<Edge> edges = new HashSet<>();
 
   public boolean areAdjacent(short from, short to) {
     if (from > to) {
@@ -62,7 +43,7 @@ public class DependenceGraph implements Attribute {
     return edges.contains(new Edge(from, to));
   }
 
-  public void addEdge(short from, short to) {
+public void addEdge(short from, short to) {
     if (from < 0) {
       throw new RuntimeException("from < 0");
     }
@@ -76,15 +57,18 @@ public class DependenceGraph implements Attribute {
     edges.add(new Edge(from, to));
   }
 
-  public String getName() {
+@Override
+public String getName() {
     return NAME;
   }
 
-  public void setValue(byte[] v) {
+@Override
+public void setValue(byte[] v) {
     throw new RuntimeException("Not Supported");
   }
 
-  public byte[] getValue() {
+@Override
+public byte[] getValue() {
     byte[] ret = new byte[4 * edges.size()];
     int i = 0;
     for (Edge e : edges) {
@@ -97,11 +81,31 @@ public class DependenceGraph implements Attribute {
     return ret;
   }
 
-  public String toString() {
-    StringBuffer buf = new StringBuffer("Dependences");
-    for (Edge e : edges) {
-      buf.append("( " + e.from + ", " + e.to + " ) ");
-    }
+@Override
+public String toString() {
+    StringBuilder buf = new StringBuilder("Dependences");
+    edges.forEach(e -> buf.append(new StringBuilder().append("( ").append(e.from).append(", ").append(e.to).append(" ) ").toString()));
     return buf.toString();
+  }
+
+protected class Edge {
+    short from;
+    short to;
+
+    Edge(short from, short to) {
+      this.from = from;
+      this.to = to;
+    }
+
+    @Override
+	public int hashCode() {
+      return (((from) << 16) + to);
+    }
+
+    @Override
+	public boolean equals(Object other) {
+      Edge o = (Edge) other;
+      return from == o.from && to == o.to;
+    }
   }
 }

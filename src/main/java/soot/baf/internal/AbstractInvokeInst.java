@@ -46,26 +46,32 @@ abstract class AbstractInvokeInst extends AbstractInst {
     return methodRef.returnType();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return getName() + getParameters();
   }
 
-  abstract public String getName();
+  @Override
+public abstract String getName();
 
-  String getParameters() {
+  @Override
+String getParameters() {
     return " " + methodRef.getSignature();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     up.methodRef(methodRef);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return getMethodRef().parameterTypes().size();
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     if (getMethodRef().returnType() instanceof VoidType) {
       return 0;
     } else {
@@ -73,7 +79,8 @@ abstract class AbstractInvokeInst extends AbstractInst {
     }
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     int count = 0;
 
     Iterator it = getMethodRef().parameterTypes().iterator();
@@ -83,7 +90,8 @@ abstract class AbstractInvokeInst extends AbstractInst {
     return count;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     if (getMethodRef().returnType() instanceof VoidType) {
       return 0;
     } else {
@@ -91,7 +99,8 @@ abstract class AbstractInvokeInst extends AbstractInst {
     }
   }
 
-  public boolean containsInvokeExpr() {
+  @Override
+public boolean containsInvokeExpr() {
     return true;
   }
 

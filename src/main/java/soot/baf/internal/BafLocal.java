@@ -38,88 +38,87 @@ public class BafLocal implements Local {
   int fixedHashCode;
   boolean isHashCodeChosen;
   private Local originalLocal;
+private int number = 0;
 
-  public BafLocal(String name, Type t) {
+public BafLocal(String name, Type t) {
     this.name = name;
     this.type = t;
   }
 
-  /* JimpleLocals are *NOT* equivalent to Baf Locals! */
+/* JimpleLocals are *NOT* equivalent to Baf Locals! */
   @Override
   public boolean equivTo(Object o) {
     return this.equals(o);
   }
 
-  /** Returns a hash code for this object, consistent with structural equality. */
+/** Returns a hash code for this object, consistent with structural equality. */
   @Override
   public int equivHashCode() {
     return name.hashCode() * 101 + type.hashCode() * 17;
   }
 
-  @Override
+@Override
   public Object clone() {
     BafLocal baf = new BafLocal(name, type);
     baf.originalLocal = originalLocal;
     return baf;
   }
 
-  public Local getOriginalLocal() {
+public Local getOriginalLocal() {
     return originalLocal;
   }
 
-  public void setOriginalLocal(Local l) {
+public void setOriginalLocal(Local l) {
     originalLocal = l;
   }
 
-  @Override
+@Override
   public String getName() {
     return name;
   }
 
-  @Override
+@Override
   public void setName(String name) {
     this.name = name;
   }
 
-  @Override
+@Override
   public Type getType() {
     return type;
   }
 
-  @Override
+@Override
   public void setType(Type t) {
     this.type = t;
   }
 
-  @Override
+@Override
   public String toString() {
     return getName();
   }
 
-  @Override
+@Override
   public void toString(UnitPrinter up) {
     up.local(this);
   }
 
-  @Override
+@Override
   public List<ValueBox> getUseBoxes() {
     return Collections.emptyList();
   }
 
-  @Override
+@Override
   public void apply(Switch s) {
     throw new RuntimeException("invalid case switch");
   }
 
-  @Override
+@Override
   public final int getNumber() {
     return number;
   }
 
-  @Override
+@Override
   public final void setNumber(int number) {
     this.number = number;
   }
-
-  private int number = 0;
 }

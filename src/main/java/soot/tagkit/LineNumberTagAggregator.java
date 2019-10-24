@@ -39,11 +39,13 @@ public class LineNumberTagAggregator extends FirstTagAggregator {
   }
 
   /** Decide whether this tag should be aggregated by this aggregator. */
-  public boolean wantTag(Tag t) {
+  @Override
+public boolean wantTag(Tag t) {
     return (t instanceof LineNumberTag) || (t instanceof SourceLnPosTag);
   }
 
-  public String aggregatedName() {
+  @Override
+public String aggregatedName() {
     return "LineNumberTable";
   }
 

@@ -43,7 +43,8 @@ public class CastCheckEliminatorDumper extends BodyTransformer {
     return "";
   }
 
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
     CastCheckEliminator cce = new CastCheckEliminator(new BriefUnitGraph(b));
   }
 }

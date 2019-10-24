@@ -40,11 +40,12 @@ public class LineNumberTable_attribute extends attribute_info {
    */
   public line_number_table_entry line_number_table[];
 
-  public String toString() {
-    String sv = "LineNumberTable : " + line_number_table_length + "\n";
+  @Override
+public String toString() {
+    String sv = new StringBuilder().append("LineNumberTable : ").append(line_number_table_length).append("\n").toString();
     for (int i = 0; i < line_number_table_length; i++) {
-      sv += "LineNumber(" + line_number_table[i].start_pc + ":" + line_number_table[i].start_inst + ","
-          + line_number_table[i].line_number + ")";
+      sv += new StringBuilder().append("LineNumber(").append(line_number_table[i].start_pc).append(":").append(line_number_table[i].start_inst).append(",")
+			.append(line_number_table[i].line_number).append(")").toString();
       sv += "\n";
     }
 

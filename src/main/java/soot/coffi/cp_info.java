@@ -122,7 +122,8 @@ abstract class cp_info {
    * @return a long value composed from the two ints.
    */
   public static long ints2long(long high, long low) {
-    long h, l;
+    long h;
+	long l;
     h = high;
     l = low;
     return ((h << 32) + l);
@@ -138,7 +139,8 @@ abstract class cp_info {
    */
   public static String printBits(int i) {
     String s = "";
-    int j, k;
+    int j;
+	int k;
     k = 1;
     for (j = 0; j < 32; j++) {
       if ((i & k) != 0) {
@@ -161,7 +163,8 @@ abstract class cp_info {
    */
   public static String printBits(long i) {
     String s = "";
-    long j, k;
+    long j;
+	long k;
     k = 1;
     for (j = 0; j < 64; j++) {
       if ((i & k) != 0) {

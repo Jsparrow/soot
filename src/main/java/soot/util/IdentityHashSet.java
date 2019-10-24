@@ -36,7 +36,7 @@ import java.util.Set;
  *             <code>java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<E,Boolean>())</code>
  */
 @Deprecated
-public class IdentityHashSet<E> extends AbstractSet<E> implements Set<E> {
+public class IdentityHashSet<E> extends AbstractSet<E> {
 
   protected IdentityHashMap<E, E> delegate;
 
@@ -44,7 +44,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Set<E> {
    * Creates a new, empty IdentityHashSet.
    */
   public IdentityHashSet() {
-    delegate = new IdentityHashMap<E, E>();
+    delegate = new IdentityHashMap<>();
   }
 
   /**
@@ -54,7 +54,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Set<E> {
    *          The original collection whose elements to inherit
    */
   public IdentityHashSet(Collection<E> original) {
-    delegate = new IdentityHashMap<E, E>();
+    delegate = new IdentityHashMap<>();
     addAll(original);
   }
 

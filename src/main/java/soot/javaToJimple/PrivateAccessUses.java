@@ -31,19 +31,20 @@ public class PrivateAccessUses extends polyglot.visit.NodeVisitor {
   private final ArrayList<IdentityKey> list;
   private ArrayList avail;
 
-  public ArrayList<IdentityKey> getList() {
+  public PrivateAccessUses() {
+    list = new ArrayList<>();
+  }
+
+public ArrayList<IdentityKey> getList() {
     return list;
   }
 
-  public void avail(ArrayList list) {
+public void avail(ArrayList list) {
     avail = list;
   }
 
-  public PrivateAccessUses() {
-    list = new ArrayList<IdentityKey>();
-  }
-
-  public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
+@Override
+public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
 
     if (n instanceof polyglot.ast.Field) {
 

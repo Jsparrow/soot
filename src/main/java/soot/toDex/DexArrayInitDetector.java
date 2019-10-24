@@ -53,8 +53,8 @@ import soot.jimple.NewArrayExpr;
  */
 public class DexArrayInitDetector {
 
-  private Map<Unit, List<Value>> arrayInitToFillValues = new HashMap<Unit, List<Value>>();
-  private Set<Unit> ignoreUnits = new HashSet<Unit>();
+  private Map<Unit, List<Value>> arrayInitToFillValues = new HashMap<>();
+  private Set<Unit> ignoreUnits = new HashSet<>();
 
   private int minimumArrayLength = -1;
 
@@ -83,9 +83,9 @@ public class DexArrayInitDetector {
         if (newArrayExp.getSize() instanceof IntConstant) {
           IntConstant intConst = (IntConstant) newArrayExp.getSize();
           if (minimumArrayLength == -1 || intConst.value >= minimumArrayLength) {
-            arrayValues = new ArrayList<Value>();
+            arrayValues = new ArrayList<>();
             arraySize = intConst.value;
-            curIgnoreUnits = new HashSet<Unit>();
+            curIgnoreUnits = new HashSet<>();
           }
         } else {
           arrayValues = null;
@@ -137,10 +137,11 @@ public class DexArrayInitDetector {
 
   private void checkAndSave(Unit arrayInitStmt, List<Value> arrayValues, int arraySize, Set<Unit> curIgnoreUnits) {
     // If we already have all assignments, construct the filler
-    if (arrayValues != null && arrayValues.size() == arraySize && arrayInitStmt != null) {
-      arrayInitToFillValues.put(arrayInitStmt, arrayValues);
-      ignoreUnits.addAll(curIgnoreUnits);
-    }
+	if (!(arrayValues != null && arrayValues.size() == arraySize && arrayInitStmt != null)) {
+		return;
+	}
+	arrayInitToFillValues.put(arrayInitStmt, arrayValues);
+	ignoreUnits.addAll(curIgnoreUnits);
   }
 
   public List<Value> getValuesForArrayInit(Unit arrayInit) {

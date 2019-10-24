@@ -38,8 +38,9 @@ public abstract class AnnotationElem implements Switchable {
     this.name = name;
   }
 
-  public String toString() {
-    return "Annotation Element: kind: " + kind + " name: " + name;
+  @Override
+public String toString() {
+    return new StringBuilder().append("Annotation Element: kind: ").append(kind).append(" name: ").append(name).toString();
   }
 
   public char getKind() {

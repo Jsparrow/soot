@@ -65,36 +65,36 @@ public class ContextSensitiveInfo {
    * assignment edges, but properly handling multiple calls to a method VarNode -> ArraySet[AssignEdge]
    */
   private final ArraySetMultiMap<VarNode, AssignEdge> contextSensitiveAssignEdges
-      = new ArraySetMultiMap<VarNode, AssignEdge>();
+      = new ArraySetMultiMap<>();
 
   private final ArraySetMultiMap<VarNode, AssignEdge> contextSensitiveAssignBarEdges
-      = new ArraySetMultiMap<VarNode, AssignEdge>();
+      = new ArraySetMultiMap<>();
 
   /**
    * nodes in each method
    */
-  private final ArraySetMultiMap<SootMethod, VarNode> methodToNodes = new ArraySetMultiMap<SootMethod, VarNode>();
+  private final ArraySetMultiMap<SootMethod, VarNode> methodToNodes = new ArraySetMultiMap<>();
 
-  private final ArraySetMultiMap<SootMethod, VarNode> methodToOutPorts = new ArraySetMultiMap<SootMethod, VarNode>();
+  private final ArraySetMultiMap<SootMethod, VarNode> methodToOutPorts = new ArraySetMultiMap<>();
 
-  private final ArraySetMultiMap<SootMethod, VarNode> methodToInPorts = new ArraySetMultiMap<SootMethod, VarNode>();
+  private final ArraySetMultiMap<SootMethod, VarNode> methodToInPorts = new ArraySetMultiMap<>();
 
-  private final ArraySetMultiMap<SootMethod, Integer> callSitesInMethod = new ArraySetMultiMap<SootMethod, Integer>();
+  private final ArraySetMultiMap<SootMethod, Integer> callSitesInMethod = new ArraySetMultiMap<>();
 
-  private final ArraySetMultiMap<SootMethod, Integer> callSitesInvokingMethod = new ArraySetMultiMap<SootMethod, Integer>();
+  private final ArraySetMultiMap<SootMethod, Integer> callSitesInvokingMethod = new ArraySetMultiMap<>();
 
-  private final ArraySetMultiMap<Integer, SootMethod> callSiteToTargets = new ArraySetMultiMap<Integer, SootMethod>();
+  private final ArraySetMultiMap<Integer, SootMethod> callSiteToTargets = new ArraySetMultiMap<>();
 
-  private final ArraySetMultiMap<Integer, AssignEdge> callSiteToEdges = new ArraySetMultiMap<Integer, AssignEdge>();
+  private final ArraySetMultiMap<Integer, AssignEdge> callSiteToEdges = new ArraySetMultiMap<>();
 
-  private final Map<Integer, LocalVarNode> virtCallSiteToReceiver = new HashMap<Integer, LocalVarNode>();
+  private final Map<Integer, LocalVarNode> virtCallSiteToReceiver = new HashMap<>();
 
-  private final Map<Integer, SootMethod> callSiteToInvokedMethod = new HashMap<Integer, SootMethod>();
+  private final Map<Integer, SootMethod> callSiteToInvokedMethod = new HashMap<>();
 
-  private final Map<Integer, SootMethod> callSiteToInvokingMethod = new HashMap<Integer, SootMethod>();
+  private final Map<Integer, SootMethod> callSiteToInvokingMethod = new HashMap<>();
 
   private final ArraySetMultiMap<LocalVarNode, Integer> receiverToVirtCallSites
-      = new ArraySetMultiMap<LocalVarNode, Integer>();
+      = new ArraySetMultiMap<>();
 
   /**
    *
@@ -126,8 +126,8 @@ public class ContextSensitiveInfo {
       }
       boolean sourceGlobal = assignSource instanceof GlobalVarNode;
       Node[] assignTargets = pag.simpleLookup(assignSource);
-      for (int i = 0; i < assignTargets.length; i++) {
-        VarNode assignTarget = (VarNode) assignTargets[i];
+      for (Node assignTarget1 : assignTargets) {
+        VarNode assignTarget = (VarNode) assignTarget1;
         if (skipNode(assignTarget)) {
           continue;
         }
@@ -135,7 +135,7 @@ public class ContextSensitiveInfo {
         if (assignTarget instanceof LocalVarNode) {
           LocalVarNode local = (LocalVarNode) assignTarget;
           SootMethod method = local.getMethod();
-          if (method.toString().indexOf("finalize()") != -1 && SootUtil.isThisNode(local)) {
+          if (method.toString().contains("finalize()") && SootUtil.isThisNode(local)) {
             isFinalizerNode = true;
           }
         }
@@ -144,7 +144,7 @@ public class ContextSensitiveInfo {
         // handle weird finalizers
         if (isFinalizerNode) {
           assignEdge.setParamEdge();
-          Integer callSite = new Integer(callSiteNum++);
+          Integer callSite = Integer.valueOf(callSiteNum++);
           assignEdge.setCallSite(callSite);
         }
         addAssignEdge(assignEdge);
@@ -185,12 +185,12 @@ public class ContextSensitiveInfo {
     }
     for (Iterator iter = callAssigns.keySet().iterator(); iter.hasNext();) {
       InvokeExpr ie = (InvokeExpr) iter.next();
-      Integer callSite = new Integer(callSiteNum++);
+      Integer callSite = Integer.valueOf(callSiteNum++);
       callSiteToInvokedMethod.put(callSite, ie.getMethod());
       SootMethod invokingMethod = pag.callToMethod.get(ie);
       callSiteToInvokingMethod.put(callSite, invokingMethod);
       if (PRINT_CALL_SITE_INFO) {
-        callSiteWriter.println(callSite + " " + callSiteToInvokingMethod.get(callSite) + " " + ie);
+        callSiteWriter.println(new StringBuilder().append(callSite).append(" ").append(callSiteToInvokingMethod.get(callSite)).append(" ").append(ie).toString());
       }
       if (pag.virtualCallsToReceivers.containsKey(ie)) {
         LocalVarNode receiver = (LocalVarNode) pag.virtualCallsToReceivers.get(ie);
@@ -219,7 +219,7 @@ public class ContextSensitiveInfo {
             edge = curEdge;
           }
         }
-        assert edge != null : "no edge from " + src + " to " + dst;
+        assert edge != null : new StringBuilder().append("no edge from ").append(src).append(" to ").append(dst).toString();
         boolean edgeFromOtherCallSite = edge.isCallEdge();
         if (edgeFromOtherCallSite) {
           edge = new AssignEdge(src, dst);
@@ -267,12 +267,11 @@ public class ContextSensitiveInfo {
     for (VarNode node : vars) {
       ArraySet<AssignEdge> assigns = contextSensitiveAssignEdges.get(node);
       for (AssignEdge edge : assigns) {
-        if (edge.isCallEdge()) {
-          if (edge.getCallSite() == null) {
-            logger.debug("" + edge + " is weird!!");
+        boolean condition = edge.isCallEdge() && edge.getCallSite() == null;
+		if (condition) {
+            logger.debug(new StringBuilder().append("").append(edge).append(" is weird!!").toString());
             return false;
           }
-        }
       }
     }
     return true;
@@ -285,13 +284,13 @@ public class ContextSensitiveInfo {
       Set<AssignEdge> outgoingAssigns = getAssignBarEdges(v);
       for (AssignEdge edge : outgoingAssigns) {
         if (edge.getSrc() != v) {
-          return edge + " src should be " + v;
+          return new StringBuilder().append(edge).append(" src should be ").append(v).toString();
         }
       }
       Set<AssignEdge> incomingAssigns = getAssignEdges(v);
       for (AssignEdge edge : incomingAssigns) {
         if (edge.getDst() != v) {
-          return edge + " dst should be " + v;
+          return new StringBuilder().append(edge).append(" dst should be ").append(v).toString();
         }
       }
     }

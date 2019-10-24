@@ -69,18 +69,18 @@ public class PartialConstructorFolder extends BodyTransformer {
    * types list
    */
 
-  public void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+public void internalTransform(Body b, String phaseName, Map<String, String> options) {
     JimpleBody body = (JimpleBody) b;
 
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Folding Jimple constructors...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Folding Jimple constructors...").toString());
     }
 
     Chain<Unit> units = body.getUnits();
-    List<Unit> stmtList = new ArrayList<Unit>();
+    List<Unit> stmtList = new ArrayList<>();
     stmtList.addAll(units);
 
-    Iterator<Unit> it = stmtList.iterator();
     Iterator<Unit> nextStmtIt = stmtList.iterator();
     // start ahead one
     nextStmtIt.next();
@@ -88,8 +88,8 @@ public class PartialConstructorFolder extends BodyTransformer {
     LocalUses localUses = LocalUses.Factory.newLocalUses(body);
 
     /* fold in NewExpr's with specialinvoke's */
-    while (it.hasNext()) {
-      Stmt s = (Stmt) it.next();
+	for (Unit aStmtList : stmtList) {
+      Stmt s = (Stmt) aStmtList;
 
       if (!(s instanceof AssignStmt)) {
         continue;
@@ -130,11 +130,10 @@ public class PartialConstructorFolder extends BodyTransformer {
       }
 
       List<UnitValueBoxPair> lu = localUses.getUsesOf(s);
-      Iterator<UnitValueBoxPair> luIter = lu.iterator();
       boolean MadeNewInvokeExpr = false;
 
-      while (luIter.hasNext()) {
-        Unit use = ((luIter.next())).unit;
+      for (UnitValueBoxPair aLu : lu) {
+        Unit use = ((aLu)).unit;
         if (!(use instanceof InvokeStmt)) {
           continue;
         }

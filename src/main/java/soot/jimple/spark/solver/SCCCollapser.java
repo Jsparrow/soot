@@ -42,45 +42,42 @@ import soot.jimple.spark.sets.PointsToSetInternal;
 
 public class SCCCollapser {
   private static final Logger logger = LoggerFactory.getLogger(SCCCollapser.class);
+/* End of public methods. */
+  /* End of package methods. */
 
-  /** Actually collapse the SCCs in the PAG. */
-  public void collapse() {
-    boolean verbose = pag.getOpts().verbose();
-    if (verbose) {
-      logger.debug("" + "Total VarNodes: " + pag.getVarNodeNumberer().size() + ". Collapsing SCCs...");
-    }
+  protected int numCollapsed = 0;
+protected PAG pag;
+protected HashSet<VarNode> visited = new HashSet<>();
+protected boolean ignoreTypes;
+protected TypeManager typeManager;
 
-    new TopoSorter(pag, ignoreTypes).sort();
-    TreeSet<VarNode> s = new TreeSet<VarNode>();
-    for (final VarNode v : pag.getVarNodeNumberer()) {
-      s.add(v);
-    }
-    for (VarNode v : s) {
-      dfsVisit(v, v);
-    }
-
-    if (verbose) {
-      logger.debug("" + "" + numCollapsed + " nodes were collapsed.");
-    }
-    visited = null;
-  }
-
-  public SCCCollapser(PAG pag, boolean ignoreTypes) {
+public SCCCollapser(PAG pag, boolean ignoreTypes) {
     this.pag = pag;
     this.ignoreTypes = ignoreTypes;
     this.typeManager = pag.getTypeManager();
   }
 
-  /* End of public methods. */
-  /* End of package methods. */
+/** Actually collapse the SCCs in the PAG. */
+  public void collapse() {
+    boolean verbose = pag.getOpts().verbose();
+    if (verbose) {
+      logger.debug(new StringBuilder().append("").append("Total VarNodes: ").append(pag.getVarNodeNumberer().size()).append(". Collapsing SCCs...").toString());
+    }
 
-  protected int numCollapsed = 0;
-  protected PAG pag;
-  protected HashSet<VarNode> visited = new HashSet<VarNode>();
-  protected boolean ignoreTypes;
-  protected TypeManager typeManager;
+    new TopoSorter(pag, ignoreTypes).sort();
+    TreeSet<VarNode> s = new TreeSet<>();
+    for (final VarNode v : pag.getVarNodeNumberer()) {
+      s.add(v);
+    }
+    s.forEach(v -> dfsVisit(v, v));
 
-  final protected void dfsVisit(VarNode v, VarNode rootOfSCC) {
+    if (verbose) {
+      logger.debug(new StringBuilder().append("").append("").append(numCollapsed).append(" nodes were collapsed.").toString());
+    }
+    visited = null;
+  }
+
+protected final void dfsVisit(VarNode v, VarNode rootOfSCC) {
     if (visited.contains(v)) {
       return;
     }

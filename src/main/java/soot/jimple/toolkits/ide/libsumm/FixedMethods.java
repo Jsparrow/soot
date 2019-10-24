@@ -35,7 +35,7 @@ import soot.jimple.StaticInvokeExpr;
 // TODO implement caching for class and method info
 public class FixedMethods {
 
-  public final static boolean ASSUME_PACKAGES_SEALED = false;
+  public static final boolean ASSUME_PACKAGES_SEALED = false;
 
   /**
    * Returns true if a method call is fixed, i.e., assuming that all classes in the Scene resemble library code, then client
@@ -64,11 +64,10 @@ public class FixedMethods {
     // TODO could use PTA and call graph to filter subclasses further
     for (SootClass cPrime : Scene.v().getFastHierarchy().getSubclassesOf(c)) {
       SootMethod mPrime = cPrime.getMethodUnsafe(m.getSubSignature());
-      if (mPrime != null) {
-        if (clientOverwriteable(mPrime)) {
-          return true;
-        }
-      }
+      boolean condition = mPrime != null && clientOverwriteable(mPrime);
+	if (condition) {
+	  return true;
+	}
     }
     return false;
   }
@@ -99,14 +98,7 @@ public class FixedMethods {
       return true;
     }
 
-    for (SootMethod m : cPrime.getMethods()) {
-      if (m.getName().equals(SootMethod.constructorName)) {
-        if (visible(m)) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return cPrime.getMethods().stream().anyMatch(m -> m.getName().equals(SootMethod.constructorName) && visible(m));
   }
 
   /**

@@ -50,7 +50,8 @@ class CONSTANT_InterfaceMethodref_info extends cp_info implements ICONSTANT_Meth
    * @return number of bytes occupied by this object.
    * @see cp_info#size
    */
-  public int size() {
+  @Override
+public int size() {
     return 5;
   }
 
@@ -62,10 +63,11 @@ class CONSTANT_InterfaceMethodref_info extends cp_info implements ICONSTANT_Meth
    * @return String representation of this entry.
    * @see cp_info#toString
    */
-  public String toString(cp_info constant_pool[]) {
+  @Override
+public String toString(cp_info constant_pool[]) {
     CONSTANT_Class_info cc = (CONSTANT_Class_info) (constant_pool[class_index]);
     CONSTANT_NameAndType_info cn = (CONSTANT_NameAndType_info) (constant_pool[name_and_type_index]);
-    return cc.toString(constant_pool) + "." + cn.toString(constant_pool);
+    return new StringBuilder().append(cc.toString(constant_pool)).append(".").append(cn.toString(constant_pool)).toString();
   }
 
   /**
@@ -74,7 +76,8 @@ class CONSTANT_InterfaceMethodref_info extends cp_info implements ICONSTANT_Meth
    * @return the String "interfacemethodref".
    * @see cp_info#typeName
    */
-  public String typeName() {
+  @Override
+public String typeName() {
     return "interfacemethodref";
   }
 
@@ -90,7 +93,8 @@ class CONSTANT_InterfaceMethodref_info extends cp_info implements ICONSTANT_Meth
    * @return a value <0, 0, or >0 indicating whether this is smaller, the same or larger than cp.
    * @see cp_info#compareTo
    */
-  public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
+  @Override
+public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
     int i;
     if (tag != cp.tag) {
       return tag - cp.tag;
@@ -104,15 +108,18 @@ class CONSTANT_InterfaceMethodref_info extends cp_info implements ICONSTANT_Meth
         cp_constant_pool);
   }
 
-  public Value createJimpleConstantValue(cp_info[] constant_pool) {
+  @Override
+public Value createJimpleConstantValue(cp_info[] constant_pool) {
     throw new UnsupportedOperationException("cannot convert to Jimple: " + typeName());
   }
 
-  public int getClassIndex() {
+  @Override
+public int getClassIndex() {
     return class_index;
   }
 
-  public int getNameAndTypeIndex() {
+  @Override
+public int getNameAndTypeIndex() {
     return name_and_type_index;
   }
 }

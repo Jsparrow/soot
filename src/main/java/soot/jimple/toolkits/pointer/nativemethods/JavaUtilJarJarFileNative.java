@@ -35,12 +35,13 @@ public class JavaUtilJarJarFileNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.String[] getMetaInfoEntryNames()")) {
+    if ("java.lang.String[] getMetaInfoEntryNames()".equals(subSignature)) {
       java_util_jar_JarFile_getMetaInfoEntryNames(method, thisVar, returnVar, params);
       return;
 

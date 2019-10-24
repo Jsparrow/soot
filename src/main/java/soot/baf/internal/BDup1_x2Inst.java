@@ -42,42 +42,50 @@ public class BDup1_x2Inst extends BDupInst implements Dup1_x2Inst {
     mUnder2Type = Baf.getDescriptorTypeOf(aUnder2Type);
   }
 
-  public Type getOp1Type() {
+  @Override
+public Type getOp1Type() {
     return mOpType;
   }
 
-  public Type getUnder1Type() {
+  @Override
+public Type getUnder1Type() {
     return mUnder1Type;
   }
 
-  public Type getUnder2Type() {
+  @Override
+public Type getUnder2Type() {
     return mUnder2Type;
   }
 
-  public List<Type> getOpTypes() {
-    List<Type> res = new ArrayList<Type>();
+  @Override
+public List<Type> getOpTypes() {
+    List<Type> res = new ArrayList<>();
     res.add(mOpType);
     return res;
   }
 
-  public List<Type> getUnderTypes() {
-    List<Type> res = new ArrayList<Type>();
+  @Override
+public List<Type> getUnderTypes() {
+    List<Type> res = new ArrayList<>();
     res.add(mUnder1Type);
     res.add(mUnder2Type);
     return res;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "dup1_x2";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseDup1_x2Inst(this);
   }
 
-  public String toString() {
-    return "dup1_x2." + Baf.bafDescriptorOf(mOpType) + "_" + Baf.bafDescriptorOf(mUnder1Type) + "."
-        + Baf.bafDescriptorOf(mUnder2Type);
+  @Override
+public String toString() {
+    return new StringBuilder().append("dup1_x2.").append(Baf.bafDescriptorOf(mOpType)).append("_").append(Baf.bafDescriptorOf(mUnder1Type)).append(".").append(Baf.bafDescriptorOf(mUnder2Type))
+			.toString();
   }
 
 }

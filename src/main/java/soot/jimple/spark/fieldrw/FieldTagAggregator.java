@@ -40,21 +40,25 @@ public class FieldTagAggregator extends TagAggregator {
     return G.v().soot_jimple_spark_fieldrw_FieldTagAggregator();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
     FieldReadTagAggregator.v().transform(b, phaseName, options);
     FieldWriteTagAggregator.v().transform(b, phaseName, options);
   }
 
   /** Decide whether this tag should be aggregated by this aggregator. */
-  public boolean wantTag(Tag t) {
+  @Override
+public boolean wantTag(Tag t) {
     throw new RuntimeException();
   }
 
-  public void considerTag(Tag t, Unit u, LinkedList<Tag> tags, LinkedList<Unit> units) {
+  @Override
+public void considerTag(Tag t, Unit u, LinkedList<Tag> tags, LinkedList<Unit> units) {
     throw new RuntimeException();
   }
 
-  public String aggregatedName() {
+  @Override
+public String aggregatedName() {
     throw new RuntimeException();
   }
 }

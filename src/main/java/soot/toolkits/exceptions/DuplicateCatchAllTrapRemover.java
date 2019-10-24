@@ -65,16 +65,16 @@ public class DuplicateCatchAllTrapRemover extends BodyTransformer {
     // span the same code region
     for (Iterator<Trap> t1It = b.getTraps().snapshotIterator(); t1It.hasNext();) {
       Trap t1 = t1It.next();
-      if (t1.getException().getName().equals("java.lang.Throwable")) {
+      if ("java.lang.Throwable".equals(t1.getException().getName())) {
         for (Iterator<Trap> t2It = b.getTraps().snapshotIterator(); t2It.hasNext();) {
           Trap t2 = t2It.next();
           if (t1 != t2 && t1.getBeginUnit() == t2.getBeginUnit() && t1.getEndUnit() == t2.getEndUnit()
-              && t2.getException().getName().equals("java.lang.Throwable")) {
+              && "java.lang.Throwable".equals(t2.getException().getName())) {
             // Both traps (t1, t2) span the same code and catch java.lang.Throwable.
             // Check if one trap jumps to a target that then jumps to the target of
             // the other trap.
             for (Trap t3 : b.getTraps()) {
-              if (t3 != t1 && t3 != t2 && t3.getException().getName().equals("java.lang.Throwable")) {
+              if (t3 != t1 && t3 != t2 && "java.lang.Throwable".equals(t3.getException().getName())) {
                 if (trapCoversUnit(b, t3, t1.getHandlerUnit()) && t3.getHandlerUnit() == t2.getHandlerUnit()) {
                   // c -> t1 -> t3 -> t2 && c -> t2
                   b.getTraps().remove(t2);

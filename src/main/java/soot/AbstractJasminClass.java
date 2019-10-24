@@ -74,344 +74,33 @@ import soot.toolkits.graph.Block;
 
 public abstract class AbstractJasminClass {
   private static final Logger logger = LoggerFactory.getLogger(AbstractJasminClass.class);
-  protected Map<Unit, String> unitToLabel;
-  protected Map<Local, Integer> localToSlot;
-  protected Map<Unit, Integer> subroutineToReturnAddressSlot;
-
-  protected List<String> code;
-
-  protected boolean isEmittingMethodCode;
-  protected int labelCount;
-
-  protected boolean isNextGotoAJsr;
-  protected int returnAddressSlot;
-  protected int currentStackHeight = 0;
-  protected int maxStackHeight = 0;
-
-  protected Map<Local, Object> localToGroup;
-  protected Map<Object, Integer> groupToColorCount;
-  protected Map<Local, Integer> localToColor;
-
-  protected Map<Block, Integer> blockToStackHeight = new HashMap<Block, Integer>(); // maps a block to the stack height upon
-                                                                                    // entering it
-  protected Map<Block, Integer> blockToLogicalStackHeight = new HashMap<Block, Integer>(); // maps a block to the logical
-                                                                                           // stack height upon entering
-                                                                                           // it
-
-  public static String slashify(String s) {
-    return s.replace('.', '/');
-  }
-
-  public static int sizeOfType(Type t) {
-    if (t instanceof DoubleWordType || t instanceof LongType || t instanceof DoubleType) {
-      return 2;
-    } else if (t instanceof VoidType) {
-      return 0;
-    } else {
-      return 1;
-    }
-  }
-
-  public static int argCountOf(SootMethodRef m) {
-    int argCount = 0;
-    Iterator<Type> typeIt = m.parameterTypes().iterator();
-
-    while (typeIt.hasNext()) {
-      Type t = (Type) typeIt.next();
-
-      argCount += sizeOfType(t);
-    }
-
-    return argCount;
-  }
-
-  public static String jasminDescriptorOf(Type type) {
-    TypeSwitch sw;
-
-    type.apply(sw = new TypeSwitch() {
-      public void caseBooleanType(BooleanType t) {
-        setResult("Z");
-      }
-
-      public void caseByteType(ByteType t) {
-        setResult("B");
-      }
-
-      public void caseCharType(CharType t) {
-        setResult("C");
-      }
-
-      public void caseDoubleType(DoubleType t) {
-        setResult("D");
-      }
-
-      public void caseFloatType(FloatType t) {
-        setResult("F");
-      }
-
-      public void caseIntType(IntType t) {
-        setResult("I");
-      }
-
-      public void caseLongType(LongType t) {
-        setResult("J");
-      }
-
-      public void caseShortType(ShortType t) {
-        setResult("S");
-      }
-
-      public void defaultCase(Type t) {
-        throw new RuntimeException("Invalid type: " + t);
-      }
-
-      public void caseArrayType(ArrayType t) {
-        StringBuffer buffer = new StringBuffer();
-
-        for (int i = 0; i < t.numDimensions; i++) {
-          buffer.append("[");
-        }
-
-        setResult(buffer.toString() + jasminDescriptorOf(t.baseType));
-      }
-
-      public void caseRefType(RefType t) {
-        setResult("L" + t.getClassName().replace('.', '/') + ";");
-      }
-
-      public void caseVoidType(VoidType t) {
-        setResult("V");
-      }
-    });
-
-    return (String) sw.getResult();
-
-  }
-
-  public static String jasminDescriptorOf(SootMethodRef m) {
-    StringBuffer buffer = new StringBuffer();
-
-    buffer.append("(");
-
-    // Add methods parameters
-    {
-      Iterator<Type> typeIt = m.parameterTypes().iterator();
-
-      while (typeIt.hasNext()) {
-        Type t = (Type) typeIt.next();
-
-        buffer.append(jasminDescriptorOf(t));
-      }
-    }
-
-    buffer.append(")");
-
-    buffer.append(jasminDescriptorOf(m.returnType()));
-
-    return buffer.toString();
-  }
-
-  protected void emit(String s) {
-    okayEmit(s);
-  }
-
-  protected void okayEmit(String s) {
-    if (isEmittingMethodCode && !s.endsWith(":")) {
-      code.add("    " + s);
-    } else {
-      code.add(s);
-    }
-  }
-
-  private String getVisibilityAnnotationAttr(VisibilityAnnotationTag tag) {
-    StringBuffer sb = new StringBuffer();
-    if (tag == null) {
-      return "";
-    } else if (tag.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE) {
-      sb.append(".runtime_visible_annotation\n");
-    } else if (tag.getVisibility() == AnnotationConstants.RUNTIME_INVISIBLE) {
-      sb.append(".runtime_invisible_annotation\n");
-    } else {
-      // source level annotation
-      return "";
-    }
-    if (tag.hasAnnotations()) {
-      Iterator<AnnotationTag> it = tag.getAnnotations().iterator();
-      while (it.hasNext()) {
-        AnnotationTag annot = it.next();
-        sb.append(".annotation ");
-        sb.append(soot.util.StringTools.getQuotedStringOf(annot.getType()) + "\n");
-        for (AnnotationElem ae : annot.getElems()) {
-          sb.append(getElemAttr(ae));
-        }
-        sb.append(".end .annotation\n");
-      }
-    }
-    sb.append(".end .annotation_attr\n");
-    return sb.toString();
-  }
-
-  private String getVisibilityParameterAnnotationAttr(VisibilityParameterAnnotationTag tag) {
-    StringBuffer sb = new StringBuffer();
-    sb.append(".param ");
-    if (tag.getKind() == AnnotationConstants.RUNTIME_VISIBLE) {
-      sb.append(".runtime_visible_annotation\n");
-    } else {
-      sb.append(".runtime_invisible_annotation\n");
-    }
-    ArrayList<VisibilityAnnotationTag> vis_list = tag.getVisibilityAnnotations();
-    if (vis_list != null) {
-      for (VisibilityAnnotationTag vat : vis_list) {
-        VisibilityAnnotationTag safeVat = vat == null ? getSafeVisibilityAnnotationTag(tag.getKind()) : vat;
-        sb.append(getVisibilityAnnotationAttr(safeVat));
-      }
-    }
-    sb.append(".end .param\n");
-    return sb.toString();
-  }
-
-  private static Map<Integer, VisibilityAnnotationTag> safeVats = new HashMap<Integer, VisibilityAnnotationTag>();
-
-  private VisibilityAnnotationTag getSafeVisibilityAnnotationTag(int kind) {
-    VisibilityAnnotationTag safeVat = safeVats.get(kind);
-    if (safeVat == null) {
-      safeVats.put(kind, safeVat = new VisibilityAnnotationTag(kind));
-    }
-    return safeVat;
-  }
-
-  private String getElemAttr(AnnotationElem elem) {
-    StringBuffer result = new StringBuffer(".elem ");
-    switch (elem.getKind()) {
-      case 'Z': {
-        result.append(".bool_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        if (elem instanceof AnnotationIntElem) {
-          result.append(((AnnotationIntElem) elem).getValue());
-        } else {
-          if (((AnnotationBooleanElem) elem).getValue()) {
-            result.append(1);
-          } else {
-            result.append(0);
-          }
-        }
-        result.append("\n");
-        break;
-      }
-      case 'S': {
-        result.append(".short_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(((AnnotationIntElem) elem).getValue());
-        result.append("\n");
-        break;
-      }
-      case 'B': {
-        result.append(".byte_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(((AnnotationIntElem) elem).getValue());
-        result.append("\n");
-        break;
-      }
-      case 'C': {
-        result.append(".char_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(((AnnotationIntElem) elem).getValue());
-        result.append("\n");
-        break;
-      }
-      case 'I': {
-        result.append(".int_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(((AnnotationIntElem) elem).getValue());
-        result.append("\n");
-        break;
-      }
-      case 'J': {
-        result.append(".long_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(((AnnotationLongElem) elem).getValue());
-        result.append("\n");
-        break;
-      }
-      case 'F': {
-        result.append(".float_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(((AnnotationFloatElem) elem).getValue());
-        result.append("\n");
-        break;
-      }
-      case 'D': {
-        result.append(".doub_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(((AnnotationDoubleElem) elem).getValue());
-        result.append("\n");
-        break;
-      }
-      case 's': {
-        result.append(".str_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationStringElem) elem).getValue()));
-        result.append("\n");
-        break;
-      }
-      case 'e': {
-        result.append(".enum_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationEnumElem) elem).getTypeName()));
-        result.append(" ");
-        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationEnumElem) elem).getConstantName()));
-        result.append("\n");
-        break;
-      }
-      case 'c': {
-        result.append(".cls_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationClassElem) elem).getDesc()));
-        result.append("\n");
-        break;
-      }
-      case '[': {
-        result.append(".arr_kind ");
-        result.append("\"" + elem.getName() + "\" ");
-        AnnotationArrayElem arrayElem = (AnnotationArrayElem) elem;
-        result.append("\n");
-        for (int i = 0; i < arrayElem.getNumValues(); i++) {
-          // result.append("\n");
-          result.append(getElemAttr(arrayElem.getValueAt(i)));
-        }
-        result.append(".end .arr_elem\n");
-        break;
-      }
-      case '@': {
-        result.append(".ann_kind ");
-        result.append("\"" + elem.getName() + "\"\n");
-        AnnotationTag annot = ((AnnotationAnnotationElem) elem).getValue();
-        result.append(".annotation ");
-        result.append(soot.util.StringTools.getQuotedStringOf(annot.getType()) + "\n");
-        for (AnnotationElem ae : annot.getElems()) {
-          result.append(getElemAttr(ae));
-        }
-        result.append(".end .annotation\n");
-        result.append(".end .annot_elem\n");
-        break;
-      }
-      default: {
-        throw new RuntimeException("Unknown Elem Attr Kind: " + elem.getKind());
-      }
-    }
-    return result.toString();
-  }
-
-  public AbstractJasminClass(SootClass sootClass) {
+private static Map<Integer, VisibilityAnnotationTag> safeVats = new HashMap<>();
+protected Map<Unit, String> unitToLabel;
+protected Map<Local, Integer> localToSlot;
+protected Map<Unit, Integer> subroutineToReturnAddressSlot;
+protected List<String> code;
+protected boolean isEmittingMethodCode;
+protected int labelCount;
+protected boolean isNextGotoAJsr;
+protected int returnAddressSlot;
+protected int currentStackHeight = 0;
+protected int maxStackHeight = 0;
+protected Map<Local, Object> localToGroup;
+protected Map<Object, Integer> groupToColorCount;
+protected Map<Local, Integer> localToColor;
+protected Map<Block, Integer> blockToStackHeight = new HashMap<>(); // maps a block to the stack height upon
+// entering it
+  protected Map<Block, Integer> blockToLogicalStackHeight = new HashMap<>(); // maps a block to the logical
+public AbstractJasminClass(SootClass sootClass) {
     if (Options.v().time()) {
       Timers.v().buildJasminTimer.start();
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + sootClass.getName() + "] Constructing baf.JasminClass...");
+      logger.debug(new StringBuilder().append("[").append(sootClass.getName()).append("] Constructing baf.JasminClass...").toString());
     }
 
-    code = new LinkedList<String>();
+    code = new LinkedList<>();
 
     // Emit the header
     {
@@ -445,9 +134,9 @@ public abstract class AbstractJasminClass {
       if (Modifier.isInterface(modifiers)) {
         modifiers -= Modifier.INTERFACE;
 
-        emit(".interface " + Modifier.toString(modifiers) + " " + slashify(sootClass.getName()));
+        emit(new StringBuilder().append(".interface ").append(Modifier.toString(modifiers)).append(" ").append(slashify(sootClass.getName())).toString());
       } else {
-        emit(".class " + Modifier.toString(modifiers) + " " + slashify(sootClass.getName()));
+        emit(new StringBuilder().append(".class ").append(Modifier.toString(modifiers)).append(" ").append(slashify(sootClass.getName())).toString());
       }
 
       if (sootClass.hasSuperclass()) {
@@ -479,7 +168,7 @@ public abstract class AbstractJasminClass {
     while (it.hasNext()) {
       Tag tag = it.next();
       if (tag instanceof Attribute) {
-        emit(".class_attribute " + tag.getName() + " \"" + new String(Base64.encode(((Attribute) tag).getValue())) + "\"");
+        emit(new StringBuilder().append(".class_attribute ").append(tag.getName()).append(" \"").append(new String(Base64.encode(((Attribute) tag).getValue()))).append("\"").toString());
         /*
          * else { emit(""); }
          */
@@ -492,28 +181,20 @@ public abstract class AbstractJasminClass {
     }
     // emit inner class attributes
     InnerClassAttribute ica = (InnerClassAttribute) sootClass.getTag("InnerClassAttribute");
-    if (ica != null && ica.getSpecs().size() > 0) {
-      if (!Options.v().no_output_inner_classes_attribute()) {
+    boolean condition = ica != null && ica.getSpecs().size() > 0 && !Options.v().no_output_inner_classes_attribute();
+	if (condition) {
         emit(".inner_class_attr ");
-        for (InnerClassTag ict : ((InnerClassAttribute) sootClass.getTag("InnerClassAttribute")).getSpecs()) {
-          // System.out.println("inner class tag: "+ict);
-          emit(".inner_class_spec_attr " + "\"" + ict.getInnerClass() + "\" " +
-
-              "\"" + ict.getOuterClass() + "\" " +
-
-              "\"" + ict.getShortName() + "\" " + Modifier.toString(ict.getAccessFlags()) + " " +
-
-              ".end .inner_class_spec_attr");
-        }
+        // System.out.println("inner class tag: "+ict);
+		((InnerClassAttribute) sootClass.getTag("InnerClassAttribute")).getSpecs().forEach(ict -> emit(new StringBuilder().append(".inner_class_spec_attr ").append("\"").append(ict.getInnerClass()).append("\" ").append("\"").append(ict.getOuterClass()).append("\" ")
+				.append("\"").append(ict.getShortName()).append("\" ").append(Modifier.toString(ict.getAccessFlags())).append(" ").append(".end .inner_class_spec_attr").toString()));
         emit(".end .inner_class_attr\n");
       }
-    }
     if (sootClass.hasTag("EnclosingMethodTag")) {
       String encMeth = ".enclosing_method_attr ";
       EnclosingMethodTag eMethTag = (EnclosingMethodTag) sootClass.getTag("EnclosingMethodTag");
-      encMeth += "\"" + eMethTag.getEnclosingClass() + "\" ";
-      encMeth += "\"" + eMethTag.getEnclosingMethod() + "\" ";
-      encMeth += "\"" + eMethTag.getEnclosingMethodSig() + "\"\n";
+      encMeth += new StringBuilder().append("\"").append(eMethTag.getEnclosingClass()).append("\" ").toString();
+      encMeth += new StringBuilder().append("\"").append(eMethTag.getEnclosingMethod()).append("\" ").toString();
+      encMeth += new StringBuilder().append("\"").append(eMethTag.getEnclosingMethodSig()).append("\"\n").toString();
       emit(encMeth);
     }
     // emit deprecated attributes
@@ -523,14 +204,14 @@ public abstract class AbstractJasminClass {
     if (sootClass.hasTag("SignatureTag")) {
       String sigAttr = ".signature_attr ";
       SignatureTag sigTag = (SignatureTag) sootClass.getTag("SignatureTag");
-      sigAttr += "\"" + sigTag.getSignature() + "\"\n";
+      sigAttr += new StringBuilder().append("\"").append(sigTag.getSignature()).append("\"\n").toString();
       emit(sigAttr);
     }
 
     Iterator<Tag> vit = sootClass.getTags().iterator();
     while (vit.hasNext()) {
       Tag t = (Tag) vit.next();
-      if (t.getName().equals("VisibilityAnnotationTag")) {
+      if ("VisibilityAnnotationTag".equals(t.getName())) {
         emit(getVisibilityAnnotationAttr((VisibilityAnnotationTag) t));
       }
     }
@@ -542,8 +223,8 @@ public abstract class AbstractJasminClass {
       while (fieldIt.hasNext()) {
         SootField field = (SootField) fieldIt.next();
 
-        String fieldString = ".field " + Modifier.toString(field.getModifiers()) + " " + "\"" + field.getName() + "\"" + " "
-            + jasminDescriptorOf(field.getType());
+        String fieldString = new StringBuilder().append(".field ").append(Modifier.toString(field.getModifiers())).append(" ").append("\"").append(field.getName()).append("\"").append(" ")
+				.append(jasminDescriptorOf(field.getType())).toString();
 
         if (field.hasTag("StringConstantValueTag")) {
           fieldString += " = ";
@@ -575,12 +256,12 @@ public abstract class AbstractJasminClass {
         if (field.hasTag("SignatureTag")) {
           fieldString += ".signature_attr ";
           SignatureTag sigTag = (SignatureTag) field.getTag("SignatureTag");
-          fieldString += "\"" + sigTag.getSignature() + "\"\n";
+          fieldString += new StringBuilder().append("\"").append(sigTag.getSignature()).append("\"\n").toString();
         }
         Iterator<Tag> vfit = field.getTags().iterator();
         while (vfit.hasNext()) {
           Tag t = (Tag) vfit.next();
-          if (t.getName().equals("VisibilityAnnotationTag")) {
+          if ("VisibilityAnnotationTag".equals(t.getName())) {
             fieldString += getVisibilityAnnotationAttr((VisibilityAnnotationTag) t);
           }
         }
@@ -591,8 +272,7 @@ public abstract class AbstractJasminClass {
         while (attributeIt.hasNext()) {
           Tag tag = (Tag) attributeIt.next();
           if (tag instanceof Attribute) {
-            emit(".field_attribute " + tag.getName() + " \"" + new String(Base64.encode(((Attribute) tag).getValue()))
-                + "\"");
+            emit(new StringBuilder().append(".field_attribute ").append(tag.getName()).append(" \"").append(new String(Base64.encode(((Attribute) tag).getValue()))).append("\"").toString());
           }
         }
 
@@ -618,18 +298,328 @@ public abstract class AbstractJasminClass {
     }
   }
 
-  protected void assignColorsToLocals(Body body) {
+// stack height upon entering
+   // it
+
+  public static String slashify(String s) {
+   return s.replace('.', '/');
+  }
+
+public static int sizeOfType(Type t) {
+    if (t instanceof DoubleWordType || t instanceof LongType || t instanceof DoubleType) {
+      return 2;
+    } else if (t instanceof VoidType) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+
+public static int argCountOf(SootMethodRef m) {
+    int argCount = 0;
+    Iterator<Type> typeIt = m.parameterTypes().iterator();
+
+    while (typeIt.hasNext()) {
+      Type t = (Type) typeIt.next();
+
+      argCount += sizeOfType(t);
+    }
+
+    return argCount;
+  }
+
+public static String jasminDescriptorOf(Type type) {
+    TypeSwitch sw;
+
+    type.apply(sw = new TypeSwitch() {
+      @Override
+	public void caseBooleanType(BooleanType t) {
+        setResult("Z");
+      }
+
+      @Override
+	public void caseByteType(ByteType t) {
+        setResult("B");
+      }
+
+      @Override
+	public void caseCharType(CharType t) {
+        setResult("C");
+      }
+
+      @Override
+	public void caseDoubleType(DoubleType t) {
+        setResult("D");
+      }
+
+      @Override
+	public void caseFloatType(FloatType t) {
+        setResult("F");
+      }
+
+      @Override
+	public void caseIntType(IntType t) {
+        setResult("I");
+      }
+
+      @Override
+	public void caseLongType(LongType t) {
+        setResult("J");
+      }
+
+      @Override
+	public void caseShortType(ShortType t) {
+        setResult("S");
+      }
+
+      @Override
+	public void defaultCase(Type t) {
+        throw new RuntimeException("Invalid type: " + t);
+      }
+
+      @Override
+	public void caseArrayType(ArrayType t) {
+        StringBuffer buffer = new StringBuffer();
+
+        for (int i = 0; i < t.numDimensions; i++) {
+          buffer.append("[");
+        }
+
+        setResult(buffer.toString() + jasminDescriptorOf(t.baseType));
+      }
+
+      @Override
+	public void caseRefType(RefType t) {
+        setResult(new StringBuilder().append("L").append(t.getClassName().replace('.', '/')).append(";").toString());
+      }
+
+      @Override
+	public void caseVoidType(VoidType t) {
+        setResult("V");
+      }
+    });
+
+    return (String) sw.getResult();
+
+  }
+
+public static String jasminDescriptorOf(SootMethodRef m) {
+    StringBuilder buffer = new StringBuilder();
+
+    buffer.append("(");
+
+    // Add methods parameters
+    {
+      Iterator<Type> typeIt = m.parameterTypes().iterator();
+
+      while (typeIt.hasNext()) {
+        Type t = (Type) typeIt.next();
+
+        buffer.append(jasminDescriptorOf(t));
+      }
+    }
+
+    buffer.append(")");
+
+    buffer.append(jasminDescriptorOf(m.returnType()));
+
+    return buffer.toString();
+  }
+
+protected void emit(String s) {
+    okayEmit(s);
+  }
+
+protected void okayEmit(String s) {
+    if (isEmittingMethodCode && !s.endsWith(":")) {
+      code.add("    " + s);
+    } else {
+      code.add(s);
+    }
+  }
+
+private String getVisibilityAnnotationAttr(VisibilityAnnotationTag tag) {
+    StringBuilder sb = new StringBuilder();
+    if (tag == null) {
+      return "";
+    } else if (tag.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE) {
+      sb.append(".runtime_visible_annotation\n");
+    } else if (tag.getVisibility() == AnnotationConstants.RUNTIME_INVISIBLE) {
+      sb.append(".runtime_invisible_annotation\n");
+    } else {
+      // source level annotation
+      return "";
+    }
+    if (tag.hasAnnotations()) {
+      Iterator<AnnotationTag> it = tag.getAnnotations().iterator();
+      while (it.hasNext()) {
+        AnnotationTag annot = it.next();
+        sb.append(".annotation ");
+        sb.append(soot.util.StringTools.getQuotedStringOf(annot.getType()) + "\n");
+        annot.getElems().forEach(ae -> sb.append(getElemAttr(ae)));
+        sb.append(".end .annotation\n");
+      }
+    }
+    sb.append(".end .annotation_attr\n");
+    return sb.toString();
+  }
+
+private String getVisibilityParameterAnnotationAttr(VisibilityParameterAnnotationTag tag) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(".param ");
+    if (tag.getKind() == AnnotationConstants.RUNTIME_VISIBLE) {
+      sb.append(".runtime_visible_annotation\n");
+    } else {
+      sb.append(".runtime_invisible_annotation\n");
+    }
+    ArrayList<VisibilityAnnotationTag> vis_list = tag.getVisibilityAnnotations();
+    if (vis_list != null) {
+      vis_list.stream().map(vat -> vat == null ? getSafeVisibilityAnnotationTag(tag.getKind()) : vat).forEach(safeVat -> sb.append(getVisibilityAnnotationAttr(safeVat)));
+    }
+    sb.append(".end .param\n");
+    return sb.toString();
+  }
+
+private VisibilityAnnotationTag getSafeVisibilityAnnotationTag(int kind) {
+    VisibilityAnnotationTag safeVat = safeVats.get(kind);
+    if (safeVat == null) {
+      safeVats.put(kind, safeVat = new VisibilityAnnotationTag(kind));
+    }
+    return safeVat;
+  }
+
+private String getElemAttr(AnnotationElem elem) {
+    StringBuilder result = new StringBuilder(".elem ");
+    switch (elem.getKind()) {
+      case 'Z': {
+        result.append(".bool_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        if (elem instanceof AnnotationIntElem) {
+          result.append(((AnnotationIntElem) elem).getValue());
+        } else {
+          if (((AnnotationBooleanElem) elem).getValue()) {
+            result.append(1);
+          } else {
+            result.append(0);
+          }
+        }
+        result.append("\n");
+        break;
+      }
+      case 'S': {
+        result.append(".short_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(((AnnotationIntElem) elem).getValue());
+        result.append("\n");
+        break;
+      }
+      case 'B': {
+        result.append(".byte_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(((AnnotationIntElem) elem).getValue());
+        result.append("\n");
+        break;
+      }
+      case 'C': {
+        result.append(".char_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(((AnnotationIntElem) elem).getValue());
+        result.append("\n");
+        break;
+      }
+      case 'I': {
+        result.append(".int_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(((AnnotationIntElem) elem).getValue());
+        result.append("\n");
+        break;
+      }
+      case 'J': {
+        result.append(".long_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(((AnnotationLongElem) elem).getValue());
+        result.append("\n");
+        break;
+      }
+      case 'F': {
+        result.append(".float_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(((AnnotationFloatElem) elem).getValue());
+        result.append("\n");
+        break;
+      }
+      case 'D': {
+        result.append(".doub_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(((AnnotationDoubleElem) elem).getValue());
+        result.append("\n");
+        break;
+      }
+      case 's': {
+        result.append(".str_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationStringElem) elem).getValue()));
+        result.append("\n");
+        break;
+      }
+      case 'e': {
+        result.append(".enum_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationEnumElem) elem).getTypeName()));
+        result.append(" ");
+        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationEnumElem) elem).getConstantName()));
+        result.append("\n");
+        break;
+      }
+      case 'c': {
+        result.append(".cls_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        result.append(soot.util.StringTools.getQuotedStringOf(((AnnotationClassElem) elem).getDesc()));
+        result.append("\n");
+        break;
+      }
+      case '[': {
+        result.append(".arr_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\" ").toString());
+        AnnotationArrayElem arrayElem = (AnnotationArrayElem) elem;
+        result.append("\n");
+        for (int i = 0; i < arrayElem.getNumValues(); i++) {
+          // result.append("\n");
+          result.append(getElemAttr(arrayElem.getValueAt(i)));
+        }
+        result.append(".end .arr_elem\n");
+        break;
+      }
+      case '@': {
+        result.append(".ann_kind ");
+        result.append(new StringBuilder().append("\"").append(elem.getName()).append("\"\n").toString());
+        AnnotationTag annot = ((AnnotationAnnotationElem) elem).getValue();
+        result.append(".annotation ");
+        result.append(soot.util.StringTools.getQuotedStringOf(annot.getType()) + "\n");
+        annot.getElems().forEach(ae -> result.append(getElemAttr(ae)));
+        result.append(".end .annotation\n");
+        result.append(".end .annot_elem\n");
+        break;
+      }
+      default: {
+        throw new RuntimeException("Unknown Elem Attr Kind: " + elem.getKind());
+      }
+    }
+    return result.toString();
+  }
+
+protected void assignColorsToLocals(Body body) {
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Assigning colors to locals...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Assigning colors to locals...").toString());
     }
 
     if (Options.v().time()) {
       Timers.v().packTimer.start();
     }
 
-    localToGroup = new HashMap<Local, Object>(body.getLocalCount() * 2 + 1, 0.7f);
-    groupToColorCount = new HashMap<Object, Integer>(body.getLocalCount() * 2 + 1, 0.7f);
-    localToColor = new HashMap<Local, Integer>(body.getLocalCount() * 2 + 1, 0.7f);
+    localToGroup = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
+    groupToColorCount = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
+    localToColor = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
 
     // Assign each local to a group, and set that group's color count to 0.
     {
@@ -647,9 +637,7 @@ public abstract class AbstractJasminClass {
 
         localToGroup.put(l, g);
 
-        if (!groupToColorCount.containsKey(g)) {
-          groupToColorCount.put(g, new Integer(0));
-        }
+        groupToColorCount.putIfAbsent(g, Integer.valueOf(0));
       }
     }
 
@@ -666,25 +654,24 @@ public abstract class AbstractJasminClass {
           Object group = localToGroup.get(l);
           int count = groupToColorCount.get(group).intValue();
 
-          localToColor.put(l, new Integer(count));
+          localToColor.put(l, Integer.valueOf(count));
 
           count++;
 
-          groupToColorCount.put(group, new Integer(count));
+          groupToColorCount.put(group, Integer.valueOf(count));
         }
       }
     }
 
   }
 
-  protected void emitMethod(SootMethod method) {
+protected void emitMethod(SootMethod method) {
     if (method.isPhantom()) {
       return;
     }
 
     // Emit prologue
-    emit(".method " + Modifier.toString(method.getModifiers()) + " " + method.getName()
-        + jasminDescriptorOf(method.makeRef()));
+    emit(new StringBuilder().append(".method ").append(Modifier.toString(method.getModifiers())).append(" ").append(method.getName()).append(jasminDescriptorOf(method.makeRef())).toString());
 
     Iterator<SootClass> throwsIt = method.getExceptions().iterator();
     while (throwsIt.hasNext()) {
@@ -700,7 +687,7 @@ public abstract class AbstractJasminClass {
     if (method.hasTag("SignatureTag")) {
       String sigAttr = ".signature_attr ";
       SignatureTag sigTag = (SignatureTag) method.getTag("SignatureTag");
-      sigAttr += "\"" + sigTag.getSignature() + "\"";
+      sigAttr += new StringBuilder().append("\"").append(sigTag.getSignature()).append("\"").toString();
       emit(sigAttr);
     }
     if (method.hasTag("AnnotationDefaultTag")) {
@@ -713,17 +700,17 @@ public abstract class AbstractJasminClass {
     Iterator<Tag> vit = method.getTags().iterator();
     while (vit.hasNext()) {
       Tag t = (Tag) vit.next();
-      if (t.getName().equals("VisibilityAnnotationTag")) {
+      if ("VisibilityAnnotationTag".equals(t.getName())) {
         emit(getVisibilityAnnotationAttr((VisibilityAnnotationTag) t));
       }
-      if (t.getName().equals("VisibilityParameterAnnotationTag")) {
+      if ("VisibilityParameterAnnotationTag".equals(t.getName())) {
         emit(getVisibilityParameterAnnotationAttr((VisibilityParameterAnnotationTag) t));
       }
     }
 
     if (method.isConcrete()) {
       if (!method.hasActiveBody()) {
-        throw new RuntimeException("method: " + method.getName() + " has no active body!");
+        throw new RuntimeException(new StringBuilder().append("method: ").append(method.getName()).append(" has no active body!").toString());
       } else {
         emitMethodBody(method);
       }
@@ -736,67 +723,65 @@ public abstract class AbstractJasminClass {
     while (it.hasNext()) {
       Tag tag = (Tag) it.next();
       if (tag instanceof Attribute) {
-        emit(".method_attribute " + tag.getName() + " \"" + new String(Base64.encode(tag.getValue())) + "\"");
+        emit(new StringBuilder().append(".method_attribute ").append(tag.getName()).append(" \"").append(new String(Base64.encode(tag.getValue()))).append("\"").toString());
       }
     }
   }
 
-  protected abstract void emitMethodBody(SootMethod method);
+protected abstract void emitMethodBody(SootMethod method);
 
-  public void print(PrintWriter out) {
-    for (String s : code) {
-      out.println(s);
-    }
+public void print(PrintWriter out) {
+    code.forEach(out::println);
   }
 
-  protected String doubleToString(DoubleConstant v) {
+protected String doubleToString(DoubleConstant v) {
     String s = v.toString();
 
-    if (s.equals("#Infinity")) {
+    if ("#Infinity".equals(s)) {
       s = "+DoubleInfinity";
-    } else if (s.equals("#-Infinity")) {
+    } else if ("#-Infinity".equals(s)) {
       s = "-DoubleInfinity";
-    } else if (s.equals("#NaN")) {
+    } else if ("#NaN".equals(s)) {
       s = "+DoubleNaN";
     }
     return s;
   }
 
-  protected String doubleToString(double d) {
-    String doubleString = new Double(d).toString();
+protected String doubleToString(double d) {
+    String doubleString = Double.toString(d);
 
-    if (doubleString.equals("NaN")) {
+    if ("NaN".equals(doubleString)) {
       return "+DoubleNaN";
-    } else if (doubleString.equals("Infinity")) {
+    } else if ("Infinity".equals(doubleString)) {
       return "+DoubleInfinity";
-    } else if (doubleString.equals("-Infinity")) {
+    } else if ("-Infinity".equals(doubleString)) {
       return "-DoubleInfinity";
     }
 
     return doubleString;
   }
 
-  protected String floatToString(FloatConstant v) {
+protected String floatToString(FloatConstant v) {
     String s = v.toString();
 
-    if (s.equals("#InfinityF")) {
+    if ("#InfinityF".equals(s)) {
       s = "+FloatInfinity";
-    } else if (s.equals("#-InfinityF")) {
+    } else if ("#-InfinityF".equals(s)) {
       s = "-FloatInfinity";
-    } else if (s.equals("#NaNF")) {
+    } else if ("#NaNF".equals(s)) {
       s = "+FloatNaN";
     }
     return s;
   }
 
-  protected String floatToString(float d) {
-    String floatString = new Float(d).toString();
+protected String floatToString(float d) {
+    String floatString = Float.toString(d);
 
-    if (floatString.equals("NaN")) {
+    if ("NaN".equals(floatString)) {
       return "+FloatNaN";
-    } else if (floatString.equals("Infinity")) {
+    } else if ("Infinity".equals(floatString)) {
       return "+FloatInfinity";
-    } else if (floatString.equals("-Infinity")) {
+    } else if ("-Infinity".equals(floatString)) {
       return "-FloatInfinity";
     }
 

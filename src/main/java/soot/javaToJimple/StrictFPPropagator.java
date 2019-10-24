@@ -30,31 +30,25 @@ public class StrictFPPropagator extends polyglot.visit.NodeVisitor {
     strict = val;
   }
 
-  public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
-    if (n instanceof polyglot.ast.ClassDecl) {
-      if (((polyglot.ast.ClassDecl) n).flags().isStrictFP()) {
+  @Override
+public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
+    if (n instanceof polyglot.ast.ClassDecl && ((polyglot.ast.ClassDecl) n).flags().isStrictFP()) {
         return new StrictFPPropagator(true);
       }
-    }
-    if (n instanceof polyglot.ast.LocalClassDecl) {
-      if (((polyglot.ast.LocalClassDecl) n).decl().flags().isStrictFP()) {
+    if (n instanceof polyglot.ast.LocalClassDecl && ((polyglot.ast.LocalClassDecl) n).decl().flags().isStrictFP()) {
         return new StrictFPPropagator(true);
       }
-    }
-    if (n instanceof polyglot.ast.MethodDecl) {
-      if (((polyglot.ast.MethodDecl) n).flags().isStrictFP()) {
+    if (n instanceof polyglot.ast.MethodDecl && ((polyglot.ast.MethodDecl) n).flags().isStrictFP()) {
         return new StrictFPPropagator(true);
       }
-    }
-    if (n instanceof polyglot.ast.ConstructorDecl) {
-      if (((polyglot.ast.ConstructorDecl) n).flags().isStrictFP()) {
+    if (n instanceof polyglot.ast.ConstructorDecl && ((polyglot.ast.ConstructorDecl) n).flags().isStrictFP()) {
         return new StrictFPPropagator(true);
       }
-    }
     return this;
   }
 
-  public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor nodeVisitor) {
+  @Override
+public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor nodeVisitor) {
 
     if (n instanceof polyglot.ast.MethodDecl) {
       polyglot.ast.MethodDecl decl = (polyglot.ast.MethodDecl) n;

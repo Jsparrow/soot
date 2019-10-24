@@ -54,27 +54,24 @@ class StmtTemplatePrinter implements StmtSwitch {
 
   private final ValueTemplatePrinter vtp; // text for expression
 
-  private List<Unit> jumpTargets = new ArrayList<Unit>();
+  private List<Unit> jumpTargets = new ArrayList<>();
 
   public StmtTemplatePrinter(TemplatePrinter templatePrinter, PatchingChain<Unit> units) {
     this.p = templatePrinter;
     this.vtp = new ValueTemplatePrinter(p);
 
-    for (Unit u : units) {
-      for (UnitBox ub : u.getUnitBoxes()) {
-        jumpTargets.add(ub.getUnit());
-      }
-    }
+    units.forEach(u -> u.getUnitBoxes().forEach(ub -> jumpTargets.add(ub.getUnit())));
 
-    final List<Unit> unitsList = new ArrayList<Unit>(units);
-    Collections.sort(jumpTargets, new Comparator<Unit>() {
-      public int compare(Unit o1, Unit o2) {
+    final List<Unit> unitsList = new ArrayList<>(units);
+    jumpTargets.sort(new Comparator<Unit>() {
+      @Override
+	public int compare(Unit o1, Unit o2) {
         return unitsList.indexOf(o1) - unitsList.indexOf(o2);
       }
     });
 
     for (int i = 0; i < jumpTargets.size(); i++) {
-      p.println("NopStmt jumpTarget" + i + "= Jimple.v().newNopStmt();");
+      p.println(new StringBuilder().append("NopStmt jumpTarget").append(i).append("= Jimple.v().newNopStmt();").toString());
     }
   }
 
@@ -100,7 +97,7 @@ class StmtTemplatePrinter implements StmtSwitch {
     }
     if (isJumpTarget(u)) {
       String nameOfJumpTarget = nameOfJumpTarget(u);
-      p.println("units.add(" + nameOfJumpTarget + ");");
+      p.println(new StringBuilder().append("units.add(").append(nameOfJumpTarget).append(");").toString());
     }
     p.print("units.add(");
     printFactoryMethodCall(stmtClassName, ops);
@@ -122,54 +119,58 @@ class StmtTemplatePrinter implements StmtSwitch {
     p.printNoIndent(")");
   }
 
-  public void caseThrowStmt(ThrowStmt stmt) {
+  @Override
+public void caseThrowStmt(ThrowStmt stmt) {
     String varName = printValueAssignment(stmt.getOp(), "op");
     printStmt(stmt, varName);
   }
 
-  public void caseTableSwitchStmt(TableSwitchStmt stmt) {
+  @Override
+public void caseTableSwitchStmt(TableSwitchStmt stmt) {
     p.openBlock();
     String varName = printValueAssignment(stmt.getKey(), "key");
 
     int lowIndex = stmt.getLowIndex();
-    p.println("int lowIndex=" + lowIndex + ";");
+    p.println(new StringBuilder().append("int lowIndex=").append(lowIndex).append(";").toString());
 
     int highIndex = stmt.getHighIndex();
-    p.println("int highIndex=" + highIndex + ";");
+    p.println(new StringBuilder().append("int highIndex=").append(highIndex).append(";").toString());
 
     p.println("List<Unit> targets = new LinkedList<Unit>();");
-    for (Unit s : stmt.getTargets()) {
-      String nameOfJumpTarget = nameOfJumpTarget(s);
-      p.println("targets.add(" + nameOfJumpTarget + ")");
-    }
+    stmt.getTargets().stream().map(this::nameOfJumpTarget).forEach(nameOfJumpTarget -> p.println(new StringBuilder().append("targets.add(").append(nameOfJumpTarget).append(")").toString()));
 
     Unit defaultTarget = stmt.getDefaultTarget();
-    p.println("Unit defaultTarget = " + nameOfJumpTarget(defaultTarget) + ";");
+    p.println(new StringBuilder().append("Unit defaultTarget = ").append(nameOfJumpTarget(defaultTarget)).append(";").toString());
 
     printStmt(stmt, varName, "lowIndex", "highIndex", "targets", "defaultTarget");
 
     p.closeBlock();
   }
 
-  public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
+  @Override
+public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
     printStmt(stmt);
   }
 
-  public void caseReturnStmt(ReturnStmt stmt) {
+  @Override
+public void caseReturnStmt(ReturnStmt stmt) {
     String varName = printValueAssignment(stmt.getOp(), "retVal");
     printStmt(stmt, varName);
   }
 
-  public void caseRetStmt(RetStmt stmt) {
+  @Override
+public void caseRetStmt(RetStmt stmt) {
     String varName = printValueAssignment(stmt.getStmtAddress(), "stmtAddress");
     printStmt(stmt, varName);
   }
 
-  public void caseNopStmt(NopStmt stmt) {
+  @Override
+public void caseNopStmt(NopStmt stmt) {
     printStmt(stmt);
   }
 
-  public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
+  @Override
+public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
     p.openBlock();
 
     String keyVarName = printValueAssignment(stmt.getKey(), "key");
@@ -181,41 +182,41 @@ class StmtTemplatePrinter implements StmtSwitch {
       c.apply(vtp);
       i++;
 
-      p.println("lookupValues.add(lookupValue" + i + ");");
+      p.println(new StringBuilder().append("lookupValues.add(lookupValue").append(i).append(");").toString());
     }
 
     p.println("List<Unit> targets = new LinkedList<Unit>();");
-    for (Unit u : stmt.getTargets()) {
-      String nameOfJumpTarget = nameOfJumpTarget(u);
-      p.println("targets.add(" + nameOfJumpTarget + ")");
-    }
+    stmt.getTargets().stream().map(this::nameOfJumpTarget).forEach(nameOfJumpTarget -> p.println(new StringBuilder().append("targets.add(").append(nameOfJumpTarget).append(")").toString()));
 
     Unit defaultTarget = stmt.getDefaultTarget();
-    p.println("Unit defaultTarget=" + defaultTarget.toString() + ";");
+    p.println(new StringBuilder().append("Unit defaultTarget=").append(defaultTarget.toString()).append(";").toString());
 
     printStmt(stmt, keyVarName, "lookupValues", "targets", "defaultTarget");
 
     p.closeBlock();
   }
 
-  public void caseInvokeStmt(InvokeStmt stmt) {
+  @Override
+public void caseInvokeStmt(InvokeStmt stmt) {
     String varName = printValueAssignment(stmt.getInvokeExpr(), "ie");
     printStmt(stmt, varName);
   }
 
-  public void caseIfStmt(IfStmt stmt) {
+  @Override
+public void caseIfStmt(IfStmt stmt) {
     String varName = printValueAssignment(stmt.getCondition(), "condition");
 
     Unit target = stmt.getTarget();
 
     vtp.suggestVariableName("target");
     String targetName = vtp.getLastAssignedVarName();
-    p.println("Unit " + targetName + "=" + nameOfJumpTarget(target) + ";");
+    p.println(new StringBuilder().append("Unit ").append(targetName).append("=").append(nameOfJumpTarget(target)).append(";").toString());
 
     printStmt(stmt, varName, targetName);
   }
 
-  public void caseIdentityStmt(IdentityStmt stmt) {
+  @Override
+public void caseIdentityStmt(IdentityStmt stmt) {
     String varName = printValueAssignment(stmt.getLeftOp(), "lhs");
 
     String varName2 = printValueAssignment(stmt.getRightOp(), "idRef");
@@ -223,40 +224,46 @@ class StmtTemplatePrinter implements StmtSwitch {
     printStmt(stmt, varName, varName2);
   }
 
-  public void caseGotoStmt(GotoStmt stmt) {
+  @Override
+public void caseGotoStmt(GotoStmt stmt) {
     Unit target = stmt.getTarget();
 
     vtp.suggestVariableName("target");
     String targetName = vtp.getLastAssignedVarName();
-    p.println("Unit " + targetName + "=" + nameOfJumpTarget(target) + ";");
+    p.println(new StringBuilder().append("Unit ").append(targetName).append("=").append(nameOfJumpTarget(target)).append(";").toString());
 
     printStmt(stmt, targetName);
   }
 
-  public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
+  @Override
+public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
     String varName = printValueAssignment(stmt.getOp(), "monitor");
 
     printStmt(stmt, varName);
   }
 
-  public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
+  @Override
+public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
     String varName = printValueAssignment(stmt.getOp(), "monitor");
 
     printStmt(stmt, varName);
   }
 
-  public void caseBreakpointStmt(BreakpointStmt stmt) {
+  @Override
+public void caseBreakpointStmt(BreakpointStmt stmt) {
     printStmt(stmt);
   }
 
-  public void caseAssignStmt(AssignStmt stmt) {
+  @Override
+public void caseAssignStmt(AssignStmt stmt) {
     String varName = printValueAssignment(stmt.getLeftOp(), "lhs");
     String varName2 = printValueAssignment(stmt.getRightOp(), "rhs");
 
     printStmt(stmt, varName, varName2);
   }
 
-  public void defaultCase(Object obj) {
+  @Override
+public void defaultCase(Object obj) {
     throw new InternalError("should never be called");
   }
 

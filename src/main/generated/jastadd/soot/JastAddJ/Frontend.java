@@ -58,8 +58,9 @@ public class Frontend extends java.lang.Object {
       try {
         for(Iterator iter = files.iterator(); iter.hasNext(); ) {
           String name = (String)iter.next();
-          if(!new File(name).exists())
-            System.err.println("WARNING: file \"" + name + "\" does not exist");
+          if(!new File(name).exists()) {
+			logger.error(new StringBuilder().append("WARNING: file \"").append(name).append("\" does not exist").toString());
+		}
           program.addSourceFile(name);
         }
 
@@ -71,29 +72,30 @@ public class Frontend extends java.lang.Object {
               Collection warnings = new LinkedList();
               // compute static semantic errors when there are no parse errors
               // or the recover from parse errors option is specified
-              if(errors.isEmpty() || program.options().hasOption("-recover"))
-                unit.errorCheck(errors, warnings);
+              if(errors.isEmpty() || program.options().hasOption("-recover")) {
+				unit.errorCheck(errors, warnings);
+			}
               if(!errors.isEmpty()) {
                 processErrors(errors, unit);
                 return false;
               }
               else {
-               if(!warnings.isEmpty())
-                 processWarnings(warnings, unit);
+               if(!warnings.isEmpty()) {
+				processWarnings(warnings, unit);
+			}
                 processNoErrors(unit);
               }
             } catch (Throwable t) {
-              System.err.println("Errors:");
-              System.err.println("Fatal exception while processing " +
-                  unit.pathName() + ":");
+              logger.error("Errors:");
+              logger.error(new StringBuilder().append("Fatal exception while processing ").append(unit.pathName()).append(":").toString());
               logger.error(t.getMessage(), t);
               return false;
             }
           }
         }
       } catch (Throwable t) {
-        System.err.println("Errors:");
-        System.err.println("Fatal exception:");
+        logger.error("Errors:");
+        logger.error("Fatal exception:");
         logger.error(t.getMessage(), t);
         return false;
       }
@@ -136,17 +138,17 @@ public class Frontend extends java.lang.Object {
 
 
     protected void processErrors(Collection errors, CompilationUnit unit) {
-      System.err.println("Errors:");
+      logger.error("Errors:");
       for(Iterator iter2 = errors.iterator(); iter2.hasNext(); ) {
-        System.err.println(iter2.next());
+        logger.error(String.valueOf(iter2.next()));
       }
     }
 
 
     protected void processWarnings(Collection warnings, CompilationUnit unit) {
-      System.err.println("Warnings:");
+      logger.error("Warnings:");
       for(Iterator iter2 = warnings.iterator(); iter2.hasNext(); ) {
-        System.err.println(iter2.next());
+        logger.error(String.valueOf(iter2.next()));
       }
     }
 
@@ -158,30 +160,22 @@ public class Frontend extends java.lang.Object {
 
     protected void printUsage() {
       printLongVersion();
-      System.out.println(
-          "\n" + name() + "\n\n" +
-          "Usage: java " + name() + " <options> <source files>\n" +
-          "  -verbose                  Output messages about what the compiler is doing\n" +
-          "  -classpath <path>         Specify where to find user class files\n" +
-          "  -sourcepath <path>        Specify where to find input source files\n" + 
-          "  -bootclasspath <path>     Override location of bootstrap class files\n" + 
-          "  -extdirs <dirs>           Override location of installed extensions\n" +
-          "  -d <directory>            Specify where to place generated class files\n" +
-          "  -help                     Print a synopsis of standard options\n" +
-          "  -version                  Print version information\n"
+      logger.info(
+          new StringBuilder().append("\n").append(name()).append("\n\n").append("Usage: java ").append(name()).append(" <options> <source files>\n").append("  -verbose                  Output messages about what the compiler is doing\n")
+				.append("  -classpath <path>         Specify where to find user class files\n").append("  -sourcepath <path>        Specify where to find input source files\n").append("  -bootclasspath <path>     Override location of bootstrap class files\n").append("  -extdirs <dirs>           Override location of installed extensions\n").append("  -d <directory>            Specify where to place generated class files\n").append("  -help                     Print a synopsis of standard options\n").append("  -version                  Print version information\n").toString()
           );
     }
 
 
 
     protected void printLongVersion() {
-      System.out.println(name() + " " + url() + " Version " + version());
+      logger.info(new StringBuilder().append(name()).append(" ").append(url()).append(" Version ").append(version()).toString());
     }
 
 
 
     protected void printVersion() {
-      System.out.println(name() + " " + version());
+      logger.info(new StringBuilder().append(name()).append(" ").append(version()).toString());
     }
 
 

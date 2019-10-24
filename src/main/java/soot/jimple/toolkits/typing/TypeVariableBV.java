@@ -86,7 +86,8 @@ class TypeVariableBV implements Comparable<Object> {
     }
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     if (rep != this) {
       return ecr().hashCode();
     }
@@ -94,7 +95,8 @@ class TypeVariableBV implements Comparable<Object> {
     return id;
   }
 
-  public boolean equals(Object obj) {
+  @Override
+public boolean equals(Object obj) {
     if (rep != this) {
       return ecr().equals(obj);
     }
@@ -116,7 +118,8 @@ class TypeVariableBV implements Comparable<Object> {
     return true;
   }
 
-  public int compareTo(Object o) {
+  @Override
+public int compareTo(Object o) {
     if (rep != this) {
       return ecr().compareTo(o);
     }
@@ -205,35 +208,34 @@ class TypeVariableBV implements Comparable<Object> {
     }
 
     // Validate relations.
-    if (type != null) {
-      for (BitSetIterator i = parents.iterator(); i.hasNext();) {
+	if (type == null) {
+		return;
+	}
+	for (BitSetIterator i = parents.iterator(); i.hasNext();) {
         TypeVariableBV parent = resolver.typeVariableForId(i.next()).ecr();
 
-        if (parent.type != null) {
-          if (!type.hasAncestor(parent.type)) {
+        boolean condition = parent.type != null && !type.hasAncestor(parent.type);
+		if (condition) {
             if (DEBUG) {
-              logger.debug("" + parent.type + " is not a parent of " + type);
+              logger.debug(new StringBuilder().append("").append(parent.type).append(" is not a parent of ").append(type).toString());
             }
 
             error("Type Error(2): Parent type is not a valid ancestor.");
           }
-        }
       }
-
-      for (BitSetIterator i = children.iterator(); i.hasNext();) {
+	for (BitSetIterator i = children.iterator(); i.hasNext();) {
         TypeVariableBV child = resolver.typeVariableForId(i.next()).ecr();
 
-        if (child.type != null) {
-          if (!type.hasDescendant(child.type)) {
+        boolean condition1 = child.type != null && !type.hasDescendant(child.type);
+		if (condition1) {
             if (DEBUG) {
-              logger.debug("" + child.type + "(" + child + ") is not a child of " + type + "(" + this + ")");
+              logger.debug(new StringBuilder().append("").append(child.type).append("(").append(child).append(") is not a child of ").append(type)
+					.append("(").append(this).append(")").toString());
             }
 
             error("Type Error(3): Child type is not a valid descendant.");
           }
-        }
       }
-    }
   }
 
   public void removeIndirectRelations() {
@@ -377,10 +379,11 @@ class TypeVariableBV implements Comparable<Object> {
       return;
     }
 
-    if (element == null) {
-      element = resolver.typeVariable();
-      element.array = this;
-    }
+    if (element != null) {
+		return;
+	}
+	element = resolver.typeVariable();
+	element.array = this;
   }
 
   public TypeVariableBV element() {
@@ -465,7 +468,7 @@ class TypeVariableBV implements Comparable<Object> {
 
       if (element != null) {
         if (!approx.hasElement()) {
-          logger.debug("*** " + this + " ***");
+          logger.debug(new StringBuilder().append("*** ").append(this).append(" ***").toString());
 
           error("Type Error(4)");
         }
@@ -594,21 +597,19 @@ class TypeVariableBV implements Comparable<Object> {
       if (var.depth() == depth) {
         element().addParent(var.element());
       } else if (var.depth() == 0) {
-        if (var.type() == null) {
-          // hack for J2ME library, reported by Stephen Cheng
-          if (!Options.v().j2me()) {
+        boolean condition = var.type() == null && !Options.v().j2me();
+		// hack for J2ME library, reported by Stephen Cheng
+		if (condition) {
             var.addChild(resolver.typeVariable(resolver.hierarchy().CLONEABLE));
             var.addChild(resolver.typeVariable(resolver.hierarchy().SERIALIZABLE));
           }
-        }
       } else {
-        if (var.type() == null) {
-          // hack for J2ME library, reported by Stephen Cheng
-          if (!Options.v().j2me()) {
+        boolean condition1 = var.type() == null && !Options.v().j2me();
+		// hack for J2ME library, reported by Stephen Cheng
+		if (condition1) {
             var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.lang.Cloneable"), var.depth())));
             var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.io.Serializable"), var.depth())));
           }
-        }
       }
     }
 
@@ -619,12 +620,13 @@ class TypeVariableBV implements Comparable<Object> {
     }
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (rep != this) {
       return ecr().toString();
     }
 
-    StringBuffer s = new StringBuffer();
+    StringBuilder s = new StringBuilder();
     s.append(",[parents:");
 
     {
@@ -656,8 +658,8 @@ class TypeVariableBV implements Comparable<Object> {
     }
 
     s.append("]");
-    return "[id:" + id + ",depth:" + depth + ((type != null) ? (",type:" + type) : "") + ",approx:" + approx + s
-        + (element == null ? "" : ",arrayof:" + element.id()) + "]";
+    return new StringBuilder().append("[id:").append(id).append(",depth:").append(depth).append((type != null) ? (",type:" + type) : "")
+			.append(",approx:").append(approx).append(s).append(element == null ? "" : ",arrayof:" + element.id()).append("]").toString();
   }
 
 }

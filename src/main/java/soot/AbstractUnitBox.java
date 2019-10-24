@@ -29,13 +29,16 @@ package soot;
 public abstract class AbstractUnitBox implements UnitBox {
   protected Unit unit;
 
-  public abstract boolean canContainUnit(Unit u);
+  @Override
+public abstract boolean canContainUnit(Unit u);
 
-  public boolean isBranchTarget() {
+  @Override
+public boolean isBranchTarget() {
     return true;
   }
 
-  public void setUnit(Unit unit) {
+  @Override
+public void setUnit(Unit unit) {
     if (!canContainUnit(unit)) {
       throw new RuntimeException("attempting to put invalid unit in UnitBox");
     }
@@ -54,11 +57,13 @@ public abstract class AbstractUnitBox implements UnitBox {
     }
   }
 
-  public Unit getUnit() {
+  @Override
+public Unit getUnit() {
     return unit;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.startUnitBox(this);
     up.unitRef(unit, isBranchTarget());
     up.endUnitBox(this);

@@ -34,6 +34,8 @@ import soot.tagkit.AnnotationFloatElem;
 import soot.tagkit.AnnotationIntElem;
 import soot.tagkit.AnnotationLongElem;
 import soot.tagkit.AnnotationStringElem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -45,7 +47,121 @@ import soot.tagkit.AnnotationStringElem;
  */
 public class AnnotationElemSwitch extends AbstractAnnotationElemTypeSwitch {
 
-  /**
+  private static final Logger logger = LoggerFactory.getLogger(AnnotationElemSwitch.class);
+
+@Override
+  public void caseAnnotationAnnotationElem(AnnotationAnnotationElem v) {
+    AnnotationInstanceCreator aic = new AnnotationInstanceCreator();
+
+    Object result = aic.create(v.getValue());
+
+    setResult(new AnnotationElemResult<Object>(v.getName(), result));
+  }
+
+@Override
+  public void caseAnnotationArrayElem(AnnotationArrayElem v) {
+
+    /*
+     * for arrays, apply a new AnnotationElemSwitch to every array element and collect the results. Note that the component
+     * type of the result is unknown here, s.t. object has to be used.
+     */
+    Object[] result = new Object[v.getNumValues()];
+
+    int i = 0;
+    for (AnnotationElem elem : v.getValues()) {
+      AnnotationElemSwitch sw = new AnnotationElemSwitch();
+      elem.apply(sw);
+      result[i] = ((AnnotationElemResult<?>) sw.getResult()).getValue();
+
+      i++;
+    }
+
+    setResult(new AnnotationElemResult<Object[]>(v.getName(), result));
+
+  }
+
+@Override
+  public void caseAnnotationBooleanElem(AnnotationBooleanElem v) {
+    setResult(new AnnotationElemResult<Boolean>(v.getName(), v.getValue()));
+
+  }
+
+@Override
+  public void caseAnnotationClassElem(AnnotationClassElem v) {
+    try {
+      Class<?> clazz = ClassLoaderUtils.loadClass(v.getDesc().replace('/', '.'));
+      setResult(new AnnotationElemResult<Class<?>>(v.getName(), clazz));
+    } catch (ClassNotFoundException e) {
+      logger.error(e.getMessage(), e);
+	throw new RuntimeException("Could not load class: " + v.getDesc());
+    }
+
+  }
+
+@Override
+  public void caseAnnotationDoubleElem(AnnotationDoubleElem v) {
+    setResult(new AnnotationElemResult<Double>(v.getName(), v.getValue()));
+  }
+
+@Override
+  public void caseAnnotationEnumElem(AnnotationEnumElem v) {
+    try {
+      Class<?> clazz = ClassLoaderUtils.loadClass(v.getTypeName().replace('/', '.'));
+
+      // find out which enum constant is used.
+      Enum<?> result = null;
+      for (Object o : clazz.getEnumConstants()) {
+        try {
+          Enum<?> t = (Enum<?>) o;
+          if (t.name().equals(v.getConstantName())) {
+            result = t;
+            break;
+          }
+        } catch (ClassCastException e) {
+          logger.error(e.getMessage(), e);
+		throw new RuntimeException(new StringBuilder().append("Class ").append(v.getTypeName()).append(" is no Enum").toString());
+        }
+      }
+
+      if (result == null) {
+        throw new RuntimeException(new StringBuilder().append(v.getConstantName()).append(" is not a EnumConstant of ").append(v.getTypeName()).toString());
+      }
+
+      setResult(new AnnotationElemResult<Enum<?>>(v.getName(), result));
+
+    } catch (ClassNotFoundException e) {
+      logger.error(e.getMessage(), e);
+	throw new RuntimeException("Could not load class: " + v.getTypeName());
+    }
+
+  }
+
+@Override
+  public void caseAnnotationFloatElem(AnnotationFloatElem v) {
+    setResult(new AnnotationElemResult<Float>(v.getName(), v.getValue()));
+  }
+
+@Override
+  public void caseAnnotationIntElem(AnnotationIntElem v) {
+    setResult(new AnnotationElemResult<Integer>(v.getName(), v.getValue()));
+  }
+
+@Override
+  public void caseAnnotationLongElem(AnnotationLongElem v) {
+    setResult(new AnnotationElemResult<Long>(v.getName(), v.getValue()));
+  }
+
+@Override
+  public void caseAnnotationStringElem(AnnotationStringElem v) {
+    setResult(new AnnotationElemResult<String>(v.getName(), v.getValue()));
+  }
+
+@Override
+  public void defaultCase(Object object) {
+    throw new RuntimeException("Unexpected AnnotationElem");
+  }
+
+/**
    *
    * A helper class to map method name and result.
    *
@@ -71,115 +187,6 @@ public class AnnotationElemSwitch extends AbstractAnnotationElemTypeSwitch {
     public V getValue() {
       return value;
     }
-  }
-
-  @Override
-  public void caseAnnotationAnnotationElem(AnnotationAnnotationElem v) {
-    AnnotationInstanceCreator aic = new AnnotationInstanceCreator();
-
-    Object result = aic.create(v.getValue());
-
-    setResult(new AnnotationElemResult<Object>(v.getName(), result));
-  }
-
-  @Override
-  public void caseAnnotationArrayElem(AnnotationArrayElem v) {
-
-    /*
-     * for arrays, apply a new AnnotationElemSwitch to every array element and collect the results. Note that the component
-     * type of the result is unknown here, s.t. object has to be used.
-     */
-    Object[] result = new Object[v.getNumValues()];
-
-    int i = 0;
-    for (AnnotationElem elem : v.getValues()) {
-      AnnotationElemSwitch sw = new AnnotationElemSwitch();
-      elem.apply(sw);
-      result[i] = ((AnnotationElemResult<?>) sw.getResult()).getValue();
-
-      i++;
-    }
-
-    setResult(new AnnotationElemResult<Object[]>(v.getName(), result));
-
-  }
-
-  @Override
-  public void caseAnnotationBooleanElem(AnnotationBooleanElem v) {
-    setResult(new AnnotationElemResult<Boolean>(v.getName(), v.getValue()));
-
-  }
-
-  @Override
-  public void caseAnnotationClassElem(AnnotationClassElem v) {
-    try {
-      Class<?> clazz = ClassLoaderUtils.loadClass(v.getDesc().replace('/', '.'));
-      setResult(new AnnotationElemResult<Class<?>>(v.getName(), clazz));
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException("Could not load class: " + v.getDesc());
-    }
-
-  }
-
-  @Override
-  public void caseAnnotationDoubleElem(AnnotationDoubleElem v) {
-    setResult(new AnnotationElemResult<Double>(v.getName(), v.getValue()));
-  }
-
-  @Override
-  public void caseAnnotationEnumElem(AnnotationEnumElem v) {
-    try {
-      Class<?> clazz = ClassLoaderUtils.loadClass(v.getTypeName().replace('/', '.'));
-
-      // find out which enum constant is used.
-      Enum<?> result = null;
-      for (Object o : clazz.getEnumConstants()) {
-        try {
-          Enum<?> t = (Enum<?>) o;
-          if (t.name().equals(v.getConstantName())) {
-            result = t;
-            break;
-          }
-        } catch (ClassCastException e) {
-          throw new RuntimeException("Class " + v.getTypeName() + " is no Enum");
-        }
-      }
-
-      if (result == null) {
-        throw new RuntimeException(v.getConstantName() + " is not a EnumConstant of " + v.getTypeName());
-      }
-
-      setResult(new AnnotationElemResult<Enum<?>>(v.getName(), result));
-
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException("Could not load class: " + v.getTypeName());
-    }
-
-  }
-
-  @Override
-  public void caseAnnotationFloatElem(AnnotationFloatElem v) {
-    setResult(new AnnotationElemResult<Float>(v.getName(), v.getValue()));
-  }
-
-  @Override
-  public void caseAnnotationIntElem(AnnotationIntElem v) {
-    setResult(new AnnotationElemResult<Integer>(v.getName(), v.getValue()));
-  }
-
-  @Override
-  public void caseAnnotationLongElem(AnnotationLongElem v) {
-    setResult(new AnnotationElemResult<Long>(v.getName(), v.getValue()));
-  }
-
-  @Override
-  public void caseAnnotationStringElem(AnnotationStringElem v) {
-    setResult(new AnnotationElemResult<String>(v.getName(), v.getValue()));
-  }
-
-  @Override
-  public void defaultCase(Object object) {
-    throw new RuntimeException("Unexpected AnnotationElem");
   }
 
 }

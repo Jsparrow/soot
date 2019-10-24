@@ -18,31 +18,87 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @production BoundFieldAccess : {@link VarAccess} ::= <span class="component">&lt;FieldDeclaration:FieldDeclaration&gt;</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BoundNames.ast:6
  */
-public class BoundFieldAccess extends VarAccess implements Cloneable {
+public class BoundFieldAccess extends VarAccess {
+  private static final Logger logger = LoggerFactory.getLogger(BoundFieldAccess.class);
+/**
+   * @apilevel internal
+   * @ast method 
+   * 
+   */
+  
   /**
+   * @apilevel internal
+   */
+  protected FieldDeclaration tokenFieldDeclaration_FieldDeclaration;
+/**
+   * @apilevel internal
+   */
+  protected boolean decl_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected Variable decl_value;
+/**
+   * @ast method 
+   * @aspect BoundNames
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BoundNames.jrag:68
+   */
+  public BoundFieldAccess(FieldDeclaration f) {
+    this(f.name(), f);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public BoundFieldAccess() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public BoundFieldAccess(String p0, FieldDeclaration p1) {
+    setID(p0);
+    setFieldDeclaration(p1);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public BoundFieldAccess(beaver.Symbol p0, FieldDeclaration p1) {
+    setID(p0);
+    setFieldDeclaration(p1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     decl_computed = false;
     decl_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public BoundFieldAccess clone() throws CloneNotSupportedException {
     BoundFieldAccess node = (BoundFieldAccess)super.clone();
     node.decl_computed = false;
@@ -51,29 +107,33 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public BoundFieldAccess copy() {
     try {
       BoundFieldAccess node = (BoundFieldAccess) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public BoundFieldAccess fullCopy() {
     BoundFieldAccess tree = (BoundFieldAccess) copy();
     if (children != null) {
@@ -87,15 +147,7 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
     }
     return tree;
   }
-  /**
-   * @ast method 
-   * @aspect BoundNames
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BoundNames.jrag:68
-   */
-  public BoundFieldAccess(FieldDeclaration f) {
-    this(f.name(), f);
-  }
-  /**
+/**
    * @ast method 
    * @aspect BoundNames
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BoundNames.jrag:73
@@ -103,16 +155,7 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
   public boolean isExactVarAccess() {
     return false;
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public BoundFieldAccess() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -120,74 +163,65 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public BoundFieldAccess(String p0, FieldDeclaration p1) {
-    setID(p0);
-    setFieldDeclaration(p1);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public BoundFieldAccess(beaver.Symbol p0, FieldDeclaration p1) {
-    setID(p0);
-    setFieldDeclaration(p1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 0;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the lexeme ID.
    * @param value The new value for the lexeme ID.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setID(String value) {
+  @Override
+public void setID(String value) {
     tokenString_ID = value;
   }
-  /**
+/**
    * JastAdd-internal setter for lexeme ID using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
-  public void setID(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setID is only valid for String lexemes");
+  @Override
+public void setID(beaver.Symbol symbol) {
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setID is only valid for String lexemes");
+	}
     tokenString_ID = (String)symbol.value;
     IDstart = symbol.getStart();
     IDend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme ID.
    * @return The value for the lexeme ID.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public String getID() {
+  @Override
+public String getID() {
     return tokenString_ID != null ? tokenString_ID : "";
   }
-  /**
+/**
    * Replaces the lexeme FieldDeclaration.
    * @param value The new value for the lexeme FieldDeclaration.
    * @apilevel high-level
@@ -197,17 +231,7 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
   public void setFieldDeclaration(FieldDeclaration value) {
     tokenFieldDeclaration_FieldDeclaration = value;
   }
-  /**
-   * @apilevel internal
-   * @ast method 
-   * 
-   */
-  
-  /**
-   * @apilevel internal
-   */
-  protected FieldDeclaration tokenFieldDeclaration_FieldDeclaration;
-  /**
+/**
    * Retrieves the value for the lexeme FieldDeclaration.
    * @return The value for the lexeme FieldDeclaration.
    * @apilevel high-level
@@ -217,20 +241,13 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
   public FieldDeclaration getFieldDeclaration() {
     return tokenFieldDeclaration_FieldDeclaration;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean decl_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected Variable decl_value;
-  /**
+/**
    * @attribute syn
    * @aspect BoundNames
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/BoundNames.jrag:72
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Variable decl() {
     if(decl_computed) {
       return decl_value;
@@ -239,17 +256,20 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     decl_value = decl_compute();
-      if(isFinal && num == state().boundariesCrossed) decl_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		decl_computed = true;
+	}
     return decl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private Variable decl_compute() {  return getFieldDeclaration();  }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

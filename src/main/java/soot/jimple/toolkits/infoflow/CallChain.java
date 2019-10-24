@@ -51,7 +51,7 @@ public class CallChain {
 
   // reconstructs the whole chain
   public List<Edge> getEdges() {
-    List<Edge> ret = new LinkedList<Edge>();
+    List<Edge> ret = new LinkedList<>();
     if (edge != null) {
       ret.add(edge);
     }
@@ -89,7 +89,8 @@ public class CallChain {
     return new CallChain(edge, next.cloneAndExtend(extension));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     if (next == null) {
       return new CallChain(edge, null);
     }
@@ -97,7 +98,8 @@ public class CallChain {
     return new CallChain(edge, (CallChain) next.clone());
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     if (o instanceof CallChain) {
       CallChain other = (CallChain) o;
       if (edge == other.edge

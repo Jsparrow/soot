@@ -30,9 +30,12 @@ import polyglot.util.CodeWriter;
 import polyglot.visit.NodeVisitor;
 
 import soot.G;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ASTMetric extends NodeVisitor implements MetricInterface {
-  polyglot.ast.Node astNode;
+  private static final Logger logger = LoggerFactory.getLogger(ASTMetric.class);
+polyglot.ast.Node astNode;
   String className = null; // name of Class being currently processed
 
   public ASTMetric(polyglot.ast.Node astNode) {
@@ -43,10 +46,11 @@ public abstract class ASTMetric extends NodeVisitor implements MetricInterface {
   /*
    * Taking care of the change in classes within a polyglot ast
    */
-  public final NodeVisitor enter(Node n) {
+  @Override
+public final NodeVisitor enter(Node n) {
     if (n instanceof ClassDecl) {
       className = ((ClassDecl) n).name();
-      System.out.println("Starting processing: " + className);
+      logger.info("Starting processing: " + className);
     }
     return this;
   }
@@ -57,13 +61,14 @@ public abstract class ASTMetric extends NodeVisitor implements MetricInterface {
    * This is done by invoking the addMetrics abstract method
    */
 
-  public final Node leave(Node parent, Node old, Node n, NodeVisitor v) {
+  @Override
+public final Node leave(Node parent, Node old, Node n, NodeVisitor v) {
     if (n instanceof ClassDecl) {
       if (className == null) {
         throw new RuntimeException("className is null");
       }
 
-      System.out.println("Done with class " + className);
+      logger.info("Done with class " + className);
 
       // get the classData object for this class
       ClassData data = getClassData();
@@ -80,14 +85,16 @@ public abstract class ASTMetric extends NodeVisitor implements MetricInterface {
   /*
    * Should be used to execute the traversal which will find the metric being calculated
    */
-  public final void execute() {
+  @Override
+public final void execute() {
     astNode.visit(this);
     // Testing testing testing
-    System.out.println("\n\n\n PRETTY P{RINTING");
-    if (this instanceof StmtSumWeightedByDepth) {
-      metricPrettyPrinter p = new metricPrettyPrinter(this);
-      p.printAst(astNode, new CodeWriter(System.out, 80));
-    }
+    logger.info("\n\n\n PRETTY P{RINTING");
+    if (!(this instanceof StmtSumWeightedByDepth)) {
+		return;
+	}
+	metricPrettyPrinter p = new metricPrettyPrinter(this);
+	p.printAst(astNode, new CodeWriter(System.out, 80));
   }
 
   public void printAstMetric(Node n, CodeWriter w) {

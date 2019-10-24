@@ -37,7 +37,7 @@ import soot.util.dot.DotGraph;
 public class ICFGDotVisualizer {
   private static final Logger logger = LoggerFactory.getLogger(ICFGDotVisualizer.class);
   private DotGraph dotIcfg = new DotGraph("");
-  private ArrayList<Unit> visited = new ArrayList<Unit>();
+  private ArrayList<Unit> visited = new ArrayList<>();
   String fileName;
   Unit startPoint;
   InterproceduralCFG<Unit, SootMethod> icfg;
@@ -57,14 +57,14 @@ public class ICFGDotVisualizer {
     this.fileName = fileName;
     this.startPoint = startPoint;
     this.icfg = icfg;
-    if (this.fileName == null || this.fileName == "") {
-      System.out.println("Please provide a vaid filename");
+    if (this.fileName == null || this.fileName.equals("")) {
+      logger.info("Please provide a vaid filename");
     }
     if (this.startPoint == null) {
-      System.out.println("startPoint is null!");
+      logger.info("startPoint is null!");
     }
     if (this.icfg == null) {
-      System.out.println("ICFG is null!");
+      logger.info("ICFG is null!");
     }
 
   }
@@ -77,9 +77,9 @@ public class ICFGDotVisualizer {
     if (this.startPoint != null && this.icfg != null && this.fileName != null) {
       graphTraverse(this.startPoint, this.icfg);
       dotIcfg.plot(this.fileName);
-      logger.debug("" + fileName + DotGraph.DOT_EXTENSION);
+      logger.debug(new StringBuilder().append("").append(fileName).append(DotGraph.DOT_EXTENSION).toString());
     } else {
-      System.out.println("Parameters not properly initialized!");
+      logger.info("Parameters not properly initialized!");
     }
 
   }
@@ -88,11 +88,11 @@ public class ICFGDotVisualizer {
     List<Unit> currentSuccessors = icfg.getSuccsOf(startPoint);
 
     if (currentSuccessors.size() == 0) {
-      System.out.println("Traversal complete");
+      logger.info("Traversal complete");
       return;
     } else {
-      for (Unit succ : currentSuccessors) {
-        System.out.println("Succesor: " + succ.toString());
+      currentSuccessors.forEach(succ -> {
+        logger.info("Succesor: " + succ.toString());
         if (!visited.contains(succ)) {
           dotIcfg.drawEdge(startPoint.toString(), succ.toString());
           visited.add(succ);
@@ -101,7 +101,7 @@ public class ICFGDotVisualizer {
         } else {
           dotIcfg.drawEdge(startPoint.toString(), succ.toString());
         }
-      }
+      });
     }
   }
 }

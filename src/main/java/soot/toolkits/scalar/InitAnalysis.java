@@ -40,22 +40,20 @@ public class InitAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>> {
 
   public InitAnalysis(UnitGraph g) {
     super(g);
-    allLocals = new ArraySparseSet<Local>();
-    for (Local loc : g.getBody().getLocals()) {
-      allLocals.add(loc);
-    }
+    allLocals = new ArraySparseSet<>();
+    g.getBody().getLocals().forEach(allLocals::add);
 
     doAnalysis();
   }
 
   @Override
   protected FlowSet<Local> entryInitialFlow() {
-    return new ArraySparseSet<Local>();
+    return new ArraySparseSet<>();
   }
 
   @Override
   protected FlowSet<Local> newInitialFlow() {
-    FlowSet<Local> ret = new ArraySparseSet<Local>();
+    FlowSet<Local> ret = new ArraySparseSet<>();
     allLocals.copy(ret);
     return ret;
   }
@@ -64,12 +62,11 @@ public class InitAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>> {
   protected void flowThrough(FlowSet<Local> in, Unit unit, FlowSet<Local> out) {
     in.copy(out);
 
-    for (ValueBox defBox : unit.getDefBoxes()) {
-      Value lhs = defBox.getValue();
-      if (lhs instanceof Local) {
-        out.add((Local) lhs);
-      }
-    }
+    unit.getDefBoxes().stream().map(ValueBox::getValue).forEach(lhs -> {
+		if (lhs instanceof Local) {
+		    out.add((Local) lhs);
+		  }
+	});
   }
 
   @Override

@@ -63,10 +63,11 @@ public class MoveResultInstruction extends DexlibAbstractInstruction {
     addTags(assign);
     body.add(assign);
 
-    if (IDalvikTyper.ENABLE_DVKTYPER) {
-      JAssignStmt jassign = (JAssignStmt) assign;
-      DalvikTyper.v().addConstraint(assign.getLeftOpBox(), assign.getRightOpBox());
-    }
+    if (!(IDalvikTyper.ENABLE_DVKTYPER)) {
+		return;
+	}
+	JAssignStmt jassign = (JAssignStmt) assign;
+	DalvikTyper.v().addConstraint(assign.getLeftOpBox(), assign.getRightOpBox());
   }
 
   // public void setLocalToMove(Local l) {

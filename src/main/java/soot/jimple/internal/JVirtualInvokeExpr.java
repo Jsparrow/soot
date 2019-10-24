@@ -45,8 +45,7 @@ public class JVirtualInvokeExpr extends AbstractVirtualInvokeExpr {
       if (methodRef.declaringClass().isInterface()) {
         SootClass sc = methodRef.declaringClass();
         String path = sc.hasTag("SourceFileTag") ? ((SourceFileTag) sc.getTag("SourceFileTag")).getAbsolutePath() : "uknown";
-        throw new RuntimeException("Trying to create virtual invoke expression for interface type ("
-            + methodRef.declaringClass().getName() + " in file " + path + "). Use JInterfaceInvokeExpr instead!");
+        throw new RuntimeException(new StringBuilder().append("Trying to create virtual invoke expression for interface type (").append(methodRef.declaringClass().getName()).append(" in file ").append(path).append("). Use JInterfaceInvokeExpr instead!").toString());
       }
     }
 
@@ -55,8 +54,9 @@ public class JVirtualInvokeExpr extends AbstractVirtualInvokeExpr {
     }
   }
 
-  public Object clone() {
-    ArrayList<Value> clonedArgs = new ArrayList<Value>(getArgCount());
+  @Override
+public Object clone() {
+    ArrayList<Value> clonedArgs = new ArrayList<>(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {
       clonedArgs.add(i, getArg(i));

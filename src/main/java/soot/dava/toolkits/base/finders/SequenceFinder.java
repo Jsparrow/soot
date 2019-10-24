@@ -44,7 +44,8 @@ public class SequenceFinder implements FactFinder {
     return G.v().soot_dava_toolkits_base_finders_SequenceFinder();
   }
 
-  public void find(DavaBody body, AugmentedStmtGraph asg, SETNode SET) throws RetriggerAnalysisException {
+  @Override
+public void find(DavaBody body, AugmentedStmtGraph asg, SETNode SET) throws RetriggerAnalysisException {
     Dava.v().log("SequenceFinder::find()");
 
     SET.find_StatementSequences(this, body);

@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AStringConstant extends PConstant
 {
-    private TStringConstant _stringConstant_;
+    private TStringConstant stringConstant;
 
     public AStringConstant()
     {
@@ -26,7 +26,7 @@ public final class AStringConstant extends PConstant
     public Object clone()
     {
         return new AStringConstant(
-            cloneNode(this._stringConstant_));
+            cloneNode(this.stringConstant));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AStringConstant extends PConstant
 
     public TStringConstant getStringConstant()
     {
-        return this._stringConstant_;
+        return this.stringConstant;
     }
 
     public void setStringConstant(TStringConstant node)
     {
-        if(this._stringConstant_ != null)
+        if(this.stringConstant != null)
         {
-            this._stringConstant_.parent(null);
+            this.stringConstant.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AStringConstant extends PConstant
             node.parent(this);
         }
 
-        this._stringConstant_ = node;
+        this.stringConstant = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._stringConstant_);
+            + toString(this.stringConstant);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._stringConstant_ == child)
+        if(this.stringConstant == child)
         {
-            this._stringConstant_ = null;
+            this.stringConstant = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AStringConstant extends PConstant
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._stringConstant_ == oldChild)
+        if(this.stringConstant == oldChild)
         {
             setStringConstant((TStringConstant) newChild);
             return;

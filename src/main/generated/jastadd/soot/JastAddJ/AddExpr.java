@@ -18,30 +18,60 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production AddExpr : {@link AdditiveExpr};
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:158
  */
-public class AddExpr extends AdditiveExpr implements Cloneable {
-  /**
+public class AddExpr extends AdditiveExpr {
+  private static final Logger logger = LoggerFactory.getLogger(AddExpr.class);
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+/**
+   * @ast method 
+   * 
+   */
+  public AddExpr() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public AddExpr(Expr p0, Expr p1) {
+    setChild(p0, 0);
+    setChild(p1, 1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     type_computed = false;
     type_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public AddExpr clone() throws CloneNotSupportedException {
     AddExpr node = (AddExpr)super.clone();
     node.type_computed = false;
@@ -50,29 +80,33 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public AddExpr copy() {
     try {
       AddExpr node = (AddExpr) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public AddExpr fullCopy() {
     AddExpr tree = (AddExpr) copy();
     if (children != null) {
@@ -86,37 +120,42 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:172
    */
-  public void typeCheck() {
+  @Override
+public void typeCheck() {
     TypeDecl left = getLeftOperand().type();
     TypeDecl right = getRightOperand().type();
-    if(!left.isString() && !right.isString())
-      super.typeCheck();
-    else if(left.isVoid())
-      error("The type void of the left hand side is not numeric");
-    else if(right.isVoid())
-      error("The type void of the right hand side is not numeric");
+    if(!left.isString() && !right.isString()) {
+		super.typeCheck();
+	} else if(left.isVoid()) {
+		error("The type void of the left hand side is not numeric");
+	} else if(right.isVoid()) {
+		error("The type void of the right hand side is not numeric");
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:805
    */
-  public soot.Value emitOperation(Body b, soot.Value left, soot.Value right) {
+  @Override
+public soot.Value emitOperation(Body b, soot.Value left, soot.Value right) {
     return asLocal(b, b.newAddExpr(asImmediate(b, left), asImmediate(b, right), this));
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:839
    */
-  public soot.Value eval(Body b) {
-    if(type().isString() && isConstant())
-      return soot.jimple.StringConstant.v(constant().stringValue());
+  @Override
+public soot.Value eval(Body b) {
+    if(type().isString() && isConstant()) {
+		return soot.jimple.StringConstant.v(constant().stringValue());
+	}
     if(isStringAdd()) {
       Local v;
       if(firstStringAddPart()) {
@@ -136,9 +175,9 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
             asImmediate(b, getLeftOperand().eval(b)),
             this
           ), this));
-      }
-      else
-        v = (Local)getLeftOperand().eval(b);
+      } else {
+		v = (Local)getLeftOperand().eval(b);
+	}
       // append
       b.setLine(this);
       b.add(b.newInvokeStmt(
@@ -153,37 +192,28 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
             Scene.v().getMethod("<java.lang.StringBuffer: java.lang.String toString()>").makeRef(),
             this
         ));
-      }
-      else
-        return v;
-    }
-    else 
-    return b.newAddExpr(
-      b.newTemp(
-        getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
-          getLeftOperand(),
-          type()
-        )
-      ),
-      asImmediate(b,
-        getRightOperand().type().emitCastTo(b, // Binary numeric promotion
-          getRightOperand(),
-          type()
-        )
-      ),
-      this
-    );
+      } else {
+		return v;
+	}
+    } else {
+		return b.newAddExpr(
+		  b.newTemp(
+		    getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
+		      getLeftOperand(),
+		      type()
+		    )
+		  ),
+		  asImmediate(b,
+		    getRightOperand().type().emitCastTo(b, // Binary numeric promotion
+		      getRightOperand(),
+		      type()
+		    )
+		  ),
+		  this
+		);
+	}
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public AddExpr() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -191,54 +221,51 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[2];
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public AddExpr(Expr p0, Expr p1) {
-    setChild(p0, 0);
-    setChild(p1, 1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 2;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the LeftOperand child.
    * @param node The new node to replace the LeftOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setLeftOperand(Expr node) {
+  @Override
+public void setLeftOperand(Expr node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the LeftOperand child.
    * @return The current node used as the LeftOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public Expr getLeftOperand() {
+  @Override
+public Expr getLeftOperand() {
     return (Expr)getChild(0);
   }
-  /**
+/**
    * Retrieves the LeftOperand child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the LeftOperand child.
@@ -246,30 +273,33 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public Expr getLeftOperandNoTransform() {
+  @Override
+public Expr getLeftOperandNoTransform() {
     return (Expr)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the RightOperand child.
    * @param node The new node to replace the RightOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setRightOperand(Expr node) {
+  @Override
+public void setRightOperand(Expr node) {
     setChild(node, 1);
   }
-  /**
+/**
    * Retrieves the RightOperand child.
    * @return The current node used as the RightOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public Expr getRightOperand() {
+  @Override
+public Expr getRightOperand() {
     return (Expr)getChild(1);
   }
-  /**
+/**
    * Retrieves the RightOperand child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the RightOperand child.
@@ -277,45 +307,41 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public Expr getRightOperandNoTransform() {
+  @Override
+public Expr getRightOperandNoTransform() {
     return (Expr)getChildNoTransform(1);
   }
-  /**
+/**
    * @attribute syn
    * @aspect ConstantExpression
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/ConstantExpression.jrag:91
    */
-  public Constant constant() {
+  @Override
+public Constant constant() {
     ASTNode$State state = state();
     try {  return type().add(getLeftOperand().constant(), getRightOperand().constant());  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:400
    */
-  public String printOp() {
+  @Override
+public String printOp() {
     ASTNode$State state = state();
     try {  return " + ";  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
    * @attribute syn
    * @aspect TypeAnalysis
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:327
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -324,36 +350,40 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {
     TypeDecl left = getLeftOperand().type();
     TypeDecl right = getRightOperand().type();
-    if(!left.isString() && !right.isString())
-      return super.type();
-    else {
-      if(left.isVoid() || right.isVoid())
-        return unknownType();
+    if(!left.isString() && !right.isString()) {
+		return super.type();
+	} else {
+      if(left.isVoid() || right.isVoid()) {
+		return unknownType();
+	}
       // pick the string type
       return left.isString() ? left : right;
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:88
    */
-  public boolean isStringAdd() {
+  @Override
+public boolean isStringAdd() {
     ASTNode$State state = state();
     try {  return type().isString() && !isConstant();  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:91
@@ -364,7 +394,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:92
@@ -375,10 +405,11 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

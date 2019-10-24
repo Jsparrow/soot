@@ -50,24 +50,23 @@ import soot.Singletons;
 
 public class PeepholeOptimizer extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(PeepholeOptimizer.class);
+private static boolean peepholesLoaded = false;
+private static final Object loaderLock = new Object();
+private final String packageName = "soot.baf.toolkits.base";
+private final Map<String, Class<?>> peepholeMap = new HashMap<>();
 
-  public PeepholeOptimizer(Singletons.Global g) {
+public PeepholeOptimizer(Singletons.Global g) {
   }
 
-  public static PeepholeOptimizer v() {
+public static PeepholeOptimizer v() {
     return G.v().soot_baf_toolkits_base_PeepholeOptimizer();
   }
 
-  private final String packageName = "soot.baf.toolkits.base";
-  private static boolean peepholesLoaded = false;
-  private static final Object loaderLock = new Object();
-
-  private final Map<String, Class<?>> peepholeMap = new HashMap<String, Class<?>>();
-
-  /** The method that drives the optimizations. */
+/** The method that drives the optimizations. */
   /* This is the public interface to PeepholeOptimizer */
 
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     if (!peepholesLoaded) {
       synchronized (loaderLock) {
         if (!peepholesLoaded) {
@@ -81,20 +80,19 @@ public class PeepholeOptimizer extends BodyTransformer {
           BufferedReader reader = new BufferedReader(new InputStreamReader(peepholeListingStream));
 
           String line = null;
-          List<String> peepholes = new LinkedList<String>();
+          List<String> peepholes = new LinkedList<>();
           try {
             line = reader.readLine();
             while (line != null) {
-              if (line.length() > 0) {
-                if (!(line.charAt(0) == '#')) {
-                  peepholes.add(line);
-                }
-              }
+              boolean condition = line.length() > 0 && !(line.charAt(0) == '#');
+			if (condition) {
+			  peepholes.add(line);
+			}
               line = reader.readLine();
             }
           } catch (IOException e) {
             throw new RuntimeException(
-                "IO error occured while reading file:  " + line + System.getProperty("line.separator") + e);
+                new StringBuilder().append("IO error occured while reading file:  ").append(line).append(System.getProperty("line.separator")).append(e).toString());
           }
 
           try {
@@ -108,7 +106,7 @@ public class PeepholeOptimizer extends BodyTransformer {
             Class<?> peepholeClass;
             if ((peepholeClass = peepholeMap.get(peepholeName)) == null) {
               try {
-                peepholeClass = Class.forName(packageName + "." + peepholeName);
+                peepholeClass = Class.forName(new StringBuilder().append(packageName).append(".").append(peepholeName).toString());
               } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e.toString());
               }
@@ -131,9 +129,7 @@ public class PeepholeOptimizer extends BodyTransformer {
 
           try {
             p = (Peephole) peepholeMap.get(peepholeName).newInstance();
-          } catch (IllegalAccessException e) {
-            throw new RuntimeException(e.toString());
-          } catch (InstantiationException e) {
+          } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e.toString());
           }
 

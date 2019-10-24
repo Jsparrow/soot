@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFullIdentClassName extends PClassName
 {
-    private TFullIdentifier _fullIdentifier_;
+    private TFullIdentifier fullIdentifier;
 
     public AFullIdentClassName()
     {
@@ -26,7 +26,7 @@ public final class AFullIdentClassName extends PClassName
     public Object clone()
     {
         return new AFullIdentClassName(
-            cloneNode(this._fullIdentifier_));
+            cloneNode(this.fullIdentifier));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AFullIdentClassName extends PClassName
 
     public TFullIdentifier getFullIdentifier()
     {
-        return this._fullIdentifier_;
+        return this.fullIdentifier;
     }
 
     public void setFullIdentifier(TFullIdentifier node)
     {
-        if(this._fullIdentifier_ != null)
+        if(this.fullIdentifier != null)
         {
-            this._fullIdentifier_.parent(null);
+            this.fullIdentifier.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AFullIdentClassName extends PClassName
             node.parent(this);
         }
 
-        this._fullIdentifier_ = node;
+        this.fullIdentifier = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._fullIdentifier_);
+            + toString(this.fullIdentifier);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._fullIdentifier_ == child)
+        if(this.fullIdentifier == child)
         {
-            this._fullIdentifier_ = null;
+            this.fullIdentifier = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AFullIdentClassName extends PClassName
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._fullIdentifier_ == oldChild)
+        if(this.fullIdentifier == oldChild)
         {
             setFullIdentifier((TFullIdentifier) newChild);
             return;

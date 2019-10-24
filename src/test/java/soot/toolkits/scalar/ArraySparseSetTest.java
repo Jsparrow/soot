@@ -33,11 +33,11 @@ public class ArraySparseSetTest {
 	
 	@Test
 	public void testBug11() {
-		ArraySparseSet<String> ars1 = new ArraySparseSet<String>();
+		ArraySparseSet<String> ars1 = new ArraySparseSet<>();
 		ars1.add("a");
 		ars1.add("b");
 
-		ArraySparseSet<String> ars2 = new ArraySparseSet<String>();
+		ArraySparseSet<String> ars2 = new ArraySparseSet<>();
 		ars2.add("b");
 		ars2.add("a");
 		
@@ -47,11 +47,11 @@ public class ArraySparseSetTest {
 	
 	@Test
 	public void testBug12() {
-		ArraySparseSet<String> ars1 = new ArraySparseSet<String>();
+		ArraySparseSet<String> ars1 = new ArraySparseSet<>();
 		ars1.add("a");
 		ars1.add("b");
 
-		ArrayPackedSet<String> aps = new ArrayPackedSet<String>(
+		ArrayPackedSet<String> aps = new ArrayPackedSet<>(
 				new CollectionFlowUniverse<String>(Arrays.asList("a","b")));
 		aps.add("b");
 		aps.add("a");
@@ -62,7 +62,7 @@ public class ArraySparseSetTest {
 
 	@Test
 	public void testIterator() {
-		ArraySparseSet<String> ars1 = new ArraySparseSet<String>();
+		ArraySparseSet<String> ars1 = new ArraySparseSet<>();
 		ars1.add("a");
 		ars1.add("b");
 		ars1.add("c");
@@ -71,8 +71,9 @@ public class ArraySparseSetTest {
 		Iterator<String> it = ars1.iterator();
 		while (it.hasNext()) {
 			String element = it.next();
-			if (element.equals("c"))
+			if ("c".equals(element)) {
 				it.remove();
+			}
 		}
 
 		// check size
@@ -82,11 +83,11 @@ public class ArraySparseSetTest {
 		boolean aFound = false;
 		boolean bFound = false;
 		for (String element : ars1) {
-			if (element.equals("a")) {
+			if ("a".equals(element)) {
 				Assert.assertFalse(aFound);
 				aFound = true;
 			}
-			if (element.equals("b")) {
+			if ("b".equals(element)) {
 				Assert.assertFalse(bFound);
 				bFound = true;
 			}

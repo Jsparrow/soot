@@ -47,62 +47,62 @@ import soot.util.IterableSet;
 
 public class Dava {
   private static final Logger logger = LoggerFactory.getLogger(Dava.class);
+private static final String LOG_TO_FILE = null;
+private static final PrintStream LOG_TO_SCREEN = null;
+private Writer iOut = null;
+private IterableSet currentPackageContext = null;
+private String currentPackage;
 
-  public Dava(Singletons.Global g) {
+public Dava(Singletons.Global g) {
   }
 
-  public static Dava v() {
+public static Dava v() {
     return G.v().soot_dava_Dava();
   }
 
-  private static final String LOG_TO_FILE = null;
-  private static final PrintStream LOG_TO_SCREEN = null;
-
-  private Writer iOut = null;
-  private IterableSet currentPackageContext = null;
-  private String currentPackage;
-
-  public void set_CurrentPackage(String cp) {
+public void set_CurrentPackage(String cp) {
     currentPackage = cp;
   }
 
-  public String get_CurrentPackage() {
+public String get_CurrentPackage() {
     return currentPackage;
   }
 
-  public void set_CurrentPackageContext(IterableSet cpc) {
+public void set_CurrentPackageContext(IterableSet cpc) {
     currentPackageContext = cpc;
   }
 
-  public IterableSet get_CurrentPackageContext() {
+public IterableSet get_CurrentPackageContext() {
     return currentPackageContext;
   }
 
-  public DavaBody newBody(SootMethod m) {
+public DavaBody newBody(SootMethod m) {
     return new DavaBody(m);
   }
 
-  /** Returns a DavaBody constructed from the given body b. */
+/** Returns a DavaBody constructed from the given body b. */
   public DavaBody newBody(Body b) {
     return new DavaBody(b);
   }
 
-  public Local newLocal(String name, Type t) {
+public Local newLocal(String name, Type t) {
     return Jimple.v().newLocal(name, t);
   }
 
-  public void log(String s) {
+public void log(String s) {
     if (LOG_TO_SCREEN != null) {
       LOG_TO_SCREEN.println(s);
       LOG_TO_SCREEN.flush();
     }
 
-    if (LOG_TO_FILE != null) {
-      if (iOut == null) {
+    if (LOG_TO_FILE == null) {
+		return;
+	}
+	if (iOut == null) {
         try {
           iOut = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(LOG_TO_FILE), "US-ASCII"));
         } catch (FileNotFoundException fnfe) {
-          logger.debug("" + "Unable to open " + LOG_TO_FILE);
+          logger.debug(new StringBuilder().append("").append("Unable to open ").append(LOG_TO_FILE).toString());
           logger.error(fnfe.getMessage(), fnfe);
           throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED);
         } catch (UnsupportedEncodingException uee) {
@@ -111,16 +111,14 @@ public class Dava {
           throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED);
         }
       }
-
-      try {
+	try {
         iOut.write(s);
         iOut.write("\n");
         iOut.flush();
       } catch (IOException ioe) {
-        logger.debug("" + "Unable to write to " + LOG_TO_FILE);
+        logger.debug(new StringBuilder().append("").append("Unable to write to ").append(LOG_TO_FILE).toString());
         logger.error(ioe.getMessage(), ioe);
         throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED);
       }
-    }
   }
 }

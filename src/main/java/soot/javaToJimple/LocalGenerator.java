@@ -31,25 +31,33 @@ import soot.Local;
 public class LocalGenerator {
 
   protected final soot.Body body;
+protected transient Set<String> localNames = null;
+private int tempInt = -1;
+private int tempVoid = -1;
+private int tempBoolean = -1;
+private int tempLong = -1;
+private int tempDouble = -1;
+private int tempFloat = -1;
+private int tempRefLikeType = -1;
+private int tempByte = -1;
+private int tempShort = -1;
+private int tempChar = -1;
+private int tempUnknownType = -1;
 
-  public LocalGenerator(Body b) {
+public LocalGenerator(Body b) {
     body = b;
   }
 
-  protected transient Set<String> localNames = null;
-
-  protected boolean bodyContainsLocal(String name) {
+protected boolean bodyContainsLocal(String name) {
     return localNames.contains(name);
   }
 
-  private void initLocalNames() {
-    localNames = new HashSet<String>();
-    for (Local l : body.getLocals()) {
-      localNames.add(l.getName());
-    }
+private void initLocalNames() {
+    localNames = new HashSet<>();
+    body.getLocals().forEach(l -> localNames.add(l.getName()));
   }
 
-  /**
+/**
    * generates a new soot local given the type
    */
   public soot.Local generateLocal(soot.Type type) {
@@ -145,74 +153,62 @@ public class LocalGenerator {
     return createLocal(name, type);
   }
 
-  private int tempInt = -1;
-  private int tempVoid = -1;
-  private int tempBoolean = -1;
-  private int tempLong = -1;
-  private int tempDouble = -1;
-  private int tempFloat = -1;
-  private int tempRefLikeType = -1;
-  private int tempByte = -1;
-  private int tempShort = -1;
-  private int tempChar = -1;
-  private int tempUnknownType = -1;
-
-  private String nextIntName() {
+private String nextIntName() {
     tempInt++;
     return "$i" + tempInt;
   }
 
-  private String nextCharName() {
+private String nextCharName() {
     tempChar++;
     return "$c" + tempChar;
   }
 
-  private String nextVoidName() {
+private String nextVoidName() {
     tempVoid++;
     return "$v" + tempVoid;
   }
 
-  private String nextByteName() {
+private String nextByteName() {
     tempByte++;
     return "$b" + tempByte;
   }
 
-  private String nextShortName() {
+private String nextShortName() {
     tempShort++;
     return "$s" + tempShort;
   }
 
-  private String nextBooleanName() {
+private String nextBooleanName() {
     tempBoolean++;
     return "$z" + tempBoolean;
   }
 
-  private String nextDoubleName() {
+private String nextDoubleName() {
     tempDouble++;
     return "$d" + tempDouble;
   }
 
-  private String nextFloatName() {
+private String nextFloatName() {
     tempFloat++;
     return "$f" + tempFloat;
   }
 
-  private String nextLongName() {
+private String nextLongName() {
     tempLong++;
     return "$l" + tempLong;
   }
 
-  private String nextRefLikeTypeName() {
+private String nextRefLikeTypeName() {
     tempRefLikeType++;
     return "$r" + tempRefLikeType;
   }
 
-  private String nextUnknownTypeName() {
+private String nextUnknownTypeName() {
     tempUnknownType++;
     return "$u" + tempUnknownType;
   }
 
-  // this should be used for generated locals only
+// this should be used for generated locals only
   protected soot.Local createLocal(String name, soot.Type sootType) {
     soot.Local sootLocal = soot.jimple.Jimple.v().newLocal(name, sootType);
     body.getLocals().add(sootLocal);

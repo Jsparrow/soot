@@ -36,27 +36,32 @@ public class UnknownType extends Type {
     return G.v().soot_UnknownType();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x5CAE5357;
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "unknown";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseUnknownType(this);
   }
 
   /** Returns the least common superclass of this type and other. */
-  public Type merge(Type other, Scene cm) {
+  @Override
+public Type merge(Type other, Scene cm) {
     if (other instanceof RefType) {
       return other;
     }
-    throw new RuntimeException("illegal type merge: " + this + " and " + other);
+    throw new RuntimeException(new StringBuilder().append("illegal type merge: ").append(this).append(" and ").append(other).toString());
   }
 }

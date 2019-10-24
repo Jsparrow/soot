@@ -116,11 +116,13 @@ public class KeyTag implements Tag {
     return analysisType;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "KeyTag";
   }
 
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     byte[] v = new byte[4];
     return v;
   }

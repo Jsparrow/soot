@@ -32,6 +32,8 @@ import java.util.Set;
 import soot.jimple.toolkits.thread.mhp.stmt.JPegStmt;
 import soot.toolkits.scalar.FlowSet;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -46,7 +48,8 @@ import soot.util.Chain;
 
 public class CompactStronglyConnectedComponents {
 
-  long compactNodes = 0;
+  private static final Logger logger = LoggerFactory.getLogger(CompactStronglyConnectedComponents.class);
+long compactNodes = 0;
   long add = 0;
 
   public CompactStronglyConnectedComponents(PegGraph pg) {
@@ -54,8 +57,8 @@ public class CompactStronglyConnectedComponents {
     compactGraph(mainPegChain, pg);
     compactStartChain(pg);
     // PegToDotFile printer = new PegToDotFile(pg, false, "compact");
-    System.err.println("compact SCC nodes: " + compactNodes);
-    System.err.println(" number of compacting scc nodes: " + add);
+    logger.error("compact SCC nodes: " + compactNodes);
+    logger.error(" number of compacting scc nodes: " + add);
   }
 
   private void compactGraph(Chain chain, PegGraph peg) {
@@ -69,14 +72,13 @@ public class CompactStronglyConnectedComponents {
     Iterator<List<Object>> sccListIt = sccList.iterator();
     while (sccListIt.hasNext()) {
       List s = sccListIt.next();
-      if (s.size() > 1) {
-        // printSCC(s);
-        if (!checkIfContainsElemsCanNotBeCompacted(s, canNotBeCompacted)) {
-          add++;
-          compact(s, chain, peg);
+      boolean condition = s.size() > 1 && !checkIfContainsElemsCanNotBeCompacted(s, canNotBeCompacted);
+	// printSCC(s);
+	if (condition) {
+	  add++;
+	  compact(s, chain, peg);
 
-        }
-      }
+	}
 
     }
     // testListSucc(peg);
@@ -118,8 +120,8 @@ public class CompactStronglyConnectedComponents {
     FlowSet allNodes = peg.getAllNodes();
     HashMap unitToSuccs = peg.getUnitToSuccs();
     HashMap unitToPreds = peg.getUnitToPreds();
-    List<Object> newPreds = new ArrayList<Object>();
-    List<Object> newSuccs = new ArrayList<Object>();
+    List<Object> newPreds = new ArrayList<>();
+    List<Object> newSuccs = new ArrayList<>();
 
     while (it.hasNext()) {
       JPegStmt s = (JPegStmt) it.next();

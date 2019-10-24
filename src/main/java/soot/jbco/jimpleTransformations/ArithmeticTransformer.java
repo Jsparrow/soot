@@ -72,15 +72,18 @@ public class ArithmeticTransformer extends BodyTransformer implements IJbcoTrans
   public static String dependancies[] = new String[] { "jtp.jbco_cae2bo" };
   public static String name = "jtp.jbco_cae2bo";
 
-  public String[] getDependencies() {
+  @Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return name;
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     int weight = soot.jbco.Main.getWeight(phaseName, b.getMethod().getSignature());
     if (weight == 0) {
       return;
@@ -105,7 +108,8 @@ public class ArithmeticTransformer extends BodyTransformer implements IJbcoTrans
 
           MulExpr me = (MulExpr) v;
           Value op1 = me.getOp1();
-          Value op = null, op2 = me.getOp2();
+          Value op = null;
+		Value op2 = me.getOp2();
           NumericConstant nc = null;
           if (op1 instanceof NumericConstant) {
             nc = (NumericConstant) op1;
@@ -117,7 +121,7 @@ public class ArithmeticTransformer extends BodyTransformer implements IJbcoTrans
 
           if (nc != null) {
             if (output) {
-              out.println("Considering: " + as + "\r");
+              out.println(new StringBuilder().append("Considering: ").append(as).append("\r").toString());
             }
 
             Type opType = op.getType();
@@ -138,7 +142,8 @@ public class ArithmeticTransformer extends BodyTransformer implements IJbcoTrans
 
                 Expr e;
                 if (shft_rem[1] != null) { // if there is an additive floating component
-                  Local tmp2 = null, tmp1 = Jimple.v().newLocal("__tmp_shft_lcl" + localCount++, opType);
+                  Local tmp2 = null;
+				Local tmp1 = Jimple.v().newLocal("__tmp_shft_lcl" + localCount++, opType);
                   locals.add(tmp1);
 
                   // shift the integral portion
@@ -278,13 +283,11 @@ public class ArithmeticTransformer extends BodyTransformer implements IJbcoTrans
     }
 
     out.println(" after as: ");
-    for (Unit uu : unitsBuilt) {
-      out.println(
-          "\t" + uu + "\ttype : " + (uu instanceof AssignStmt ? ((AssignStmt) uu).getLeftOp().getType().toString() : ""));
-    }
+    unitsBuilt.forEach(uu -> out.println(new StringBuilder().append("\t").append(uu).append("\ttype : ").append(uu instanceof AssignStmt ? ((AssignStmt) uu).getLeftOp().getType().toString() : "").toString()));
   }
 
-  public void outputSummary() {
+  @Override
+public void outputSummary() {
     if (!output) {
       return;
     }

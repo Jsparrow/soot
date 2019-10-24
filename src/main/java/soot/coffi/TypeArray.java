@@ -64,24 +64,21 @@ class TypeArray {
     return newArray;
   }
 
-  public boolean equals(Object obj) {
-    if (obj instanceof TypeArray) {
-      TypeArray other = (TypeArray) obj;
-
-      if (types.length != other.types.length) {
+  @Override
+public boolean equals(Object obj) {
+    if (!(obj instanceof TypeArray)) {
+		return false;
+	}
+	TypeArray other = (TypeArray) obj;
+	if (types.length != other.types.length) {
         return false;
       }
-
-      for (Type element : types) {
+	for (Type element : types) {
         if (!element.equals(element)) {
           return false;
         }
       }
-
-      return true;
-    } else {
-      return false;
-    }
+	return true;
   }
 
   public TypeArray merge(TypeArray otherArray) {
@@ -110,7 +107,7 @@ class TypeArray {
 
   public void print(PrintStream out) {
     for (int i = 0; i < types.length; i++) {
-      out.println(i + ": " + types[i].toString());
+      out.println(new StringBuilder().append(i).append(": ").append(types[i].toString()).toString());
     }
   }
 }

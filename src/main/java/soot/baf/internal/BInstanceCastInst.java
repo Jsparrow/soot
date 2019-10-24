@@ -41,41 +41,50 @@ public class BInstanceCastInst extends AbstractInst implements InstanceCastInst 
     castType = opType;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
 
     return new BInstanceCastInst(castType);
 
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 1;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "checkcast";
   }
 
-  public Type getCastType() {
+  @Override
+public Type getCastType() {
     return castType;
   }
 
-  public void setCastType(Type t) {
+  @Override
+public void setCastType(Type t) {
     castType = t;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseInstanceCastInst(this);
   }
 }

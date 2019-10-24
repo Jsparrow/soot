@@ -36,18 +36,20 @@ import org.slf4j.LoggerFactory;
 public class EscapedReader extends FilterReader {
   private static final Logger logger = LoggerFactory.getLogger(EscapedReader.class);
 
-  /** Constructs an EscapedReader around the given Reader. */
+private StringBuffer mini = new StringBuffer();
+
+boolean nextF;
+
+int nextch = 0;
+
+/** Constructs an EscapedReader around the given Reader. */
   public EscapedReader(Reader fos) {
     super(fos);
   }
 
-  private StringBuffer mini = new StringBuffer();
-
-  boolean nextF;
-  int nextch = 0;
-
-  /** Reads a character from the input. */
-  public int read() throws IOException {
+/** Reads a character from the input. */
+  @Override
+public int read() throws IOException {
     /* if you already read the char, just return it */
     if (nextF) {
       nextF = false;
@@ -77,7 +79,7 @@ public class EscapedReader extends FilterReader {
     }
 
     // logger.debug(""+mini.toString());
-    ch = Integer.parseInt(mini.substring(2).toString(), 16);
+    ch = Integer.parseInt(mini.substring(2), 16);
 
     return ch;
   }

@@ -54,10 +54,10 @@ public class BytecodeHierarchy implements IHierarchy {
       return Collections.emptyList();
     }
 
-    LinkedList<AncestryTreeNode> leafs = new LinkedList<AncestryTreeNode>();
+    LinkedList<AncestryTreeNode> leafs = new LinkedList<>();
     leafs.add(new AncestryTreeNode(null, root));
 
-    LinkedList<AncestryTreeNode> r = new LinkedList<AncestryTreeNode>();
+    LinkedList<AncestryTreeNode> r = new LinkedList<>();
     final RefType objectType = RefType.v("java.lang.Object");
     while (!leafs.isEmpty()) {
       AncestryTreeNode node = leafs.remove();
@@ -66,9 +66,7 @@ public class BytecodeHierarchy implements IHierarchy {
       } else {
         SootClass sc = node.type.getSootClass();
 
-        for (SootClass i : sc.getInterfaces()) {
-          leafs.add(new AncestryTreeNode(node, (i).getType()));
-        }
+        sc.getInterfaces().forEach(i -> leafs.add(new AncestryTreeNode(node, (i).getType())));
 
         // The superclass of all interfaces is Object
         // -- try to discard phantom interfaces.
@@ -111,7 +109,8 @@ public class BytecodeHierarchy implements IHierarchy {
     } else if (b instanceof NullType) {
       return Collections.<Type>singletonList(a);
     } else if (a instanceof ArrayType && b instanceof ArrayType) {
-      Type eta = ((ArrayType) a).getElementType(), etb = ((ArrayType) b).getElementType();
+      Type eta = ((ArrayType) a).getElementType();
+	Type etb = ((ArrayType) b).getElementType();
       Collection<Type> ts;
 
       // Primitive arrays are not covariant but all other arrays are
@@ -121,16 +120,14 @@ public class BytecodeHierarchy implements IHierarchy {
         ts = lcas_(eta, etb);
       }
 
-      LinkedList<Type> r = new LinkedList<Type>();
+      LinkedList<Type> r = new LinkedList<>();
       if (ts.isEmpty()) {
         // From Java Language Spec 2nd ed., Chapter 10, Arrays
         r.add(RefType.v("java.lang.Object"));
         r.add(RefType.v("java.io.Serializable"));
         r.add(RefType.v("java.lang.Cloneable"));
       } else {
-        for (Type t : ts) {
-          r.add(t.makeArrayType());
-        }
+        ts.forEach(t -> r.add(t.makeArrayType()));
       }
       return r;
     } else if (a instanceof ArrayType || b instanceof ArrayType) {
@@ -146,7 +143,7 @@ public class BytecodeHierarchy implements IHierarchy {
        * only one is Object.
        */
 
-      LinkedList<Type> r = new LinkedList<Type>();
+      LinkedList<Type> r = new LinkedList<>();
       /*
        * Do not consider Object to be a subtype of Serializable or Cloneable (it can appear this way if phantom-refs is
        * enabled and rt.jar is not available) otherwise an infinite loop can result.
@@ -167,9 +164,10 @@ public class BytecodeHierarchy implements IHierarchy {
     }
     // a and b are both RefType
     else {
-      Collection<AncestryTreeNode> treea = buildAncestryTree((RefType) a), treeb = buildAncestryTree((RefType) b);
+      Collection<AncestryTreeNode> treea = buildAncestryTree((RefType) a);
+	Collection<AncestryTreeNode> treeb = buildAncestryTree((RefType) b);
 
-      LinkedList<Type> r = new LinkedList<Type>();
+      LinkedList<Type> r = new LinkedList<>();
       for (AncestryTreeNode nodea : treea) {
         for (AncestryTreeNode nodeb : treeb) {
           RefType t = leastCommonNode(nodea, nodeb);
@@ -230,7 +228,7 @@ public class BytecodeHierarchy implements IHierarchy {
    * types class is phantom. Note anchor should always be type Throwable as this is the root of all exception types.
    */
   private static Deque<RefType> superclassPath(RefType t, RefType anchor) {
-    Deque<RefType> r = new ArrayDeque<RefType>();
+    Deque<RefType> r = new ArrayDeque<>();
     r.addFirst(t);
 
     if (TypeResolver.typesEqual(t, anchor)) {
@@ -284,11 +282,13 @@ public class BytecodeHierarchy implements IHierarchy {
     return r;
   }
 
-  public Collection<Type> lcas(Type a, Type b) {
+  @Override
+public Collection<Type> lcas(Type a, Type b) {
     return lcas_(a, b);
   }
 
-  public boolean ancestor(Type ancestor, Type child) {
+  @Override
+public boolean ancestor(Type ancestor, Type child) {
     return ancestor_(ancestor, child);
   }
 

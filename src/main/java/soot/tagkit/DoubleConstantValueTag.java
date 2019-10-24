@@ -27,24 +27,25 @@ import soot.jimple.DoubleConstant;
 public class DoubleConstantValueTag extends ConstantValueTag {
   private final double value;
 
-  public double getDoubleValue() {
-    return value;
-  }
-
   public DoubleConstantValueTag(double val) {
     this.value = val;
   }
 
-  public String toString() {
+public double getDoubleValue() {
+    return value;
+  }
+
+@Override
+public String toString() {
     return "ConstantValue: " + Double.toString(value);
   }
 
-  @Override
+@Override
   public DoubleConstant getConstant() {
     return DoubleConstant.v(value);
   }
 
-  @Override
+@Override
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
@@ -54,7 +55,7 @@ public class DoubleConstantValueTag extends ConstantValueTag {
     return result;
   }
 
-  @Override
+@Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;

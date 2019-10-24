@@ -48,9 +48,10 @@ class local_variable_type_table_entry {
   /** The index in the local variable array of this local variable. */
   public int index;
 
-  public String toString() {
-    return "start: " + start_pc + "length: " + length + "name_index: " + name_index + "signature_index: " + signature_index
-        + "index: " + index;
+  @Override
+public String toString() {
+    return new StringBuilder().append("start: ").append(start_pc).append("length: ").append(length).append("name_index: ").append(name_index).append("signature_index: ")
+			.append(signature_index).append("index: ").append(index).toString();
 
   }
 }

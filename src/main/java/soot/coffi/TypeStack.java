@@ -44,7 +44,8 @@ class TypeStack {
     // no constructor
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     TypeStack newTypeStack = new TypeStack();
 
     newTypeStack.types = types.clone();
@@ -100,31 +101,28 @@ class TypeStack {
     }
   }
 
-  public boolean equals(Object object) {
-    if (object instanceof TypeStack) {
-      TypeStack otherStack = (TypeStack) object;
-
-      if (otherStack.types.length != types.length) {
+  @Override
+public boolean equals(Object object) {
+    if (!(object instanceof TypeStack)) {
+		return false;
+	}
+	TypeStack otherStack = (TypeStack) object;
+	if (otherStack.types.length != types.length) {
         return false;
       }
-
-      for (Type element : types) {
+	for (Type element : types) {
         if (!element.equals(element)) {
           return false;
         }
       }
-
-      return true;
-    } else {
-      return false;
-    }
+	return true;
   }
 
   public TypeStack merge(TypeStack other) {
 
     if (types.length != other.types.length) {
       throw new RuntimeException(
-          "TypeStack merging failed; unequal " + "stack lengths: " + types.length + " and " + other.types.length);
+          new StringBuilder().append("TypeStack merging failed; unequal ").append("stack lengths: ").append(types.length).append(" and ").append(other.types.length).toString());
     }
 
     TypeStack newStack = new TypeStack();
@@ -137,7 +135,7 @@ class TypeStack {
       } else {
         if ((!(types[i] instanceof ArrayType) && !(types[i] instanceof RefType))
             || (!(other.types[i] instanceof RefType) && !(other.types[i] instanceof ArrayType))) {
-          throw new RuntimeException("TypeStack merging failed; incompatible types " + types[i] + " and " + other.types[i]);
+          throw new RuntimeException(new StringBuilder().append("TypeStack merging failed; incompatible types ").append(types[i]).append(" and ").append(other.types[i]).toString());
         }
 
         // logger.debug("Merging: " + types[i] + " with " + other.types[i]);
@@ -151,7 +149,7 @@ class TypeStack {
 
   public void print(PrintStream out) {
     for (int i = types.length - 1; i >= 0; i--) {
-      out.println(i + ": " + types[i].toString());
+      out.println(new StringBuilder().append(i).append(": ").append(types[i].toString()).toString());
     }
 
     if (types.length == 0) {

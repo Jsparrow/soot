@@ -41,8 +41,9 @@ public class JStaticInvokeExpr extends AbstractStaticInvokeExpr {
 
   }
 
-  public Object clone() {
-    List<Value> clonedArgs = new ArrayList<Value>(getArgCount());
+  @Override
+public Object clone() {
+    List<Value> clonedArgs = new ArrayList<>(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {
       clonedArgs.add(i, getArg(i));

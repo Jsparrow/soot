@@ -33,31 +33,38 @@ public class BNegInst extends AbstractOpTypeInst implements NegInst {
     super(opType);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BNegInst(getOpType());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public final String getName() {
+  @Override
+public final String getName() {
     return "neg";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseNegInst(this);
   }
 }

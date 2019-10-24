@@ -30,31 +30,38 @@ public class BArrayLengthInst extends AbstractInst implements ArrayLengthInst {
   public BArrayLengthInst() {
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 1;
   }
 
-  public final String getName() {
+  @Override
+public final String getName() {
     return "arraylength";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseArrayLengthInst(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BArrayLengthInst();
   }
 

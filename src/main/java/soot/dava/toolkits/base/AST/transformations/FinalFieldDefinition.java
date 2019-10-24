@@ -112,14 +112,10 @@ public class FinalFieldDefinition {
       return;
     }
 
-    cancelFinalModifier = new ArrayList<SootField>();
+    cancelFinalModifier = new ArrayList<>();
     analyzeMethod(node, interesting);
 
-    Iterator<SootField> it = cancelFinalModifier.iterator();
-    while (it.hasNext()) {
-      SootField field = it.next();
-      field.setModifiers((soot.Modifier.FINAL ^ 0xFFFF) & field.getModifiers());
-    }
+    cancelFinalModifier.forEach(field -> field.setModifiers((soot.Modifier.FINAL ^ 0xFFFF) & field.getModifiers()));
   }
 
   /*
@@ -132,7 +128,7 @@ public class FinalFieldDefinition {
   public ArrayList<SootField> findFinalFields() {
 
     // first thing is to get a list of all final fields in the class
-    ArrayList<SootField> interestingFinalFields = new ArrayList<SootField>();
+    ArrayList<SootField> interestingFinalFields = new ArrayList<>();
 
     Iterator fieldIt = sootClass.getFields().iterator();
     while (fieldIt.hasNext()) {
@@ -156,10 +152,7 @@ public class FinalFieldDefinition {
   public void analyzeMethod(ASTMethodNode node, List<SootField> varsOfInterest) {
     MustMayInitialize must = new MustMayInitialize(node, MustMayInitialize.MUST);
 
-    Iterator<SootField> it = varsOfInterest.iterator();
-    while (it.hasNext()) {
-      SootField interest = it.next();
-
+    for (SootField interest : varsOfInterest) {
       // check for constant value tags
       Type fieldType = interest.getType();
       if (fieldType instanceof DoubleType && interest.hasTag("DoubleConstantValueTag")) {
@@ -192,7 +185,7 @@ public class FinalFieldDefinition {
         // all paths\n");
         List defs = must.getDefs(interest);
         if (defs == null) {
-          throw new RuntimeException("Sootfield: " + interest + " is mayInitialized but the defs is null");
+          throw new RuntimeException(new StringBuilder().append("Sootfield: ").append(interest).append(" is mayInitialized but the defs is null").toString());
         }
 
         handleAssignOnSomePaths(node, interest, defs);
@@ -253,15 +246,14 @@ public class FinalFieldDefinition {
         }
       }
     }
-    if (!done) {
-      List<AugmentedStmt> newBody = new ArrayList<AugmentedStmt>();
-      newBody.add(defaultStmt);
-
-      ASTStatementSequenceNode newNode = new ASTStatementSequenceNode(newBody);
-      body.add(newNode);
-
-      node.replaceBody(body);
-    }
+    if (done) {
+		return;
+	}
+	List<AugmentedStmt> newBody = new ArrayList<>();
+	newBody.add(defaultStmt);
+	ASTStatementSequenceNode newNode = new ASTStatementSequenceNode(newBody);
+	body.add(newNode);
+	node.replaceBody(body);
 
   }
 
@@ -420,7 +412,7 @@ public class FinalFieldDefinition {
           body.remove(1);
         } else {
           // System.out.println("had to add new node");
-          List<AugmentedStmt> tempList = new ArrayList<AugmentedStmt>();
+          List<AugmentedStmt> tempList = new ArrayList<>();
           tempList.add(initialization);
           nodeSecond = new ASTStatementSequenceNode(tempList);
         }
@@ -494,7 +486,7 @@ public class FinalFieldDefinition {
               ancestorSubBody = (List<ASTStatementSequenceNode>) it.next();
             }
 
-            if (ancestorSubBody.indexOf(grandParent) > -1) {
+            if (ancestorSubBody.contains(grandParent)) {
               // grandParent is present in this body
               int index = ancestorSubBody.indexOf(grandParent);
               // check the next index
@@ -506,7 +498,7 @@ public class FinalFieldDefinition {
                 // add the assign stmt here
 
                 List<AugmentedStmt> stmtsLast = (someNode).getStatements();
-                List<AugmentedStmt> newStmts = new ArrayList<AugmentedStmt>();
+                List<AugmentedStmt> newStmts = new ArrayList<>();
                 newStmts.add(assignStmt1);
                 newStmts.addAll(stmtsLast);
                 someNode.setStatements(newStmts);
@@ -520,7 +512,7 @@ public class FinalFieldDefinition {
                 }
               } else {
                 // create a new stmt seq node and add it here
-                List<AugmentedStmt> tempList = new ArrayList<AugmentedStmt>();
+                List<AugmentedStmt> tempList = new ArrayList<>();
                 tempList.add(assignStmt1);
                 ASTStatementSequenceNode lastNode = new ASTStatementSequenceNode(tempList);
                 ancestorSubBody.add(index + 1, lastNode);
@@ -571,16 +563,16 @@ class MethodCallFinder extends DepthFirstAdapter {
     this.def = def;
   }
 
-  public void outDefinitionStmt(DefinitionStmt s) {
-    if (s instanceof GAssignStmt) {
-      if (((GAssignStmt) s).equals(def)) {
+  @Override
+public void outDefinitionStmt(DefinitionStmt s) {
+    if (s instanceof GAssignStmt && ((GAssignStmt) s).equals(def)) {
         foundIt = true;
         // System.out.println("Found it" + s);
       }
-    }
   }
 
-  public void inInvokeExpr(InvokeExpr ie) {
+  @Override
+public void inInvokeExpr(InvokeExpr ie) {
     // System.out.println("In invoke Expr");
     if (foundIt) {
       // System.out.println("oops invoking something after definition");

@@ -56,6 +56,8 @@ import soot.tagkit.FloatConstantValueTag;
 import soot.tagkit.IntegerConstantValueTag;
 import soot.tagkit.LongConstantValueTag;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Deemed important because of obfuscation techniques which add crazy
@@ -69,25 +71,28 @@ import soot.util.Chain;
  *
  */
 public class ConstantFieldValueFinder {
-  public final boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(ConstantFieldValueFinder.class);
 
-  public static String combiner = "_$p$g_";
+public static String combiner = "_$p$g_";
 
-  HashMap<String, SootField> classNameFieldNameToSootFieldMapping = new HashMap<String, SootField>();
+public final boolean DEBUG = false;
 
-  HashMap<String, ArrayList> fieldToValues = new HashMap<String, ArrayList>();
-  HashMap<String, Object> primTypeFieldValueToUse = new HashMap<String, Object>();
+HashMap<String, SootField> classNameFieldNameToSootFieldMapping = new HashMap<>();
 
-  Chain appClasses;
+HashMap<String, ArrayList> fieldToValues = new HashMap<>();
 
-  public ConstantFieldValueFinder(Chain classes) {
+HashMap<String, Object> primTypeFieldValueToUse = new HashMap<>();
+
+Chain appClasses;
+
+public ConstantFieldValueFinder(Chain classes) {
     appClasses = classes;
     debug("ConstantFieldValueFinder -- applyAnalyses", "computing Method Summaries");
     computeFieldToValuesAssignedList();
     valuesForPrimTypeFields();
   }
 
-  /*
+/*
    * The hashMap returned contains a mapping of class + combiner + field ----> Double/Float/Long/Integer if there is no
    * mapping for a particular field then that means we couldnt detect a constant value for it
    */
@@ -95,11 +100,11 @@ public class ConstantFieldValueFinder {
     return primTypeFieldValueToUse;
   }
 
-  public HashMap<String, SootField> getClassNameFieldNameToSootFieldMapping() {
+public HashMap<String, SootField> getClassNameFieldNameToSootFieldMapping() {
     return classNameFieldNameToSootFieldMapping;
   }
 
-  /*
+/*
    * This method gives values to all the fields in all the classes if they can be determined statically We only care about
    * fields which have primitive types
    */
@@ -121,7 +126,7 @@ public class ConstantFieldValueFinder {
           continue;
         }
 
-        String combined = declaringClass + combiner + fieldName;
+        String combined = new StringBuilder().append(declaringClass).append(combiner).append(fieldName).toString();
         classNameFieldNameToSootFieldMapping.put(combined, f);
 
         Object value = null;
@@ -129,27 +134,27 @@ public class ConstantFieldValueFinder {
         // check for constant value tags
         if (fieldType instanceof DoubleType && f.hasTag("DoubleConstantValueTag")) {
           double val = ((DoubleConstantValueTag) f.getTag("DoubleConstantValueTag")).getDoubleValue();
-          value = new Double(val);
+          value = Double.valueOf(val);
         } else if (fieldType instanceof FloatType && f.hasTag("FloatConstantValueTag")) {
           float val = ((FloatConstantValueTag) f.getTag("FloatConstantValueTag")).getFloatValue();
-          value = new Float(val);
+          value = Float.valueOf(val);
         } else if (fieldType instanceof LongType && f.hasTag("LongConstantValueTag")) {
           long val = ((LongConstantValueTag) f.getTag("LongConstantValueTag")).getLongValue();
-          value = new Long(val);
+          value = Long.valueOf(val);
         } else if (fieldType instanceof CharType && f.hasTag("IntegerConstantValueTag")) {
           int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
-          value = new Integer(val);
+          value = Integer.valueOf(val);
         } else if (fieldType instanceof BooleanType && f.hasTag("IntegerConstantValueTag")) {
           int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
           if (val == 0) {
-            value = new Boolean(false);
+            value = Boolean.valueOf(false);
           } else {
-            value = new Boolean(true);
+            value = Boolean.valueOf(true);
           }
         } else if ((fieldType instanceof IntType || fieldType instanceof ByteType || fieldType instanceof ShortType)
             && f.hasTag("IntegerConstantValueTag")) {
           int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
-          value = new Integer(val);
+          value = Integer.valueOf(val);
         }
 
         // if there was a constant value tag we have its value now
@@ -169,16 +174,16 @@ public class ConstantFieldValueFinder {
           // add default value to primTypeFieldValueToUse hashmap
 
           if (fieldType instanceof DoubleType) {
-            value = new Double(0);
+            value = Double.valueOf(0);
           } else if (fieldType instanceof FloatType) {
-            value = new Float(0);
+            value = Float.valueOf(0);
           } else if (fieldType instanceof LongType) {
-            value = new Long(0);
+            value = Long.valueOf(0);
           } else if (fieldType instanceof BooleanType) {
-            value = new Boolean(false);
+            value = Boolean.valueOf(false);
           } else if ((fieldType instanceof IntType || fieldType instanceof ByteType || fieldType instanceof ShortType)
               || fieldType instanceof CharType) {
-            value = new Integer(0);
+            value = Integer.valueOf(0);
           } else {
             throw new DecompilationException("Unknown primitive type...please report to developer");
           }
@@ -234,34 +239,34 @@ public class ConstantFieldValueFinder {
          */
 
         if (tempConstant instanceof LongConstant) {
-          Long tempVal = new Long(((LongConstant) tempConstant).value);
-          if (tempVal.compareTo(new Long(0)) == 0) {
+          Long tempVal = Long.valueOf(((LongConstant) tempConstant).value);
+          if (tempVal.compareTo(Long.valueOf(0)) == 0) {
             primTypeFieldValueToUse.put(combined, tempVal);
           } else {
             debug("Not assigning the agreed value since that is not the default value for " + combined);
           }
         } else if (tempConstant instanceof DoubleConstant) {
-          Double tempVal = new Double(((DoubleConstant) tempConstant).value);
-          if (tempVal.compareTo(new Double(0)) == 0) {
+          Double tempVal = Double.valueOf(((DoubleConstant) tempConstant).value);
+          if (tempVal.compareTo(Double.valueOf(0)) == 0) {
             primTypeFieldValueToUse.put(combined, tempVal);
           } else {
             debug("Not assigning the agreed value since that is not the default value for " + combined);
           }
 
         } else if (tempConstant instanceof FloatConstant) {
-          Float tempVal = new Float(((FloatConstant) tempConstant).value);
-          if (tempVal.compareTo(new Float(0)) == 0) {
+          Float tempVal = Float.valueOf(((FloatConstant) tempConstant).value);
+          if (tempVal.compareTo(Float.valueOf(0)) == 0) {
             primTypeFieldValueToUse.put(combined, tempVal);
           } else {
             debug("Not assigning the agreed value since that is not the default value for " + combined);
           }
 
         } else if (tempConstant instanceof IntConstant) {
-          Integer tempVal = new Integer(((IntConstant) tempConstant).value);
-          if (tempVal.compareTo(new Integer(0)) == 0) {
+          Integer tempVal = Integer.valueOf(((IntConstant) tempConstant).value);
+          if (tempVal.compareTo(Integer.valueOf(0)) == 0) {
             SootField tempField = classNameFieldNameToSootFieldMapping.get(combined);
             if (tempField.getType() instanceof BooleanType) {
-              primTypeFieldValueToUse.put(combined, new Boolean(false));
+              primTypeFieldValueToUse.put(combined, Boolean.valueOf(false));
               // System.out.println("puttingvalue false for"+combined);
             } else {
               primTypeFieldValueToUse.put(combined, tempVal);
@@ -278,7 +283,7 @@ public class ConstantFieldValueFinder {
     } // all classes
   }
 
-  /*
+/*
    * Go through all the methods in the application and make a mapping of className+methodName ---> values assigned There can
    * obviously be more than one value assigned to each field
    */
@@ -344,7 +349,7 @@ public class ConstantFieldValueFinder {
           debug("\tField DeclaringClass: " + declaringClass);
 
           // get the valueList for this class+field combo
-          String combined = declaringClass + combiner + fieldName;
+          String combined = new StringBuilder().append(declaringClass).append(combiner).append(fieldName).toString();
           Object temp = fieldToValues.get(combined);
 
           ArrayList valueList;
@@ -362,30 +367,30 @@ public class ConstantFieldValueFinder {
     } // going through classes
   }
 
-  public void printConstantValueFields() {
-    System.out.println("\n\n Printing Constant Value Fields (method: printConstantValueFields)");
+public void printConstantValueFields() {
+    logger.info("\n\n Printing Constant Value Fields (method: printConstantValueFields)");
     Iterator<String> it = primTypeFieldValueToUse.keySet().iterator();
     while (it.hasNext()) {
       String combined = it.next();
 
       int temp = combined.indexOf(combiner, 0);
       if (temp > 0) {
-        System.out.println("Class: " + combined.substring(0, temp) + " Field: "
-            + combined.substring(temp + combiner.length()) + " Value: " + primTypeFieldValueToUse.get(combined));
+        logger.info(new StringBuilder().append("Class: ").append(combined.substring(0, temp)).append(" Field: ").append(combined.substring(temp + combiner.length())).append(" Value: ").append(primTypeFieldValueToUse.get(combined))
+				.toString());
 
       }
     }
   }
 
-  public void debug(String methodName, String debug) {
+public void debug(String methodName, String debug) {
     if (DEBUG) {
-      System.out.println(methodName + "    DEBUG: " + debug);
+      logger.info(new StringBuilder().append(methodName).append("    DEBUG: ").append(debug).toString());
     }
   }
 
-  public void debug(String debug) {
+public void debug(String debug) {
     if (DEBUG) {
-      System.out.println("DEBUG: " + debug);
+      logger.info("DEBUG: " + debug);
     }
   }
 

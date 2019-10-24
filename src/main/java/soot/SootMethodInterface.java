@@ -33,24 +33,24 @@ public interface SootMethodInterface {
   /**
    *  @return The class which declares the current {@link SootMethod}/{@link SootMethodRef}  
    */
-  public SootClass getDeclaringClass();
+  SootClass getDeclaringClass();
 
   /**
    * @return Name of the method
    */
-  public String getName();
+  String getName();
 
-  public List<Type> getParameterTypes();
+  List<Type> getParameterTypes();
 
-  public Type getParameterType(int i);
+  Type getParameterType(int i);
 
-  public Type getReturnType();
+  Type getReturnType();
 
-  public boolean isStatic();
+  boolean isStatic();
 
   /**
    * @return The Soot signature of this method. Used to refer to methods unambiguously.
    */
-  public String getSignature();
+  String getSignature();
 
 }

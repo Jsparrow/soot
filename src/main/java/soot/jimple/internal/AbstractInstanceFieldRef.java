@@ -54,13 +54,16 @@ public abstract class AbstractInstanceFieldRef implements InstanceFieldRef, Conv
     this.fieldRef = fieldRef;
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public String toString() {
-    return baseBox.getValue().toString() + "." + fieldRef.getSignature();
+  @Override
+public String toString() {
+    return new StringBuilder().append(baseBox.getValue().toString()).append(".").append(fieldRef.getSignature()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (PrecedenceTest.needsBrackets(baseBox, this)) {
       up.literal("(");
     }
@@ -72,33 +75,39 @@ public abstract class AbstractInstanceFieldRef implements InstanceFieldRef, Conv
     up.fieldRef(fieldRef);
   }
 
-  public Value getBase() {
+  @Override
+public Value getBase() {
     return baseBox.getValue();
   }
 
-  public ValueBox getBaseBox() {
+  @Override
+public ValueBox getBaseBox() {
     return baseBox;
   }
 
-  public void setBase(Value base) {
+  @Override
+public void setBase(Value base) {
     baseBox.setValue(base);
   }
 
-  public SootFieldRef getFieldRef() {
+  @Override
+public SootFieldRef getFieldRef() {
     return fieldRef;
   }
 
-  public void setFieldRef(SootFieldRef fieldRef) {
+  @Override
+public void setFieldRef(SootFieldRef fieldRef) {
     this.fieldRef = fieldRef;
   }
 
-  public SootField getField() {
+  @Override
+public SootField getField() {
     return fieldRef.resolve();
   }
 
   @Override
   public final List<ValueBox> getUseBoxes() {
-    List<ValueBox> useBoxes = new ArrayList<ValueBox>();
+    List<ValueBox> useBoxes = new ArrayList<>();
 
     useBoxes.addAll(baseBox.getValue().getUseBoxes());
     useBoxes.add(baseBox);
@@ -106,28 +115,33 @@ public abstract class AbstractInstanceFieldRef implements InstanceFieldRef, Conv
     return useBoxes;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return fieldRef.type();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((RefSwitch) sw).caseInstanceFieldRef(this);
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof AbstractInstanceFieldRef) {
-      AbstractInstanceFieldRef fr = (AbstractInstanceFieldRef) o;
-      return fr.getField().equals(getField()) && fr.baseBox.getValue().equivTo(baseBox.getValue());
-    }
-    return false;
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof AbstractInstanceFieldRef)) {
+		return false;
+	}
+	AbstractInstanceFieldRef fr = (AbstractInstanceFieldRef) o;
+	return fr.getField().equals(getField()) && fr.baseBox.getValue().equivTo(baseBox.getValue());
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return getField().equivHashCode() * 101 + baseBox.getValue().equivHashCode() + 17;
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) getBase()).convertToBaf(context, out);
     Unit u;
     out.add(u = Baf.v().newFieldGetInst(fieldRef));

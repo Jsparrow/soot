@@ -46,7 +46,8 @@ public class LineNumberAdder extends SceneTransformer {
     return G.v().soot_jimple_toolkits_annotation_LineNumberAdder();
   }
 
-  public void internalTransform(String phaseName, Map opts) {
+  @Override
+public void internalTransform(String phaseName, Map opts) {
 
     // using a snapshot iterator because Application classes may change if LambdaMetaFactory translates invokedynamic to new
     // classes; no need to visit new classes
@@ -54,7 +55,7 @@ public class LineNumberAdder extends SceneTransformer {
     while (it.hasNext()) {
       SootClass sc = (SootClass) it.next();
       // make map of first line to each method
-      HashMap<Integer, SootMethod> lineToMeth = new HashMap<Integer, SootMethod>();
+      HashMap<Integer, SootMethod> lineToMeth = new HashMap<>();
       Iterator methIt = sc.getMethods().iterator();
       while (methIt.hasNext()) {
         SootMethod meth = (SootMethod) methIt.next();
@@ -68,7 +69,7 @@ public class LineNumberAdder extends SceneTransformer {
         }
         if (s.hasTag("LineNumberTag")) {
           LineNumberTag tag = (LineNumberTag) s.getTag("LineNumberTag");
-          lineToMeth.put(new Integer(tag.getLineNumber()), meth);
+          lineToMeth.put(Integer.valueOf(tag.getLineNumber()), meth);
         }
       }
       Iterator methIt2 = sc.getMethods().iterator();
@@ -86,7 +87,7 @@ public class LineNumberAdder extends SceneTransformer {
           LineNumberTag tag = (LineNumberTag) s.getTag("LineNumberTag");
           int line_num = tag.getLineNumber() - 1;
           // already taken
-          if (lineToMeth.containsKey(new Integer(line_num))) {
+          if (lineToMeth.containsKey(Integer.valueOf(line_num))) {
             meth.addTag(new LineNumberTag(line_num + 1));
           }
           // still available - so use it for this meth

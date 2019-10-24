@@ -68,16 +68,12 @@ public class Timer {
     g.Timer_forcedGarbageCollectionTimer.start();
 
     // Stop all outstanding timers
-    for (Timer t : g.Timer_outstandingTimers) {
-      t.end();
-    }
+	g.Timer_outstandingTimers.forEach(Timer::end);
 
     gc();
 
     // Start all outstanding timers
-    for (Timer t : g.Timer_outstandingTimers) {
-      t.start();
-    }
+	g.Timer_outstandingTimers.forEach(Timer::start);
 
     g.Timer_forcedGarbageCollectionTimer.end();
     g.Timer_isGarbageCollecting = false;
@@ -91,7 +87,7 @@ public class Timer {
     startTime = nanoTime();
 
     if (hasStarted) {
-      throw new RuntimeException("timer " + name + " has already been started!");
+      throw new RuntimeException(new StringBuilder().append("timer ").append(name).append(" has already been started!").toString());
     }
 
     hasStarted = true;
@@ -104,14 +100,15 @@ public class Timer {
   }
 
   /** Returns the name of the current timer. */
-  public String toString() {
+  @Override
+public String toString() {
     return name;
   }
 
   /** Stops the current timer. */
   public void end() {
     if (!hasStarted) {
-      throw new RuntimeException("timer " + name + " has not been started!");
+      throw new RuntimeException(new StringBuilder().append("timer ").append(name).append(" has not been started!").toString());
     }
 
     hasStarted = false;

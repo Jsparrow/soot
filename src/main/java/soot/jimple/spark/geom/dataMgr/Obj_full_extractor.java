@@ -35,8 +35,8 @@ import soot.jimple.spark.pag.Node;
  *
  */
 public class Obj_full_extractor extends PtSensVisitor<IntervalContextVar> {
-  private List<IntervalContextVar> backupList = new ArrayList<IntervalContextVar>();
-  private IntervalContextVar tmp_icv = new IntervalContextVar();
+  private List<IntervalContextVar> backupList = new ArrayList<>();
+  private IntervalContextVar tmpIcv = new IntervalContextVar();
 
   @Override
   public boolean visit(Node var, long L, long R, int sm_int) {
@@ -48,22 +48,22 @@ public class Obj_full_extractor extends PtSensVisitor<IntervalContextVar> {
 
     if (resList == null) {
       // The first time this object is inserted
-      resList = new ArrayList<IntervalContextVar>();
+      resList = new ArrayList<>();
     } else {
       // We search the list and merge the context sensitive objects
       backupList.clear();
-      tmp_icv.L = L;
-      tmp_icv.R = R;
+      tmpIcv.L = L;
+      tmpIcv.R = R;
 
       for (IntervalContextVar old_cv : resList) {
-        if (old_cv.contains(tmp_icv)) {
+        if (old_cv.contains(tmpIcv)) {
           /*
            * Becase we keep the intervals disjoint. It's impossible the passed in interval is contained in an interval or
            * intersects with other intervals. In such case, we can directly return.
            */
           return false;
         }
-        if (!tmp_icv.merge(old_cv)) {
+        if (!tmpIcv.merge(old_cv)) {
           backupList.add(old_cv);
         }
       }
@@ -74,8 +74,8 @@ public class Obj_full_extractor extends PtSensVisitor<IntervalContextVar> {
       resList = tmpList;
 
       // Write back
-      L = tmp_icv.L;
-      R = tmp_icv.R;
+      L = tmpIcv.L;
+      R = tmpIcv.R;
     }
 
     IntervalContextVar icv = new IntervalContextVar(L, R, var);

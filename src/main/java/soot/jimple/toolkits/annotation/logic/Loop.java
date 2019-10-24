@@ -98,14 +98,8 @@ public class Loop {
    */
   public Collection<Stmt> getLoopExits() {
     if (loopExits == null) {
-      loopExits = new HashSet<Stmt>();
-      for (Stmt s : loopStatements) {
-        for (Unit succ : g.getSuccsOf(s)) {
-          if (!loopStatements.contains(succ)) {
-            loopExits.add(s);
-          }
-        }
-      }
+      loopExits = new HashSet<>();
+      loopStatements.forEach(s -> g.getSuccsOf(s).stream().filter(succ -> !loopStatements.contains(succ)).forEach(succ -> loopExits.add(s)));
     }
     return loopExits;
   }
@@ -116,11 +110,8 @@ public class Loop {
   public Collection<Stmt> targetsOfLoopExit(Stmt loopExit) {
     assert getLoopExits().contains(loopExit);
     List<Unit> succs = g.getSuccsOf(loopExit);
-    Collection<Stmt> res = new HashSet<Stmt>();
-    for (Unit u : succs) {
-      Stmt s = (Stmt) u;
-      res.add(s);
-    }
+    Collection<Stmt> res = new HashSet<>();
+    succs.stream().map(u -> (Stmt) u).forEach(res::add);
     res.removeAll(loopStatements);
     return res;
   }

@@ -53,8 +53,8 @@ public class BriefUnitGraph extends UnitGraph {
       Timers.v().graphTimer.start();
     }
 
-    unitToSuccs = new HashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
-    unitToPreds = new HashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
+    unitToSuccs = new HashMap<>(size * 2 + 1, 0.7f);
+    unitToPreds = new HashMap<>(size * 2 + 1, 0.7f);
     buildUnexceptionalEdges(unitToSuccs, unitToPreds);
 
     buildHeadsAndTails();

@@ -45,45 +45,49 @@ import soot.util.Chain;
 public class RemoveRedundantPushStores extends BodyTransformer implements IJbcoTransform {
 
   public static String dependancies[] = new String[] { "bb.jbco_rrps" };
+public static String name = "bb.jbco_rrps";
 
-  public String[] getDependencies() {
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_rrps";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     // removes all redundant load-stores
     boolean changed = true;
     PatchingChain<Unit> units = b.getUnits();
     while (changed) {
       changed = false;
-      Unit prevprevprev = null, prevprev = null, prev = null;
+      Unit prevprevprev = null;
+	Unit prevprev = null;
+	Unit prev = null;
       ExceptionalUnitGraph eug = new ExceptionalUnitGraph(b);
       Iterator<Unit> it = units.snapshotIterator();
       while (it.hasNext()) {
         Unit u = it.next();
-        if (prev != null && prev instanceof PushInst && u instanceof StoreInst) {
-          if (prevprev != null && prevprev instanceof StoreInst && prevprevprev != null
-              && prevprevprev instanceof PushInst) {
-            Local lprev = ((StoreInst) prevprev).getLocal();
-            Local l = ((StoreInst) u).getLocal();
-            if (l == lprev && eug.getSuccsOf(prevprevprev).size() == 1 && eug.getSuccsOf(prevprev).size() == 1) {
-              fixJumps(prevprevprev, prev, b.getTraps());
-              fixJumps(prevprev, u, b.getTraps());
-              units.remove(prevprevprev);
-              units.remove(prevprev);
-              changed = true;
-              break;
-            }
-          }
+        boolean condition = prev instanceof PushInst && u instanceof StoreInst && prevprev instanceof StoreInst && prevprevprev != null
+              && prevprevprev instanceof PushInst;
+		if (condition) {
+		Local lprev = ((StoreInst) prevprev).getLocal();
+		Local l = ((StoreInst) u).getLocal();
+		if (l == lprev && eug.getSuccsOf(prevprevprev).size() == 1 && eug.getSuccsOf(prevprev).size() == 1) {
+		  fixJumps(prevprevprev, prev, b.getTraps());
+		  fixJumps(prevprev, u, b.getTraps());
+		  units.remove(prevprevprev);
+		  units.remove(prevprev);
+		  changed = true;
+		  break;
+		}
         }
         prevprevprev = prevprev;
         prevprev = prev;
@@ -92,9 +96,9 @@ public class RemoveRedundantPushStores extends BodyTransformer implements IJbcoT
     } // end while changes have been made
   }
 
-  private void fixJumps(Unit from, Unit to, Chain<Trap> t) {
+private void fixJumps(Unit from, Unit to, Chain<Trap> t) {
     from.redirectJumpsToThisTo(to);
-    for (Trap trap : t) {
+    t.forEach(trap -> {
       if (trap.getBeginUnit() == from) {
         trap.setBeginUnit(to);
       }
@@ -104,6 +108,6 @@ public class RemoveRedundantPushStores extends BodyTransformer implements IJbcoT
       if (trap.getHandlerUnit() == from) {
         trap.setHandlerUnit(to);
       }
-    }
+    });
   }
 }

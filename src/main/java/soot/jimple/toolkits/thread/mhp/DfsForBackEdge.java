@@ -33,6 +33,8 @@ import soot.tagkit.Tag;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.scalar.FlowSet;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -47,9 +49,10 @@ import soot.util.Chain;
 
 public class DfsForBackEdge {
 
-  private final Map<Object, Object> backEdges = new HashMap<Object, Object>();
-  private final Set<Object> gray = new HashSet<Object>();
-  private final Set<Object> black = new HashSet<Object>();
+  private static final Logger logger = LoggerFactory.getLogger(DfsForBackEdge.class);
+private final Map<Object, Object> backEdges = new HashMap<>();
+  private final Set<Object> gray = new HashSet<>();
+  private final Set<Object> black = new HashSet<>();
   private final DominatorsFinder domFinder;
 
   DfsForBackEdge(Chain chain, DirectedGraph peg) {
@@ -96,8 +99,8 @@ public class DfsForBackEdge {
              */
             FlowSet dominators = domFinder.getDominatorsOf(s);
             if (dominators.contains(succ)) {
-              System.out.println("s is " + s);
-              System.out.println("succ is " + succ);
+              logger.info("s is " + s);
+              logger.info("succ is " + succ);
               backEdges.put(s, succ);
             }
           }
@@ -114,18 +117,18 @@ public class DfsForBackEdge {
   }
 
   private void testBackEdge() {
-    System.out.println("===test backEdges==");
+    logger.info("===test backEdges==");
     Set maps = backEdges.entrySet();
     for (Iterator iter = maps.iterator(); iter.hasNext();) {
       Map.Entry entry = (Map.Entry) iter.next();
       JPegStmt key = (JPegStmt) entry.getKey();
       Tag tag = (Tag) key.getTags().get(0);
-      System.out.println("---key=  " + tag + " " + key);
+      logger.info(new StringBuilder().append("---key=  ").append(tag).append(" ").append(key).toString());
       JPegStmt value = (JPegStmt) entry.getValue();
       Tag tag1 = (Tag) value.getTags().get(0);
-      System.out.println("---value=  " + tag1 + " " + value);
+      logger.info(new StringBuilder().append("---value=  ").append(tag1).append(" ").append(value).toString());
     }
-    System.out.println("===test backEdges==end==");
+    logger.info("===test backEdges==end==");
   }
 
 }

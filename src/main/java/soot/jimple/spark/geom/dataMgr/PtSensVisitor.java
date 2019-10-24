@@ -34,6 +34,8 @@ import soot.jimple.spark.geom.geomPA.GeomPointsTo;
 import soot.jimple.spark.pag.Node;
 import soot.jimple.spark.pag.VarNode;
 import soot.jimple.spark.sets.PointsToSetInternal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A container for storing context sensitive querying result of geomPTA. Similar to the class PointsToSetInternal for SPARK.
@@ -45,16 +47,18 @@ import soot.jimple.spark.sets.PointsToSetInternal;
  * @author xiao
  */
 public abstract class PtSensVisitor<VarType extends ContextVar> {
-  // Indicates if this visitor is prepared
+  private static final Logger logger = LoggerFactory.getLogger(PtSensVisitor.class);
+
+// Indicates if this visitor is prepared
   protected boolean readyToUse = false;
 
   protected GeomPointsTo ptsProvider = (GeomPointsTo) Scene.v().getPointsToAnalysis();
 
   // The list view
-  public List<VarType> outList = new ArrayList<VarType>();
+  public List<VarType> outList = new ArrayList<>();
 
   // The table view (cannot be accessed directly outside)
-  protected Map<Node, List<VarType>> tableView = new HashMap<Node, List<VarType>>();
+  protected Map<Node, List<VarType>> tableView = new HashMap<>();
 
   /**
    * Called before each round of collection.
@@ -68,20 +72,19 @@ public abstract class PtSensVisitor<VarType extends ContextVar> {
    * Called after each round of collection.
    */
   public void finish() {
-    if (readyToUse == false) {
-      // We flatten the list
+    if (readyToUse != false) {
+		return;
+	}
+	// We flatten the list
       readyToUse = true;
-      outList.clear();
-
-      if (tableView.size() == 0) {
+	outList.clear();
+	if (tableView.isEmpty()) {
         return;
       }
-
-      for (Map.Entry<Node, List<VarType>> entry : tableView.entrySet()) {
+	tableView.entrySet().forEach(entry -> {
         List<VarType> resList = entry.getValue();
         outList.addAll(resList);
-      }
-    }
+      });
   }
 
   /**
@@ -150,9 +153,7 @@ public abstract class PtSensVisitor<VarType extends ContextVar> {
 
     PointsToSetInternal ptset = vn.makeP2Set();
 
-    for (VarType cv : outList) {
-      ptset.add(cv.var);
-    }
+    outList.forEach(cv -> ptset.add(cv.var));
 
     return ptset;
   }
@@ -165,9 +166,7 @@ public abstract class PtSensVisitor<VarType extends ContextVar> {
       finish();
     }
 
-    for (VarType cv : outList) {
-      System.out.printf("\t%s\n", cv.toString());
-    }
+    outList.forEach(cv -> logger.info("\t%s\n", cv.toString()));
   }
 
   /**

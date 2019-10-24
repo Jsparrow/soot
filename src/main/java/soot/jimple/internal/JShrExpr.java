@@ -38,19 +38,23 @@ public class JShrExpr extends AbstractJimpleIntLongBinopExpr implements ShrExpr 
     super(op1, op2);
   }
 
-  public String getSymbol() {
+  @Override
+public String getSymbol() {
     return " >> ";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseShrExpr(this);
   }
 
-  Object makeBafInst(Type opType) {
+  @Override
+Object makeBafInst(Type opType) {
     return Baf.v().newShrInst(this.getOp1().getType());
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     Value op1 = op1Box.getValue();
     Value op2 = op2Box.getValue();
 
@@ -68,7 +72,8 @@ public class JShrExpr extends AbstractJimpleIntLongBinopExpr implements ShrExpr 
     return UnknownType.v();
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JShrExpr(Jimple.cloneIfNecessary(getOp1()), Jimple.cloneIfNecessary(getOp2()));
   }
 

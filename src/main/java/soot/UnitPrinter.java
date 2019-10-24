@@ -29,49 +29,49 @@ import soot.jimple.IdentityRef;
  * Interface for different methods of printing out a Unit.
  */
 public interface UnitPrinter {
-  public void startUnit(Unit u);
+  void startUnit(Unit u);
 
-  public void endUnit(Unit u);
+  void endUnit(Unit u);
 
-  public void startUnitBox(UnitBox u);
+  void startUnitBox(UnitBox u);
 
-  public void endUnitBox(UnitBox u);
+  void endUnitBox(UnitBox u);
 
-  public void startValueBox(ValueBox u);
+  void startValueBox(ValueBox u);
 
-  public void endValueBox(ValueBox u);
+  void endValueBox(ValueBox u);
 
-  public void incIndent();
+  void incIndent();
 
-  public void decIndent();
+  void decIndent();
 
-  public void noIndent();
+  void noIndent();
 
-  public void setIndent(String newIndent);
+  void setIndent(String newIndent);
 
-  public String getIndent();
+  String getIndent();
 
-  public void literal(String s);
+  void literal(String s);
 
-  public void newline();
+  void newline();
 
-  public void local(Local l);
+  void local(Local l);
 
-  public void type(Type t);
+  void type(Type t);
 
-  public void methodRef(SootMethodRef m);
+  void methodRef(SootMethodRef m);
 
-  public void constant(Constant c);
+  void constant(Constant c);
 
-  public void fieldRef(SootFieldRef f);
+  void fieldRef(SootFieldRef f);
 
-  public void unitRef(Unit u, boolean branchTarget);
+  void unitRef(Unit u, boolean branchTarget);
 
-  public void identityRef(IdentityRef r);
+  void identityRef(IdentityRef r);
 
-  public void setPositionTagger(AttributesUnitPrinter pt);
+  void setPositionTagger(AttributesUnitPrinter pt);
 
-  public AttributesUnitPrinter getPositionTagger();
+  AttributesUnitPrinter getPositionTagger();
 
-  public StringBuffer output();
+  StringBuffer output();
 }

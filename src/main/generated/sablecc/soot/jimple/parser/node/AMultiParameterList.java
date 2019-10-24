@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AMultiParameterList extends PParameterList
 {
-    private PParameter _parameter_;
-    private TComma _comma_;
-    private PParameterList _parameterList_;
+    private PParameter parameter;
+    private TComma comma;
+    private PParameterList parameterList;
 
     public AMultiParameterList()
     {
@@ -34,9 +34,9 @@ public final class AMultiParameterList extends PParameterList
     public Object clone()
     {
         return new AMultiParameterList(
-            cloneNode(this._parameter_),
-            cloneNode(this._comma_),
-            cloneNode(this._parameterList_));
+            cloneNode(this.parameter),
+            cloneNode(this.comma),
+            cloneNode(this.parameterList));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class AMultiParameterList extends PParameterList
 
     public PParameter getParameter()
     {
-        return this._parameter_;
+        return this.parameter;
     }
 
     public void setParameter(PParameter node)
     {
-        if(this._parameter_ != null)
+        if(this.parameter != null)
         {
-            this._parameter_.parent(null);
+            this.parameter.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class AMultiParameterList extends PParameterList
             node.parent(this);
         }
 
-        this._parameter_ = node;
+        this.parameter = node;
     }
 
     public TComma getComma()
     {
-        return this._comma_;
+        return this.comma;
     }
 
     public void setComma(TComma node)
     {
-        if(this._comma_ != null)
+        if(this.comma != null)
         {
-            this._comma_.parent(null);
+            this.comma.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AMultiParameterList extends PParameterList
             node.parent(this);
         }
 
-        this._comma_ = node;
+        this.comma = node;
     }
 
     public PParameterList getParameterList()
     {
-        return this._parameterList_;
+        return this.parameterList;
     }
 
     public void setParameterList(PParameterList node)
     {
-        if(this._parameterList_ != null)
+        if(this.parameterList != null)
         {
-            this._parameterList_.parent(null);
+            this.parameterList.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class AMultiParameterList extends PParameterList
             node.parent(this);
         }
 
-        this._parameterList_ = node;
+        this.parameterList = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._parameter_)
-            + toString(this._comma_)
-            + toString(this._parameterList_);
+        return new StringBuilder().append("").append(toString(this.parameter)).append(toString(this.comma)).append(toString(this.parameterList)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._parameter_ == child)
+        if(this.parameter == child)
         {
-            this._parameter_ = null;
+            this.parameter = null;
             return;
         }
 
-        if(this._comma_ == child)
+        if(this.comma == child)
         {
-            this._comma_ = null;
+            this.comma = null;
             return;
         }
 
-        if(this._parameterList_ == child)
+        if(this.parameterList == child)
         {
-            this._parameterList_ = null;
+            this.parameterList = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class AMultiParameterList extends PParameterList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._parameter_ == oldChild)
+        if(this.parameter == oldChild)
         {
             setParameter((PParameter) newChild);
             return;
         }
 
-        if(this._comma_ == oldChild)
+        if(this.comma == oldChild)
         {
             setComma((TComma) newChild);
             return;
         }
 
-        if(this._parameterList_ == oldChild)
+        if(this.parameterList == oldChild)
         {
             setParameterList((PParameterList) newChild);
             return;

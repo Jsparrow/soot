@@ -46,16 +46,16 @@ import soot.jimple.Stmt;
 
 public class BadFields extends SceneTransformer {
   private static final Logger logger = LoggerFactory.getLogger(BadFields.class);
+private SootClass lastClass;
+private SootClass currentClass;
 
-  public static void main(String[] args) {
+public static void main(String[] args) {
     PackManager.v().getPack("cg").add(new Transform("cg.badfields", new BadFields()));
     soot.Main.main(args);
   }
 
-  private SootClass lastClass;
-  private SootClass currentClass;
-
-  protected void internalTransform(String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(String phaseName, Map<String, String> options) {
     lastClass = null;
 
     for (Iterator<SootClass> clIt = Scene.v().getApplicationClasses().iterator(); clIt.hasNext();) {
@@ -70,33 +70,33 @@ public class BadFields extends SceneTransformer {
     Scene.v().setCallGraph(Scene.v().internalMakeCallGraph());
   }
 
-  private void handleClass(SootClass cl) {
+private void handleClass(SootClass cl) {
     for (Iterator<SootField> fIt = cl.getFields().iterator(); fIt.hasNext();) {
       final SootField f = fIt.next();
       if (!f.isStatic()) {
         continue;
       }
       String typeName = f.getType().toString();
-      if (typeName.equals("java.lang.Class")) {
+      if ("java.lang.Class".equals(typeName)) {
         continue;
       }
       if (f.isFinal()) {
         if (f.getType() instanceof PrimType) {
           continue;
         }
-        if (typeName.equals("java.io.PrintStream")) {
+        if ("java.io.PrintStream".equals(typeName)) {
           continue;
         }
-        if (typeName.equals("java.lang.String")) {
+        if ("java.lang.String".equals(typeName)) {
           continue;
         }
-        if (typeName.equals("java.lang.Object")) {
+        if ("java.lang.Object".equals(typeName)) {
           continue;
         }
-        if (typeName.equals("java.lang.Integer")) {
+        if ("java.lang.Integer".equals(typeName)) {
           continue;
         }
-        if (typeName.equals("java.lang.Boolean")) {
+        if ("java.lang.Boolean".equals(typeName)) {
           continue;
         }
       }
@@ -104,15 +104,15 @@ public class BadFields extends SceneTransformer {
     }
   }
 
-  private void warn(String warning) {
+private void warn(String warning) {
     if (lastClass != currentClass) {
-      logger.debug("" + "In class " + currentClass);
+      logger.debug(new StringBuilder().append("").append("In class ").append(currentClass).toString());
     }
     lastClass = currentClass;
-    logger.debug("" + "  " + warning);
+    logger.debug(new StringBuilder().append("").append("  ").append(warning).toString());
   }
 
-  private void handleMethod(SootMethod m) {
+private void handleMethod(SootMethod m) {
     if (!m.isConcrete()) {
       return;
     }
@@ -124,14 +124,14 @@ public class BadFields extends SceneTransformer {
       }
       StaticFieldRef sfr = (StaticFieldRef) v;
       SootField f = sfr.getField();
-      if (!f.getDeclaringClass().getName().equals("java.lang.System")) {
+      if (!"java.lang.System".equals(f.getDeclaringClass().getName())) {
         continue;
       }
-      if (f.getName().equals("err")) {
-        logger.debug("" + "Use of System.err in " + m);
+      if ("err".equals(f.getName())) {
+        logger.debug(new StringBuilder().append("").append("Use of System.err in ").append(m).toString());
       }
-      if (f.getName().equals("out")) {
-        logger.debug("" + "Use of System.out in " + m);
+      if ("out".equals(f.getName())) {
+        logger.debug(new StringBuilder().append("").append("Use of System.out in ").append(m).toString());
       }
     }
     for (Iterator<Unit> sIt = m.getActiveBody().getUnits().iterator(); sIt.hasNext();) {
@@ -141,18 +141,18 @@ public class BadFields extends SceneTransformer {
       }
       InvokeExpr ie = s.getInvokeExpr();
       SootMethod target = ie.getMethod();
-      if (target.getDeclaringClass().getName().equals("java.lang.System") && target.getName().equals("exit")) {
-        warn("" + m + " calls System.exit");
+      if ("java.lang.System".equals(target.getDeclaringClass().getName()) && "exit".equals(target.getName())) {
+        warn(new StringBuilder().append("").append(m).append(" calls System.exit").toString());
       }
     }
-    if (m.getName().equals("<clinit>")) {
+    if ("<clinit>".equals(m.getName())) {
       for (Iterator<Unit> sIt = m.getActiveBody().getUnits().iterator(); sIt.hasNext();) {
         final Stmt s = (Stmt) sIt.next();
         for (Iterator<ValueBox> bIt = s.getUseBoxes().iterator(); bIt.hasNext();) {
           final ValueBox b = bIt.next();
           Value v = b.getValue();
           if (v instanceof FieldRef) {
-            warn(m.getName() + " reads field " + v);
+            warn(new StringBuilder().append(m.getName()).append(" reads field ").append(v).toString());
           }
         }
         if (!s.containsInvokeExpr()) {
@@ -165,34 +165,30 @@ public class BadFields extends SceneTransformer {
     }
   }
 
-  private void calls(SootMethod target) {
-    if (target.getName().equals("<init>")) {
-      if (target.getDeclaringClass().getName().equals("java.io.PrintStream")) {
+private void calls(SootMethod target) {
+    if ("<init>".equals(target.getName())) {
+      if ("java.io.PrintStream".equals(target.getDeclaringClass().getName())) {
         return;
       }
-      if (target.getDeclaringClass().getName().equals("java.lang.Boolean")) {
+      if ("java.lang.Boolean".equals(target.getDeclaringClass().getName())) {
         return;
       }
-      if (target.getDeclaringClass().getName().equals("java.lang.Integer")) {
+      if ("java.lang.Integer".equals(target.getDeclaringClass().getName())) {
         return;
       }
-      if (target.getDeclaringClass().getName().equals("java.lang.String")) {
+      if ("java.lang.String".equals(target.getDeclaringClass().getName())) {
         return;
       }
-      if (target.getDeclaringClass().getName().equals("java.lang.Object")) {
-        return;
-      }
-    }
-    if (target.getName().equals("getProperty")) {
-      if (target.getDeclaringClass().getName().equals("java.lang.System")) {
+      if ("java.lang.Object".equals(target.getDeclaringClass().getName())) {
         return;
       }
     }
-    if (target.getName().equals("charAt")) {
-      if (target.getDeclaringClass().getName().equals("java.lang.String")) {
+    if ("getProperty".equals(target.getName()) && "java.lang.System".equals(target.getDeclaringClass().getName())) {
         return;
       }
-    }
+    if ("charAt".equals(target.getName()) && "java.lang.String".equals(target.getDeclaringClass().getName())) {
+        return;
+      }
     warn("<clinit> invokes " + target);
   }
 }

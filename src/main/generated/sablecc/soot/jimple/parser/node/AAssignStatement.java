@@ -7,10 +7,10 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AAssignStatement extends PStatement
 {
-    private PVariable _variable_;
-    private TEquals _equals_;
-    private PExpression _expression_;
-    private TSemicolon _semicolon_;
+    private PVariable variable;
+    private TEquals equals;
+    private PExpression expression;
+    private TSemicolon semicolon;
 
     public AAssignStatement()
     {
@@ -38,10 +38,10 @@ public final class AAssignStatement extends PStatement
     public Object clone()
     {
         return new AAssignStatement(
-            cloneNode(this._variable_),
-            cloneNode(this._equals_),
-            cloneNode(this._expression_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.variable),
+            cloneNode(this.equals),
+            cloneNode(this.expression),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -52,14 +52,14 @@ public final class AAssignStatement extends PStatement
 
     public PVariable getVariable()
     {
-        return this._variable_;
+        return this.variable;
     }
 
     public void setVariable(PVariable node)
     {
-        if(this._variable_ != null)
+        if(this.variable != null)
         {
-            this._variable_.parent(null);
+            this.variable.parent(null);
         }
 
         if(node != null)
@@ -72,19 +72,19 @@ public final class AAssignStatement extends PStatement
             node.parent(this);
         }
 
-        this._variable_ = node;
+        this.variable = node;
     }
 
     public TEquals getEquals()
     {
-        return this._equals_;
+        return this.equals;
     }
 
     public void setEquals(TEquals node)
     {
-        if(this._equals_ != null)
+        if(this.equals != null)
         {
-            this._equals_.parent(null);
+            this.equals.parent(null);
         }
 
         if(node != null)
@@ -97,19 +97,19 @@ public final class AAssignStatement extends PStatement
             node.parent(this);
         }
 
-        this._equals_ = node;
+        this.equals = node;
     }
 
     public PExpression getExpression()
     {
-        return this._expression_;
+        return this.expression;
     }
 
     public void setExpression(PExpression node)
     {
-        if(this._expression_ != null)
+        if(this.expression != null)
         {
-            this._expression_.parent(null);
+            this.expression.parent(null);
         }
 
         if(node != null)
@@ -122,19 +122,19 @@ public final class AAssignStatement extends PStatement
             node.parent(this);
         }
 
-        this._expression_ = node;
+        this.expression = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -147,44 +147,41 @@ public final class AAssignStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._variable_)
-            + toString(this._equals_)
-            + toString(this._expression_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.variable)).append(toString(this.equals)).append(toString(this.expression)).append(toString(this.semicolon))
+				.toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._variable_ == child)
+        if(this.variable == child)
         {
-            this._variable_ = null;
+            this.variable = null;
             return;
         }
 
-        if(this._equals_ == child)
+        if(this.equals == child)
         {
-            this._equals_ = null;
+            this.equals = null;
             return;
         }
 
-        if(this._expression_ == child)
+        if(this.expression == child)
         {
-            this._expression_ = null;
+            this.expression = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -195,25 +192,25 @@ public final class AAssignStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._variable_ == oldChild)
+        if(this.variable == oldChild)
         {
             setVariable((PVariable) newChild);
             return;
         }
 
-        if(this._equals_ == oldChild)
+        if(this.equals == oldChild)
         {
             setEquals((TEquals) newChild);
             return;
         }
 
-        if(this._expression_ == oldChild)
+        if(this.expression == oldChild)
         {
             setExpression((PExpression) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

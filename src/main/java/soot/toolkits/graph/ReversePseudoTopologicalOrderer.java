@@ -35,7 +35,6 @@ public class ReversePseudoTopologicalOrderer<N> extends PseudoTopologicalOrderer
    * @deprecated use {@link PseudoTopologicalOrderer#newList(DirectedGraph, boolean)} instead
    */
   public ReversePseudoTopologicalOrderer() {
-    super();
     setReverseOrder(true);
   }
 }

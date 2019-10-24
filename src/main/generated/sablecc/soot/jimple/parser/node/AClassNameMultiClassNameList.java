@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AClassNameMultiClassNameList extends PClassNameList
 {
-    private PClassName _className_;
-    private TComma _comma_;
-    private PClassNameList _classNameList_;
+    private PClassName className;
+    private TComma comma;
+    private PClassNameList classNameList;
 
     public AClassNameMultiClassNameList()
     {
@@ -34,9 +34,9 @@ public final class AClassNameMultiClassNameList extends PClassNameList
     public Object clone()
     {
         return new AClassNameMultiClassNameList(
-            cloneNode(this._className_),
-            cloneNode(this._comma_),
-            cloneNode(this._classNameList_));
+            cloneNode(this.className),
+            cloneNode(this.comma),
+            cloneNode(this.classNameList));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class AClassNameMultiClassNameList extends PClassNameList
 
     public PClassName getClassName()
     {
-        return this._className_;
+        return this.className;
     }
 
     public void setClassName(PClassName node)
     {
-        if(this._className_ != null)
+        if(this.className != null)
         {
-            this._className_.parent(null);
+            this.className.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class AClassNameMultiClassNameList extends PClassNameList
             node.parent(this);
         }
 
-        this._className_ = node;
+        this.className = node;
     }
 
     public TComma getComma()
     {
-        return this._comma_;
+        return this.comma;
     }
 
     public void setComma(TComma node)
     {
-        if(this._comma_ != null)
+        if(this.comma != null)
         {
-            this._comma_.parent(null);
+            this.comma.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AClassNameMultiClassNameList extends PClassNameList
             node.parent(this);
         }
 
-        this._comma_ = node;
+        this.comma = node;
     }
 
     public PClassNameList getClassNameList()
     {
-        return this._classNameList_;
+        return this.classNameList;
     }
 
     public void setClassNameList(PClassNameList node)
     {
-        if(this._classNameList_ != null)
+        if(this.classNameList != null)
         {
-            this._classNameList_.parent(null);
+            this.classNameList.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class AClassNameMultiClassNameList extends PClassNameList
             node.parent(this);
         }
 
-        this._classNameList_ = node;
+        this.classNameList = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._className_)
-            + toString(this._comma_)
-            + toString(this._classNameList_);
+        return new StringBuilder().append("").append(toString(this.className)).append(toString(this.comma)).append(toString(this.classNameList)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._className_ == child)
+        if(this.className == child)
         {
-            this._className_ = null;
+            this.className = null;
             return;
         }
 
-        if(this._comma_ == child)
+        if(this.comma == child)
         {
-            this._comma_ = null;
+            this.comma = null;
             return;
         }
 
-        if(this._classNameList_ == child)
+        if(this.classNameList == child)
         {
-            this._classNameList_ = null;
+            this.classNameList = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class AClassNameMultiClassNameList extends PClassNameList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._className_ == oldChild)
+        if(this.className == oldChild)
         {
             setClassName((PClassName) newChild);
             return;
         }
 
-        if(this._comma_ == oldChild)
+        if(this.comma == oldChild)
         {
             setComma((TComma) newChild);
             return;
         }
 
-        if(this._classNameList_ == oldChild)
+        if(this.classNameList == oldChild)
         {
             setClassNameList((PClassNameList) newChild);
             return;

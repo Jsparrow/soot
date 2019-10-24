@@ -59,11 +59,22 @@ public abstract class DexlibAbstractInstruction {
   // protected Unit endUnit;
   protected Unit unit;
 
-  public Instruction getInstruction() {
+  /**
+   * @param instruction
+   *          the underlying dexlib instruction
+   * @param codeAddress
+   *          the bytecode address of this instruction
+   */
+  public DexlibAbstractInstruction(Instruction instruction, int codeAddress) {
+    this.instruction = instruction;
+    this.codeAddress = codeAddress;
+  }
+
+public Instruction getInstruction() {
     return instruction;
   }
 
-  /**
+/**
    * Jimplify this instruction.
    *
    * @param body
@@ -71,7 +82,7 @@ public abstract class DexlibAbstractInstruction {
    */
   public abstract void jimplify(DexBody body);
 
-  /**
+/**
    * Return the target register that is a copy of the given register. For instruction such as v0 = v3 (v0 gets the content of
    * v3), movesRegister(3) returns 0 movesRegister(0) returns -1
    *
@@ -85,7 +96,7 @@ public abstract class DexlibAbstractInstruction {
     return -1;
   }
 
-  /**
+/**
    * Return the source register that is moved to the given register. For instruction such as v0 = v3 (v0 gets the content of
    * v3), movesToRegister(3) returns -1 movesToRegister(0) returns 3
    *
@@ -99,7 +110,7 @@ public abstract class DexlibAbstractInstruction {
     return -1;
   }
 
-  /**
+/**
    * Return if the instruction overrides the value in the register.
    *
    * Instructions should override this if they modify the registers.
@@ -111,7 +122,7 @@ public abstract class DexlibAbstractInstruction {
     return false;
   }
 
-  /**
+/**
    * Return if the value in the register is used as a floating point.
    *
    * Instructions that have this context information and may deal with integers or floating points should override this.
@@ -125,7 +136,7 @@ public abstract class DexlibAbstractInstruction {
     return false;
   }
 
-  /**
+/**
    * Return the types that are be introduced by this instruction.
    *
    * Instructions that may introduce types should override this.
@@ -134,26 +145,15 @@ public abstract class DexlibAbstractInstruction {
     return Collections.emptySet();
   }
 
-  /**
-   * @param instruction
-   *          the underlying dexlib instruction
-   * @param codeAddress
-   *          the bytecode address of this instruction
-   */
-  public DexlibAbstractInstruction(Instruction instruction, int codeAddress) {
-    this.instruction = instruction;
-    this.codeAddress = codeAddress;
-  }
-
-  public int getLineNumber() {
+public int getLineNumber() {
     return lineNumber;
   }
 
-  public void setLineNumber(int lineNumber) {
+public void setLineNumber(int lineNumber) {
     this.lineNumber = lineNumber;
   }
 
-  /**
+/**
    * Tag the passed host with: - this instructions line number (if one is set) - the original bytecode offset
    *
    * @param host
@@ -170,7 +170,7 @@ public abstract class DexlibAbstractInstruction {
     }
   }
 
-  // /**
+// /**
   // * Return the first of the jimple units that represent this instruction.
   // *
   // */
@@ -189,7 +189,7 @@ public abstract class DexlibAbstractInstruction {
     return unit;
   }
 
-  /**
+/**
    * Set the Jimple Unit, that comprises this instruction.
    *
    * Does not override already set units.
@@ -199,7 +199,7 @@ public abstract class DexlibAbstractInstruction {
     // defineBlock(stmt, stmt);
   }
 
-  // /**
+// /**
   // * Set the first and last Jimple Unit, that comprise this instruction.
   // *
   // * Does not override already set units.
@@ -253,7 +253,7 @@ public abstract class DexlibAbstractInstruction {
    * @return a list of register indices
    */
   protected List<Integer> getUsedRegistersNums(RegisterRangeInstruction instruction) {
-    List<Integer> regs = new ArrayList<Integer>();
+    List<Integer> regs = new ArrayList<>();
     int start = instruction.getStartRegister();
     for (int i = start; i < start + instruction.getRegisterCount(); i++) {
       regs.add(i);
@@ -262,7 +262,7 @@ public abstract class DexlibAbstractInstruction {
     return regs;
   }
 
-  /**
+/**
    * Return the indices used in the given instruction.
    *
    * @param instruction
@@ -272,7 +272,7 @@ public abstract class DexlibAbstractInstruction {
   protected List<Integer> getUsedRegistersNums(FiveRegisterInstruction instruction) {
     int[] regs = { instruction.getRegisterC(), instruction.getRegisterD(), instruction.getRegisterE(),
         instruction.getRegisterF(), instruction.getRegisterG(), };
-    List<Integer> l = new ArrayList<Integer>();
+    List<Integer> l = new ArrayList<>();
     for (int i = 0; i < instruction.getRegisterCount(); i++) {
       l.add(regs[i]);
     }

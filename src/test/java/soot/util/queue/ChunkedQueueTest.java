@@ -134,8 +134,9 @@ public class ChunkedQueueTest {
 	public void removeFromLargeQueueTest() {
 		ChunkedQueue<String> queue = new ChunkedQueue<>();
 		QueueReader<String> rdr = queue.reader();
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 100; i++) {
 			queue.add("Hello World " + i);
+		}
 		Assert.assertTrue(rdr.hasNext());
 		rdr.remove("Hello World 90");
 		Assert.assertTrue(rdr.hasNext());

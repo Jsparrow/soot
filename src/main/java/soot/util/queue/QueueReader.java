@@ -44,7 +44,8 @@ public class QueueReader<E> implements java.util.Iterator<E> {
   /**
    * Returns (and removes) the next object in the queue, or null if there are none.
    */
-  @SuppressWarnings("unchecked")
+  @Override
+@SuppressWarnings("unchecked")
   public E next() {
     Object ret = null;
     do {
@@ -68,7 +69,8 @@ public class QueueReader<E> implements java.util.Iterator<E> {
   }
 
   /** Returns true iff there is currently another object in the queue. */
-  @SuppressWarnings("unchecked")
+  @Override
+@SuppressWarnings("unchecked")
   public boolean hasNext() {
     do {
       if (q[index] == null) {
@@ -118,12 +120,14 @@ public class QueueReader<E> implements java.util.Iterator<E> {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+@SuppressWarnings("unchecked")
   public void remove() {
     q[index - 1] = (E) ChunkedQueue.DELETED_CONST;
   }
 
-  public QueueReader<E> clone() {
-    return new QueueReader<E>(q, index);
+  @Override
+public QueueReader<E> clone() {
+    return new QueueReader<>(q, index);
   }
 }

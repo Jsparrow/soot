@@ -39,15 +39,13 @@ public class Typing {
   private HashMap<Local, Type> map;
 
   public Typing(Collection<Local> vs) {
-    map = new HashMap<Local, Type>(vs.size());
+    map = new HashMap<>(vs.size());
     final BottomType bottomType = BottomType.v();
-    for (Local v : vs) {
-      this.map.put(v, bottomType);
-    }
+    vs.forEach(v -> this.map.put(v, bottomType));
   }
 
   public Typing(Typing tg) {
-    this.map = new HashMap<Local, Type>(tg.map);
+    this.map = new HashMap<>(tg.map);
   }
 
   public Type get(Local v) {
@@ -60,14 +58,14 @@ public class Typing {
 
   @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append('{');
-    for (Local v : this.map.keySet()) {
+    this.map.keySet().forEach(v -> {
       sb.append(v);
       sb.append(':');
       sb.append(this.get(v));
       sb.append(',');
-    }
+    });
     sb.append('}');
     return sb.toString();
   }
@@ -93,7 +91,8 @@ public class Typing {
   public static int compare(Typing a, Typing b, IHierarchy h) {
     int r = 0;
     for (Local v : a.map.keySet()) {
-      Type ta = a.get(v), tb = b.get(v);
+      Type ta = a.get(v);
+	Type tb = b.get(v);
 
       int cmp;
       if (TypeResolver.typesEqual(ta, tb)) {

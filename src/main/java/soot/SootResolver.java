@@ -48,10 +48,10 @@ import soot.util.MultiMap;
 public class SootResolver {
   private static final Logger logger = LoggerFactory.getLogger(SootResolver.class);
   /** Maps each resolved class to a list of all references in it. */
-  protected MultiMap<SootClass, Type> classToTypesSignature = new ConcurrentHashMultiMap<SootClass, Type>();
+  protected MultiMap<SootClass, Type> classToTypesSignature = new ConcurrentHashMultiMap<>();
 
   /** Maps each resolved class to a list of all references in it. */
-  protected MultiMap<SootClass, Type> classToTypesHierarchy = new ConcurrentHashMultiMap<SootClass, Type>();
+  protected MultiMap<SootClass, Type> classToTypesHierarchy = new ConcurrentHashMultiMap<>();
 
   /** SootClasses waiting to be resolved. */
   @SuppressWarnings("unchecked")
@@ -60,36 +60,30 @@ public class SootResolver {
   private Program program = null;
 
   public SootResolver(Singletons.Global g) {
-    worklist[SootClass.HIERARCHY] = new ArrayDeque<SootClass>();
-    worklist[SootClass.SIGNATURES] = new ArrayDeque<SootClass>();
-    worklist[SootClass.BODIES] = new ArrayDeque<SootClass>();
+    worklist[SootClass.HIERARCHY] = new ArrayDeque<>();
+    worklist[SootClass.SIGNATURES] = new ArrayDeque<>();
+    worklist[SootClass.BODIES] = new ArrayDeque<>();
   }
 
   protected void initializeProgram() {
-    if (Options.v().src_prec() != Options.src_prec_apk_c_j) {
-      program = new Program();
-      program.state().reset();
-
-      program.initBytecodeReader(new BytecodeParser());
-      program.initJavaParser(new JavaParser() {
-        @Override
-        public CompilationUnit parse(InputStream is, String fileName) throws IOException, beaver.Parser.Exception {
-          return new JastAddJavaParser().parse(is, fileName);
-        }
-      });
-
-      program.options().initOptions();
-      program.options().addKeyValueOption("-classpath");
-      program.options().setValueForOption(Scene.v().getSootClassPath(), "-classpath");
-      if (Options.v().src_prec() == Options.src_prec_java) {
+    if (Options.v().src_prec() == Options.src_prec_apk_c_j) {
+		return;
+	}
+	program = new Program();
+	program.state().reset();
+	program.initBytecodeReader(new BytecodeParser());
+	program.initJavaParser((InputStream is, String fileName) -> new JastAddJavaParser().parse(is, fileName));
+	program.options().initOptions();
+	program.options().addKeyValueOption("-classpath");
+	program.options().setValueForOption(Scene.v().getSootClassPath(), "-classpath");
+	if (Options.v().src_prec() == Options.src_prec_java) {
         program.setSrcPrec(Program.SRC_PREC_JAVA);
       } else if (Options.v().src_prec() == Options.src_prec_class) {
         program.setSrcPrec(Program.SRC_PREC_CLASS);
       } else if (Options.v().src_prec() == Options.src_prec_only_class) {
         program.setSrcPrec(Program.SRC_PREC_CLASS);
       }
-      program.initPaths();
-    }
+	program.initPaths();
   }
 
   public static SootResolver v() {
@@ -154,12 +148,8 @@ public class SootResolver {
           if (onlySignatures) {
             bringToSignatures(sc);
             sc.setPhantomClass();
-            for (SootMethod m : sc.getMethods()) {
-              m.setPhantom(true);
-            }
-            for (SootField f : sc.getFields()) {
-              f.setPhantom(true);
-            }
+            sc.getMethods().forEach(m -> m.setPhantom(true));
+            sc.getFields().forEach(f -> f.setPhantom(true));
           } else {
             bringToBodies(sc);
           }
@@ -222,15 +212,13 @@ public class SootResolver {
       if (modelAsPhantomRef) {
         if (!Scene.v().allowsPhantomRefs()) {
           String suffix = "";
-          if (className.equals("java.lang.Object")) {
-            suffix = " Try adding rt.jar to Soot's classpath, e.g.:\n" + "java -cp sootclasses.jar soot.Main -cp "
-                + ".:/path/to/jdk/jre/lib/rt.jar <other options>";
-          } else if (className.equals("javax.crypto.Cipher")) {
-            suffix = " Try adding jce.jar to Soot's classpath, e.g.:\n" + "java -cp sootclasses.jar soot.Main -cp "
-                + ".:/path/to/jdk/jre/lib/rt.jar:/path/to/jdk/jre/lib/jce.jar <other options>";
+          if ("java.lang.Object".equals(className)) {
+            suffix = new StringBuilder().append(" Try adding rt.jar to Soot's classpath, e.g.:\n").append("java -cp sootclasses.jar soot.Main -cp ").append(".:/path/to/jdk/jre/lib/rt.jar <other options>").toString();
+          } else if ("javax.crypto.Cipher".equals(className)) {
+            suffix = new StringBuilder().append(" Try adding jce.jar to Soot's classpath, e.g.:\n").append("java -cp sootclasses.jar soot.Main -cp ").append(".:/path/to/jdk/jre/lib/rt.jar:/path/to/jdk/jre/lib/jce.jar <other options>").toString();
           }
           throw new SootClassNotFoundException(
-              "couldn't find class: " + className + " (is your soot-class-path set properly?)" + suffix);
+              new StringBuilder().append("couldn't find class: ").append(className).append(" (is your soot-class-path set properly?)").append(suffix).toString());
         } else {
           // logger.warn("" + className + " is a
           // phantom class!");
@@ -263,9 +251,7 @@ public class SootResolver {
     if (outerClass != null) {
       addToResolveWorklist(outerClass, level);
     }
-    for (SootClass iface : sc.getInterfaces()) {
-      addToResolveWorklist(iface, level);
-    }
+    sc.getInterfaces().forEach(iface -> addToResolveWorklist(iface, level));
   }
 
   /**
@@ -286,21 +272,16 @@ public class SootResolver {
   }
 
   protected void bringToSignaturesUnchecked(SootClass sc) {
-    for (SootField f : sc.getFields()) {
-      addToResolveWorklist(f.getType(), SootClass.HIERARCHY);
-    }
-    for (SootMethod m : sc.getMethods()) {
-      addToResolveWorklist(m.getReturnType(), SootClass.HIERARCHY);
-      for (Type ptype : m.getParameterTypes()) {
-        addToResolveWorklist(ptype, SootClass.HIERARCHY);
-      }
-      List<SootClass> exceptions = m.getExceptionsUnsafe();
-      if (exceptions != null) {
-        for (SootClass exception : exceptions) {
-          addToResolveWorklist(exception, SootClass.HIERARCHY);
-        }
-      }
-    }
+    sc.getFields().forEach(f -> addToResolveWorklist(f.getType(), SootClass.HIERARCHY));
+    sc.getMethods().stream().map(m -> {
+		addToResolveWorklist(m.getReturnType(), SootClass.HIERARCHY);
+		m.getParameterTypes().forEach(ptype -> addToResolveWorklist(ptype, SootClass.HIERARCHY));
+		return m.getExceptionsUnsafe();
+	}).forEach(exceptions -> {
+		if (exceptions != null) {
+		    exceptions.forEach(exception -> addToResolveWorklist(exception, SootClass.HIERARCHY));
+		  }
+	});
 
     // Bring superclasses to signatures
     reResolveHierarchy(sc, SootClass.SIGNATURES);
@@ -329,26 +310,14 @@ public class SootResolver {
     {
       Collection<Type> references = classToTypesHierarchy.get(sc);
       if (references != null) {
-        // This must be an iterator, not a for-all since the underlying
-        // collection may change as we go
-        Iterator<Type> it = references.iterator();
-        while (it.hasNext()) {
-          final Type t = it.next();
-          addToResolveWorklist(t, SootClass.HIERARCHY);
-        }
+        references.forEach(t -> addToResolveWorklist(t, SootClass.HIERARCHY));
       }
     }
 
     {
       Collection<Type> references = classToTypesSignature.get(sc);
       if (references != null) {
-        // This must be an iterator, not a for-all since the underlying
-        // collection may change as we go
-        Iterator<Type> it = references.iterator();
-        while (it.hasNext()) {
-          final Type t = it.next();
-          addToResolveWorklist(t, SootClass.SIGNATURES);
-        }
+        references.forEach(t -> addToResolveWorklist(t, SootClass.SIGNATURES));
       }
     }
   }

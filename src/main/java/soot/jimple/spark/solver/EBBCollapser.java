@@ -45,32 +45,31 @@ import soot.jimple.spark.pag.VarNode;
 
 public class EBBCollapser {
   private static final Logger logger = LoggerFactory.getLogger(EBBCollapser.class);
+/* End of public methods. */
+  /* End of package methods. */
 
-  /** Actually collapse the EBBs in the PAG. */
+  protected int numCollapsed = 0;
+protected PAG pag;
+
+public EBBCollapser(PAG pag) {
+    this.pag = pag;
+  }
+
+/** Actually collapse the EBBs in the PAG. */
   public void collapse() {
     boolean verbose = pag.getOpts().verbose();
     if (verbose) {
-      logger.debug("" + "Total VarNodes: " + pag.getVarNodeNumberer().size() + ". Collapsing EBBs...");
+      logger.debug(new StringBuilder().append("").append("Total VarNodes: ").append(pag.getVarNodeNumberer().size()).append(". Collapsing EBBs...").toString());
     }
     collapseAlloc();
     collapseLoad();
     collapseSimple();
     if (verbose) {
-      logger.debug("" + "" + numCollapsed + " nodes were collapsed.");
+      logger.debug(new StringBuilder().append("").append("").append(numCollapsed).append(" nodes were collapsed.").toString());
     }
   }
 
-  public EBBCollapser(PAG pag) {
-    this.pag = pag;
-  }
-
-  /* End of public methods. */
-  /* End of package methods. */
-
-  protected int numCollapsed = 0;
-  protected PAG pag;
-
-  protected void collapseAlloc() {
+protected void collapseAlloc() {
     final boolean ofcg = (pag.getOnFlyCallGraph() != null);
     for (Object object : pag.allocSources()) {
       final AllocNode n = (AllocNode) object;
@@ -102,7 +101,7 @@ public class EBBCollapser {
     }
   }
 
-  protected void collapseSimple() {
+protected void collapseSimple() {
     final boolean ofcg = (pag.getOnFlyCallGraph() != null);
     final TypeManager typeManager = pag.getTypeManager();
     boolean change;
@@ -138,7 +137,7 @@ public class EBBCollapser {
     } while (change);
   }
 
-  protected void collapseLoad() {
+protected void collapseLoad() {
     final boolean ofcg = (pag.getOnFlyCallGraph() != null);
     final TypeManager typeManager = pag.getTypeManager();
     for (Iterator<Object> nIt = new ArrayList<Object>(pag.loadSources()).iterator(); nIt.hasNext();) {
@@ -146,7 +145,7 @@ public class EBBCollapser {
       Type nType = n.getType();
       Node[] succs = pag.loadLookup(n);
       Node firstSucc = null;
-      HashMap<Type, VarNode> typeToSucc = new HashMap<Type, VarNode>();
+      HashMap<Type, VarNode> typeToSucc = new HashMap<>();
       for (Node element : succs) {
         VarNode succ = (VarNode) element;
         Type sType = succ.getType();

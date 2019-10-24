@@ -46,61 +46,56 @@ import soot.Type;
  * @author Ondrej Lhotak
  */
 public class ReachingTypeDumper {
-  private static class StringComparator<T> implements Comparator<T> {
-    public int compare(T o1, T o2) {
-      return o1.toString().compareTo(o2.toString());
-    }
-  }
-
-  public ReachingTypeDumper(PointsToAnalysis pa, String output_dir) {
-    this.pa = pa;
-    this.output_dir = output_dir;
-  }
-
-  public void dump() {
-    try {
-      PrintWriter file = new PrintWriter(new FileOutputStream(new File(output_dir, "types")));
-      for (SootClass cls : Scene.v().getApplicationClasses()) {
-        handleClass(file, cls);
-      }
-      for (SootClass cls : Scene.v().getLibraryClasses()) {
-        handleClass(file, cls);
-      }
-      file.close();
-    } catch (IOException e) {
-      throw new RuntimeException("Couldn't dump reaching types." + e);
-    }
-  }
-
   /* End of public methods. */
-  /* End of package methods. */
+	  /* End of package methods. */
+	
+	  protected PointsToAnalysis pa;
+	protected String output_dir;
 
-  protected PointsToAnalysis pa;
-  protected String output_dir;
+	public ReachingTypeDumper(PointsToAnalysis pa, String output_dir) {
+	    this.pa = pa;
+	    this.output_dir = output_dir;
+	  }
 
-  protected void handleClass(PrintWriter out, SootClass c) {
-    for (SootMethod m : c.getMethods()) {
-      if (!m.isConcrete()) {
-        continue;
-      }
-      Body b = m.retrieveActiveBody();
+	public void dump() {
+	    try (PrintWriter file = new PrintWriter(new FileOutputStream(new File(output_dir, "types")))) {
+	      Scene.v().getApplicationClasses().forEach(cls -> handleClass(file, cls));
+	      Scene.v().getLibraryClasses().forEach(cls -> handleClass(file, cls));
+	    } catch (IOException e) {
+	      throw new RuntimeException("Couldn't dump reaching types." + e);
+	    }
+	  }
 
-      Local[] sortedLocals = b.getLocals().toArray(new Local[b.getLocalCount()]);
-      Arrays.sort(sortedLocals, new StringComparator<Local>());
+	protected void handleClass(PrintWriter out, SootClass c) {
+	    for (SootMethod m : c.getMethods()) {
+	      if (!m.isConcrete()) {
+	        continue;
+	      }
+	      Body b = m.retrieveActiveBody();
+	
+	      Local[] sortedLocals = b.getLocals().toArray(new Local[b.getLocalCount()]);
+	      Arrays.sort(sortedLocals, new StringComparator<Local>());
+	
+	      for (Local l : sortedLocals) {
+	        out.println(new StringBuilder().append("V ").append(m).append(l).toString());
+	        if (l.getType() instanceof RefLikeType) {
+	          Set<Type> types = pa.reachingObjects(l).possibleTypes();
+	
+	          Type[] sortedTypes = types.toArray(new Type[types.size()]);
+	          Arrays.sort(sortedTypes, new StringComparator<Type>());
+	
+	          for (Type type : sortedTypes) {
+	            out.println("T " + type);
+	          }
+	        }
+	      }
+	    }
+	  }
 
-      for (Local l : sortedLocals) {
-        out.println("V " + m + l);
-        if (l.getType() instanceof RefLikeType) {
-          Set<Type> types = pa.reachingObjects(l).possibleTypes();
-
-          Type[] sortedTypes = types.toArray(new Type[types.size()]);
-          Arrays.sort(sortedTypes, new StringComparator<Type>());
-
-          for (Type type : sortedTypes) {
-            out.println("T " + type);
-          }
-        }
-      }
+private static class StringComparator<T> implements Comparator<T> {
+    @Override
+	public int compare(T o1, T o2) {
+      return o1.toString().compareTo(o2.toString());
     }
   }
 }

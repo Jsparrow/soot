@@ -55,7 +55,7 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
   //
   // unanalysed methods assumed pure (& return a new obj)
   // class name prefix / method name
-  static private final String[][] pureMethods = { { "java.lang.", "valueOf" }, { "java.", "equals" }, { "javax.", "equals" },
+  private static final String[][] pureMethods = { { "java.lang.", "valueOf" }, { "java.", "equals" }, { "javax.", "equals" },
       { "sun.", "equals" }, { "java.", "compare" }, { "javax.", "compare" }, { "sun.", "compare" }, { "java.", "getClass" },
       { "javax.", "getClass" }, { "sun.", "getClass" }, { "java.", "hashCode" }, { "javax.", "hashCode" },
       { "sun.", "hashCode" }, { "java.", "toString" }, { "javax.", "toString" }, { "sun.", "toString" },
@@ -77,7 +77,7 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
       { "java.lang.StringIndexOutOfBoundsException", "<init>" } };
 
   // unanalysed methods that modify the whole environment
-  static private final String[][] impureMethods = { { "java.io.", "<init>" }, { "java.io.", "close" },
+  private static final String[][] impureMethods = { { "java.io.", "<init>" }, { "java.io.", "close" },
       { "java.io.", "read" }, { "java.io.", "write" }, { "java.io.", "flush" }, { "java.io.", "flushBuffer" },
       { "java.io.", "print" }, { "java.io.", "println" }, { "java.lang.Runtime",
           "exit" }, /*
@@ -110,41 +110,12 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
                      */ };
 
   // unanalysed methods that alter its arguments, but have no side effect
-  static private final String[][] alterMethods = { { "java.lang.System", "arraycopy" },
+  private static final String[][] alterMethods = { { "java.lang.System", "arraycopy" },
       // these are really huge methods used internally by StringBuffer
       // printing => put here to speed-up the analysis
       { "java.lang.FloatingDecimal", "dtoa" }, { "java.lang.FloatingDecimal", "developLongDigits" },
       { "java.lang.FloatingDecimal", "big5pow" }, { "java.lang.FloatingDecimal", "getChars" },
       { "java.lang.FloatingDecimal", "roundup" } };
-
-  /**
-   * Filter out some method.
-   */
-  static private class Filter implements SootMethodFilter {
-
-    @Override
-    public boolean want(SootMethod method) {
-      // could be optimized with HashSet....
-      String c = method.getDeclaringClass().toString();
-      String m = method.getName();
-      for (String[] element : PurityInterproceduralAnalysis.pureMethods) {
-        if (m.equals(element[1]) && c.startsWith(element[0])) {
-          return false;
-        }
-      }
-      for (String[] element : PurityInterproceduralAnalysis.impureMethods) {
-        if (m.equals(element[1]) && c.startsWith(element[0])) {
-          return false;
-        }
-      }
-      for (String[] element : PurityInterproceduralAnalysis.alterMethods) {
-        if (m.equals(element[1]) && c.startsWith(element[0])) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }
 
   /**
    * The constructor does it all!
@@ -163,7 +134,7 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
     logger.debug("[AM] Analysis finished");
     Date finish = new Date();
     long runtime = finish.getTime() - start.getTime();
-    logger.debug("[AM] run time: " + runtime / 1000. + " s");
+    logger.debug(new StringBuilder().append("[AM] run time: ").append(runtime / 1000.).append(" s").toString());
 
     if (opts.dump_cg()) {
       logger.debug("[AM] Dumping annotated .dot call-graph");
@@ -210,7 +181,7 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
           m.addTag(new GenericAttribute("Pure", new byte[0]));
         }
         if (opts.print()) {
-          logger.debug("  |- method " + m.toString() + " is " + (isPure ? "pure" : "impure"));
+          logger.debug(new StringBuilder().append("  |- method ").append(m.toString()).append(" is ").append(isPure ? "pure" : "impure").toString());
         }
 
         // param & this ro / safety
@@ -258,9 +229,9 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
             /*
              * m.addTag(new GenericAttribute("param"+i+"Status", s.getBytes()));
              */
-            m.addTag(new StringTag("param" + i + ": " + s));
+            m.addTag(new StringTag(new StringBuilder().append("param").append(i).append(": ").append(s).toString()));
             if (opts.print()) {
-              logger.debug("  |   |- param " + i + " is " + s);
+              logger.debug(new StringBuilder().append("  |   |- param ").append(i).append(" is ").append(s).toString());
             }
           }
           i++;
@@ -270,12 +241,12 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
 
   }
 
-  @Override
+@Override
   protected PurityGraphBox newInitialSummary() {
     return new PurityGraphBox();
   }
 
-  @Override
+@Override
   protected void merge(PurityGraphBox in1, PurityGraphBox in2, PurityGraphBox out) {
     if (out != in1) {
       out.g = new PurityGraph(in1.g);
@@ -283,19 +254,19 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
     out.g.union(in2.g);
   }
 
-  @Override
+@Override
   protected void copy(PurityGraphBox source, PurityGraphBox dest) {
     dest.g = new PurityGraph(source.g);
   }
 
-  @Override
+@Override
   protected void analyseMethod(SootMethod method, PurityGraphBox dst) {
     Body body = method.retrieveActiveBody();
     ExceptionalUnitGraph graph = new ExceptionalUnitGraph(body);
     new PurityIntraproceduralAnalysis(graph, this).copyResult(dst);
   }
 
-  /**
+/**
    * @return
    *
    * @see PurityGraph.conservativeGraph
@@ -325,7 +296,7 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
     return b;
   }
 
-  /**
+/**
    * @param stmt
    *          any statement containing an InvokeExpr
    *
@@ -354,8 +325,37 @@ public class PurityInterproceduralAnalysis extends AbstractInterproceduralAnalys
     dst.g = g;
   }
 
-  @Override
+@Override
   protected void fillDotGraph(String prefix, PurityGraphBox o, DotGraph out) {
     o.g.fillDotGraph(prefix, out);
+  }
+
+/**
+   * Filter out some method.
+   */
+  private static class Filter implements SootMethodFilter {
+
+    @Override
+    public boolean want(SootMethod method) {
+      // could be optimized with HashSet....
+      String c = method.getDeclaringClass().toString();
+      String m = method.getName();
+      for (String[] element : PurityInterproceduralAnalysis.pureMethods) {
+        if (m.equals(element[1]) && c.startsWith(element[0])) {
+          return false;
+        }
+      }
+      for (String[] element : PurityInterproceduralAnalysis.impureMethods) {
+        if (m.equals(element[1]) && c.startsWith(element[0])) {
+          return false;
+        }
+      }
+      for (String[] element : PurityInterproceduralAnalysis.alterMethods) {
+        if (m.equals(element[1]) && c.startsWith(element[0])) {
+          return false;
+        }
+      }
+      return true;
+    }
   }
 }

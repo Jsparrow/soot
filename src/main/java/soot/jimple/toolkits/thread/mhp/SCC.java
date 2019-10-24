@@ -53,9 +53,9 @@ public class SCC {
   // public SCC(Chain chain, DirectedGraph g){
   public SCC(Iterator it, DirectedGraph g) {
 
-    gray = new HashSet<Object>();
-    finishedOrder = new LinkedList<Object>();
-    sccList = new ArrayList<List<Object>>();
+    gray = new HashSet<>();
+    finishedOrder = new LinkedList<>();
+    sccList = new ArrayList<>();
 
     // Visit each node
     {
@@ -71,24 +71,19 @@ public class SCC {
     }
 
     // Re-color all nodes white
-    gray = new HashSet<Object>();
+    gray = new HashSet<>();
 
     // visit nodes via tranpose edges according decreasing order of finish time of nodes
 
     {
 
-      Iterator<Object> revNodeIt = finishedOrder.iterator();
-      while (revNodeIt.hasNext()) {
-        Object s = revNodeIt.next();
-        if (!gray.contains(s)) {
+      finishedOrder.stream().filter(s -> !gray.contains(s)).forEach(s -> {
 
-          List<Object> scc = new ArrayList<Object>();
+	  List<Object> scc = new ArrayList<>();
 
-          visitRevNode(g, s, scc);
-          sccList.add(scc);
-        }
-
-      }
+	  visitRevNode(g, s, scc);
+	  sccList.add(scc);
+	});
     }
   }
 
@@ -118,9 +113,11 @@ public class SCC {
     scc.add(s);
     gray.add(s);
 
-    if (g.getPredsOf(s) != null) {
-      Iterator predsIt = g.getPredsOf(s).iterator();
-      if (g.getPredsOf(s).size() > 0) {
+    if (g.getPredsOf(s) == null) {
+		return;
+	}
+	Iterator predsIt = g.getPredsOf(s).iterator();
+	if (g.getPredsOf(s).size() > 0) {
         while (predsIt.hasNext()) {
           Object pred = predsIt.next();
           if (!gray.contains(pred)) {
@@ -130,7 +127,6 @@ public class SCC {
         }
 
       }
-    }
   }
 
   public List<List<Object>> getSccList() {

@@ -30,15 +30,16 @@ public class PrivateInstancesAvailable extends polyglot.visit.NodeVisitor {
 
   private final ArrayList<IdentityKey> list;
 
-  public ArrayList<IdentityKey> getList() {
+  public PrivateInstancesAvailable() {
+    list = new ArrayList<>();
+  }
+
+public ArrayList<IdentityKey> getList() {
     return list;
   }
 
-  public PrivateInstancesAvailable() {
-    list = new ArrayList<IdentityKey>();
-  }
-
-  public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
+@Override
+public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
 
     if (n instanceof polyglot.ast.FieldDecl) {
 

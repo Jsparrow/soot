@@ -18,17 +18,69 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @production BodyDeclList : {@link List};
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.ast:13
  */
-public class BodyDeclList extends List implements Cloneable {
-  /**
+public class BodyDeclList extends List {
+  private static final Logger logger = LoggerFactory.getLogger(BodyDeclList.class);
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values;
+/**
+   * @apilevel internal
+   */
+  protected List localMethodSignatureCopy_MethodDecl_MemberSubstitutor_list;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map localFieldCopy_FieldDeclaration_MemberSubstitutor_values;
+/**
+   * @apilevel internal
+   */
+  protected List localFieldCopy_FieldDeclaration_MemberSubstitutor_list;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map localClassDeclCopy_ClassDecl_MemberSubstitutor_values;
+/**
+   * @apilevel internal
+   */
+  protected List localClassDeclCopy_ClassDecl_MemberSubstitutor_list;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values;
+/**
+   * @apilevel internal
+   */
+  protected List localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_list;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map constructorCopy_ConstructorDecl_MemberSubstitutor_values;
+/**
+   * @apilevel internal
+   */
+  protected List constructorCopy_ConstructorDecl_MemberSubstitutor_list;
+/**
+   * @ast method 
+   * 
+   */
+  public BodyDeclList() {
+    is$Final(true);
+
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values = null;
     localMethodSignatureCopy_MethodDecl_MemberSubstitutor_list = null;    localFieldCopy_FieldDeclaration_MemberSubstitutor_values = null;
@@ -36,16 +88,18 @@ public class BodyDeclList extends List implements Cloneable {
     localClassDeclCopy_ClassDecl_MemberSubstitutor_list = null;    localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values = null;
     localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_list = null;    constructorCopy_ConstructorDecl_MemberSubstitutor_values = null;
     constructorCopy_ConstructorDecl_MemberSubstitutor_list = null;  }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public BodyDeclList clone() throws CloneNotSupportedException {
     BodyDeclList node = (BodyDeclList)super.clone();
     node.localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values = null;
@@ -57,29 +111,33 @@ public class BodyDeclList extends List implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public BodyDeclList copy() {
     try {
       BodyDeclList node = (BodyDeclList) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public BodyDeclList fullCopy() {
     BodyDeclList tree = (BodyDeclList) copy();
     if (children != null) {
@@ -93,17 +151,7 @@ public class BodyDeclList extends List implements Cloneable {
     }
     return tree;
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public BodyDeclList() {
-    super();
-
-    is$Final(true);
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -111,33 +159,28 @@ public class BodyDeclList extends List implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 0;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return true;
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values;
-  /**
-   * @apilevel internal
-   */
-  protected List localMethodSignatureCopy_MethodDecl_MemberSubstitutor_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1114
@@ -147,7 +190,9 @@ public class BodyDeclList extends List implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(originalMethod);
     _parameters.add(m);
-    if(localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values == null) localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+    if(localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values == null) {
+		localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+	}
     if(localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values.containsKey(_parameters)) {
       return (BodyDecl)localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values.get(_parameters);
     }
@@ -164,24 +209,18 @@ public class BodyDeclList extends List implements Cloneable {
     if(localMethodSignatureCopy_MethodDecl_MemberSubstitutor_value != null) {
       localMethodSignatureCopy_MethodDecl_MemberSubstitutor_value.is$Final = true;
     }
-      if(true) localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values.put(_parameters, localMethodSignatureCopy_MethodDecl_MemberSubstitutor_value);
+      if(true) {
+		localMethodSignatureCopy_MethodDecl_MemberSubstitutor_values.put(_parameters, localMethodSignatureCopy_MethodDecl_MemberSubstitutor_value);
+	}
     return localMethodSignatureCopy_MethodDecl_MemberSubstitutor_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private BodyDecl localMethodSignatureCopy_compute(MethodDecl originalMethod, MemberSubstitutor m) {
      return originalMethod.substitutedBodyDecl(m);
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map localFieldCopy_FieldDeclaration_MemberSubstitutor_values;
-  /**
-   * @apilevel internal
-   */
-  protected List localFieldCopy_FieldDeclaration_MemberSubstitutor_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1148
@@ -191,7 +230,9 @@ public class BodyDeclList extends List implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(originalDecl);
     _parameters.add(m);
-    if(localFieldCopy_FieldDeclaration_MemberSubstitutor_values == null) localFieldCopy_FieldDeclaration_MemberSubstitutor_values = new java.util.HashMap(4);
+    if(localFieldCopy_FieldDeclaration_MemberSubstitutor_values == null) {
+		localFieldCopy_FieldDeclaration_MemberSubstitutor_values = new java.util.HashMap(4);
+	}
     if(localFieldCopy_FieldDeclaration_MemberSubstitutor_values.containsKey(_parameters)) {
       return (BodyDecl)localFieldCopy_FieldDeclaration_MemberSubstitutor_values.get(_parameters);
     }
@@ -208,24 +249,18 @@ public class BodyDeclList extends List implements Cloneable {
     if(localFieldCopy_FieldDeclaration_MemberSubstitutor_value != null) {
       localFieldCopy_FieldDeclaration_MemberSubstitutor_value.is$Final = true;
     }
-      if(true) localFieldCopy_FieldDeclaration_MemberSubstitutor_values.put(_parameters, localFieldCopy_FieldDeclaration_MemberSubstitutor_value);
+      if(true) {
+		localFieldCopy_FieldDeclaration_MemberSubstitutor_values.put(_parameters, localFieldCopy_FieldDeclaration_MemberSubstitutor_value);
+	}
     return localFieldCopy_FieldDeclaration_MemberSubstitutor_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private BodyDecl localFieldCopy_compute(FieldDeclaration originalDecl, MemberSubstitutor m) {
     return originalDecl.substitutedBodyDecl(m);
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map localClassDeclCopy_ClassDecl_MemberSubstitutor_values;
-  /**
-   * @apilevel internal
-   */
-  protected List localClassDeclCopy_ClassDecl_MemberSubstitutor_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1204
@@ -235,7 +270,9 @@ public class BodyDeclList extends List implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(originalDecl);
     _parameters.add(m);
-    if(localClassDeclCopy_ClassDecl_MemberSubstitutor_values == null) localClassDeclCopy_ClassDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+    if(localClassDeclCopy_ClassDecl_MemberSubstitutor_values == null) {
+		localClassDeclCopy_ClassDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+	}
     if(localClassDeclCopy_ClassDecl_MemberSubstitutor_values.containsKey(_parameters)) {
       return (MemberClassDecl)localClassDeclCopy_ClassDecl_MemberSubstitutor_values.get(_parameters);
     }
@@ -252,25 +289,19 @@ public class BodyDeclList extends List implements Cloneable {
     if(localClassDeclCopy_ClassDecl_MemberSubstitutor_value != null) {
       localClassDeclCopy_ClassDecl_MemberSubstitutor_value.is$Final = true;
     }
-      if(true) localClassDeclCopy_ClassDecl_MemberSubstitutor_values.put(_parameters, localClassDeclCopy_ClassDecl_MemberSubstitutor_value);
+      if(true) {
+		localClassDeclCopy_ClassDecl_MemberSubstitutor_values.put(_parameters, localClassDeclCopy_ClassDecl_MemberSubstitutor_value);
+	}
     return localClassDeclCopy_ClassDecl_MemberSubstitutor_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private MemberClassDecl localClassDeclCopy_compute(ClassDecl originalDecl, MemberSubstitutor m) {
     ClassDecl copy = originalDecl.substitutedClassDecl(m);
     return new MemberClassDecl(copy);
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values;
-  /**
-   * @apilevel internal
-   */
-  protected List localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1208
@@ -280,7 +311,9 @@ public class BodyDeclList extends List implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(originalDecl);
     _parameters.add(m);
-    if(localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values == null) localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+    if(localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values == null) {
+		localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+	}
     if(localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values.containsKey(_parameters)) {
       return (MemberInterfaceDecl)localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values.get(_parameters);
     }
@@ -297,25 +330,19 @@ public class BodyDeclList extends List implements Cloneable {
     if(localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_value != null) {
       localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_value.is$Final = true;
     }
-      if(true) localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values.put(_parameters, localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_value);
+      if(true) {
+		localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_values.put(_parameters, localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_value);
+	}
     return localInterfaceDeclCopy_InterfaceDecl_MemberSubstitutor_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private MemberInterfaceDecl localInterfaceDeclCopy_compute(InterfaceDecl originalDecl, MemberSubstitutor m) {
     InterfaceDecl copy = originalDecl.substitutedInterfaceDecl(m);
     return new MemberInterfaceDecl(copy);
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map constructorCopy_ConstructorDecl_MemberSubstitutor_values;
-  /**
-   * @apilevel internal
-   */
-  protected List constructorCopy_ConstructorDecl_MemberSubstitutor_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1234
@@ -325,7 +352,9 @@ public class BodyDeclList extends List implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(originalDecl);
     _parameters.add(m);
-    if(constructorCopy_ConstructorDecl_MemberSubstitutor_values == null) constructorCopy_ConstructorDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+    if(constructorCopy_ConstructorDecl_MemberSubstitutor_values == null) {
+		constructorCopy_ConstructorDecl_MemberSubstitutor_values = new java.util.HashMap(4);
+	}
     if(constructorCopy_ConstructorDecl_MemberSubstitutor_values.containsKey(_parameters)) {
       return (BodyDecl)constructorCopy_ConstructorDecl_MemberSubstitutor_values.get(_parameters);
     }
@@ -342,19 +371,22 @@ public class BodyDeclList extends List implements Cloneable {
     if(constructorCopy_ConstructorDecl_MemberSubstitutor_value != null) {
       constructorCopy_ConstructorDecl_MemberSubstitutor_value.is$Final = true;
     }
-      if(true) constructorCopy_ConstructorDecl_MemberSubstitutor_values.put(_parameters, constructorCopy_ConstructorDecl_MemberSubstitutor_value);
+      if(true) {
+		constructorCopy_ConstructorDecl_MemberSubstitutor_values.put(_parameters, constructorCopy_ConstructorDecl_MemberSubstitutor_value);
+	}
     return constructorCopy_ConstructorDecl_MemberSubstitutor_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private BodyDecl constructorCopy_compute(ConstructorDecl originalDecl, MemberSubstitutor m) {
     return originalDecl.substitutedBodyDecl(m);
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

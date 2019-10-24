@@ -44,9 +44,12 @@ import soot.dava.toolkits.base.AST.transformations.VoidReturnRemover;
 import soot.dava.toolkits.base.renamer.Renamer;
 import soot.dava.toolkits.base.renamer.infoGatheringAnalysis;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InterProceduralAnalyses {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(InterProceduralAnalyses.class);
+public static boolean DEBUG = false;
 
   /*
    * Method is invoked by postProcessDava in PackManager if the transformations flag is true
@@ -57,7 +60,7 @@ public class InterProceduralAnalyses {
     Chain classes = Scene.v().getApplicationClasses();
 
     if (DEBUG) {
-      System.out.println("\n\nInvoking redundantFielduseEliminator");
+      logger.info("\n\nInvoking redundantFielduseEliminator");
     }
     ConstantFieldValueFinder finder = new ConstantFieldValueFinder(classes);
 
@@ -96,14 +99,14 @@ public class InterProceduralAnalyses {
         // System.out.println("force is "+force);
         if (deobfuscate) {
           if (DEBUG) {
-            System.out.println("\nSTART CP Class:" + s.getName() + " Method: " + m.getName());
+            logger.info(new StringBuilder().append("\nSTART CP Class:").append(s.getName()).append(" Method: ").append(m.getName()).toString());
           }
           CPApplication CPApp = new CPApplication((ASTMethodNode) AST, constantValueFields,
               finder.getClassNameFieldNameToSootFieldMapping());
           AST.apply(CPApp);
 
           if (DEBUG) {
-            System.out.println("DONE CP for " + m.getName());
+            logger.info("DONE CP for " + m.getName());
           }
         }
 
@@ -127,7 +130,7 @@ public class InterProceduralAnalyses {
         // VERY EXPENSIVE STAGE of redoing all analyses!!!!
         if (deobfuscate) {
           if (DEBUG) {
-            System.out.println("reinvoking analyzeAST");
+            logger.info("reinvoking analyzeAST");
           }
           UselessLabelFinder.DEBUG = false;
           body.analyzeAST();

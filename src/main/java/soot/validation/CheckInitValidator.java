@@ -55,7 +55,8 @@ public enum CheckInitValidator implements BodyValidator {
           if (!init.contains(l)) {
             throw new ValidationException(s,
                 "Local variable $1 is not definitively defined at this point".replace("$1", l.getName()),
-                "Warning: Local variable " + l + " not definitely defined at " + s + " in " + body.getMethod(), false);
+                new StringBuilder().append("Warning: Local variable ").append(l).append(" not definitely defined at ").append(s).append(" in ").append(body.getMethod())
+						.toString(), false);
           }
         }
       }

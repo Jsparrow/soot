@@ -17,6 +17,8 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
   * @ast class
@@ -24,7 +26,10 @@ import soot.coffi.CoffiMethodSource;
  */
 public class FileNamesPart extends PathPart {
 
-    private HashMap sourceFiles = new HashMap();
+    private static final Logger logger = LoggerFactory.getLogger(FileNamesPart.class);
+
+
+	private HashMap sourceFiles = new HashMap();
 
 
     private HashSet packages = new HashSet();
@@ -38,7 +43,8 @@ public class FileNamesPart extends PathPart {
 
 
 
-    public boolean hasPackage(String name) { return packages.contains(name); }
+    @Override
+	public boolean hasPackage(String name) { return packages.contains(name); }
 
 
     public boolean isEmpty() { return sourceFiles.isEmpty(); }
@@ -48,7 +54,8 @@ public class FileNamesPart extends PathPart {
 
 
 
-    public boolean selectCompilationUnit(String canonicalName) throws IOException {
+    @Override
+	public boolean selectCompilationUnit(String canonicalName) throws IOException {
       if(sourceFiles.containsKey(canonicalName)) {
         String f = (String)sourceFiles.get(canonicalName);
         File classFile = new File(f);
@@ -88,14 +95,16 @@ public class FileNamesPart extends PathPart {
               int pos = 0;
               while(packageName != null && -1 != (pos = packageName.indexOf('.', pos + 1))) {
                 String n = packageName.substring(0, pos);
-                if(!packages.contains(n))
-                  packages.add(n);
+                if(!packages.contains(n)) {
+					packages.add(n);
+				}
               }
             }
           }
           return u;
         }
       } catch (IOException e) {
+		logger.error(e.getMessage(), e);
       }
       return null;
     }

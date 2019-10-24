@@ -37,6 +37,8 @@ import soot.dava.internal.AST.ASTWhileNode;
 import soot.dava.toolkits.base.AST.traversals.AllDefinitionsFinder;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import soot.dava.internal.javaRep.*;
 //import soot.dava.internal.SET.*;
@@ -68,17 +70,17 @@ import soot.jimple.Stmt;
  */
 
 public class ReachingDefs extends StructuredAnalysis<Stmt> {
-  Object toAnalyze;
+  private static final Logger logger = LoggerFactory.getLogger(ReachingDefs.class);
+Object toAnalyze;
 
   public ReachingDefs(Object analyze) {
-    super();
     toAnalyze = analyze;
-    process(analyze, new DavaFlowSet<Stmt>());
+    process(analyze, new DavaFlowSet<>());
   }
 
   @Override
   public DavaFlowSet<Stmt> emptyFlowSet() {
-    return new DavaFlowSet<Stmt>();
+    return new DavaFlowSet<>();
   }
 
   /*
@@ -86,16 +88,14 @@ public class ReachingDefs extends StructuredAnalysis<Stmt> {
    */
   @Override
   public DavaFlowSet<Stmt> newInitialFlow() {
-    DavaFlowSet<Stmt> initial = new DavaFlowSet<Stmt>();
+    DavaFlowSet<Stmt> initial = new DavaFlowSet<>();
     // find all definitions in the program
     AllDefinitionsFinder defFinder = new AllDefinitionsFinder();
     ((ASTNode) toAnalyze).apply(defFinder);
     List<DefinitionStmt> allDefs = defFinder.getAllDefs();
     // all defs is the list of all augmented stmts which contains
-    // DefinitionStmts
-    for (DefinitionStmt def : allDefs) {
-      initial.add(def);
-    }
+	// DefinitionStmts
+	allDefs.forEach(initial::add);
 
     // initial is not the universal set of all definitions
     return initial;
@@ -104,7 +104,8 @@ public class ReachingDefs extends StructuredAnalysis<Stmt> {
   /*
    * Using union
    */
-  public void setMergeType() {
+  @Override
+public void setMergeType() {
     MERGETYPE = UNION;
   }
 
@@ -193,7 +194,7 @@ public class ReachingDefs extends StructuredAnalysis<Stmt> {
   }
 
   public List<DefinitionStmt> getReachingDefs(Local local, Object node) {
-    ArrayList<DefinitionStmt> toReturn = new ArrayList<DefinitionStmt>();
+    ArrayList<DefinitionStmt> toReturn = new ArrayList<>();
 
     // get the reaching defs of this node
     DavaFlowSet<Stmt> beforeSet = null;
@@ -245,7 +246,7 @@ public class ReachingDefs extends StructuredAnalysis<Stmt> {
 
     // find all reachingdefs matching this local
     for (Object o : beforeSet) {
-      System.out.println("Reaching def:" + o);
+      logger.info("Reaching def:" + o);
     }
   }
 }

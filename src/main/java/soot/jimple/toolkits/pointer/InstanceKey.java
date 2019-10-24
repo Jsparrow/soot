@@ -93,11 +93,10 @@ public class InstanceKey {
    * {@inheritDoc}
    */
   public boolean mayNotAlias(InstanceKey otherKey) {
-    if (owner.equals(otherKey.owner) && stmtAfterAssignStmt != null && otherKey.stmtAfterAssignStmt != null) {
-      if (lnma.notMayAlias(assignedLocal, stmtAfterAssignStmt, otherKey.assignedLocal, otherKey.stmtAfterAssignStmt)) {
+    boolean condition = owner.equals(otherKey.owner) && stmtAfterAssignStmt != null && otherKey.stmtAfterAssignStmt != null && lnma.notMayAlias(assignedLocal, stmtAfterAssignStmt, otherKey.assignedLocal, otherKey.stmtAfterAssignStmt);
+	if (condition) {
         return true;
       }
-    }
     // different methods or local not-may-alias was not successful: get points-to info
     PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
     if (pta == null) {
@@ -119,10 +118,11 @@ public class InstanceKey {
     return stmtAfterAssignStmt != null;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     String instanceKeyString
-        = stmtAfterAssignStmt != null ? lmaa.instanceKeyString(assignedLocal, stmtAfterAssignStmt) : "pts(" + hashCode + ")";
-    return instanceKeyString + "(" + assignedLocal.getName() + ")";
+        = stmtAfterAssignStmt != null ? lmaa.instanceKeyString(assignedLocal, stmtAfterAssignStmt) : new StringBuilder().append("pts(").append(hashCode).append(")").toString();
+    return new StringBuilder().append(instanceKeyString).append("(").append(assignedLocal.getName()).append(")").toString();
   }
 
   /**

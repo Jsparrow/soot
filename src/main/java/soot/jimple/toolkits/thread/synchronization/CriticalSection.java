@@ -42,7 +42,9 @@ class CriticalSection extends SynchronizedRegion {
   public String name;
 
   public Value origLock;
-  public CodeBlockRWSet read, write;
+  public CodeBlockRWSet read;
+
+public CodeBlockRWSet write;
   public HashSet<Unit> invokes;
   public HashSet<Unit> units;
   public HashMap<Unit, CodeBlockRWSet> unitToRWSet;
@@ -64,23 +66,22 @@ class CriticalSection extends SynchronizedRegion {
   public List<EquivalentValue> lockset;
 
   CriticalSection(boolean wholeMethod, SootMethod method, int nestLevel) {
-    super();
     this.IDNum = nextIDNum;
     nextIDNum++;
     this.nestLevel = nestLevel;
     this.read = new CodeBlockRWSet();
     this.write = new CodeBlockRWSet();
-    this.invokes = new HashSet<Unit>();
-    this.units = new HashSet<Unit>();
-    this.unitToRWSet = new HashMap<Unit, CodeBlockRWSet>();
-    this.unitToUses = new HashMap<Unit, List>();
+    this.invokes = new HashSet<>();
+    this.units = new HashSet<>();
+    this.unitToRWSet = new HashMap<>();
+    this.unitToUses = new HashMap<>();
     this.wholeMethod = wholeMethod;
     this.method = method;
     this.setNumber = 0; // 0 = no group, -1 = DELETE
     this.group = null;
-    this.edges = new HashSet<CriticalSectionDataDependency>();
-    this.waits = new HashSet<Unit>();
-    this.notifys = new HashSet<Unit>();
+    this.edges = new HashSet<>();
+    this.waits = new HashSet<>();
+    this.notifys = new HashSet<>();
     this.transitiveTargets = null;
     this.lockObject = null;
     this.lockObjectArrayIndex = null;
@@ -114,11 +115,13 @@ class CriticalSection extends SynchronizedRegion {
     this.lockset = tn.lockset;
   }
 
-  protected Object clone() {
+  @Override
+protected Object clone() {
     return new CriticalSection(this);
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return name;
   }
 }

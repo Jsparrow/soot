@@ -107,7 +107,8 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
   protected void caseUninterestingStmt(Stmt s) {
   };
 
-  public final void caseAssignStmt(AssignStmt s) {
+  @Override
+public final void caseAssignStmt(AssignStmt s) {
     statement = s;
     Value lhs = s.getLeftOp();
     Value rhs = s.getRightOp();
@@ -182,7 +183,8 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
     }
   }
 
-  public final void caseReturnStmt(ReturnStmt s) {
+  @Override
+public final void caseReturnStmt(ReturnStmt s) {
     statement = s;
     Value op = s.getOp();
     if (op.getType() instanceof RefType || op.getType() instanceof ArrayType) {
@@ -196,17 +198,20 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
     }
   }
 
-  public final void caseReturnVoidStmt(ReturnVoidStmt s) {
+  @Override
+public final void caseReturnVoidStmt(ReturnVoidStmt s) {
     statement = s;
     caseReturnStmt((Local) null);
   }
 
-  public final void caseInvokeStmt(InvokeStmt s) {
+  @Override
+public final void caseInvokeStmt(InvokeStmt s) {
     statement = s;
     caseInvokeStmt(null, s.getInvokeExpr());
   }
 
-  public final void caseIdentityStmt(IdentityStmt s) {
+  @Override
+public final void caseIdentityStmt(IdentityStmt s) {
     statement = s;
     Value lhs = s.getLeftOp();
     Value rhs = s.getRightOp();
@@ -223,7 +228,8 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
     }
   }
 
-  public final void caseThrowStmt(ThrowStmt s) {
+  @Override
+public final void caseThrowStmt(ThrowStmt s) {
     statement = s;
     caseThrowStmt((Local) s.getOp());
   }

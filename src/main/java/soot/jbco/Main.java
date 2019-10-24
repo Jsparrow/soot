@@ -102,23 +102,18 @@ public class Main {
 
   public static void main(String[] argv) {
     int rcount = 0;
-    Vector<String> transformsToAdd = new Vector<String>();
+    Vector<String> transformsToAdd = new Vector<>();
     boolean remove[] = new boolean[argv.length];
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
-      if (arg.equals("-jbco:help")) {
-        System.out.println("The Java Bytecode Obfuscator (JBCO)\n\nGeneral Options:");
-        System.out.println("\t-jbco:help     -  print this help message.");
-        System.out.println("\t-jbco:verbose  -  print extra information during obfuscation.");
-        System.out.println("\t-jbco:silent   -  turn off all output, including summary information.");
-        System.out.println("\t-jbco:metrics  -  calculate total vertices and edges;\n"
+      if ("-jbco:help".equals(arg)) {
+        logger.info("The Java Bytecode Obfuscator (JBCO)\n\nGeneral Options:");
+        logger.info("\t-jbco:help     -  print this help message.");
+        logger.info("\t-jbco:verbose  -  print extra information during obfuscation.");
+        logger.info("\t-jbco:silent   -  turn off all output, including summary information.");
+        logger.info("\t-jbco:metrics  -  calculate total vertices and edges;\n"
             + "\t                  calculate avg. and highest graph degrees.");
-        System.out.println("\t-jbco:debug    -  turn on extra debugging like\n"
-            + "\t                  stack height and type verifier.\n\nTransformations ( -t:[W:]<name>[:pattern] )\n"
-            + "\tW              -  specify obfuscation weight (0-9)\n"
-            + "\t<name>         -  name of obfuscation (from list below)\n"
-            + "\tpattern        -  limit to method names matched by pattern\n"
-            + "\t                  prepend * to pattern if a regex\n");
+        logger.info(new StringBuilder().append("\t-jbco:debug    -  turn on extra debugging like\n").append("\t                  stack height and type verifier.\n\nTransformations ( -t:[W:]<name>[:pattern] )\n").append("\tW              -  specify obfuscation weight (0-9)\n").append("\t<name>         -  name of obfuscation (from list below)\n").append("\tpattern        -  limit to method names matched by pattern\n").append("\t                  prepend * to pattern if a regex\n").toString());
 
         for (int j = 0; j < optionStrings[0].length; j++) {
           String line = "\t" + optionStrings[1][j];
@@ -127,10 +122,10 @@ public class Main {
             line += " ";
           }
           line += "-  " + optionStrings[0][j];
-          System.out.println(line);
+          logger.info(line);
         }
         System.exit(0);
-      } else if (arg.equals("-jbco:metrics")) {
+      } else if ("-jbco:metrics".equals(arg)) {
         metrics = true;
         remove[i] = true;
         rcount++;
@@ -148,29 +143,30 @@ public class Main {
           try {
             tweight = Integer.parseInt(arg.substring(0, 1));
           } catch (NumberFormatException nfe) {
-            logger.debug("Improperly formated transformation weight: " + argv[i]);
+            logger.error(nfe.getMessage(), nfe);
+			logger.debug("Improperly formated transformation weight: " + argv[i]);
             System.exit(1);
           }
           arg = arg.substring(arg.indexOf(':') + 1);
         }
 
         transformsToAdd.add(arg);
-        transformsToWeights.put(arg, new Integer(tweight));
-        if (arg.equals("wjtp.jbco_fr")) {
+        transformsToWeights.put(arg, Integer.valueOf(tweight));
+        if ("wjtp.jbco_fr".equals(arg)) {
           FieldRenamer.v().setRenameFields(true);
         }
         remove[i] = true;
         rcount++;
-      } else if (arg.equals("-jbco:verbose")) {
+      } else if ("-jbco:verbose".equals(arg)) {
         jbcoVerbose = true;
         remove[i] = true;
         rcount++;
-      } else if (arg.equals("-jbco:silent")) {
+      } else if ("-jbco:silent".equals(arg)) {
         jbcoSummary = false;
         jbcoVerbose = false;
         remove[i] = true;
         rcount++;
-      } else if (arg.equals("-jbco:debug")) {
+      } else if ("-jbco:debug".equals(arg)) {
         jbcoDebug = true;
         remove[i] = true;
         rcount++;
@@ -184,7 +180,8 @@ public class Main {
           try {
             tweight = Integer.parseInt(arg.substring(0, 1));
           } catch (NumberFormatException nfe) {
-            logger.debug("Improperly formatted transformation weight: " + argv[i]);
+            logger.error(nfe.getMessage(), nfe);
+			logger.debug("Improperly formatted transformation weight: " + argv[i]);
             System.exit(1);
           }
           if (arg.indexOf(':') < 0) {
@@ -208,7 +205,8 @@ public class Main {
           try {
             o = java.util.regex.Pattern.compile(arg);
           } catch (java.util.regex.PatternSyntaxException pse) {
-            logger.debug("Illegal Regular Expression Pattern: " + arg);
+            logger.error(pse.getMessage(), pse);
+			logger.debug("Illegal Regular Expression Pattern: " + arg);
             System.exit(1);
           }
         } else {
@@ -218,10 +216,10 @@ public class Main {
         transformsToAdd.add(trans);
         Map<Object, Integer> htmp = transformsToMethodsToWeights.get(trans);
         if (htmp == null) {
-          htmp = new HashMap<Object, Integer>();
+          htmp = new HashMap<>();
           transformsToMethodsToWeights.put(trans, htmp);
         }
-        htmp.put(o, new Integer(tweight));
+        htmp.put(o, Integer.valueOf(tweight));
         remove[i] = true;
         rcount++;
       } else {
@@ -267,8 +265,8 @@ public class Main {
       }
 
       String jl = null;
-      for (int i = 0; i < transformsToAdd.size(); i++) {
-        if (transformsToAdd.get(i).startsWith("bb")) {
+      for (String aTransformsToAdd : transformsToAdd) {
+        if (aTransformsToAdd.startsWith("bb")) {
           jl = "jtp.jbco_jl";
           jtp.add(new Transform(jl, newTransform((Transformer) getTransform(jl))));
           bb.insertBefore(new Transform("bb.jbco_j2bl", newTransform((Transformer) getTransform("bb.jbco_j2bl"))), "bb.lso");
@@ -279,8 +277,7 @@ public class Main {
         }
       }
 
-      for (int i = 0; i < transformsToAdd.size(); i++) {
-        String tname = transformsToAdd.get(i);
+      for (String tname : transformsToAdd) {
         IJbcoTransform t = getTransform(tname);
 
         Pack p = tname.startsWith("wjtp") ? wjtp : tname.startsWith("jtp") ? jtp : bb;
@@ -308,9 +305,9 @@ public class Main {
             Transform o = (Transform) phases.next();
             Transformer t = o.getTransformer();
             if (t instanceof IJbcoTransform) {
-              logger.debug("\t" + ((IJbcoTransform) t).getName() + "  JBCO");
+              logger.debug(new StringBuilder().append("\t").append(((IJbcoTransform) t).getName()).append("  JBCO").toString());
             } else {
-              logger.debug("\t" + o.getPhaseName() + "  default");
+              logger.debug(new StringBuilder().append("\t").append(o.getPhaseName()).append("  default").toString());
             }
           }
         }
@@ -325,23 +322,17 @@ public class Main {
 
     soot.Main.main(argv);
 
-    if (jbcoSummary) {
-      logger.debug("\n***** JBCO SUMMARY *****\n");
-      Iterator<Transformer> tit = jbcotransforms.iterator();
-      while (tit.hasNext()) {
-        Object o = tit.next();
-        if (o instanceof IJbcoTransform) {
-          ((IJbcoTransform) o).outputSummary();
-        }
-      }
-
-      logger.debug("\n***** END SUMMARY *****\n");
-    }
+    if (!jbcoSummary) {
+		return;
+	}
+	logger.debug("\n***** JBCO SUMMARY *****\n");
+	jbcotransforms.stream().filter(o -> o instanceof IJbcoTransform).forEach(o -> ((IJbcoTransform) o).outputSummary());
+	logger.debug("\n***** END SUMMARY *****\n");
   }
 
   private static String[] checkWhole(String argv[], boolean add) {
     for (int i = 0; i < argv.length; i++) {
-      if (argv[i].equals("-w")) {
+      if ("-w".equals(argv[i])) {
         if (add) {
           return argv;
         } else {
@@ -359,14 +350,13 @@ public class Main {
       }
     }
 
-    if (add) {
-      String tmp[] = new String[argv.length + 1];
-      tmp[0] = "-w";
-      System.arraycopy(argv, 0, tmp, 1, argv.length);
-      return tmp;
-    }
-
-    return argv;
+    if (!add) {
+		return argv;
+	}
+	String tmp[] = new String[argv.length + 1];
+	tmp[0] = "-w";
+	System.arraycopy(argv, 0, tmp, 1, argv.length);
+	return tmp;
   }
 
   private static Transformer newTransform(Transformer t) {
@@ -381,73 +371,73 @@ public class Main {
     if (name.startsWith("bb.printout")) {
       return new BAFPrintout(name, true);
     }
-    if (name.equals("bb.jbco_j2bl")) {
+    if ("bb.jbco_j2bl".equals(name)) {
       return new Jimple2BafLocalBuilder();
     }
-    if (name.equals("jtp.jbco_gia")) {
+    if ("jtp.jbco_gia".equals(name)) {
       return new GotoInstrumenter();
     }
-    if (name.equals("jtp.jbco_cae2bo")) {
+    if ("jtp.jbco_cae2bo".equals(name)) {
       return new ArithmeticTransformer();
     }
-    if (name.equals("wjtp.jbco_cc")) {
+    if ("wjtp.jbco_cc".equals(name)) {
       return new CollectConstants();
     }
-    if (name.equals("bb.jbco_ecvf")) {
+    if ("bb.jbco_ecvf".equals(name)) {
       return new UpdateConstantsToFields();
     }
-    if (name.equals("bb.jbco_rds")) {
+    if ("bb.jbco_rds".equals(name)) {
       return new FindDuplicateSequences();
     }
-    if (name.equals("bb.jbco_plvb")) {
+    if ("bb.jbco_plvb".equals(name)) {
       return new LocalsToBitField();
     }
-    if (name.equals("bb.jbco_rlaii")) {
+    if ("bb.jbco_rlaii".equals(name)) {
       return new MoveLoadsAboveIfs();
     }
-    if (name.equals("bb.jbco_ptss")) {
+    if ("bb.jbco_ptss".equals(name)) {
       return new WrapSwitchesInTrys();
     }
-    if (name.equals("bb.jbco_iii")) {
+    if ("bb.jbco_iii".equals(name)) {
       return new IndirectIfJumpsToCaughtGotos();
     }
-    if (name.equals("bb.jbco_ctbcb")) {
+    if ("bb.jbco_ctbcb".equals(name)) {
       return new TryCatchCombiner();
     }
-    if (name.equals("bb.jbco_cb2ji")) {
+    if ("bb.jbco_cb2ji".equals(name)) {
       return new AddJSRs();
     }
-    if (name.equals("bb.jbco_riitcb")) {
+    if ("bb.jbco_riitcb".equals(name)) {
       return new IfNullToTryCatch();
     }
-    if (name.equals("wjtp.jbco_blbc")) {
+    if ("wjtp.jbco_blbc".equals(name)) {
       return new LibraryMethodWrappersBuilder();
     }
-    if (name.equals("wjtp.jbco_bapibm")) {
+    if ("wjtp.jbco_bapibm".equals(name)) {
       return new BuildIntermediateAppClasses();
     }
-    if (name.equals("wjtp.jbco_cr")) {
+    if ("wjtp.jbco_cr".equals(name)) {
       return ClassRenamer.v();
     }
-    if (name.equals("bb.jbco_ful")) {
+    if ("bb.jbco_ful".equals(name)) {
       return new FixUndefinedLocals();
     }
-    if (name.equals("wjtp.jbco_fr")) {
+    if ("wjtp.jbco_fr".equals(name)) {
       return FieldRenamer.v();
     }
-    if (name.equals("wjtp.jbco_mr")) {
+    if ("wjtp.jbco_mr".equals(name)) {
       return MethodRenamer.v();
     }
-    if (name.equals("jtp.jbco_adss")) {
+    if ("jtp.jbco_adss".equals(name)) {
       return new AddSwitches();
     }
-    if (name.equals("jtp.jbco_jl")) {
+    if ("jtp.jbco_jl".equals(name)) {
       return new CollectJimpleLocals();
     }
-    if (name.equals("bb.jbco_dcc")) {
+    if ("bb.jbco_dcc".equals(name)) {
       return new ConstructorConfuser();
     }
-    if (name.equals("bb.jbco_counter")) {
+    if ("bb.jbco_counter".equals(name)) {
       return new BAFCounter();
     }
 
@@ -494,7 +484,7 @@ public class Main {
     }
 
     if (jbcoVerbose) {
-      logger.debug("[" + phasename + "] Processing " + method + " with weight: " + result);
+      logger.debug(new StringBuilder().append("[").append(phasename).append("] Processing ").append(method).append(" with weight: ").append(result).toString());
     }
     return result;
   }

@@ -51,419 +51,421 @@ import soot.tagkit.StringTag;
  */
 public class TightestQualifiersTagger extends SceneTransformer {
 
-  public TightestQualifiersTagger(Singletons.Global g) {
-  }
+  public static final int RESULT_PUBLIC = 0;
+	public static final int RESULT_PACKAGE = 1;
+	public static final int RESULT_PROTECTED = 2;
+	public static final int RESULT_PRIVATE = 3;
+	private final HashMap<SootMethod, Integer> methodResultsMap = new HashMap<>();
+	private final HashMap<SootField, Integer> fieldResultsMap = new HashMap<>();
+	private MethodToContexts methodToContexts;
 
-  public static TightestQualifiersTagger v() {
-    return G.v().soot_jimple_toolkits_annotation_qualifiers_TightestQualifiersTagger();
-  }
+	public TightestQualifiersTagger(Singletons.Global g) {
+	  }
 
-  public final static int RESULT_PUBLIC = 0;
-  public final static int RESULT_PACKAGE = 1;
-  public final static int RESULT_PROTECTED = 2;
-  public final static int RESULT_PRIVATE = 3;
+	public static TightestQualifiersTagger v() {
+	    return G.v().soot_jimple_toolkits_annotation_qualifiers_TightestQualifiersTagger();
+	  }
 
-  private final HashMap<SootMethod, Integer> methodResultsMap = new HashMap<SootMethod, Integer>();
-  private final HashMap<SootField, Integer> fieldResultsMap = new HashMap<SootField, Integer>();
-  private MethodToContexts methodToContexts;
+	@Override
+	protected void internalTransform(String phaseName, Map options) {
+	
+	    handleMethods();
+	    handleFields();
+	  }
 
-  protected void internalTransform(String phaseName, Map options) {
+	private void handleMethods() {
+	    Iterator classesIt = Scene.v().getApplicationClasses().iterator();
+	    while (classesIt.hasNext()) {
+	      SootClass appClass = (SootClass) classesIt.next();
+	      Iterator methsIt = appClass.getMethods().iterator();
+	      while (methsIt.hasNext()) {
+	        SootMethod sm = (SootMethod) methsIt.next();
+	        // for now if its unreachable do nothing
+	        if (!Scene.v().getReachableMethods().contains(sm)) {
+	          continue;
+	        }
+	        analyzeMethod(sm);
+	      }
+	    }
+	
+	    Iterator<SootMethod> methStatIt = methodResultsMap.keySet().iterator();
+	    while (methStatIt.hasNext()) {
+	      SootMethod meth = methStatIt.next();
+	      int result = methodResultsMap.get(meth).intValue();
+	      String sRes = "Public";
+	      if (result == RESULT_PUBLIC) {
+	        sRes = "Public";
+	      } else if (result == RESULT_PROTECTED) {
+	        sRes = "Protected";
+	      } else if (result == RESULT_PACKAGE) {
+	        sRes = "Package";
+	      } else if (result == RESULT_PRIVATE) {
+	        sRes = "Private";
+	      }
+	
+	      String actual = null;
+	      if (Modifier.isPublic(meth.getModifiers())) {
+	        actual = "Public";
+	      } else if (Modifier.isProtected(meth.getModifiers())) {
+	        actual = "Protected";
+	      } else if (Modifier.isPrivate(meth.getModifiers())) {
+	        actual = "Private";
+	      } else {
+	        actual = "Package";
+	      }
+	
+	      // System.out.println("Method: "+meth.getName()+" has "+actual+" level access, can have: "+sRes+" level access.");
+	
+	      if (!sRes.equals(actual)) {
+	        if ("<init>".equals(meth.getName())) {
+	          meth.addTag(new StringTag(new StringBuilder().append("Constructor: ").append(meth.getDeclaringClass().getName()).append(" has ").append(actual).append(" level access, can have: ").append(sRes)
+					.append(" level access.").toString(), "Tightest Qualifiers"));
+	        } else {
+	          meth.addTag(new StringTag(
+	              new StringBuilder().append("Method: ").append(meth.getName()).append(" has ").append(actual).append(" level access, can have: ").append(sRes)
+						.append(" level access.").toString(),
+	              "Tightest Qualifiers"));
+	        }
+	        meth.addTag(new ColorTag(255, 10, 0, true, "Tightest Qualifiers"));
+	      }
+	    }
+	  }
 
-    handleMethods();
-    handleFields();
-  }
+	private void analyzeMethod(SootMethod sm) {
+	
+	    CallGraph cg = Scene.v().getCallGraph();
+	
+	    // Iterator eIt = Scene.v().getEntryPoints().iterator();
+	    // while (eIt.hasNext()){
+	    // System.out.println(eIt.next());
+	    // }
+	
+	    if (methodToContexts == null) {
+	      methodToContexts = new MethodToContexts(Scene.v().getReachableMethods().listener());
+	    }
+	
+	    for (Iterator momcIt = methodToContexts.get(sm).iterator(); momcIt.hasNext();) {
+	      final MethodOrMethodContext momc = (MethodOrMethodContext) momcIt.next();
+	      Iterator callerEdges = cg.edgesInto(momc);
+	      while (callerEdges.hasNext()) {
+	        Edge callEdge = (Edge) callerEdges.next();
+	        if (!callEdge.isExplicit()) {
+	          continue;
+	        }
+	        SootMethod methodCaller = callEdge.src();
+	        // System.out.println("Caller edge type: "+Edge.kindToString(callEdge.kind()));
+	        SootClass callingClass = methodCaller.getDeclaringClass();
+	        // public methods
+	        if (Modifier.isPublic(sm.getModifiers())) {
+	          analyzePublicMethod(sm, callingClass);
+	        }
+	        // protected methods
+	        else if (Modifier.isProtected(sm.getModifiers())) {
+	          analyzeProtectedMethod(sm, callingClass);
+	        }
+	        // private methods - do nothing
+	        else if (Modifier.isPrivate(sm.getModifiers())) {
+	        }
+	        // package level methods
+	        else {
+	          analyzePackageMethod(sm, callingClass);
+	        }
+	
+	      }
+	    }
+	
+	  }
 
-  private void handleMethods() {
-    Iterator classesIt = Scene.v().getApplicationClasses().iterator();
-    while (classesIt.hasNext()) {
-      SootClass appClass = (SootClass) classesIt.next();
-      Iterator methsIt = appClass.getMethods().iterator();
-      while (methsIt.hasNext()) {
-        SootMethod sm = (SootMethod) methsIt.next();
-        // for now if its unreachable do nothing
-        if (!Scene.v().getReachableMethods().contains(sm)) {
-          continue;
-        }
-        analyzeMethod(sm);
-      }
-    }
+	private boolean analyzeProtectedMethod(SootMethod sm, SootClass callingClass) {
+	    SootClass methodClass = sm.getDeclaringClass();
+	
+	    // System.out.println("protected method: "+sm.getName()+" in class: "+methodClass.getName()+" calling class:
+	    // "+callingClass.getName());
+	
+	    boolean insidePackageAccess = isCallSamePackage(callingClass, methodClass);
+	    boolean subClassAccess = isCallClassSubClass(callingClass, methodClass);
+	    boolean sameClassAccess = isCallClassMethodClass(callingClass, methodClass);
+	
+	    if (!insidePackageAccess && subClassAccess) {
+	      methodResultsMap.put(sm, Integer.valueOf(RESULT_PROTECTED));
+	      return true;
+	    } else if (insidePackageAccess && !sameClassAccess) {
+	      updateToPackage(sm);
+	      return false;
+	    } else {
+	      updateToPrivate(sm);
+	      return false;
+	    }
+	  }
 
-    Iterator<SootMethod> methStatIt = methodResultsMap.keySet().iterator();
-    while (methStatIt.hasNext()) {
-      SootMethod meth = methStatIt.next();
-      int result = methodResultsMap.get(meth).intValue();
-      String sRes = "Public";
-      if (result == RESULT_PUBLIC) {
-        sRes = "Public";
-      } else if (result == RESULT_PROTECTED) {
-        sRes = "Protected";
-      } else if (result == RESULT_PACKAGE) {
-        sRes = "Package";
-      } else if (result == RESULT_PRIVATE) {
-        sRes = "Private";
-      }
+	private boolean analyzePackageMethod(SootMethod sm, SootClass callingClass) {
+	    SootClass methodClass = sm.getDeclaringClass();
+	
+	    // System.out.println("package method: "+sm.getName()+" in class: "+methodClass.getName()+" calling class:
+	    // "+callingClass.getName());
+	    boolean insidePackageAccess = isCallSamePackage(callingClass, methodClass);
+	    boolean subClassAccess = isCallClassSubClass(callingClass, methodClass);
+	    boolean sameClassAccess = isCallClassMethodClass(callingClass, methodClass);
+	
+	    if (insidePackageAccess && !sameClassAccess) {
+	      updateToPackage(sm);
+	      return true;
+	    } else {
+	      updateToPrivate(sm);
+	      return false;
+	    }
+	  }
 
-      String actual = null;
-      if (Modifier.isPublic(meth.getModifiers())) {
-        actual = "Public";
-      } else if (Modifier.isProtected(meth.getModifiers())) {
-        actual = "Protected";
-      } else if (Modifier.isPrivate(meth.getModifiers())) {
-        actual = "Private";
-      } else {
-        actual = "Package";
-      }
+	private boolean analyzePublicMethod(SootMethod sm, SootClass callingClass) {
+	
+	    SootClass methodClass = sm.getDeclaringClass();
+	
+	    // System.out.println("public method: "+sm.getName()+" in class: "+methodClass.getName()+" calling class:
+	    // "+callingClass.getName());
+	
+	    boolean insidePackageAccess = isCallSamePackage(callingClass, methodClass);
+	    boolean subClassAccess = isCallClassSubClass(callingClass, methodClass);
+	    boolean sameClassAccess = isCallClassMethodClass(callingClass, methodClass);
+	
+	    if (!insidePackageAccess && !subClassAccess) {
+	      methodResultsMap.put(sm, Integer.valueOf(RESULT_PUBLIC));
+	      return true;
+	    } else if (!insidePackageAccess && subClassAccess) {
+	      updateToProtected(sm);
+	      return false;
+	    } else if (insidePackageAccess && !sameClassAccess) {
+	      updateToPackage(sm);
+	      return false;
+	    } else {
+	      updateToPrivate(sm);
+	      return false;
+	    }
+	
+	  }
 
-      // System.out.println("Method: "+meth.getName()+" has "+actual+" level access, can have: "+sRes+" level access.");
+	private void updateToProtected(SootMethod sm) {
+	    if (!methodResultsMap.containsKey(sm)) {
+	      methodResultsMap.put(sm, Integer.valueOf(RESULT_PROTECTED));
+	    } else {
+	      if (methodResultsMap.get(sm).intValue() != RESULT_PUBLIC) {
+	        methodResultsMap.put(sm, Integer.valueOf(RESULT_PROTECTED));
+	      }
+	    }
+	  }
 
-      if (!sRes.equals(actual)) {
-        if (meth.getName().equals("<init>")) {
-          meth.addTag(new StringTag("Constructor: " + meth.getDeclaringClass().getName() + " has " + actual
-              + " level access, can have: " + sRes + " level access.", "Tightest Qualifiers"));
-        } else {
-          meth.addTag(new StringTag(
-              "Method: " + meth.getName() + " has " + actual + " level access, can have: " + sRes + " level access.",
-              "Tightest Qualifiers"));
-        }
-        meth.addTag(new ColorTag(255, 10, 0, true, "Tightest Qualifiers"));
-      }
-    }
-  }
+	private void updateToPackage(SootMethod sm) {
+	    if (!methodResultsMap.containsKey(sm)) {
+	      methodResultsMap.put(sm, Integer.valueOf(RESULT_PACKAGE));
+	    } else {
+	      if (methodResultsMap.get(sm).intValue() == RESULT_PRIVATE) {
+	        methodResultsMap.put(sm, Integer.valueOf(RESULT_PACKAGE));
+	      }
+	    }
+	  }
 
-  private void analyzeMethod(SootMethod sm) {
+	private void updateToPrivate(SootMethod sm) {
+	    if (!methodResultsMap.containsKey(sm)) {
+	      methodResultsMap.put(sm, Integer.valueOf(RESULT_PRIVATE));
+	    }
+	  }
 
-    CallGraph cg = Scene.v().getCallGraph();
+	private boolean isCallClassMethodClass(SootClass call, SootClass check) {
+	    if (call.equals(check)) {
+	      return true;
+	    }
+	    return false;
+	  }
 
-    // Iterator eIt = Scene.v().getEntryPoints().iterator();
-    // while (eIt.hasNext()){
-    // System.out.println(eIt.next());
-    // }
+	private boolean isCallClassSubClass(SootClass call, SootClass check) {
+	    if (!call.hasSuperclass()) {
+	      return false;
+	    }
+	    if (call.getSuperclass().equals(check)) {
+	      return true;
+	    }
+	    return false;
+	  }
 
-    if (methodToContexts == null) {
-      methodToContexts = new MethodToContexts(Scene.v().getReachableMethods().listener());
-    }
+	private boolean isCallSamePackage(SootClass call, SootClass check) {
+	    if (call.getPackageName().equals(check.getPackageName())) {
+	      return true;
+	    }
+	    return false;
+	  }
 
-    for (Iterator momcIt = methodToContexts.get(sm).iterator(); momcIt.hasNext();) {
-      final MethodOrMethodContext momc = (MethodOrMethodContext) momcIt.next();
-      Iterator callerEdges = cg.edgesInto(momc);
-      while (callerEdges.hasNext()) {
-        Edge callEdge = (Edge) callerEdges.next();
-        if (!callEdge.isExplicit()) {
-          continue;
-        }
-        SootMethod methodCaller = callEdge.src();
-        // System.out.println("Caller edge type: "+Edge.kindToString(callEdge.kind()));
-        SootClass callingClass = methodCaller.getDeclaringClass();
-        // public methods
-        if (Modifier.isPublic(sm.getModifiers())) {
-          analyzePublicMethod(sm, callingClass);
-        }
-        // protected methods
-        else if (Modifier.isProtected(sm.getModifiers())) {
-          analyzeProtectedMethod(sm, callingClass);
-        }
-        // private methods - do nothing
-        else if (Modifier.isPrivate(sm.getModifiers())) {
-        }
-        // package level methods
-        else {
-          analyzePackageMethod(sm, callingClass);
-        }
+	private void handleFields() {
+	    Iterator classesIt = Scene.v().getApplicationClasses().iterator();
+	    while (classesIt.hasNext()) {
+	      SootClass appClass = (SootClass) classesIt.next();
+	      Iterator fieldsIt = appClass.getFields().iterator();
+	      while (fieldsIt.hasNext()) {
+	        SootField sf = (SootField) fieldsIt.next();
+	        analyzeField(sf);
+	      }
+	    }
+	
+	    Iterator<SootField> fieldStatIt = fieldResultsMap.keySet().iterator();
+	    while (fieldStatIt.hasNext()) {
+	      SootField f = fieldStatIt.next();
+	      int result = fieldResultsMap.get(f).intValue();
+	      String sRes = "Public";
+	      if (result == RESULT_PUBLIC) {
+	        sRes = "Public";
+	      } else if (result == RESULT_PROTECTED) {
+	        sRes = "Protected";
+	      } else if (result == RESULT_PACKAGE) {
+	        sRes = "Package";
+	      } else if (result == RESULT_PRIVATE) {
+	        sRes = "Private";
+	      }
+	
+	      String actual = null;
+	      if (Modifier.isPublic(f.getModifiers())) {
+	        // System.out.println("Field: "+f.getName()+" is public");
+	        actual = "Public";
+	      } else if (Modifier.isProtected(f.getModifiers())) {
+	        actual = "Protected";
+	      } else if (Modifier.isPrivate(f.getModifiers())) {
+	        actual = "Private";
+	      } else {
+	        actual = "Package";
+	      }
+	
+	      // System.out.println("Field: "+f.getName()+" has "+actual+" level access, can have: "+sRes+" level access.");
+	
+	      if (!sRes.equals(actual)) {
+	        f.addTag(
+	            new StringTag(new StringBuilder().append("Field: ").append(f.getName()).append(" has ").append(actual).append(" level access, can have: ").append(sRes)
+						.append(" level access.").toString(),
+	                "Tightest Qualifiers"));
+	        f.addTag(new ColorTag(255, 10, 0, true, "Tightest Qualifiers"));
+	      }
+	    }
+	  }
 
-      }
-    }
+	private void analyzeField(SootField sf) {
+	
+	    // from all bodies get all use boxes and eliminate used fields
+	    Iterator classesIt = Scene.v().getApplicationClasses().iterator();
+	    while (classesIt.hasNext()) {
+	      SootClass appClass = (SootClass) classesIt.next();
+	      Iterator mIt = appClass.getMethods().iterator();
+	      while (mIt.hasNext()) {
+	        SootMethod sm = (SootMethod) mIt.next();
+	        if (!sm.hasActiveBody()) {
+	          continue;
+	        }
+	        if (!Scene.v().getReachableMethods().contains(sm)) {
+	          continue;
+	        }
+	        Body b = sm.getActiveBody();
+	
+	        Iterator usesIt = b.getUseBoxes().iterator();
+	        while (usesIt.hasNext()) {
+	          ValueBox vBox = (ValueBox) usesIt.next();
+	          Value v = vBox.getValue();
+	          if (v instanceof FieldRef) {
+	            FieldRef fieldRef = (FieldRef) v;
+	            SootField f = fieldRef.getField();
+	            if (f.equals(sf)) {
+	              if (Modifier.isPublic(sf.getModifiers())) {
+	                if (analyzePublicField(sf, appClass)) {
+	                  return;
+	                }
+	              } else if (Modifier.isProtected(sf.getModifiers())) {
+	                analyzeProtectedField(sf, appClass);
+	              } else if (Modifier.isPrivate(sf.getModifiers())) {
+	              } else {
+	                analyzePackageField(sf, appClass);
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }
+	  }
 
-  }
+	private boolean analyzePublicField(SootField sf, SootClass callingClass) {
+	    SootClass fieldClass = sf.getDeclaringClass();
+	
+	    boolean insidePackageAccess = isCallSamePackage(callingClass, fieldClass);
+	    boolean subClassAccess = isCallClassSubClass(callingClass, fieldClass);
+	    boolean sameClassAccess = isCallClassMethodClass(callingClass, fieldClass);
+	
+	    if (!insidePackageAccess && !subClassAccess) {
+	      fieldResultsMap.put(sf, Integer.valueOf(RESULT_PUBLIC));
+	      return true;
+	    } else if (!insidePackageAccess && subClassAccess) {
+	      updateToProtected(sf);
+	      return false;
+	    } else if (insidePackageAccess && !sameClassAccess) {
+	      updateToPackage(sf);
+	      return false;
+	    } else {
+	      updateToPrivate(sf);
+	      return false;
+	    }
+	
+	  }
 
-  private boolean analyzeProtectedMethod(SootMethod sm, SootClass callingClass) {
-    SootClass methodClass = sm.getDeclaringClass();
+	private boolean analyzeProtectedField(SootField sf, SootClass callingClass) {
+	    SootClass fieldClass = sf.getDeclaringClass();
+	
+	    boolean insidePackageAccess = isCallSamePackage(callingClass, fieldClass);
+	    boolean subClassAccess = isCallClassSubClass(callingClass, fieldClass);
+	    boolean sameClassAccess = isCallClassMethodClass(callingClass, fieldClass);
+	
+	    if (!insidePackageAccess && subClassAccess) {
+	      fieldResultsMap.put(sf, Integer.valueOf(RESULT_PROTECTED));
+	      return true;
+	    } else if (insidePackageAccess && !sameClassAccess) {
+	      updateToPackage(sf);
+	      return false;
+	    } else {
+	      updateToPrivate(sf);
+	      return false;
+	    }
+	  }
 
-    // System.out.println("protected method: "+sm.getName()+" in class: "+methodClass.getName()+" calling class:
-    // "+callingClass.getName());
+	private boolean analyzePackageField(SootField sf, SootClass callingClass) {
+	    SootClass fieldClass = sf.getDeclaringClass();
+	
+	    boolean insidePackageAccess = isCallSamePackage(callingClass, fieldClass);
+	    boolean subClassAccess = isCallClassSubClass(callingClass, fieldClass);
+	    boolean sameClassAccess = isCallClassMethodClass(callingClass, fieldClass);
+	
+	    if (insidePackageAccess && !sameClassAccess) {
+	      updateToPackage(sf);
+	      return true;
+	    } else {
+	      updateToPrivate(sf);
+	      return false;
+	    }
+	  }
 
-    boolean insidePackageAccess = isCallSamePackage(callingClass, methodClass);
-    boolean subClassAccess = isCallClassSubClass(callingClass, methodClass);
-    boolean sameClassAccess = isCallClassMethodClass(callingClass, methodClass);
+	private void updateToProtected(SootField sf) {
+	    if (!fieldResultsMap.containsKey(sf)) {
+	      fieldResultsMap.put(sf, Integer.valueOf(RESULT_PROTECTED));
+	    } else {
+	      if (fieldResultsMap.get(sf).intValue() != RESULT_PUBLIC) {
+	        fieldResultsMap.put(sf, Integer.valueOf(RESULT_PROTECTED));
+	      }
+	    }
+	  }
 
-    if (!insidePackageAccess && subClassAccess) {
-      methodResultsMap.put(sm, new Integer(RESULT_PROTECTED));
-      return true;
-    } else if (insidePackageAccess && !sameClassAccess) {
-      updateToPackage(sm);
-      return false;
-    } else {
-      updateToPrivate(sm);
-      return false;
-    }
-  }
+	private void updateToPackage(SootField sf) {
+	    if (!fieldResultsMap.containsKey(sf)) {
+	      fieldResultsMap.put(sf, Integer.valueOf(RESULT_PACKAGE));
+	    } else {
+	      if (fieldResultsMap.get(sf).intValue() == RESULT_PRIVATE) {
+	        fieldResultsMap.put(sf, Integer.valueOf(RESULT_PACKAGE));
+	      }
+	    }
+	  }
 
-  private boolean analyzePackageMethod(SootMethod sm, SootClass callingClass) {
-    SootClass methodClass = sm.getDeclaringClass();
-
-    // System.out.println("package method: "+sm.getName()+" in class: "+methodClass.getName()+" calling class:
-    // "+callingClass.getName());
-    boolean insidePackageAccess = isCallSamePackage(callingClass, methodClass);
-    boolean subClassAccess = isCallClassSubClass(callingClass, methodClass);
-    boolean sameClassAccess = isCallClassMethodClass(callingClass, methodClass);
-
-    if (insidePackageAccess && !sameClassAccess) {
-      updateToPackage(sm);
-      return true;
-    } else {
-      updateToPrivate(sm);
-      return false;
-    }
-  }
-
-  private boolean analyzePublicMethod(SootMethod sm, SootClass callingClass) {
-
-    SootClass methodClass = sm.getDeclaringClass();
-
-    // System.out.println("public method: "+sm.getName()+" in class: "+methodClass.getName()+" calling class:
-    // "+callingClass.getName());
-
-    boolean insidePackageAccess = isCallSamePackage(callingClass, methodClass);
-    boolean subClassAccess = isCallClassSubClass(callingClass, methodClass);
-    boolean sameClassAccess = isCallClassMethodClass(callingClass, methodClass);
-
-    if (!insidePackageAccess && !subClassAccess) {
-      methodResultsMap.put(sm, new Integer(RESULT_PUBLIC));
-      return true;
-    } else if (!insidePackageAccess && subClassAccess) {
-      updateToProtected(sm);
-      return false;
-    } else if (insidePackageAccess && !sameClassAccess) {
-      updateToPackage(sm);
-      return false;
-    } else {
-      updateToPrivate(sm);
-      return false;
-    }
-
-  }
-
-  private void updateToProtected(SootMethod sm) {
-    if (!methodResultsMap.containsKey(sm)) {
-      methodResultsMap.put(sm, new Integer(RESULT_PROTECTED));
-    } else {
-      if (methodResultsMap.get(sm).intValue() != RESULT_PUBLIC) {
-        methodResultsMap.put(sm, new Integer(RESULT_PROTECTED));
-      }
-    }
-  }
-
-  private void updateToPackage(SootMethod sm) {
-    if (!methodResultsMap.containsKey(sm)) {
-      methodResultsMap.put(sm, new Integer(RESULT_PACKAGE));
-    } else {
-      if (methodResultsMap.get(sm).intValue() == RESULT_PRIVATE) {
-        methodResultsMap.put(sm, new Integer(RESULT_PACKAGE));
-      }
-    }
-  }
-
-  private void updateToPrivate(SootMethod sm) {
-    if (!methodResultsMap.containsKey(sm)) {
-      methodResultsMap.put(sm, new Integer(RESULT_PRIVATE));
-    }
-  }
-
-  private boolean isCallClassMethodClass(SootClass call, SootClass check) {
-    if (call.equals(check)) {
-      return true;
-    }
-    return false;
-  }
-
-  private boolean isCallClassSubClass(SootClass call, SootClass check) {
-    if (!call.hasSuperclass()) {
-      return false;
-    }
-    if (call.getSuperclass().equals(check)) {
-      return true;
-    }
-    return false;
-  }
-
-  private boolean isCallSamePackage(SootClass call, SootClass check) {
-    if (call.getPackageName().equals(check.getPackageName())) {
-      return true;
-    }
-    return false;
-  }
-
-  private void handleFields() {
-    Iterator classesIt = Scene.v().getApplicationClasses().iterator();
-    while (classesIt.hasNext()) {
-      SootClass appClass = (SootClass) classesIt.next();
-      Iterator fieldsIt = appClass.getFields().iterator();
-      while (fieldsIt.hasNext()) {
-        SootField sf = (SootField) fieldsIt.next();
-        analyzeField(sf);
-      }
-    }
-
-    Iterator<SootField> fieldStatIt = fieldResultsMap.keySet().iterator();
-    while (fieldStatIt.hasNext()) {
-      SootField f = fieldStatIt.next();
-      int result = fieldResultsMap.get(f).intValue();
-      String sRes = "Public";
-      if (result == RESULT_PUBLIC) {
-        sRes = "Public";
-      } else if (result == RESULT_PROTECTED) {
-        sRes = "Protected";
-      } else if (result == RESULT_PACKAGE) {
-        sRes = "Package";
-      } else if (result == RESULT_PRIVATE) {
-        sRes = "Private";
-      }
-
-      String actual = null;
-      if (Modifier.isPublic(f.getModifiers())) {
-        // System.out.println("Field: "+f.getName()+" is public");
-        actual = "Public";
-      } else if (Modifier.isProtected(f.getModifiers())) {
-        actual = "Protected";
-      } else if (Modifier.isPrivate(f.getModifiers())) {
-        actual = "Private";
-      } else {
-        actual = "Package";
-      }
-
-      // System.out.println("Field: "+f.getName()+" has "+actual+" level access, can have: "+sRes+" level access.");
-
-      if (!sRes.equals(actual)) {
-        f.addTag(
-            new StringTag("Field: " + f.getName() + " has " + actual + " level access, can have: " + sRes + " level access.",
-                "Tightest Qualifiers"));
-        f.addTag(new ColorTag(255, 10, 0, true, "Tightest Qualifiers"));
-      }
-    }
-  }
-
-  private void analyzeField(SootField sf) {
-
-    // from all bodies get all use boxes and eliminate used fields
-    Iterator classesIt = Scene.v().getApplicationClasses().iterator();
-    while (classesIt.hasNext()) {
-      SootClass appClass = (SootClass) classesIt.next();
-      Iterator mIt = appClass.getMethods().iterator();
-      while (mIt.hasNext()) {
-        SootMethod sm = (SootMethod) mIt.next();
-        if (!sm.hasActiveBody()) {
-          continue;
-        }
-        if (!Scene.v().getReachableMethods().contains(sm)) {
-          continue;
-        }
-        Body b = sm.getActiveBody();
-
-        Iterator usesIt = b.getUseBoxes().iterator();
-        while (usesIt.hasNext()) {
-          ValueBox vBox = (ValueBox) usesIt.next();
-          Value v = vBox.getValue();
-          if (v instanceof FieldRef) {
-            FieldRef fieldRef = (FieldRef) v;
-            SootField f = fieldRef.getField();
-            if (f.equals(sf)) {
-              if (Modifier.isPublic(sf.getModifiers())) {
-                if (analyzePublicField(sf, appClass)) {
-                  return;
-                }
-              } else if (Modifier.isProtected(sf.getModifiers())) {
-                analyzeProtectedField(sf, appClass);
-              } else if (Modifier.isPrivate(sf.getModifiers())) {
-              } else {
-                analyzePackageField(sf, appClass);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private boolean analyzePublicField(SootField sf, SootClass callingClass) {
-    SootClass fieldClass = sf.getDeclaringClass();
-
-    boolean insidePackageAccess = isCallSamePackage(callingClass, fieldClass);
-    boolean subClassAccess = isCallClassSubClass(callingClass, fieldClass);
-    boolean sameClassAccess = isCallClassMethodClass(callingClass, fieldClass);
-
-    if (!insidePackageAccess && !subClassAccess) {
-      fieldResultsMap.put(sf, new Integer(RESULT_PUBLIC));
-      return true;
-    } else if (!insidePackageAccess && subClassAccess) {
-      updateToProtected(sf);
-      return false;
-    } else if (insidePackageAccess && !sameClassAccess) {
-      updateToPackage(sf);
-      return false;
-    } else {
-      updateToPrivate(sf);
-      return false;
-    }
-
-  }
-
-  private boolean analyzeProtectedField(SootField sf, SootClass callingClass) {
-    SootClass fieldClass = sf.getDeclaringClass();
-
-    boolean insidePackageAccess = isCallSamePackage(callingClass, fieldClass);
-    boolean subClassAccess = isCallClassSubClass(callingClass, fieldClass);
-    boolean sameClassAccess = isCallClassMethodClass(callingClass, fieldClass);
-
-    if (!insidePackageAccess && subClassAccess) {
-      fieldResultsMap.put(sf, new Integer(RESULT_PROTECTED));
-      return true;
-    } else if (insidePackageAccess && !sameClassAccess) {
-      updateToPackage(sf);
-      return false;
-    } else {
-      updateToPrivate(sf);
-      return false;
-    }
-  }
-
-  private boolean analyzePackageField(SootField sf, SootClass callingClass) {
-    SootClass fieldClass = sf.getDeclaringClass();
-
-    boolean insidePackageAccess = isCallSamePackage(callingClass, fieldClass);
-    boolean subClassAccess = isCallClassSubClass(callingClass, fieldClass);
-    boolean sameClassAccess = isCallClassMethodClass(callingClass, fieldClass);
-
-    if (insidePackageAccess && !sameClassAccess) {
-      updateToPackage(sf);
-      return true;
-    } else {
-      updateToPrivate(sf);
-      return false;
-    }
-  }
-
-  private void updateToProtected(SootField sf) {
-    if (!fieldResultsMap.containsKey(sf)) {
-      fieldResultsMap.put(sf, new Integer(RESULT_PROTECTED));
-    } else {
-      if (fieldResultsMap.get(sf).intValue() != RESULT_PUBLIC) {
-        fieldResultsMap.put(sf, new Integer(RESULT_PROTECTED));
-      }
-    }
-  }
-
-  private void updateToPackage(SootField sf) {
-    if (!fieldResultsMap.containsKey(sf)) {
-      fieldResultsMap.put(sf, new Integer(RESULT_PACKAGE));
-    } else {
-      if (fieldResultsMap.get(sf).intValue() == RESULT_PRIVATE) {
-        fieldResultsMap.put(sf, new Integer(RESULT_PACKAGE));
-      }
-    }
-  }
-
-  private void updateToPrivate(SootField sf) {
-    if (!fieldResultsMap.containsKey(sf)) {
-      fieldResultsMap.put(sf, new Integer(RESULT_PRIVATE));
-    }
-  }
+	private void updateToPrivate(SootField sf) {
+	    if (!fieldResultsMap.containsKey(sf)) {
+	      fieldResultsMap.put(sf, Integer.valueOf(RESULT_PRIVATE));
+	    }
+	  }
 }

@@ -35,42 +35,44 @@ import soot.util.PhaseDumper;
  */
 public class Transform implements HasPhaseOptions {
   private static final Logger logger = LoggerFactory.getLogger(Transform.class);
-  final private boolean DEBUG;
+  private final boolean debug;
   final String phaseName;
   final Transformer t;
+private String declaredOpts;
+private String defaultOpts;
 
-  public Transform(String phaseName, Transformer t) {
-    this.DEBUG = Options.v().dump_body().contains(phaseName);
+public Transform(String phaseName, Transformer t) {
+    this.debug = Options.v().dump_body().contains(phaseName);
     this.phaseName = phaseName;
     this.t = t;
   }
 
-  public String getPhaseName() {
+@Override
+public String getPhaseName() {
     return phaseName;
   }
 
-  public Transformer getTransformer() {
+public Transformer getTransformer() {
     return t;
   }
 
-  private String declaredOpts;
-  private String defaultOpts;
-
-  public String getDeclaredOptions() {
+@Override
+public String getDeclaredOptions() {
     if (declaredOpts != null) {
       return declaredOpts;
     }
     return Options.getDeclaredOptionsForPhase(phaseName);
   }
 
-  public String getDefaultOptions() {
+@Override
+public String getDefaultOptions() {
     if (defaultOpts != null) {
       return defaultOpts;
     }
     return Options.getDefaultOptionsForPhase(phaseName);
   }
 
-  /**
+/**
    * Allows user-defined phases to have options other than just enabled without having to mess with the XML. Call this method
    * with a space-separated list of options declared for this Transform. Only declared options may be passed to this
    * transform as a phase option.
@@ -79,7 +81,7 @@ public class Transform implements HasPhaseOptions {
     declaredOpts = options;
   }
 
-  /**
+/**
    * Allows user-defined phases to have options other than just enabled without having to mess with the XML. Call this method
    * with a space-separated list of option:value pairs that this Transform is to use as default parameters (eg
    * `enabled:off').
@@ -88,43 +90,39 @@ public class Transform implements HasPhaseOptions {
     defaultOpts = options;
   }
 
-  public void apply() {
+public void apply() {
     Map<String, String> options = PhaseOptions.v().getPhaseOptions(phaseName);
-    if (PhaseOptions.getBoolean(options, "enabled")) {
-      if (Options.v().verbose()) {
-        logger.debug("" + "Applying phase " + phaseName + " to the scene.");
+    if (PhaseOptions.getBoolean(options, "enabled") && Options.v().verbose()) {
+        logger.debug(new StringBuilder().append("").append("Applying phase ").append(phaseName).append(" to the scene.").toString());
       }
-    }
-    if (DEBUG) {
+    if (debug) {
       PhaseDumper.v().dumpBefore(getPhaseName());
     }
 
     ((SceneTransformer) t).transform(phaseName, options);
 
-    if (DEBUG) {
+    if (debug) {
       PhaseDumper.v().dumpAfter(getPhaseName());
     }
   }
 
-  public void apply(Body b) {
+public void apply(Body b) {
     Map<String, String> options = PhaseOptions.v().getPhaseOptions(phaseName);
-    if (PhaseOptions.getBoolean(options, "enabled")) {
-      if (Options.v().verbose()) {
-        logger.debug("" + "Applying phase " + phaseName + " to " + b.getMethod() + ".");
+    if (PhaseOptions.getBoolean(options, "enabled") && Options.v().verbose()) {
+        logger.debug(new StringBuilder().append("").append("Applying phase ").append(phaseName).append(" to ").append(b.getMethod()).append(".").toString());
       }
-    }
-    if (DEBUG) {
+    if (debug) {
       PhaseDumper.v().dumpBefore(b, getPhaseName());
     }
 
     ((BodyTransformer) t).transform(b, phaseName, options);
 
-    if (DEBUG) {
+    if (debug) {
       PhaseDumper.v().dumpAfter(b, getPhaseName());
     }
   }
 
-  @Override
+@Override
   public String toString() {
     return phaseName;
   }

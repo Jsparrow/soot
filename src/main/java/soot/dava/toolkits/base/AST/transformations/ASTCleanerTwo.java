@@ -71,14 +71,16 @@ public class ASTCleanerTwo extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
   /*
    * Note the ASTNode in this case can be any of the following: ASTMethodNode ASTSwitchNode ASTIfNode ASTIfElseNode
    * ASTUnconditionalWhileNode ASTWhileNode ASTDoWhileNode ASTForLoopNode ASTLabeledBlockNode ASTSynchronizedBlockNode
    */
-  public void normalRetrieving(ASTNode node) {
+  @Override
+public void normalRetrieving(ASTNode node) {
     if (node instanceof ASTSwitchNode) {
       dealWithSwitchNode((ASTSwitchNode) node);
       return;
@@ -91,12 +93,10 @@ public class ASTCleanerTwo extends DepthFirstAdapter {
     int subBodyNumber = 0;
     while (sbit.hasNext()) {
       List<Object> subBody = (List<Object>) sbit.next();
-      Iterator<Object> it = subBody.iterator();
-
       int nodeNumber = 0;
       // go over the ASTNodes in this subBody and apply
-      while (it.hasNext()) {
-        ASTNode temp = (ASTNode) it.next();
+	for (Object aSubBody : subBody) {
+        ASTNode temp = (ASTNode) aSubBody;
         if (temp instanceof ASTIfElseNode) {
           IfElseBreaker breaker = new IfElseBreaker();
           boolean success = false;
@@ -189,7 +189,8 @@ public class ASTCleanerTwo extends DepthFirstAdapter {
     } // end of going over subBodies
   }
 
-  public void caseASTTryNode(ASTTryNode node) {
+  @Override
+public void caseASTTryNode(ASTTryNode node) {
     inASTTryNode(node);
 
     // get try body
@@ -295,20 +296,16 @@ public class ASTCleanerTwo extends DepthFirstAdapter {
     List<Object> indexList = node.getIndexList();
     Map<Object, List<Object>> index2BodyList = node.getIndex2BodyList();
 
-    Iterator<Object> it = indexList.iterator();
-    while (it.hasNext()) {
-      // going through all the cases of the switch statement
-      Object currentIndex = it.next();
+    for (Object currentIndex : indexList) {
       List<Object> body = index2BodyList.get(currentIndex);
 
       if (body != null) {
         // this body is a list of ASTNodes
 
-        Iterator<Object> itBody = body.iterator();
         int nodeNumber = 0;
         // go over the ASTNodes and apply
-        while (itBody.hasNext()) {
-          ASTNode temp = (ASTNode) itBody.next();
+		for (Object aBody : body) {
+          ASTNode temp = (ASTNode) aBody;
           if (temp instanceof ASTIfElseNode) {
             IfElseBreaker breaker = new IfElseBreaker();
             boolean success = false;

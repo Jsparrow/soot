@@ -210,7 +210,62 @@ public class PatchingChain<E extends Unit> extends AbstractCollection<E> impleme
     return innerChain.getPredOf(point);
   }
 
-  protected class PatchingIterator implements Iterator<E> {
+  /**
+   * Returns an iterator over a copy of this chain. This avoids ConcurrentModificationExceptions from being thrown if the
+   * underlying Chain is modified during iteration. Do not use this to remove elements which have not yet been iterated over!
+   */
+  @Override
+  public Iterator<E> snapshotIterator() {
+    List<E> l = new LinkedList<>(this);
+    return l.iterator();
+  }
+
+/** Returns an iterator over this Chain. */
+  @Override
+  public Iterator<E> iterator() {
+    return new PatchingIterator(innerChain);
+  }
+
+/** Returns an iterator over this Chain, starting at the given object. */
+  @Override
+  public Iterator<E> iterator(E u) {
+    return new PatchingIterator(innerChain, u);
+  }
+
+/** Returns an iterator over this Chain, starting at head and reaching tail (inclusive). */
+  @Override
+  public Iterator<E> iterator(E head, E tail) {
+    return new PatchingIterator(innerChain, head, tail);
+  }
+
+/** Returns the size of this Chain. */
+  @Override
+  public int size() {
+    return innerChain.size();
+  }
+
+@Override
+  /** Returns the number of times this chain has been modified. */
+  public long getModificationCount() {
+    return innerChain.getModificationCount();
+  }
+
+@Override
+  public Collection<E> getElementsUnsorted() {
+    return innerChain.getElementsUnsorted();
+  }
+
+@Override
+  public void insertAfter(Collection<? extends E> toInsert, E point) {
+    innerChain.insertAfter(toInsert, point);
+  }
+
+@Override
+  public void insertBefore(Collection<? extends E> toInsert, E point) {
+    innerChain.insertBefore(toInsert, point);
+  }
+
+protected class PatchingIterator implements Iterator<E> {
     protected Iterator<E> innerIterator = null;
     protected E lastObject;
     protected boolean state = false;
@@ -264,60 +319,5 @@ public class PatchingChain<E extends Unit> extends AbstractCollection<E> impleme
 
       lastObject.redirectJumpsToThisTo(successor);
     }
-  }
-
-  /**
-   * Returns an iterator over a copy of this chain. This avoids ConcurrentModificationExceptions from being thrown if the
-   * underlying Chain is modified during iteration. Do not use this to remove elements which have not yet been iterated over!
-   */
-  @Override
-  public Iterator<E> snapshotIterator() {
-    List<E> l = new LinkedList<E>(this);
-    return l.iterator();
-  }
-
-  /** Returns an iterator over this Chain. */
-  @Override
-  public Iterator<E> iterator() {
-    return new PatchingIterator(innerChain);
-  }
-
-  /** Returns an iterator over this Chain, starting at the given object. */
-  @Override
-  public Iterator<E> iterator(E u) {
-    return new PatchingIterator(innerChain, u);
-  }
-
-  /** Returns an iterator over this Chain, starting at head and reaching tail (inclusive). */
-  @Override
-  public Iterator<E> iterator(E head, E tail) {
-    return new PatchingIterator(innerChain, head, tail);
-  }
-
-  /** Returns the size of this Chain. */
-  @Override
-  public int size() {
-    return innerChain.size();
-  }
-
-  @Override
-  /** Returns the number of times this chain has been modified. */
-  public long getModificationCount() {
-    return innerChain.getModificationCount();
-  }
-
-  @Override
-  public Collection<E> getElementsUnsorted() {
-    return innerChain.getElementsUnsorted();
-  }
-
-  @Override
-  public void insertAfter(Collection<? extends E> toInsert, E point) {
-    innerChain.insertAfter(toInsert, point);
-  }
-
-  @Override
-  public void insertBefore(Collection<? extends E> toInsert, E point) {
-    innerChain.insertBefore(toInsert, point);
   }
 }

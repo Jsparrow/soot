@@ -32,7 +32,8 @@ public class AccessFieldJBB extends AbstractJimpleBodyBuilder {
     // base(this);
   }
 
-  protected boolean needsAccessor(polyglot.ast.Expr expr) {
+  @Override
+protected boolean needsAccessor(polyglot.ast.Expr expr) {
     if (expr instanceof soot.javaToJimple.jj.ast.JjAccessField_c) {
       return true;
     } else {
@@ -40,7 +41,8 @@ public class AccessFieldJBB extends AbstractJimpleBodyBuilder {
     }
   }
 
-  protected soot.Local handlePrivateFieldUnarySet(polyglot.ast.Unary unary) {
+  @Override
+protected soot.Local handlePrivateFieldUnarySet(polyglot.ast.Unary unary) {
     if (unary.expr() instanceof soot.javaToJimple.jj.ast.JjAccessField_c) {
       // not sure about strings here but...
       soot.javaToJimple.jj.ast.JjAccessField_c accessField = (soot.javaToJimple.jj.ast.JjAccessField_c) unary.expr();
@@ -76,7 +78,8 @@ public class AccessFieldJBB extends AbstractJimpleBodyBuilder {
 
   }
 
-  protected soot.Local handlePrivateFieldAssignSet(polyglot.ast.Assign assign) {
+  @Override
+protected soot.Local handlePrivateFieldAssignSet(polyglot.ast.Assign assign) {
     if (assign.left() instanceof soot.javaToJimple.jj.ast.JjAccessField_c) {
       // not sure about strings here but...
       soot.javaToJimple.jj.ast.JjAccessField_c accessField = (soot.javaToJimple.jj.ast.JjAccessField_c) assign.left();
@@ -109,7 +112,7 @@ public class AccessFieldJBB extends AbstractJimpleBodyBuilder {
     }
 
     soot.SootMethodRef methToCall = base().getSootMethodRef(call);
-    List<soot.Value> params = new ArrayList<soot.Value>();
+    List<soot.Value> params = new ArrayList<>();
     /*
      * if (!field.flags().isStatic()){ //params.add(base().getThis(Util.getSootType(field.target().type())));
      * params.add((soot.Local)ext().getBaseLocal(field.target())); }
@@ -137,7 +140,8 @@ public class AccessFieldJBB extends AbstractJimpleBodyBuilder {
     return retLocal;
   }
 
-  protected soot.Local handlePrivateFieldSet(polyglot.ast.Expr expr, soot.Value right, soot.Value baseLocal) {
+  @Override
+protected soot.Local handlePrivateFieldSet(polyglot.ast.Expr expr, soot.Value right, soot.Value baseLocal) {
     if (expr instanceof soot.javaToJimple.jj.ast.JjAccessField_c) {
       soot.javaToJimple.jj.ast.JjAccessField_c accessField = (soot.javaToJimple.jj.ast.JjAccessField_c) expr;
       return handleCall(accessField.field(), accessField.setMeth(), right, null);
@@ -160,7 +164,8 @@ public class AccessFieldJBB extends AbstractJimpleBodyBuilder {
    * ext().createExpr(expr); } }
    */
 
-  protected soot.Value createAggressiveExpr(polyglot.ast.Expr expr, boolean redAgg, boolean revIfNec) {
+  @Override
+protected soot.Value createAggressiveExpr(polyglot.ast.Expr expr, boolean redAgg, boolean revIfNec) {
     if (expr instanceof soot.javaToJimple.jj.ast.JjAccessField_c) {
       soot.javaToJimple.jj.ast.JjAccessField_c accessField = (soot.javaToJimple.jj.ast.JjAccessField_c) expr;
 
@@ -172,7 +177,8 @@ public class AccessFieldJBB extends AbstractJimpleBodyBuilder {
     }
   }
 
-  protected soot.Value createLHS(polyglot.ast.Expr expr) {
+  @Override
+protected soot.Value createLHS(polyglot.ast.Expr expr) {
     if (expr instanceof soot.javaToJimple.jj.ast.JjAccessField_c) {
       soot.javaToJimple.jj.ast.JjAccessField_c accessField = (soot.javaToJimple.jj.ast.JjAccessField_c) expr;
 

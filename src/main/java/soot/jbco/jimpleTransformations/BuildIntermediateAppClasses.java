@@ -59,6 +59,8 @@ import soot.jimple.NullConstant;
 import soot.jimple.SpecialInvokeExpr;
 import soot.jimple.ThisRef;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michael Batchelder
@@ -71,27 +73,30 @@ import soot.util.Chain;
  */
 public class BuildIntermediateAppClasses extends SceneTransformer implements IJbcoTransform {
 
-  private static int newclasses = 0;
+  private static final Logger logger = LoggerFactory.getLogger(BuildIntermediateAppClasses.class);
+private static int newclasses = 0;
   private static int newmethods = 0;
+public static String dependancies[] = new String[] { "wjtp.jbco_bapibm" };
+public static String name = "wjtp.jbco_bapibm";
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
     out.println("New buffer classes created: " + newclasses);
     out.println("New buffer class methods created: " + newmethods);
   }
 
-  public static String dependancies[] = new String[] { "wjtp.jbco_bapibm" };
-
-  public String[] getDependencies() {
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "wjtp.jbco_bapibm";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  protected void internalTransform(String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(String phaseName, Map<String, String> options) {
     if (output) {
       out.println("Building Intermediate Classes...");
     }
@@ -107,7 +112,7 @@ public class BuildIntermediateAppClasses extends SceneTransformer implements IJb
       SootClass originalSuperclass = sc.getSuperclass();
 
       if (output) {
-        out.println("Processing " + sc.getName() + " with super " + originalSuperclass.getName());
+        out.println(new StringBuilder().append("Processing ").append(sc.getName()).append(" with super ").append(originalSuperclass.getName()).toString());
       }
 
       Iterator<SootMethod> methodIterator = sc.methodIterator();
@@ -120,13 +125,14 @@ public class BuildIntermediateAppClasses extends SceneTransformer implements IJb
         try {
           method.getActiveBody();
         } catch (Exception e) {
-          if (method.retrieveActiveBody() == null) {
+          logger.error(e.getMessage(), e);
+		if (method.retrieveActiveBody() == null) {
             throw new RuntimeException(method.getSignature() + " has no body. This was not expected dude.");
           }
         }
 
         String subSig = method.getSubSignature();
-        if (subSig.equals("void main(java.lang.String[])") && method.isPublic() && method.isStatic()) {
+        if ("void main(java.lang.String[])".equals(subSig) && method.isPublic() && method.isStatic()) {
           continue; // skip the main method - it needs to be named 'main'
         } else if (subSig.indexOf("init>(") > 0) {
           if (subSig.startsWith("void <init>(")) {
@@ -158,64 +164,62 @@ public class BuildIntermediateAppClasses extends SceneTransformer implements IJb
 
         ThisRef thisRef = new ThisRef(mediatingClass.getType());
 
-        for (String subSig : methodsToAdd.keySet()) {
-          SootMethod originalSuperclassMethod = methodsToAdd.get(subSig);
-          List<Type> paramTypes = originalSuperclassMethod.getParameterTypes();
-          Type returnType = originalSuperclassMethod.getReturnType();
-          List<SootClass> exceptions = originalSuperclassMethod.getExceptions();
-          int modifiers = originalSuperclassMethod.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE;
-          SootMethod newMethod;
-          { // build new junk method to call original method
-            String newMethodName = MethodRenamer.v().getNewName();
-            newMethod = Scene.v().makeSootMethod(newMethodName, paramTypes, returnType, modifiers, exceptions);
-            mediatingClass.addMethod(newMethod);
+        methodsToAdd.keySet().stream().map(methodsToAdd::get).forEach(originalSuperclassMethod -> {
+			List<Type> paramTypes = originalSuperclassMethod.getParameterTypes();
+			Type returnType = originalSuperclassMethod.getReturnType();
+			List<SootClass> exceptions = originalSuperclassMethod.getExceptions();
+			int modifiers = originalSuperclassMethod.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE;
+			SootMethod newMethod;
+			{ // build new junk method to call original method
+			    String newMethodName = MethodRenamer.v().getNewName();
+			    newMethod = Scene.v().makeSootMethod(newMethodName, paramTypes, returnType, modifiers, exceptions);
+			    mediatingClass.addMethod(newMethod);
 
-            Body body = Jimple.v().newBody(newMethod);
-            newMethod.setActiveBody(body);
-            Chain<Local> locals = body.getLocals();
-            PatchingChain<Unit> units = body.getUnits();
+			    Body body = Jimple.v().newBody(newMethod);
+			    newMethod.setActiveBody(body);
+			    Chain<Local> locals = body.getLocals();
+			    PatchingChain<Unit> units = body.getUnits();
 
-            BodyBuilder.buildThisLocal(units, thisRef, locals);
-            BodyBuilder.buildParameterLocals(units, locals, paramTypes);
+			    BodyBuilder.buildThisLocal(units, thisRef, locals);
+			    BodyBuilder.buildParameterLocals(units, locals, paramTypes);
 
-            if (returnType instanceof VoidType) {
-              units.add(Jimple.v().newReturnVoidStmt());
-            } else if (returnType instanceof PrimType) {
-              units.add(Jimple.v().newReturnStmt(IntConstant.v(0)));
-            } else {
-              units.add(Jimple.v().newReturnStmt(NullConstant.v()));
-            }
-            newmethods++;
-          } // end build new junk method to call original method
+			    if (returnType instanceof VoidType) {
+			      units.add(Jimple.v().newReturnVoidStmt());
+			    } else if (returnType instanceof PrimType) {
+			      units.add(Jimple.v().newReturnStmt(IntConstant.v(0)));
+			    } else {
+			      units.add(Jimple.v().newReturnStmt(NullConstant.v()));
+			    }
+			    newmethods++;
+			  } // end build new junk method to call original method
+			{ // build copy of old method
+			    newMethod = Scene.v().makeSootMethod(originalSuperclassMethod.getName(), paramTypes, returnType, modifiers,
+			        exceptions);
+			    mediatingClass.addMethod(newMethod);
 
-          { // build copy of old method
-            newMethod = Scene.v().makeSootMethod(originalSuperclassMethod.getName(), paramTypes, returnType, modifiers,
-                exceptions);
-            mediatingClass.addMethod(newMethod);
+			    Body body = Jimple.v().newBody(newMethod);
+			    newMethod.setActiveBody(body);
+			    Chain<Local> locals = body.getLocals();
+			    PatchingChain<Unit> units = body.getUnits();
 
-            Body body = Jimple.v().newBody(newMethod);
-            newMethod.setActiveBody(body);
-            Chain<Local> locals = body.getLocals();
-            PatchingChain<Unit> units = body.getUnits();
+			    Local ths = BodyBuilder.buildThisLocal(units, thisRef, locals);
+			    List<Local> args = BodyBuilder.buildParameterLocals(units, locals, paramTypes);
 
-            Local ths = BodyBuilder.buildThisLocal(units, thisRef, locals);
-            List<Local> args = BodyBuilder.buildParameterLocals(units, locals, paramTypes);
+			    SootMethodRef superclassMethodRef = originalSuperclassMethod.makeRef();
+			    if (returnType instanceof VoidType) {
+			      units.add(Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(ths, superclassMethodRef, args)));
+			      units.add(Jimple.v().newReturnVoidStmt());
+			    } else {
+			      Local loc = Jimple.v().newLocal("retValue", returnType);
+			      body.getLocals().add(loc);
 
-            SootMethodRef superclassMethodRef = originalSuperclassMethod.makeRef();
-            if (returnType instanceof VoidType) {
-              units.add(Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(ths, superclassMethodRef, args)));
-              units.add(Jimple.v().newReturnVoidStmt());
-            } else {
-              Local loc = Jimple.v().newLocal("retValue", returnType);
-              body.getLocals().add(loc);
+			      units.add(Jimple.v().newAssignStmt(loc, Jimple.v().newSpecialInvokeExpr(ths, superclassMethodRef, args)));
 
-              units.add(Jimple.v().newAssignStmt(loc, Jimple.v().newSpecialInvokeExpr(ths, superclassMethodRef, args)));
-
-              units.add(Jimple.v().newReturnStmt(loc));
-            }
-            newmethods++;
-          } // end build copy of old method
-        }
+			      units.add(Jimple.v().newReturnStmt(loc));
+			    }
+			    newmethods++;
+			  } // end build copy of old method
+		});
         sc.setSuperclass(mediatingClass);
 
         // rewrite class init methods to call the proper superclass inits
@@ -226,37 +230,36 @@ public class BuildIntermediateAppClasses extends SceneTransformer implements IJb
           Local thisLocal = b.getThisLocal();
           Iterator<Unit> uIt = b.getUnits().snapshotIterator();
           while (uIt.hasNext()) {
-            for (ValueBox valueBox : uIt.next().getUseBoxes()) {
-              Value v = valueBox.getValue();
-              if (v instanceof SpecialInvokeExpr) {
-                SpecialInvokeExpr sie = (SpecialInvokeExpr) v;
-                SootMethodRef smr = sie.getMethodRef();
-                if (sie.getBase().equivTo(thisLocal) && smr.declaringClass().getName().equals(originalSuperclass.getName())
-                    && smr.getSubSignature().getString().startsWith("void " + constructorName)) {
-                  SootMethod newSuperInit;
-                  if (!mediatingClass.declaresMethod(constructorName, smr.parameterTypes())) {
-                    List<Type> paramTypes = smr.parameterTypes();
-                    newSuperInit = Scene.v().makeSootMethod(constructorName, paramTypes, smr.returnType());
-                    mediatingClass.addMethod(newSuperInit);
+            uIt.next().getUseBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+				if (v instanceof SpecialInvokeExpr) {
+				    SpecialInvokeExpr sie = (SpecialInvokeExpr) v;
+				    SootMethodRef smr = sie.getMethodRef();
+				    if (sie.getBase().equivTo(thisLocal) && smr.declaringClass().getName().equals(originalSuperclass.getName())
+				        && smr.getSubSignature().getString().startsWith("void " + constructorName)) {
+				      SootMethod newSuperInit;
+				      if (!mediatingClass.declaresMethod(constructorName, smr.parameterTypes())) {
+				        List<Type> paramTypes = smr.parameterTypes();
+				        newSuperInit = Scene.v().makeSootMethod(constructorName, paramTypes, smr.returnType());
+				        mediatingClass.addMethod(newSuperInit);
 
-                    JimpleBody body = Jimple.v().newBody(newSuperInit);
-                    newSuperInit.setActiveBody(body);
-                    PatchingChain<Unit> initUnits = body.getUnits();
-                    Collection<Local> locals = body.getLocals();
+				        JimpleBody body = Jimple.v().newBody(newSuperInit);
+				        newSuperInit.setActiveBody(body);
+				        PatchingChain<Unit> initUnits = body.getUnits();
+				        Collection<Local> locals = body.getLocals();
 
-                    Local ths = BodyBuilder.buildThisLocal(initUnits, thisRef, locals);
-                    List<Local> args = BodyBuilder.buildParameterLocals(initUnits, locals, paramTypes);
+				        Local ths = BodyBuilder.buildThisLocal(initUnits, thisRef, locals);
+				        List<Local> args = BodyBuilder.buildParameterLocals(initUnits, locals, paramTypes);
 
-                    initUnits.add(Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(ths, smr, args)));
-                    initUnits.add(Jimple.v().newReturnVoidStmt());
-                  } else {
-                    newSuperInit = mediatingClass.getMethod(constructorName, smr.parameterTypes());
-                  }
+				        initUnits.add(Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(ths, smr, args)));
+				        initUnits.add(Jimple.v().newReturnVoidStmt());
+				      } else {
+				        newSuperInit = mediatingClass.getMethod(constructorName, smr.parameterTypes());
+				      }
 
-                  sie.setMethodRef(newSuperInit.makeRef());
-                }
-              }
-            }
+				      sie.setMethodRef(newSuperInit.makeRef());
+				    }
+				  }
+			});
           }
         } // end of rewrite class init methods to call the proper superclass inits
       }
@@ -269,7 +272,7 @@ public class BuildIntermediateAppClasses extends SceneTransformer implements IJb
     Scene.v().setFastHierarchy(new FastHierarchy());
   }
 
-  private Optional<SootMethod> findAccessibleInSuperClassesBySubSig(SootClass base, String subSig) {
+private Optional<SootMethod> findAccessibleInSuperClassesBySubSig(SootClass base, String subSig) {
     Hierarchy hierarchy = Scene.v().getActiveHierarchy();
     for (SootClass superClass : hierarchy.getSuperclassesOfIncluding(base.getSuperclass())) {
       if (superClass.isLibraryClass() && superClass.declaresMethod(subSig)) {

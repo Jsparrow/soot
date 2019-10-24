@@ -17,13 +17,18 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
   * @ast class
  * 
  */
 public class MethodInfo extends java.lang.Object {
 
-    private BytecodeParser p;
+    private static final Logger logger = LoggerFactory.getLogger(MethodInfo.class);
+
+
+	private BytecodeParser p;
 
 
     String name;
@@ -42,12 +47,13 @@ public class MethodInfo extends java.lang.Object {
     public MethodInfo(BytecodeParser parser) {
       p = parser;
       flags = p.u2();
-      if(BytecodeParser.VERBOSE)
-        p.print("  Flags: " + Integer.toBinaryString(flags));
+      if(BytecodeParser.VERBOSE) {
+		p.print("  Flags: " + Integer.toBinaryString(flags));
+	}
       int name_index = p.u2();
       CONSTANT_Info info = p.constantPool[name_index];
-      if(info == null || !(info instanceof CONSTANT_Utf8_Info)) {
-        System.err.println("Expected CONSTANT_Utf8_Info but found: " + info.getClass().getName());
+      if(!(info instanceof CONSTANT_Utf8_Info)) {
+        logger.error("Expected CONSTANT_Utf8_Info but found: " + info.getClass().getName());
         //if(info instanceof CONSTANT_Class_Info) {
         //  System.err.println(" found CONSTANT_Class_Info: " + ((CONSTANT_Class_Info)info).name());
         //  name = ((CONSTANT_Class_Info)info).name();
@@ -67,7 +73,9 @@ public class MethodInfo extends java.lang.Object {
         parameterList = methodDescriptor.parameterListSkipFirst();
         if(s != null) {
           Iterator iter = s.parameterTypes().iterator();
-          if(iter.hasNext()) iter.next();
+          if(iter.hasNext()) {
+			iter.next();
+		}
           for(int i = 0; iter.hasNext(); i++) {
             Access a = (Access)iter.next();
             ((ParameterDeclaration)parameterList.getChildNoTransform(i)).setTypeAccess(a);
@@ -128,10 +136,11 @@ public class MethodInfo extends java.lang.Object {
       }
       if(attributes.annotations != null) {
         for(Iterator iter = attributes.annotations.iterator(); iter.hasNext(); ) {
-          if(b instanceof MethodDecl) 
-            ((MethodDecl)b).getModifiers().addModifier((Modifier)iter.next());
-          else if(b instanceof ConstructorDecl)
-            ((ConstructorDecl)b).getModifiers().addModifier((Modifier)iter.next());
+          if(b instanceof MethodDecl) {
+			((MethodDecl)b).getModifiers().addModifier((Modifier)iter.next());
+		} else if(b instanceof ConstructorDecl) {
+			((ConstructorDecl)b).getModifiers().addModifier((Modifier)iter.next());
+		}
         }
       }
       return b;
@@ -140,7 +149,7 @@ public class MethodInfo extends java.lang.Object {
 
 
     private boolean isConstructor() {
-      return name.equals("<init>");
+      return "<init>".equals(name);
     }
 
 

@@ -33,70 +33,72 @@ import java.util.NoSuchElementException;
  */
 
 public final class LargeNumberedMap<K extends Numberable, V> {
-  public LargeNumberedMap(ArrayNumberer<K> universe) {
-    this.universe = universe;
-    int newsize = universe.size();
-    if (newsize < 8) {
-      newsize = 8;
-    }
-    values = new Object[newsize];
-  }
-
-  public boolean put(Numberable key, V value) {
-    int number = key.getNumber();
-    if (number == 0) {
-      throw new RuntimeException(String.format("oops, forgot to initialize. Object is of type %s, and looks like this: %s",
-          key.getClass().getName(), key.toString()));
-    }
-    if (number >= values.length) {
-      Object[] oldValues = values;
-      values = new Object[universe.size() * 2 + 5];
-      System.arraycopy(oldValues, 0, values, 0, oldValues.length);
-    }
-    boolean ret = (values[number] != value);
-    values[number] = value;
-    return ret;
-  }
-
-  @SuppressWarnings("unchecked")
-  public V get(Numberable key) {
-    int i = key.getNumber();
-    if (i >= values.length) {
-      return null;
-    }
-    return (V) values[i];
-  }
-
-  public Iterator<K> keyIterator() {
-    return new Iterator<K>() {
-      int cur = 0;
-
-      private void advance() {
-        while (cur < values.length && values[cur] == null) {
-          cur++;
-        }
-      }
-
-      public boolean hasNext() {
-        advance();
-        return cur < values.length;
-      }
-
-      public K next() {
-        if (!hasNext()) {
-          throw new NoSuchElementException();
-        }
-        return universe.get(cur++);
-      }
-
-      public void remove() {
-        throw new UnsupportedOperationException();
-      }
-    };
-  }
-
   /* Private stuff. */
+	
+	  private Object[] values;
+	private ArrayNumberer<K> universe;
+	public LargeNumberedMap(ArrayNumberer<K> universe) {
+	    this.universe = universe;
+	    int newsize = universe.size();
+	    if (newsize < 8) {
+	      newsize = 8;
+	    }
+	    values = new Object[newsize];
+	  }
 
-  private Object[] values;
-  private ArrayNumberer<K> universe;
+	public boolean put(Numberable key, V value) {
+	    int number = key.getNumber();
+	    if (number == 0) {
+	      throw new RuntimeException(String.format("oops, forgot to initialize. Object is of type %s, and looks like this: %s",
+	          key.getClass().getName(), key.toString()));
+	    }
+	    if (number >= values.length) {
+	      Object[] oldValues = values;
+	      values = new Object[universe.size() * 2 + 5];
+	      System.arraycopy(oldValues, 0, values, 0, oldValues.length);
+	    }
+	    boolean ret = (values[number] != value);
+	    values[number] = value;
+	    return ret;
+	  }
+
+	@SuppressWarnings("unchecked")
+	  public V get(Numberable key) {
+	    int i = key.getNumber();
+	    if (i >= values.length) {
+	      return null;
+	    }
+	    return (V) values[i];
+	  }
+
+	public Iterator<K> keyIterator() {
+	    return new Iterator<K>() {
+	      int cur = 0;
+	
+	      private void advance() {
+	        while (cur < values.length && values[cur] == null) {
+	          cur++;
+	        }
+	      }
+	
+	      @Override
+		public boolean hasNext() {
+	        advance();
+	        return cur < values.length;
+	      }
+	
+	      @Override
+		public K next() {
+	        if (!hasNext()) {
+	          throw new NoSuchElementException();
+	        }
+	        return universe.get(cur++);
+	      }
+	
+	      @Override
+		public void remove() {
+	        throw new UnsupportedOperationException();
+	      }
+	    };
+	  }
 }

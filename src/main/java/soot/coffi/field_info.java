@@ -75,7 +75,8 @@ public class field_info {
    * @return the prototype (access + type + name) of this field.
    */
   public String prototype(cp_info constant_pool[]) {
-    CONSTANT_Utf8_info cm, dm;
+    CONSTANT_Utf8_info cm;
+	CONSTANT_Utf8_info dm;
     String s;
 
     cm = (CONSTANT_Utf8_info) (constant_pool[name_index]);
@@ -84,7 +85,7 @@ public class field_info {
     if (s.compareTo("") != 0) {
       s = s + " ";
     }
-    return s + ClassFile.parseDesc(dm.convert(), "") + " " + cm.convert();
+    return new StringBuilder().append(s).append(ClassFile.parseDesc(dm.convert(), "")).append(" ").append(cm.convert()).toString();
   }
 
   /**

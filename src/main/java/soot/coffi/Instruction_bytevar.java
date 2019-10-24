@@ -64,15 +64,18 @@ class Instruction_bytevar extends Instruction implements Interface_OneIntArg {
     super(c);
   }
 
-  public String toString(cp_info constant_pool[]) {
-    return super.toString(constant_pool) + argsep + LOCALPREFIX + arg_b;
+  @Override
+public String toString(cp_info constant_pool[]) {
+    return new StringBuilder().append(super.toString(constant_pool)).append(argsep).append(LOCALPREFIX).append(arg_b).toString();
   }
 
-  public int nextOffset(int curr) {
+  @Override
+public int nextOffset(int curr) {
     return curr + 1 + ((isWide) ? 3 : 1);
   }
 
-  public int parse(byte bc[], int index) {
+  @Override
+public int parse(byte bc[], int index) {
     int indexbyte1 = (bc[index]) & 0xff;
 
     if (isWide) {
@@ -87,13 +90,15 @@ class Instruction_bytevar extends Instruction implements Interface_OneIntArg {
     }
   }
 
-  public int compile(byte bc[], int index) {
+  @Override
+public int compile(byte bc[], int index) {
     bc[index++] = code;
     bc[index++] = (byte) arg_b;
     return index;
   }
 
-  public int getIntArg() {
+  @Override
+public int getIntArg() {
     return arg_b;
   }
 }

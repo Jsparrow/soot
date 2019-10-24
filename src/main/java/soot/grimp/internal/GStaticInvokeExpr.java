@@ -41,7 +41,8 @@ public class GStaticInvokeExpr extends AbstractStaticInvokeExpr {
     }
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     ArrayList clonedArgs = new ArrayList(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {

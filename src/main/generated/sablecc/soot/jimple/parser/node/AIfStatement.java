@@ -8,8 +8,8 @@ import soot.jimple.parser.analysis.*;
 public final class AIfStatement extends PStatement
 {
     private TIf _if_;
-    private PBoolExpr _boolExpr_;
-    private PGotoStmt _gotoStmt_;
+    private PBoolExpr boolExpr;
+    private PGotoStmt gotoStmt;
 
     public AIfStatement()
     {
@@ -35,8 +35,8 @@ public final class AIfStatement extends PStatement
     {
         return new AIfStatement(
             cloneNode(this._if_),
-            cloneNode(this._boolExpr_),
-            cloneNode(this._gotoStmt_));
+            cloneNode(this.boolExpr),
+            cloneNode(this.gotoStmt));
     }
 
     @Override
@@ -72,14 +72,14 @@ public final class AIfStatement extends PStatement
 
     public PBoolExpr getBoolExpr()
     {
-        return this._boolExpr_;
+        return this.boolExpr;
     }
 
     public void setBoolExpr(PBoolExpr node)
     {
-        if(this._boolExpr_ != null)
+        if(this.boolExpr != null)
         {
-            this._boolExpr_.parent(null);
+            this.boolExpr.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AIfStatement extends PStatement
             node.parent(this);
         }
 
-        this._boolExpr_ = node;
+        this.boolExpr = node;
     }
 
     public PGotoStmt getGotoStmt()
     {
-        return this._gotoStmt_;
+        return this.gotoStmt;
     }
 
     public void setGotoStmt(PGotoStmt node)
     {
-        if(this._gotoStmt_ != null)
+        if(this.gotoStmt != null)
         {
-            this._gotoStmt_.parent(null);
+            this.gotoStmt.parent(null);
         }
 
         if(node != null)
@@ -117,16 +117,13 @@ public final class AIfStatement extends PStatement
             node.parent(this);
         }
 
-        this._gotoStmt_ = node;
+        this.gotoStmt = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._if_)
-            + toString(this._boolExpr_)
-            + toString(this._gotoStmt_);
+        return new StringBuilder().append("").append(toString(this._if_)).append(toString(this.boolExpr)).append(toString(this.gotoStmt)).toString();
     }
 
     @Override
@@ -139,15 +136,15 @@ public final class AIfStatement extends PStatement
             return;
         }
 
-        if(this._boolExpr_ == child)
+        if(this.boolExpr == child)
         {
-            this._boolExpr_ = null;
+            this.boolExpr = null;
             return;
         }
 
-        if(this._gotoStmt_ == child)
+        if(this.gotoStmt == child)
         {
-            this._gotoStmt_ = null;
+            this.gotoStmt = null;
             return;
         }
 
@@ -164,13 +161,13 @@ public final class AIfStatement extends PStatement
             return;
         }
 
-        if(this._boolExpr_ == oldChild)
+        if(this.boolExpr == oldChild)
         {
             setBoolExpr((PBoolExpr) newChild);
             return;
         }
 
-        if(this._gotoStmt_ == oldChild)
+        if(this.gotoStmt == oldChild)
         {
             setGotoStmt((PGotoStmt) newChild);
             return;

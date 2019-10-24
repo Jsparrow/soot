@@ -28,7 +28,7 @@ package soot.jimple.toolkits.annotation.tags;
  */
 
 public class NullCheckTag implements OneByteCodeTag {
-  private final static String NAME = "NullCheckTag";
+  private static final String NAME = "NullCheckTag";
 
   private byte value = 0;
 
@@ -38,11 +38,13 @@ public class NullCheckTag implements OneByteCodeTag {
     }
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return NAME;
   }
 
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     byte[] bv = new byte[1];
     bv[0] = value;
     return bv;
@@ -56,7 +58,8 @@ public class NullCheckTag implements OneByteCodeTag {
     }
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return ((value == 0) ? "[not null]" : "[unknown]");
   }
 }

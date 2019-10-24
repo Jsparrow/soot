@@ -58,11 +58,12 @@ public class Histogram {
 
     for (int i = 0; i < results.length; i++) {
       if (i == 0) {
-        output.print("<=" + limits[0] + ": " + results[i]);
+        output.print(new StringBuilder().append("<=").append(limits[0]).append(": ").append(results[i]).toString());
       } else if (i == results.length - 1) {
-        output.print(">" + limits[limits.length - 1] + ": " + results[i]);
+        output.print(new StringBuilder().append(">").append(limits[limits.length - 1]).append(": ").append(results[i]).toString());
       } else {
-        output.print(limits[i - 1] + "< x <=" + limits[i] + ": " + results[i]);
+        output.print(new StringBuilder().append(limits[i - 1]).append("< x <=").append(limits[i]).append(": ")
+				.append(results[i]).toString());
       }
 
       output.printf(", percentage = %.2f\n", (double) results[i] * 100 / count);
@@ -90,7 +91,7 @@ public class Histogram {
       return;
     }
 
-    output.println("Samples : " + count + " (" + other.count + ")");
+    output.println(new StringBuilder().append("Samples : ").append(count).append(" (").append(other.count).append(")").toString());
 
     for (int i = 0; i < results.length; i++) {
       if (i == 0) {

@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ANewExpression extends PExpression
 {
-    private PNewExpr _newExpr_;
+    private PNewExpr newExpr;
 
     public ANewExpression()
     {
@@ -26,7 +26,7 @@ public final class ANewExpression extends PExpression
     public Object clone()
     {
         return new ANewExpression(
-            cloneNode(this._newExpr_));
+            cloneNode(this.newExpr));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ANewExpression extends PExpression
 
     public PNewExpr getNewExpr()
     {
-        return this._newExpr_;
+        return this.newExpr;
     }
 
     public void setNewExpr(PNewExpr node)
     {
-        if(this._newExpr_ != null)
+        if(this.newExpr != null)
         {
-            this._newExpr_.parent(null);
+            this.newExpr.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ANewExpression extends PExpression
             node.parent(this);
         }
 
-        this._newExpr_ = node;
+        this.newExpr = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._newExpr_);
+            + toString(this.newExpr);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._newExpr_ == child)
+        if(this.newExpr == child)
         {
-            this._newExpr_ = null;
+            this.newExpr = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ANewExpression extends PExpression
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._newExpr_ == oldChild)
+        if(this.newExpr == oldChild)
         {
             setNewExpr((PNewExpr) newChild);
             return;

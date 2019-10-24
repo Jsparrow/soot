@@ -48,7 +48,8 @@ public class Insn21c extends AbstractInsn implements OneRegInsn {
     this.referencedItem = referencedItem;
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 
@@ -68,6 +69,6 @@ public class Insn21c extends AbstractInsn implements OneRegInsn {
 
   @Override
   public String toString() {
-    return super.toString() + " ref: " + referencedItem;
+    return new StringBuilder().append(super.toString()).append(" ref: ").append(referencedItem).toString();
   }
 }

@@ -50,36 +50,44 @@ public class JInvokeStmt extends AbstractStmt implements InvokeStmt {
     this.invokeExprBox = invokeExprBox;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JInvokeStmt(Jimple.cloneIfNecessary(getInvokeExpr()));
   }
 
-  public boolean containsInvokeExpr() {
+  @Override
+public boolean containsInvokeExpr() {
     return true;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return invokeExprBox.getValue().toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     invokeExprBox.toString(up);
   }
 
-  public void setInvokeExpr(Value invokeExpr) {
+  @Override
+public void setInvokeExpr(Value invokeExpr) {
     invokeExprBox.setValue(invokeExpr);
   }
 
-  public InvokeExpr getInvokeExpr() {
+  @Override
+public InvokeExpr getInvokeExpr() {
     return (InvokeExpr) invokeExprBox.getValue();
   }
 
-  public ValueBox getInvokeExprBox() {
+  @Override
+public ValueBox getInvokeExprBox() {
     return invokeExprBox;
   }
 
-  public List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+  @Override
+public List<ValueBox> getUseBoxes() {
+    List<ValueBox> list = new ArrayList<>();
 
     list.addAll(invokeExprBox.getValue().getUseBoxes());
     list.add(invokeExprBox);
@@ -87,28 +95,33 @@ public class JInvokeStmt extends AbstractStmt implements InvokeStmt {
     return list;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseInvokeStmt(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     InvokeExpr ie = getInvokeExpr();
 
     context.setCurrentUnit(this);
 
     ((ConvertToBaf) ie).convertToBaf(context, out);
-    if (!ie.getMethodRef().returnType().equals(VoidType.v())) {
-      Unit u = Baf.v().newPopInst(ie.getMethodRef().returnType());
-      u.addAllTagsOf(this);
-      out.add(u);
-    }
+    if (ie.getMethodRef().returnType().equals(VoidType.v())) {
+		return;
+	}
+	Unit u = Baf.v().newPopInst(ie.getMethodRef().returnType());
+	u.addAllTagsOf(this);
+	out.add(u);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

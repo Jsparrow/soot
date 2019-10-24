@@ -40,44 +40,63 @@ public class CombinedDUAnalysisTest {
             SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
             SimpleLiveLocals live = new SimpleLiveLocals(graph);
             
-            public List<Unit> getDefsOfAt(Local l, Unit s) {
-                HashSet<Unit> hs1 = new HashSet<Unit>(combined.getDefsOfAt(l, s));
-                HashSet<Unit> hs2 = new HashSet<Unit>(defs.getDefsOfAt(l, s));
-                if( !hs1.equals(hs2) ) throw new RuntimeException(
-                        "Defs of "+l+" in "+s+"\ncombined: "+hs1+"\nsimple: "+hs2);
+            @Override
+			public List<Unit> getDefsOfAt(Local l, Unit s) {
+                HashSet<Unit> hs1 = new HashSet<>(combined.getDefsOfAt(l, s));
+                HashSet<Unit> hs2 = new HashSet<>(defs.getDefsOfAt(l, s));
+                if( !hs1.equals(hs2) ) {
+					throw new RuntimeException(
+					        new StringBuilder().append("Defs of ").append(l).append(" in ").append(s).append("\ncombined: ")
+									.append(hs1).append("\nsimple: ").append(hs2).toString());
+				}
                 return combined.getDefsOfAt(l, s);
             }
             
-            public List<UnitValueBoxPair> getUsesOf(Unit u) {
-                HashSet<UnitValueBoxPair> hs1 = new HashSet<UnitValueBoxPair>(combined.getUsesOf(u));
-                HashSet<UnitValueBoxPair> hs2 = new HashSet<UnitValueBoxPair>(uses.getUsesOf(u));
-                if( !hs1.equals(hs2) ) throw new RuntimeException(
-                        "Uses of "+u+"\ncombined: "+hs1+"\nsimple: "+hs2);
+            @Override
+			public List<UnitValueBoxPair> getUsesOf(Unit u) {
+                HashSet<UnitValueBoxPair> hs1 = new HashSet<>(combined.getUsesOf(u));
+                HashSet<UnitValueBoxPair> hs2 = new HashSet<>(uses.getUsesOf(u));
+                if( !hs1.equals(hs2) ) {
+					throw new RuntimeException(
+					        new StringBuilder().append("Uses of ").append(u).append("\ncombined: ").append(hs1).append("\nsimple: ")
+									.append(hs2).toString());
+				}
                 return combined.getUsesOf(u);
             }
             
-            public List<Local> getLiveLocalsBefore(Unit u) {
-                HashSet<Local> hs1 = new HashSet<Local>(combined.getLiveLocalsBefore(u));
-                HashSet<Local> hs2 = new HashSet<Local>(live.getLiveLocalsBefore(u));
-                if( !hs1.equals(hs2) ) throw new RuntimeException(
-                        "llb of "+u+"\ncombined: "+hs1+"\nsimple: "+hs2);
+            @Override
+			public List<Local> getLiveLocalsBefore(Unit u) {
+                HashSet<Local> hs1 = new HashSet<>(combined.getLiveLocalsBefore(u));
+                HashSet<Local> hs2 = new HashSet<>(live.getLiveLocalsBefore(u));
+                if( !hs1.equals(hs2) ) {
+					throw new RuntimeException(
+					        new StringBuilder().append("llb of ").append(u).append("\ncombined: ").append(hs1).append("\nsimple: ")
+									.append(hs2).toString());
+				}
                 return combined.getLiveLocalsBefore(u);
             }
             
-            public List<Local> getLiveLocalsAfter(Unit u) {
-                HashSet<Local> hs1 = new HashSet<Local>(combined.getLiveLocalsAfter(u));
-                HashSet<Local> hs2 = new HashSet<Local>(live.getLiveLocalsAfter(u));
-                if( !hs1.equals(hs2) ) throw new RuntimeException(
-                        "lla of "+u+"\ncombined: "+hs1+"\nsimple: "+hs2);
+            @Override
+			public List<Local> getLiveLocalsAfter(Unit u) {
+                HashSet<Local> hs1 = new HashSet<>(combined.getLiveLocalsAfter(u));
+                HashSet<Local> hs2 = new HashSet<>(live.getLiveLocalsAfter(u));
+                if( !hs1.equals(hs2) ) {
+					throw new RuntimeException(
+					        new StringBuilder().append("lla of ").append(u).append("\ncombined: ").append(hs1).append("\nsimple: ")
+									.append(hs2).toString());
+				}
                 return combined.getLiveLocalsAfter(u);
             }
 
 			@Override
 			public List<Unit> getDefsOf(Local l) {
-                HashSet<Unit> hs1 = new HashSet<Unit>(combined.getDefsOf(l));
-                HashSet<Unit> hs2 = new HashSet<Unit>(defs.getDefsOf(l));
-                if( !hs1.equals(hs2) ) throw new RuntimeException(
-                        "Defs of "+l+"\ncombined: "+hs1+"\nsimple: "+hs2);
+                HashSet<Unit> hs1 = new HashSet<>(combined.getDefsOf(l));
+                HashSet<Unit> hs2 = new HashSet<>(defs.getDefsOf(l));
+                if( !hs1.equals(hs2) ) {
+					throw new RuntimeException(
+					        new StringBuilder().append("Defs of ").append(l).append("\ncombined: ").append(hs1).append("\nsimple: ")
+									.append(hs2).toString());
+				}
                 return combined.getDefsOf(l);
 			}
 			

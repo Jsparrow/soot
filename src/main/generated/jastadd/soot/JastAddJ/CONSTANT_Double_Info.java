@@ -34,13 +34,15 @@ public class CONSTANT_Double_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
+    @Override
+	public String toString() {
       return "DoubleInfo: " + Double.toString(value);
     }
 
 
 
-    public Expr expr() {
+    @Override
+	public Expr expr() {
       return Literal.buildDoubleLiteral(value);
     }
 

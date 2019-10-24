@@ -51,23 +51,27 @@ public class ConstructorConfuser extends BodyTransformer implements IJbcoTransfo
 
   public static String dependancies[] = new String[] { "bb.jbco_dcc", "bb.jbco_ful", "bb.lp" };
 
-  public String[] getDependencies() {
+public static String name = "bb.jbco_dcc";
+
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_dcc";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
     out.println("Constructor methods have been jumbled: " + count);
   }
 
-  @SuppressWarnings("fallthrough")
+@Override
+@SuppressWarnings("fallthrough")
   protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
-    if (!b.getMethod().getSubSignature().equals("void <init>()")) {
+    if (!"void <init>()".equals(b.getMethod().getSubSignature())) {
       return;
     }
     int weight = soot.jbco.Main.getWeight(phaseName, b.getMethod().getSignature());
@@ -92,7 +96,7 @@ public class ConstructorConfuser extends BodyTransformer implements IJbcoTransfo
       if (u instanceof SpecialInvokeInst) {
         sii = (SpecialInvokeInst) u;
         SootMethodRef smr = sii.getMethodRef();
-        if (c == null || !smr.declaringClass().getName().equals(c.getName()) || !smr.name().equals("<init>")) {
+        if (c == null || !smr.declaringClass().getName().equals(c.getName()) || !"<init>".equals(smr.name())) {
           sii = null;
         } else {
           break;
@@ -105,7 +109,9 @@ public class ConstructorConfuser extends BodyTransformer implements IJbcoTransfo
       return;
     }
 
-    int lowi = -1, lowest = 99999999, rand = Rand.getInt(4);
+    int lowi = -1;
+	int lowest = 99999999;
+	int rand = Rand.getInt(4);
     for (int i = 0; i < instances.length; i++) {
       if (lowest > instances[i]) {
         lowest = instances[i];
@@ -119,7 +125,7 @@ public class ConstructorConfuser extends BodyTransformer implements IJbcoTransfo
     boolean done = false;
     switch (rand) {
       case 0:
-        if (prev != null && prev instanceof LoadInst && sii.getMethodRef().parameterTypes().size() == 0
+        if (prev instanceof LoadInst && sii.getMethodRef().parameterTypes().size() == 0
             && !BodyBuilder.isExceptionCaughtAt(units, sii, b.getTraps().iterator())) {
 
           Local bl = ((LoadInst) prev).getLocal();
@@ -162,7 +168,7 @@ public class ConstructorConfuser extends BodyTransformer implements IJbcoTransfo
         if (sii.getMethodRef().parameterTypes().size() == 0
             && !BodyBuilder.isExceptionCaughtAt(units, sii, b.getTraps().iterator())) {
           while (c != null) {
-            if (c.getName().equals("java.lang.Throwable")) {
+            if ("java.lang.Throwable".equals(c.getName())) {
               Unit throwThis = Baf.v().newThrowInst();
               units.insertBefore(throwThis, sii);
               b.getTraps().add(Baf.v().newTrap(origClass, throwThis, sii, sii));

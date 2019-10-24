@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AXorBinop extends PBinop
 {
-    private TXor _xor_;
+    private TXor xor;
 
     public AXorBinop()
     {
@@ -26,7 +26,7 @@ public final class AXorBinop extends PBinop
     public Object clone()
     {
         return new AXorBinop(
-            cloneNode(this._xor_));
+            cloneNode(this.xor));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AXorBinop extends PBinop
 
     public TXor getXor()
     {
-        return this._xor_;
+        return this.xor;
     }
 
     public void setXor(TXor node)
     {
-        if(this._xor_ != null)
+        if(this.xor != null)
         {
-            this._xor_.parent(null);
+            this.xor.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AXorBinop extends PBinop
             node.parent(this);
         }
 
-        this._xor_ = node;
+        this.xor = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._xor_);
+            + toString(this.xor);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._xor_ == child)
+        if(this.xor == child)
         {
-            this._xor_ = null;
+            this.xor = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AXorBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._xor_ == oldChild)
+        if(this.xor == oldChild)
         {
             setXor((TXor) newChild);
             return;

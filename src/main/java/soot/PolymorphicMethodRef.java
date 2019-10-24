@@ -46,23 +46,6 @@ public class PolymorphicMethodRef extends SootMethodRefImpl {
   public static String POLYMORPHIC_SIGNATURE = "java/lang/invoke/MethodHandle$PolymorphicSignature";
 
   /**
-   * Check if the declaring class "has the rights" to declare polymorphic methods
-   * {@see http://docs.oracle.com/javase/specs/jls/se11/html/jls-15.html#jls-15.12.4.4}
-   * 
-   * @param declaringClass
-   *          the class to check
-   * @return if the class is allowed according to the JVM Spec
-   */
-  public static boolean handlesClass(SootClass declaringClass) {
-    return handlesClass(declaringClass.getName());
-  }
-
-  public static boolean handlesClass(String declaringClassName) {
-    return declaringClassName.equals(PolymorphicMethodRef.METHODHANDLE_SIGNATURE)
-        || declaringClassName.equals(PolymorphicMethodRef.VARHANDLE_SIGNATURE);
-  }
-
-  /**
    * Constructor.
    *
    * @param declaringClass
@@ -83,7 +66,24 @@ public class PolymorphicMethodRef extends SootMethodRefImpl {
     super(declaringClass, name, parameterTypes, returnType, isStatic);
   }
 
-  @Override
+/**
+   * Check if the declaring class "has the rights" to declare polymorphic methods
+   * {@see http://docs.oracle.com/javase/specs/jls/se11/html/jls-15.html#jls-15.12.4.4}
+   * 
+   * @param declaringClass
+   *          the class to check
+   * @return if the class is allowed according to the JVM Spec
+   */
+  public static boolean handlesClass(SootClass declaringClass) {
+    return handlesClass(declaringClass.getName());
+  }
+
+public static boolean handlesClass(String declaringClassName) {
+    return declaringClassName.equals(PolymorphicMethodRef.METHODHANDLE_SIGNATURE)
+        || declaringClassName.equals(PolymorphicMethodRef.VARHANDLE_SIGNATURE);
+  }
+
+@Override
   public SootMethod resolve() {
 
     SootMethod method = getDeclaringClass().getMethodUnsafe(getName(), getParameterTypes(), getReturnType());
@@ -103,7 +103,7 @@ public class PolymorphicMethodRef extends SootMethodRefImpl {
         if (annotationsTag != null) {
           for (AnnotationTag annotation : ((VisibilityAnnotationTag) annotationsTag).getAnnotations()) {
             // check the annotation's type
-            if (annotation.getType().equals("L" + POLYMORPHIC_SIGNATURE + ";")) {
+            if (annotation.getType().equals(new StringBuilder().append("L").append(POLYMORPHIC_SIGNATURE).append(";").toString())) {
               // the method is polymorphic, add a fitting method to the MethodHandle or VarHandle class, as the JVM does on
               // runtime
               return addPolyMorphicMethod(candidateMethod);
@@ -116,7 +116,7 @@ public class PolymorphicMethodRef extends SootMethodRefImpl {
     return null;
   }
 
-  private SootMethod addPolyMorphicMethod(SootMethod originalPolyMorphicMethod) {
+private SootMethod addPolyMorphicMethod(SootMethod originalPolyMorphicMethod) {
     SootMethod newMethod
         = new SootMethod(getName(), getParameterTypes(), getReturnType(), originalPolyMorphicMethod.modifiers);
     getDeclaringClass().addMethod(newMethod);

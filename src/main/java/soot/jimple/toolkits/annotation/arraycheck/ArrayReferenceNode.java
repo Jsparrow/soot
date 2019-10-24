@@ -42,20 +42,22 @@ class ArrayReferenceNode {
     return l;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return m.hashCode() + l.hashCode() + 1;
   }
 
-  public boolean equals(Object other) {
-    if (other instanceof ArrayReferenceNode) {
-      ArrayReferenceNode another = (ArrayReferenceNode) other;
-      return m.equals(another.getMethod()) && l.equals(another.getLocal());
-    }
-
-    return false;
+  @Override
+public boolean equals(Object other) {
+    if (!(other instanceof ArrayReferenceNode)) {
+		return false;
+	}
+	ArrayReferenceNode another = (ArrayReferenceNode) other;
+	return m.equals(another.getMethod()) && l.equals(another.getLocal());
   }
 
-  public String toString() {
-    return "[" + m.getSignature() + " : " + l.toString() + "[ ]";
+  @Override
+public String toString() {
+    return new StringBuilder().append("[").append(m.getSignature()).append(" : ").append(l.toString()).append("[ ]").toString();
   }
 }

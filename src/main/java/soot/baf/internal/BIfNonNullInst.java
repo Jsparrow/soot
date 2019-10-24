@@ -33,31 +33,38 @@ public class BIfNonNullInst extends AbstractBranchInst implements IfNonNullInst 
     super(Baf.v().newInstBox(target));
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BIfNonNullInst(getTarget());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "ifnonnull";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseIfNonNullInst(this);
   }
 }

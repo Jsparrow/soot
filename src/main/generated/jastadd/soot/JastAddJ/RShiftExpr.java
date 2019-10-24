@@ -18,57 +18,83 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production RShiftExpr : {@link ShiftExpr};
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:163
  */
-public class RShiftExpr extends ShiftExpr implements Cloneable {
-  /**
+public class RShiftExpr extends ShiftExpr {
+  private static final Logger logger = LoggerFactory.getLogger(RShiftExpr.class);
+/**
+   * @ast method 
+   * 
+   */
+  public RShiftExpr() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public RShiftExpr(Expr p0, Expr p1) {
+    setChild(p0, 0);
+    setChild(p1, 1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public RShiftExpr clone() throws CloneNotSupportedException {
     RShiftExpr node = (RShiftExpr)super.clone();
     node.in$Circle(false);
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public RShiftExpr copy() {
     try {
       RShiftExpr node = (RShiftExpr) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public RShiftExpr fullCopy() {
     RShiftExpr tree = (RShiftExpr) copy();
     if (children != null) {
@@ -82,30 +108,23 @@ public class RShiftExpr extends ShiftExpr implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:799
    */
-  public soot.Value eval(Body b) { return emitShiftExpr(b); }
-  /**
+  @Override
+public soot.Value eval(Body b) { return emitShiftExpr(b); }
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:823
    */
-  public soot.Value emitOperation(Body b, soot.Value left, soot.Value right) {
+  @Override
+public soot.Value emitOperation(Body b, soot.Value left, soot.Value right) {
     return asLocal(b, b.newShrExpr(asImmediate(b, left), asImmediate(b, right), this));
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public RShiftExpr() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -113,54 +132,51 @@ public class RShiftExpr extends ShiftExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[2];
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public RShiftExpr(Expr p0, Expr p1) {
-    setChild(p0, 0);
-    setChild(p1, 1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 2;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the LeftOperand child.
    * @param node The new node to replace the LeftOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setLeftOperand(Expr node) {
+  @Override
+public void setLeftOperand(Expr node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the LeftOperand child.
    * @return The current node used as the LeftOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public Expr getLeftOperand() {
+  @Override
+public Expr getLeftOperand() {
     return (Expr)getChild(0);
   }
-  /**
+/**
    * Retrieves the LeftOperand child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the LeftOperand child.
@@ -168,30 +184,33 @@ public class RShiftExpr extends ShiftExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public Expr getLeftOperandNoTransform() {
+  @Override
+public Expr getLeftOperandNoTransform() {
     return (Expr)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the RightOperand child.
    * @param node The new node to replace the RightOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setRightOperand(Expr node) {
+  @Override
+public void setRightOperand(Expr node) {
     setChild(node, 1);
   }
-  /**
+/**
    * Retrieves the RightOperand child.
    * @return The current node used as the RightOperand child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public Expr getRightOperand() {
+  @Override
+public Expr getRightOperand() {
     return (Expr)getChild(1);
   }
-  /**
+/**
    * Retrieves the RightOperand child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the RightOperand child.
@@ -199,35 +218,39 @@ public class RShiftExpr extends ShiftExpr implements Cloneable {
    * @ast method 
    * 
    */
-  public Expr getRightOperandNoTransform() {
+  @Override
+public Expr getRightOperandNoTransform() {
     return (Expr)getChildNoTransform(1);
   }
-  /**
+/**
    * @attribute syn
    * @aspect ConstantExpression
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/ConstantExpression.jrag:91
    */
-  public Constant constant() {
+  @Override
+public Constant constant() {
     ASTNode$State state = state();
     try {  return type().rshift(getLeftOperand().constant(), getRightOperand().constant());  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:400
    */
-  public String printOp() {
+  @Override
+public String printOp() {
     ASTNode$State state = state();
     try {  return " >> ";  }
     finally {
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

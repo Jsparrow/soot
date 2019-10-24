@@ -71,12 +71,12 @@ public enum IdentityStatementsValidator implements BodyValidator {
           }
           if (!firstStatement) {
             exceptions.add(new ValidationException(identityStmt,
-                "@this-assignment statement should precede all other statements" + "\n method: " + method));
+                new StringBuilder().append("@this-assignment statement should precede all other statements").append("\n method: ").append(method).toString()));
           }
         } else if (identityStmt.getRightOp() instanceof ParameterRef) {
           if (foundNonThisOrParamIdentityStatement) {
             exceptions.add(new ValidationException(identityStmt,
-                "@param-assignment statements should precede all non-identity statements" + "\n method: " + method));
+                new StringBuilder().append("@param-assignment statements should precede all non-identity statements").append("\n method: ").append(method).toString()));
           }
         } else {
           // @caughtexception statement

@@ -58,7 +58,7 @@ public class SimpleLiveLocals implements LiveLocals {
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + graph.getBody().getMethod().getName() + "]     Constructing SimpleLiveLocals...");
+      logger.debug(new StringBuilder().append("[").append(graph.getBody().getMethod().getName()).append("]     Constructing SimpleLiveLocals...").toString());
     }
 
     analysis = new Analysis(graph);
@@ -78,12 +78,14 @@ public class SimpleLiveLocals implements LiveLocals {
     }
   }
 
-  public List<Local> getLiveLocalsAfter(Unit s) {
+  @Override
+public List<Local> getLiveLocalsAfter(Unit s) {
     // ArraySparseSet returns a unbacked list of elements!
     return analysis.getFlowAfter(s).toList();
   }
 
-  public List<Local> getLiveLocalsBefore(Unit s) {
+  @Override
+public List<Local> getLiveLocalsBefore(Unit s) {
     // ArraySparseSet returns a unbacked list of elements!
     return analysis.getFlowBefore(s).toList();
   }
@@ -95,7 +97,7 @@ public class SimpleLiveLocals implements LiveLocals {
 
     @Override
     protected FlowSet<Local> newInitialFlow() {
-      return new ArraySparseSet<Local>();
+      return new ArraySparseSet<>();
     }
 
     @Override
@@ -103,22 +105,20 @@ public class SimpleLiveLocals implements LiveLocals {
       in.copy(out);
 
       // Perform kill
-      for (ValueBox box : unit.getDefBoxes()) {
-        Value v = box.getValue();
-        if (v instanceof Local) {
+	unit.getDefBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+		if (v instanceof Local) {
           Local l = (Local) v;
           out.remove(l);
         }
-      }
+	});
 
       // Perform generation
-      for (ValueBox box : unit.getUseBoxes()) {
-        Value v = box.getValue();
-        if (v instanceof Local) {
+	unit.getUseBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+		if (v instanceof Local) {
           Local l = (Local) v;
           out.add(l);
         }
-      }
+	});
     }
 
     @Override

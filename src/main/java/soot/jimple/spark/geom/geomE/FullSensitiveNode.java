@@ -49,6 +49,8 @@ import soot.jimple.spark.pag.LocalVarNode;
 import soot.jimple.spark.pag.Node;
 import soot.jimple.spark.pag.StringConstantNode;
 import soot.jimple.spark.sets.P2SetVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class defines an abstract pointer in the geometric points-to solver. All the points-to/flows-to information and the
@@ -59,33 +61,35 @@ import soot.jimple.spark.sets.P2SetVisitor;
  *
  */
 public class FullSensitiveNode extends IVarAbstraction {
-  // The targets of directed edges on the constraint graph
-  public Map<FullSensitiveNode, GeometricManager> flowto;
+  private static final Logger logger = LoggerFactory.getLogger(FullSensitiveNode.class);
 
-  // The objects this variable points to
-  public Map<AllocNode, GeometricManager> pt_objs;
-
-  // Newly added points-to tuple
-  public Map<AllocNode, GeometricManager> new_pts;
-
-  // store/load complex constraints
-  public Vector<PlainConstraint> complex_cons;
-
-  // Symbolicize the 1-to-1 and many-to-many mappings
+// Symbolicize the 1-to-1 and many-to-many mappings
   public static String symbols[] = { "/", "[]" };
 
-  static {
+static {
     stubManager = new GeometricManager();
     pres = new RectangleNode(1, 1, Constants.MAX_CONTEXTS, Constants.MAX_CONTEXTS);
     stubManager.addNewFigure(GeometricManager.MANY_TO_MANY, pres);
     deadManager = new GeometricManager();
   }
 
-  public FullSensitiveNode(Node thisVar) {
+// The targets of directed edges on the constraint graph
+  public Map<FullSensitiveNode, GeometricManager> flowto;
+
+// The objects this variable points to
+  public Map<AllocNode, GeometricManager> pt_objs;
+
+// Newly added points-to tuple
+  public Map<AllocNode, GeometricManager> new_pts;
+
+// store/load complex constraints
+  public Vector<PlainConstraint> complex_cons;
+
+public FullSensitiveNode(Node thisVar) {
     me = thisVar;
   }
 
-  @Override
+@Override
   public void deleteAll() {
     flowto = null;
     pt_objs = null;
@@ -93,23 +97,23 @@ public class FullSensitiveNode extends IVarAbstraction {
     complex_cons = null;
   }
 
-  @Override
+@Override
   public void reconstruct() {
-    flowto = new HashMap<FullSensitiveNode, GeometricManager>();
-    pt_objs = new HashMap<AllocNode, GeometricManager>();
-    new_pts = new HashMap<AllocNode, GeometricManager>();
+    flowto = new HashMap<>();
+    pt_objs = new HashMap<>();
+    new_pts = new HashMap<>();
     complex_cons = null;
     lrf_value = 0;
   }
 
-  @Override
+@Override
   public void keepPointsToOnly() {
     flowto = null;
     new_pts = null;
     complex_cons = null;
   }
 
-  @Override
+@Override
   public void do_before_propagation() {
     // We first perform the geometric merging
     do_pts_interval_merge();
@@ -125,9 +129,11 @@ public class FullSensitiveNode extends IVarAbstraction {
      * "this pointer filter".
      */
     Node wrappedNode = getWrappedNode();
-    if (wrappedNode instanceof LocalVarNode && ((LocalVarNode) wrappedNode).isThisPtr()) {
-      SootMethod func = ((LocalVarNode) wrappedNode).getMethod();
-      if (!func.isConstructor()) {
+    if (!(wrappedNode instanceof LocalVarNode && ((LocalVarNode) wrappedNode).isThisPtr())) {
+		return;
+	}
+	SootMethod func = ((LocalVarNode) wrappedNode).getMethod();
+	if (!func.isConstructor()) {
         // We don't process the specialinvoke call edge
         SootClass defClass = func.getDeclaringClass();
         Hierarchy typeHierarchy = Scene.v().getActiveHierarchy();
@@ -145,6 +151,7 @@ public class FullSensitiveNode extends IVarAbstraction {
                   pt_objs.put(obj, (GeometricManager) deadManager);
                 }
               } catch (RuntimeException e) {
+				logger.error(e.getMessage(), e);
                 // If the input program has a wrong type cast, resolveConcreteDispatch fails and it goes here
                 // We simply ignore this error
               }
@@ -152,20 +159,17 @@ public class FullSensitiveNode extends IVarAbstraction {
           }
         }
       }
-    }
   }
 
-  @Override
+@Override
   public void do_after_propagation() {
     if (new_pts.size() > 0) {
-      for (GeometricManager gm : new_pts.values()) {
-        gm.flush();
-      }
+      new_pts.values().forEach(GeometricManager::flush);
     }
-    new_pts = new HashMap<AllocNode, GeometricManager>();
+    new_pts = new HashMap<>();
   }
 
-  @Override
+@Override
   public int num_of_diff_objs() {
     // If this pointer is not a representative pointer
     if (parent != this) {
@@ -179,7 +183,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return pt_objs.size();
   }
 
-  @Override
+@Override
   public int num_of_diff_edges() {
     if (parent != this) {
       return getRepresentative().num_of_diff_objs();
@@ -192,7 +196,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return flowto.size();
   }
 
-  @Override
+@Override
   public boolean add_points_to_3(AllocNode obj, long I1, long I2, long L) {
     pres.I1 = I1;
     pres.I2 = I2;
@@ -201,7 +205,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return addPointsTo(GeometricManager.ONE_TO_ONE, obj);
   }
 
-  @Override
+@Override
   public boolean add_points_to_4(AllocNode obj, long I1, long I2, long L1, long L2) {
     pres.I1 = I1;
     pres.I2 = I2;
@@ -211,7 +215,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return addPointsTo(GeometricManager.MANY_TO_MANY, obj);
   }
 
-  @Override
+@Override
   public boolean add_simple_constraint_3(IVarAbstraction qv, long I1, long I2, long L) {
     pres.I1 = I1;
     pres.I2 = I2;
@@ -220,7 +224,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return addFlowsTo(GeometricManager.ONE_TO_ONE, qv);
   }
 
-  @Override
+@Override
   public boolean add_simple_constraint_4(IVarAbstraction qv, long I1, long I2, long L1, long L2) {
     pres.I1 = I1;
     pres.I2 = I2;
@@ -230,34 +234,39 @@ public class FullSensitiveNode extends IVarAbstraction {
     return addFlowsTo(GeometricManager.MANY_TO_MANY, qv);
   }
 
-  @Override
+@Override
   public void put_complex_constraint(PlainConstraint cons) {
     if (complex_cons == null) {
-      complex_cons = new Vector<PlainConstraint>();
+      complex_cons = new Vector<>();
     }
     complex_cons.add(cons);
   }
 
-  @Override
+@Override
   public void drop_duplicates() {
-    for (GeometricManager gm : pt_objs.values()) {
-      gm.removeUselessSegments();
-    }
+    pt_objs.values().forEach(GeometricManager::removeUselessSegments);
   }
 
-  /**
+/**
    * The place where you implement the pointer assignment reasoning.
    */
   @Override
   public void propagate(GeomPointsTo ptAnalyzer, IWorklist worklist) {
-    int i, j;
+    int i;
+	int j;
     AllocNode obj;
-    SegmentNode pts, pe, entry_pts[], entry_pe[];
-    GeometricManager gm1, gm2;
-    FullSensitiveNode qn, objn;
-    boolean added, hasNewPointsTo;
+    SegmentNode pts;
+	SegmentNode pe;
+	SegmentNode entry_pts[];
+	SegmentNode entry_pe[];
+    GeometricManager gm1;
+	GeometricManager gm2;
+    FullSensitiveNode qn;
+	FullSensitiveNode objn;
+    boolean added;
+	boolean hasNewPointsTo;
 
-    if (pt_objs.size() == 0) {
+    if (pt_objs.isEmpty()) {
       return;
       // System.err.println("+++ Process assignment for: " + toString());
     }
@@ -318,7 +327,7 @@ public class FullSensitiveNode extends IVarAbstraction {
       }
     }
 
-    if (flowto.size() == 0) {
+    if (flowto.isEmpty()) {
       return;
     }
 
@@ -430,12 +439,12 @@ public class FullSensitiveNode extends IVarAbstraction {
     // System.err.println();
   }
 
-  @Override
+@Override
   public boolean isDeadObject(AllocNode obj) {
     return pt_objs.get(obj) == deadManager;
   }
 
-  @Override
+@Override
   public int count_pts_intervals(AllocNode obj) {
     int ret = 0;
     SegmentNode[] int_entry = find_points_to(obj);
@@ -451,7 +460,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return ret;
   }
 
-  @Override
+@Override
   public int count_flow_intervals(IVarAbstraction qv) {
     int ret = 0;
     SegmentNode[] int_entry = find_flowto((FullSensitiveNode) qv);
@@ -467,11 +476,15 @@ public class FullSensitiveNode extends IVarAbstraction {
     return ret;
   }
 
-  @Override
+@Override
   public boolean heap_sensitive_intersection(IVarAbstraction qv) {
-    int i, j;
+    int i;
+	int j;
     FullSensitiveNode qn;
-    SegmentNode p, q, pt[], qt[];
+    SegmentNode p;
+	SegmentNode q;
+	SegmentNode pt[];
+	SegmentNode qt[];
     boolean localToSameMethod;
 
     qn = (FullSensitiveNode) qv;
@@ -518,7 +531,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return false;
   }
 
-  @Override
+@Override
   public Set<AllocNode> get_all_points_to_objects() {
     // If this pointer is not a representative pointer
     if (parent != this) {
@@ -528,7 +541,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return pt_objs.keySet();
   }
 
-  @Override
+@Override
   public void print_context_sensitive_points_to(PrintStream outPrintStream) {
     for (Iterator<AllocNode> it = pt_objs.keySet().iterator(); it.hasNext();) {
       AllocNode obj = it.next();
@@ -537,7 +550,8 @@ public class FullSensitiveNode extends IVarAbstraction {
       for (int j = 0; j < GeometricManager.Divisions; ++j) {
         SegmentNode p = int_entry[j];
         while (p != null) {
-          outPrintStream.print("(" + obj.toString() + ", " + p.I1 + ", " + p.I2 + ", " + p.L + ", ");
+          outPrintStream.print(new StringBuilder().append("(").append(obj.toString()).append(", ").append(p.I1).append(", ")
+				.append(p.I2).append(", ").append(p.L).append(", ").toString());
           if (p instanceof RectangleNode) {
             outPrintStream.print(((RectangleNode) p).L_prime + ", ");
           }
@@ -549,14 +563,14 @@ public class FullSensitiveNode extends IVarAbstraction {
     }
   }
 
-  /**
+/**
    * We transfer the SPARK results to current pointer if this pointer is not involved in the geometric analysis. Note that,
    * the unreachable objects will not be inserted.
    */
   @Override
   public void injectPts() {
     final GeomPointsTo geomPTA = (GeomPointsTo) Scene.v().getPointsToAnalysis();
-    pt_objs = new HashMap<AllocNode, GeometricManager>();
+    pt_objs = new HashMap<>();
 
     me.getP2Set().forall(new P2SetVisitor() {
       @Override
@@ -570,7 +584,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     new_pts = null;
   }
 
-  @Override
+@Override
   public boolean pointer_interval_points_to(long l, long r, AllocNode obj) {
     SegmentNode[] int_entry = find_points_to(obj);
 
@@ -588,12 +602,12 @@ public class FullSensitiveNode extends IVarAbstraction {
     return false;
   }
 
-  @Override
+@Override
   public void remove_points_to(AllocNode obj) {
     pt_objs.remove(obj);
   }
 
-  @Override
+@Override
   public void get_all_context_sensitive_objects(long l, long r, PtSensVisitor visitor) {
     if (parent != this) {
       getRepresentative().get_all_context_sensitive_objects(l, r, visitor);
@@ -620,7 +634,8 @@ public class FullSensitiveNode extends IVarAbstraction {
         while (p != null) {
           long L = p.I1;
           long R = L + p.L;
-          long objL = -1, objR = -1;
+          long objL = -1;
+		long objR = -1;
 
           // Now we compute which context sensitive objects are pointed to by this pointer
           if (l <= L && L < r) {
@@ -666,7 +681,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     }
   }
 
-  @Override
+@Override
   public int count_new_pts_intervals() {
     int ans = 0;
 
@@ -684,7 +699,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return ans;
   }
 
-  // -----------------------------------Private Functions---------------------------------------
+// -----------------------------------Private Functions---------------------------------------
   /**
    * A non-interface public function. It adds the points-to tuple to the geometric manager.
    */
@@ -700,15 +715,14 @@ public class FullSensitiveNode extends IVarAbstraction {
     }
 
     SegmentNode p = gm.addNewFigure(code, pres);
-    if (p != null) {
-      new_pts.put(obj, gm);
-      return true;
-    }
-
-    return false;
+    if (p == null) {
+		return false;
+	}
+	new_pts.put(obj, gm);
+	return true;
   }
 
-  /**
+/**
    * A non-interface public function. It adds the flows-to tuple to the geometric manager.
    */
   private boolean addFlowsTo(int code, IVarAbstraction qv) {
@@ -726,33 +740,30 @@ public class FullSensitiveNode extends IVarAbstraction {
     return false;
   }
 
-  private void do_pts_interval_merge() {
-    for (GeometricManager gm : new_pts.values()) {
-      gm.mergeFigures(Parameters.max_pts_budget);
-    }
+private void do_pts_interval_merge() {
+    new_pts.values().forEach(gm -> gm.mergeFigures(Parameters.max_pts_budget));
   }
 
-  private void do_flow_edge_interval_merge() {
-    for (GeometricManager gm : flowto.values()) {
-      gm.mergeFigures(Parameters.max_cons_budget);
-    }
+private void do_flow_edge_interval_merge() {
+    flowto.values().forEach(gm -> gm.mergeFigures(Parameters.max_cons_budget));
   }
 
-  private SegmentNode[] find_flowto(FullSensitiveNode qv) {
+private SegmentNode[] find_flowto(FullSensitiveNode qv) {
     GeometricManager im = flowto.get(qv);
     return im == null ? null : im.getFigures();
   }
 
-  private SegmentNode[] find_points_to(AllocNode obj) {
+private SegmentNode[] find_points_to(AllocNode obj) {
     GeometricManager im = pt_objs.get(obj);
     return im == null ? null : im.getFigures();
   }
 
-  /**
+/**
    * Implement the inference rules when the input points-to figure is a one-to-one mapping.
    */
   private static int infer_pts_is_one_to_one(SegmentNode pts, SegmentNode pe, int code) {
-    long interI, interJ;
+    long interI;
+	long interJ;
 
     // The left-end is the larger one
     interI = pe.I1 < pts.I1 ? pts.I1 : pe.I1;
@@ -781,19 +792,22 @@ public class FullSensitiveNode extends IVarAbstraction {
     return GeometricManager.Undefined_Mapping;
   }
 
-  /**
+/**
    * Implement the inference rules when the input points-to figure is a many-to-many mapping.
    */
   private static int infer_pts_is_many_to_many(RectangleNode pts, SegmentNode pe, int code) {
-    long interI, interJ;
+    long interI;
+	long interJ;
 
     // The left-end is the larger one
     interI = pe.I1 < pts.I1 ? pts.I1 : pe.I1;
     // The right-end is the smaller one
     interJ = (pe.I1 + pe.L < pts.I1 + pts.L ? pe.I1 + pe.L : pts.I1 + pts.L);
 
-    if (interI < interJ) {
-      switch (code) {
+    if (interI >= interJ) {
+		return GeometricManager.Undefined_Mapping;
+	}
+	switch (code) {
         case GeometricManager.ONE_TO_ONE:
           // assignment is a 1-1 mapping
           pres.I1 = interI - pe.I1 + pe.I2;
@@ -810,14 +824,10 @@ public class FullSensitiveNode extends IVarAbstraction {
           pres.L_prime = pts.L_prime;
           break;
       }
-
-      return GeometricManager.MANY_TO_MANY;
-    }
-
-    return GeometricManager.Undefined_Mapping;
+	return GeometricManager.MANY_TO_MANY;
   }
 
-  /**
+/**
    * Implements the pointer assignment inference rules. The pts and pe are the points-to tuple and flow edge pres is the
    * computed result code indicates the types of the pts and pe
    *
@@ -845,7 +855,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return false;
   }
 
-  /**
+/**
    * The last parameter code can only be 1-1 and many-1
    */
   private static boolean instantiateLoadConstraint(FullSensitiveNode objn, FullSensitiveNode qn, SegmentNode pts, int code) {
@@ -895,7 +905,7 @@ public class FullSensitiveNode extends IVarAbstraction {
     return objn.addFlowsTo(ret_type, qn);
   }
 
-  // code can only be 1-1 and 1-many
+// code can only be 1-1 and 1-many
   private static boolean instantiateStoreConstraint(FullSensitiveNode qn, FullSensitiveNode objn, SegmentNode pts,
       int code) {
     int ret_type = GeometricManager.Undefined_Mapping;

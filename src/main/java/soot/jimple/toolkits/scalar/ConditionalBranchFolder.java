@@ -51,13 +51,15 @@ public class ConditionalBranchFolder extends BodyTransformer {
     return G.v().soot_jimple_toolkits_scalar_ConditionalBranchFolder();
   }
 
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     StmtBody stmtBody = (StmtBody) body;
 
-    int numTrue = 0, numFalse = 0;
+    int numTrue = 0;
+	int numFalse = 0;
 
     if (Options.v().verbose()) {
-      logger.debug("[" + stmtBody.getMethod().getName() + "] Folding conditional branches...");
+      logger.debug(new StringBuilder().append("[").append(stmtBody.getMethod().getName()).append("] Folding conditional branches...").toString());
     }
 
     Chain<Unit> units = stmtBody.getUnits();
@@ -87,7 +89,8 @@ public class ConditionalBranchFolder extends BodyTransformer {
 
     if (Options.v().verbose()) {
       logger.debug(
-          "[" + stmtBody.getMethod().getName() + "]     Folded " + numTrue + " true, " + numFalse + " conditional branches");
+          new StringBuilder().append("[").append(stmtBody.getMethod().getName()).append("]     Folded ").append(numTrue).append(" true, ").append(numFalse)
+				.append(" conditional branches").toString());
     }
 
   } // foldBranches

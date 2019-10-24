@@ -25,9 +25,12 @@ package soot.tagkit;
 import java.io.UnsupportedEncodingException;
 
 import soot.SootClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OuterClassTag implements Tag {
-  SootClass outerClass;
+  private static final Logger logger = LoggerFactory.getLogger(OuterClassTag.class);
+SootClass outerClass;
   String simpleName;
   boolean anon;
 
@@ -37,17 +40,20 @@ public class OuterClassTag implements Tag {
     this.anon = anon;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "OuterClassTag";
   }
 
   /**
    */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     try {
       return outerClass.getName().getBytes("UTF8");
     } catch (UnsupportedEncodingException e) {
-      return new byte[0];
+      logger.error(e.getMessage(), e);
+	return new byte[0];
     }
   }
 
@@ -63,7 +69,8 @@ public class OuterClassTag implements Tag {
     return anon;
   }
 
-  public String toString() {
-    return "[outer class=" + outerClass.getName() + "]";
+  @Override
+public String toString() {
+    return new StringBuilder().append("[outer class=").append(outerClass.getName()).append("]").toString();
   }
 }

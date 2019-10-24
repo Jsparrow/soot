@@ -86,9 +86,10 @@ public class AsmClassSource extends ClassSource {
 
   @Override
   public void close() {
-    if (foundFile != null) {
-      foundFile.close();
-      foundFile = null;
-    }
+    if (foundFile == null) {
+		return;
+	}
+	foundFile.close();
+	foundFile = null;
   }
 }

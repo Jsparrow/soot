@@ -37,7 +37,8 @@ public class SingletonList<E> extends AbstractList<E> {
     this.e = e;
   }
 
-  public E get(int index) {
+  @Override
+public E get(int index) {
     if (index != 0) {
       throw new IndexOutOfBoundsException();
     } else {
@@ -45,7 +46,8 @@ public class SingletonList<E> extends AbstractList<E> {
     }
   }
 
-  public int size() {
+  @Override
+public int size() {
     return 1;
   }
 }

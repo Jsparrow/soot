@@ -34,12 +34,15 @@ import soot.shimple.PiExpr;
 import soot.shimple.Shimple;
 import soot.toolkits.scalar.ValueUnitPair;
 import soot.util.Switch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Navindra Umanee
  **/
 public class SPiExpr implements PiExpr {
-  protected ValueUnitPair argBox;
+  private static final Logger logger = LoggerFactory.getLogger(SPiExpr.class);
+protected ValueUnitPair argBox;
   protected Object targetKey;
 
   public SPiExpr(Value v, Unit u, Object o) {
@@ -47,44 +50,54 @@ public class SPiExpr implements PiExpr {
     this.targetKey = o;
   }
 
-  public ValueUnitPair getArgBox() {
+  @Override
+public ValueUnitPair getArgBox() {
     return argBox;
   }
 
-  public Value getValue() {
+  @Override
+public Value getValue() {
     return argBox.getValue();
   }
 
-  public Unit getCondStmt() {
+  @Override
+public Unit getCondStmt() {
     return argBox.getUnit();
   }
 
-  public Object getTargetKey() {
+  @Override
+public Object getTargetKey() {
     return targetKey;
   }
 
-  public void setValue(Value value) {
+  @Override
+public void setValue(Value value) {
     argBox.setValue(value);
   }
 
-  public void setCondStmt(Unit pred) {
+  @Override
+public void setCondStmt(Unit pred) {
     argBox.setUnit(pred);
   }
 
-  public void setTargetKey(Object targetKey) {
+  @Override
+public void setTargetKey(Object targetKey) {
     this.targetKey = targetKey;
   }
 
-  public List<UnitBox> getUnitBoxes() {
+  @Override
+public List<UnitBox> getUnitBoxes() {
     return Collections.<UnitBox>singletonList(argBox);
   }
 
-  public void clearUnitBoxes() {
-    System.out.println("clear unit boxes");
+  @Override
+public void clearUnitBoxes() {
+    logger.info("clear unit boxes");
     argBox.setUnit(null);
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (!(o instanceof SPiExpr)) {
       return false;
     }
@@ -92,25 +105,30 @@ public class SPiExpr implements PiExpr {
     return getArgBox().equivTo(((SPiExpr) o).getArgBox());
   }
 
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return getArgBox().equivHashCode() * 17;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     // *** FIXME:
     throw new RuntimeException("Not Yet Implemented.");
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new SPiExpr(getValue(), getCondStmt(), getTargetKey());
   }
 
-  public String toString() {
-    String s = Shimple.PI + "(" + getValue() + ")";
+  @Override
+public String toString() {
+    String s = new StringBuilder().append(Shimple.PI).append("(").append(getValue()).append(")").toString();
     return s;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Shimple.PI);
     up.literal("(");
     argBox.toString(up);
@@ -119,11 +137,13 @@ public class SPiExpr implements PiExpr {
     up.literal("])");
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return getValue().getType();
   }
 
-  public List getUseBoxes() {
+  @Override
+public List getUseBoxes() {
     return Collections.singletonList(argBox);
   }
 }

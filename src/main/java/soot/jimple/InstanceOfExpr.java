@@ -28,17 +28,17 @@ import soot.ValueBox;
 import soot.util.Switch;
 
 public interface InstanceOfExpr extends Expr {
-  public Value getOp();
+  Value getOp();
 
-  public void setOp(Value op);
+  void setOp(Value op);
 
-  public ValueBox getOpBox();
+  ValueBox getOpBox();
 
-  public Type getType();
+  @Override Type getType();
 
-  public Type getCheckType();
+  Type getCheckType();
 
-  public void setCheckType(Type checkType);
+  void setCheckType(Type checkType);
 
-  public void apply(Switch sw);
+  @Override void apply(Switch sw);
 }

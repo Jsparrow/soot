@@ -72,14 +72,12 @@ public class ConstantValueToInitializerTransformer extends SceneTransformer {
 
   @Override
   protected void internalTransform(String phaseName, Map<String, String> options) {
-    for (SootClass sc : Scene.v().getClasses()) {
-      transformClass(sc);
-    }
+    Scene.v().getClasses().forEach(this::transformClass);
   }
 
   public void transformClass(SootClass sc) {
     SootMethod smInit = null;
-    Set<SootField> alreadyInitialized = new HashSet<SootField>();
+    Set<SootField> alreadyInitialized = new HashSet<>();
 
     for (SootField sf : sc.getFields()) {
       // We can only create an initializer for all fields that have the
@@ -157,12 +155,13 @@ public class ConstantValueToInitializerTransformer extends SceneTransformer {
       }
     }
 
-    if (smInit != null) {
-      Chain<Unit> units = smInit.getActiveBody().getUnits();
-      if (units.isEmpty() || !(units.getLast() instanceof ReturnVoidStmt)) {
+    if (smInit == null) {
+		return;
+	}
+	Chain<Unit> units = smInit.getActiveBody().getUnits();
+	if (units.isEmpty() || !(units.getLast() instanceof ReturnVoidStmt)) {
         units.add(Jimple.v().newReturnVoidStmt());
       }
-    }
   }
 
   private SootMethod getOrCreateInitializer(SootClass sc, Set<SootField> alreadyInitialized) {
@@ -180,15 +179,8 @@ public class ConstantValueToInitializerTransformer extends SceneTransformer {
       smInit.retrieveActiveBody();
 
       // We need to collect those variables that are already initialized
-      // somewhere
-      for (Unit u : smInit.getActiveBody().getUnits()) {
-        Stmt s = (Stmt) u;
-        for (ValueBox vb : s.getDefBoxes()) {
-          if (vb.getValue() instanceof FieldRef) {
-            alreadyInitialized.add(((FieldRef) vb.getValue()).getField());
-          }
-        }
-      }
+	// somewhere
+	smInit.getActiveBody().getUnits().stream().map(u -> (Stmt) u).forEach(s -> s.getDefBoxes().stream().filter(vb -> vb.getValue() instanceof FieldRef).forEach(vb -> alreadyInitialized.add(((FieldRef) vb.getValue()).getField())));
     }
     return smInit;
   }

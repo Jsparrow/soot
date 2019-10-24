@@ -29,7 +29,7 @@ package soot.util;
  */
 public interface Numberer<E> {
   /** Tells the numberer that a new object needs to be assigned a number. */
-  public void add(E o);
+  void add(E o);
 
   /**
    * Removes the number for a given object.
@@ -38,16 +38,16 @@ public interface Numberer<E> {
    *          the element
    * @return true if the removal was successful, false when not
    */
-  public boolean remove(E o);
+  boolean remove(E o);
 
   /**
    * Should return the number that was assigned to object o that was previously passed as an argument to add().
    */
-  public long get(E o);
+  long get(E o);
 
   /** Should return the object that was assigned the number number. */
-  public E get(long number);
+  E get(long number);
 
   /** Should return the number of objects that have been assigned numbers. */
-  public int size();
+  int size();
 }

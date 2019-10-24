@@ -40,17 +40,19 @@ import soot.toolkits.astmetrics.ComputeASTMetrics;
  */
 public class JavaClassSource extends ClassSource {
   private static final Logger logger = LoggerFactory.getLogger(JavaClassSource.class);
+private File fullPath;
 
-  public JavaClassSource(String className, File fullPath) {
+public JavaClassSource(String className, File fullPath) {
     super(className);
     this.fullPath = fullPath;
   }
 
-  public JavaClassSource(String className) {
+public JavaClassSource(String className) {
     super(className);
   }
 
-  public Dependencies resolve(SootClass sc) {
+@Override
+public Dependencies resolve(SootClass sc) {
     if (Options.v().verbose()) {
       logger.debug("resolving [from .java]: " + className);
     }
@@ -84,6 +86,4 @@ public class JavaClassSource extends ClassSource {
 
     return references;
   }
-
-  private File fullPath;
 }

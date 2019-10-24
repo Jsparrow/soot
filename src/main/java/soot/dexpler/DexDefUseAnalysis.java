@@ -48,9 +48,9 @@ import soot.toolkits.scalar.LocalDefs;
 public class DexDefUseAnalysis implements LocalDefs {
 
   private final Body body;
-  private Map<Local, Set<Unit>> localToUses = new HashMap<Local, Set<Unit>>();
-  private Map<Local, Set<Unit>> localToDefs = new HashMap<Local, Set<Unit>>();
-  private Map<Local, Set<Unit>> localToDefsWithAliases = new HashMap<Local, Set<Unit>>();
+  private Map<Local, Set<Unit>> localToUses = new HashMap<>();
+  private Map<Local, Set<Unit>> localToDefs = new HashMap<>();
+  private Map<Local, Set<Unit>> localToDefsWithAliases = new HashMap<>();
 
   protected BitSet[] localToDefsBits;
   protected BitSet[] localToUsesBits;
@@ -133,10 +133,10 @@ public class DexDefUseAnalysis implements LocalDefs {
   protected Set<Unit> collectDefinitionsWithAliases(Local l) {
     Set<Unit> defs = localToDefsWithAliases.get(l);
     if (defs == null) {
-      Set<Local> seenLocals = new HashSet<Local>();
-      defs = new HashSet<Unit>();
+      Set<Local> seenLocals = new HashSet<>();
+      defs = new HashSet<>();
 
-      List<Local> newLocals = new ArrayList<Local>();
+      List<Local> newLocals = new ArrayList<>();
       newLocals.add(l);
 
       while (!newLocals.isEmpty()) {
@@ -191,11 +191,10 @@ public class DexDefUseAnalysis implements LocalDefs {
       if (bs != null) {
         for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i + 1)) {
           Unit u = unitList.get(i);
-          if (u instanceof DefinitionStmt) {
-            if (((DefinitionStmt) u).getLeftOp() == l) {
-              defs.add(u);
-            }
-          }
+          boolean condition = u instanceof DefinitionStmt && ((DefinitionStmt) u).getLeftOp() == l;
+		if (condition) {
+		  defs.add(u);
+		}
         }
       }
       localToDefs.put(l, defs);

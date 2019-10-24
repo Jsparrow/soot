@@ -48,56 +48,67 @@ public class JGotoStmt extends AbstractStmt implements GotoStmt {
     targetBoxes = Collections.singletonList(box);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JGotoStmt(getTarget());
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     Unit t = getTarget();
     String target = "(branch)";
     if (!t.branches()) {
       target = t.toString();
     }
-    return Jimple.GOTO + " [?= " + target + "]";
+    return new StringBuilder().append(Jimple.GOTO).append(" [?= ").append(target).append("]").toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.GOTO);
     up.literal(" ");
     targetBox.toString(up);
   }
 
-  public Unit getTarget() {
+  @Override
+public Unit getTarget() {
     return targetBox.getUnit();
   }
 
-  public void setTarget(Unit target) {
+  @Override
+public void setTarget(Unit target) {
     targetBox.setUnit(target);
   }
 
-  public UnitBox getTargetBox() {
+  @Override
+public UnitBox getTargetBox() {
     return targetBox;
   }
 
-  public List<UnitBox> getUnitBoxes() {
+  @Override
+public List<UnitBox> getUnitBoxes() {
     return targetBoxes;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseGotoStmt(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     Unit u = Baf.v().newGotoInst(Baf.v().newPlaceholderInst(getTarget()));
     u.addAllTagsOf(this);
     out.add(u);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return true;
   }
 

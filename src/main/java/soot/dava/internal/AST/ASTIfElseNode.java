@@ -32,7 +32,8 @@ import soot.dava.toolkits.base.AST.analysis.Analysis;
 import soot.jimple.ConditionExpr;
 
 public class ASTIfElseNode extends ASTControlFlowNode {
-  private List<Object> ifBody, elseBody;
+  private List<Object> ifBody;
+private List<Object> elseBody;
 
   public ASTIfElseNode(SETNodeLabel label, ConditionExpr condition, List<Object> ifBody, List<Object> elseBody) {
     super(label, condition);
@@ -62,7 +63,7 @@ public class ASTIfElseNode extends ASTControlFlowNode {
   public void replace(SETNodeLabel newLabel, ASTCondition newCond, List<Object> newBody, List<Object> bodyTwo) {
     this.ifBody = newBody;
     this.elseBody = bodyTwo;
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
     subBodies.add(newBody);
     subBodies.add(bodyTwo);
     set_Condition(newCond);
@@ -77,7 +78,7 @@ public class ASTIfElseNode extends ASTControlFlowNode {
     this.ifBody = ifBody;
     this.elseBody = elseBody;
 
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
     subBodies.add(ifBody);
     subBodies.add(elseBody);
   }
@@ -88,7 +89,7 @@ public class ASTIfElseNode extends ASTControlFlowNode {
   public void replaceElseBody(List<Object> elseBody) {
     this.elseBody = elseBody;
 
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
     subBodies.add(ifBody);
     subBodies.add(elseBody);
   }
@@ -104,11 +105,13 @@ public class ASTIfElseNode extends ASTControlFlowNode {
     return elseBody;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ASTIfElseNode(get_Label(), get_Condition(), ifBody, elseBody);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     label_toString(up);
 
     up.literal("if");
@@ -142,8 +145,9 @@ public class ASTIfElseNode extends ASTControlFlowNode {
     up.newline();
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
     b.append(label_toString());
 
@@ -178,7 +182,8 @@ public class ASTIfElseNode extends ASTControlFlowNode {
    * Nomair A. Naeem, 7-FEB-05 Part of Visitor Design Implementation for AST See: soot.dava.toolkits.base.AST.analysis For
    * details
    */
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTIfElseNode(this);
   }
 

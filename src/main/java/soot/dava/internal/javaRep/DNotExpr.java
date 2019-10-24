@@ -45,21 +45,25 @@ public class DNotExpr extends AbstractUnopExpr {
     super(Grimp.v().newExprBox(op));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new DNotExpr(Grimp.cloneIfNecessary(getOpBox().getValue()));
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(" ! (");
     getOpBox().toString(up);
     up.literal(")");
   }
 
-  public String toString() {
-    return " ! (" + (getOpBox().getValue()).toString() + ")";
+  @Override
+public String toString() {
+    return new StringBuilder().append(" ! (").append((getOpBox().getValue()).toString()).append(")").toString();
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     Value op = getOpBox().getValue();
 
     if (op.getType().equals(IntType.v()) || op.getType().equals(ByteType.v()) || op.getType().equals(ShortType.v())
@@ -79,11 +83,13 @@ public class DNotExpr extends AbstractUnopExpr {
   /*
    * NOTE THIS IS AN EMPTY IMPLEMENTATION OF APPLY METHOD
    */
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
   }
 
   /** Compares the specified object with this one for structural equality. */
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (o instanceof DNotExpr) {
       return getOpBox().getValue().equivTo(((DNotExpr) o).getOpBox().getValue());
     }
@@ -91,7 +97,8 @@ public class DNotExpr extends AbstractUnopExpr {
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return getOpBox().getValue().equivHashCode();
   }
 }

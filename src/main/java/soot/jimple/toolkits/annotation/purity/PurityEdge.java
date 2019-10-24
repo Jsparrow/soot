@@ -30,7 +30,8 @@ package soot.jimple.toolkits.annotation.purity;
  */
 public class PurityEdge {
   private String field;
-  private PurityNode source, target;
+  private PurityNode source;
+private PurityNode target;
   private boolean inside;
 
   PurityEdge(PurityNode source, String field, PurityNode target, boolean inside) {
@@ -56,11 +57,13 @@ public class PurityEdge {
     return inside;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return field.hashCode() + target.hashCode() + source.hashCode() + (inside ? 69 : 0);
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     if (!(o instanceof PurityEdge)) {
       return false;
     }
@@ -68,11 +71,12 @@ public class PurityEdge {
     return source.equals(e.source) && field.equals(e.field) && target.equals(e.target) && inside == e.inside;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (inside) {
-      return source.toString() + " = " + field + " => " + target.toString();
+      return new StringBuilder().append(source.toString()).append(" = ").append(field).append(" => ").append(target.toString()).toString();
     } else {
-      return source.toString() + " - " + field + " -> " + target.toString();
+      return new StringBuilder().append(source.toString()).append(" - ").append(field).append(" -> ").append(target.toString()).toString();
     }
 
   }

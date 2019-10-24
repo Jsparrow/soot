@@ -37,7 +37,8 @@ public class StringConstantValueTag extends ConstantValueTag {
     return value;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "ConstantValue: " + value;
   }
 

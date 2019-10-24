@@ -69,20 +69,17 @@ public class MethodStaticnessCorrector extends AbstractStaticnessCorrector {
         Stmt s = (Stmt) u;
         if (s.containsInvokeExpr()) {
           InvokeExpr iexpr = s.getInvokeExpr();
-          if (iexpr instanceof StaticInvokeExpr) {
-            if (isClassLoaded(iexpr.getMethodRef().declaringClass())) {
-              SootMethod target = Scene.v().grabMethod(iexpr.getMethodRef().getSignature());
-              if (target != null && !target.isStatic()) {
-                if (canBeMadeStatic(target)) {
-                  // Remove the this-assignment to prevent
-                  // 'this-assignment in a static method!' exception
-                  target.getActiveBody().getUnits().remove(target.getActiveBody().getThisUnit());
-                  target.setModifiers(target.getModifiers() | Modifier.STATIC);
-                  logger.warn(target.getName() + " changed into a static method");
-                }
-              }
-            }
-          }
+          if (iexpr instanceof StaticInvokeExpr && isClassLoaded(iexpr.getMethodRef().declaringClass())) {
+		  SootMethod target = Scene.v().grabMethod(iexpr.getMethodRef().getSignature());
+		  boolean condition = target != null && !target.isStatic() && canBeMadeStatic(target);
+		if (condition) {
+		  // Remove the this-assignment to prevent
+		  // 'this-assignment in a static method!' exception
+		  target.getActiveBody().getUnits().remove(target.getActiveBody().getThisUnit());
+		  target.setModifiers(target.getModifiers() | Modifier.STATIC);
+		  logger.warn(target.getName() + " changed into a static method");
+		}
+		}
         }
       }
     }
@@ -96,19 +93,19 @@ public class MethodStaticnessCorrector extends AbstractStaticnessCorrector {
    * @return True if the given method can be made static, otherwise false
    */
   private boolean canBeMadeStatic(SootMethod target) {
-    if (target.hasActiveBody()) {
-      Body body = target.getActiveBody();
-      Value thisLocal = body.getThisLocal();
-      for (Unit u : body.getUnits()) {
+    if (!target.hasActiveBody()) {
+		return false;
+	}
+	Body body = target.getActiveBody();
+	Value thisLocal = body.getThisLocal();
+	for (Unit u : body.getUnits()) {
         for (ValueBox vb : u.getUseBoxes()) {
           if (vb.getValue() == thisLocal) {
             return false;
           }
         }
       }
-      return true;
-    }
-    return false;
+	return true;
   }
 
 }

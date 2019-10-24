@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AArrayBrackets extends PArrayBrackets
 {
-    private TLBracket _lBracket_;
-    private TRBracket _rBracket_;
+    private TLBracket lBracket;
+    private TRBracket rBracket;
 
     public AArrayBrackets()
     {
@@ -30,8 +30,8 @@ public final class AArrayBrackets extends PArrayBrackets
     public Object clone()
     {
         return new AArrayBrackets(
-            cloneNode(this._lBracket_),
-            cloneNode(this._rBracket_));
+            cloneNode(this.lBracket),
+            cloneNode(this.rBracket));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class AArrayBrackets extends PArrayBrackets
 
     public TLBracket getLBracket()
     {
-        return this._lBracket_;
+        return this.lBracket;
     }
 
     public void setLBracket(TLBracket node)
     {
-        if(this._lBracket_ != null)
+        if(this.lBracket != null)
         {
-            this._lBracket_.parent(null);
+            this.lBracket.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class AArrayBrackets extends PArrayBrackets
             node.parent(this);
         }
 
-        this._lBracket_ = node;
+        this.lBracket = node;
     }
 
     public TRBracket getRBracket()
     {
-        return this._rBracket_;
+        return this.rBracket;
     }
 
     public void setRBracket(TRBracket node)
     {
-        if(this._rBracket_ != null)
+        if(this.rBracket != null)
         {
-            this._rBracket_.parent(null);
+            this.rBracket.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class AArrayBrackets extends PArrayBrackets
             node.parent(this);
         }
 
-        this._rBracket_ = node;
+        this.rBracket = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._lBracket_)
-            + toString(this._rBracket_);
+        return new StringBuilder().append("").append(toString(this.lBracket)).append(toString(this.rBracket)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._lBracket_ == child)
+        if(this.lBracket == child)
         {
-            this._lBracket_ = null;
+            this.lBracket = null;
             return;
         }
 
-        if(this._rBracket_ == child)
+        if(this.rBracket == child)
         {
-            this._rBracket_ = null;
+            this.rBracket = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class AArrayBrackets extends PArrayBrackets
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._lBracket_ == oldChild)
+        if(this.lBracket == oldChild)
         {
             setLBracket((TLBracket) newChild);
             return;
         }
 
-        if(this._rBracket_ == oldChild)
+        if(this.rBracket == oldChild)
         {
             setRBracket((TRBracket) newChild);
             return;

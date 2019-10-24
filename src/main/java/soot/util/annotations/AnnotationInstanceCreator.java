@@ -34,6 +34,8 @@ import soot.tagkit.AnnotationElem;
 import soot.tagkit.AnnotationEnumElem;
 import soot.tagkit.AnnotationTag;
 import soot.util.annotations.AnnotationElemSwitch.AnnotationElemResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -46,7 +48,9 @@ import soot.util.annotations.AnnotationElemSwitch.AnnotationElemResult;
  */
 public class AnnotationInstanceCreator {
 
-  /**
+  private static final Logger logger = LoggerFactory.getLogger(AnnotationInstanceCreator.class);
+
+/**
    * Creates an instance of the Annotation represented by <code>tag</code>.
    *
    * @param tag
@@ -71,10 +75,10 @@ public class AnnotationInstanceCreator {
     try {
       // load the class of the annotation to be created
       final Class<?> clazz = ClassLoaderUtils.loadClass(tag.getType().replace('/', '.'));
-      final Map<String, Object> map = new HashMap<String, Object>();
+      final Map<String, Object> map = new HashMap<>();
 
       // for every element generate the result
-      for (AnnotationElem elem : tag.getElems()) {
+	tag.getElems().forEach(elem -> {
         AnnotationElemSwitch sw = new AnnotationElemSwitch();
         elem.apply(sw);
 
@@ -82,7 +86,7 @@ public class AnnotationInstanceCreator {
         AnnotationElemResult<Object> result = (AnnotationElemResult<Object>) sw.getResult();
 
         map.put(result.getKey(), result.getValue());
-      }
+      });
 
       // create the instance
       Object result = Proxy.newProxyInstance(cl, new Class[] { clazz }, new AbstractInvocationHandler() {
@@ -95,7 +99,7 @@ public class AnnotationInstanceCreator {
 
           // if the method being called is #annotationType return the
           // clazz of the annotation
-          if (name.equals("annotationType")) {
+          if ("annotationType".equals(name)) {
             return clazz;
           }
 
@@ -127,7 +131,7 @@ public class AnnotationInstanceCreator {
             }
           }
 
-          throw new RuntimeException("No value for " + name + " declared in the annotation " + clazz);
+          throw new RuntimeException(new StringBuilder().append("No value for ").append(name).append(" declared in the annotation ").append(clazz).toString());
         }
       });
 
@@ -135,7 +139,8 @@ public class AnnotationInstanceCreator {
 
     } catch (ClassNotFoundException e) {
 
-      throw new RuntimeException("Could not load class: " + tag.getType());
+      logger.error(e.getMessage(), e);
+	throw new RuntimeException("Could not load class: " + tag.getType());
     }
   }
 }

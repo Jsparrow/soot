@@ -102,7 +102,7 @@ public class AnnotationGenerator {
     // error-checking -- is this annotation appropriate for the target Host?
     Target t = klass.getAnnotation(Target.class);
     Collection<ElementType> elementTypes = Arrays.asList(t.value());
-    final String ERR = "Annotation class " + klass + " not applicable to host of type " + h.getClass() + ".";
+    final String ERR = new StringBuilder().append("Annotation class ").append(klass).append(" not applicable to host of type ").append(h.getClass()).append(".").toString();
     if (h instanceof SootClass) {
       if (!elementTypes.contains(ElementType.TYPE)) {
         throw new RuntimeException(ERR);
@@ -116,7 +116,7 @@ public class AnnotationGenerator {
         throw new RuntimeException(ERR);
       }
     } else {
-      throw new RuntimeException("Tried to attach annotation to host of type " + h.getClass() + ".");
+      throw new RuntimeException(new StringBuilder().append("Tried to attach annotation to host of type ").append(h.getClass()).append(".").toString());
     }
 
     // get the retention type of the class
@@ -159,7 +159,7 @@ public class AnnotationGenerator {
   public void annotate(Host h, String annotationName, int visibility, List<AnnotationElem> elems) {
     annotationName = annotationName.replace('.', '/');
     if (!annotationName.endsWith(";")) {
-      annotationName = "L" + annotationName + ';';
+      annotationName = new StringBuilder().append("L").append(annotationName).append(';').toString();
     }
     VisibilityAnnotationTag tagToAdd = findOrAdd(h, visibility);
     AnnotationTag at = new AnnotationTag(annotationName, elems);
@@ -177,25 +177,21 @@ public class AnnotationGenerator {
    * @return
    */
   private VisibilityAnnotationTag findOrAdd(Host h, int visibility) {
-    ArrayList<VisibilityAnnotationTag> va_tags = new ArrayList<VisibilityAnnotationTag>();
+    ArrayList<VisibilityAnnotationTag> va_tags = new ArrayList<>();
 
-    for (Tag t : h.getTags()) {
-      if (t instanceof VisibilityAnnotationTag) {
-        VisibilityAnnotationTag vat = (VisibilityAnnotationTag) t;
-        if (vat.getVisibility() == visibility) {
+    h.getTags().stream().filter(t -> t instanceof VisibilityAnnotationTag).map(t -> (VisibilityAnnotationTag) t).forEach(vat -> {
+		if (vat.getVisibility() == visibility) {
           va_tags.add(vat);
         }
-      }
-    }
+	});
 
-    if (va_tags.isEmpty()) {
-      VisibilityAnnotationTag vat = new VisibilityAnnotationTag(visibility);
-      h.addTag(vat);
-      return vat;
-    }
-
-    // return the first visibility annotation with the right visibility
-    return (va_tags.get(0));
+    if (!va_tags.isEmpty()) {
+		// return the first visibility annotation with the right visibility
+		return (va_tags.get(0));
+	}
+	VisibilityAnnotationTag vat = new VisibilityAnnotationTag(visibility);
+	h.addTag(vat);
+	return vat;
   }
 
 }

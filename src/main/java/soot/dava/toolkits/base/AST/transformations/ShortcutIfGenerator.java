@@ -36,10 +36,14 @@ import soot.jimple.DefinitionStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.ImmediateBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ShortcutIfGenerator extends DepthFirstAdapter {
 
-  public ShortcutIfGenerator() {
+  private static final Logger logger = LoggerFactory.getLogger(ShortcutIfGenerator.class);
+
+public ShortcutIfGenerator() {
 
   }
 
@@ -47,7 +51,8 @@ public class ShortcutIfGenerator extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
     for (AugmentedStmt as : node.getStatements()) {
       Stmt s = as.get_Stmt();
       if (!(s instanceof DefinitionStmt)) {
@@ -91,7 +96,7 @@ public class ShortcutIfGenerator extends DepthFirstAdapter {
 
       DShortcutIf shortcut = new DShortcutIf(OpBox, trueBox, falseBox);
       if (DEBUG) {
-        System.out.println("created: " + shortcut);
+        logger.info("created: " + shortcut);
       }
       rightBox.setValue(shortcut);
     }

@@ -47,19 +47,19 @@ public class SegmentNode implements Comparable<SegmentNode> {
     copySegment(other);
   }
 
-  public void copySegment(SegmentNode other) {
-    I1 = other.I1;
-    I2 = other.I2;
-    L = other.L;
-  }
-
   public SegmentNode(long i1, long i2, long l) {
     I1 = i1;
     I2 = i2;
     L = l;
   }
 
-  public boolean equals(SegmentNode other) {
+public void copySegment(SegmentNode other) {
+    I1 = other.I1;
+    I2 = other.I2;
+    L = other.L;
+  }
+
+public boolean equals(SegmentNode other) {
     if (other instanceof RectangleNode) {
       return false;
     }
@@ -71,7 +71,7 @@ public class SegmentNode implements Comparable<SegmentNode> {
     return false;
   }
 
-  @Override
+@Override
   public int compareTo(SegmentNode o) {
     long d;
 
@@ -100,15 +100,15 @@ public class SegmentNode implements Comparable<SegmentNode> {
     return 0;
   }
 
-  public long xEnd() {
+public long xEnd() {
     return I1 + L;
   }
 
-  public long yEnd() {
+public long yEnd() {
     return I2 + L;
   }
 
-  /**
+/**
    * Testing if two figures are intersected. This interface implements standard intersection testing that ignores the
    * semantics of the X- and Y- axis. Processing the semantics issues before calling this method. A sample usage, please @see
    * heap_sensitive_intersection
@@ -136,7 +136,7 @@ public class SegmentNode implements Comparable<SegmentNode> {
     return false;
   }
 
-  public boolean projYIntersect(SegmentNode q) {
+public boolean projYIntersect(SegmentNode q) {
     long py1 = this.I2;
     long py2 = yEnd();
     long qy1 = q.I2;

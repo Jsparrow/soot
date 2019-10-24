@@ -61,32 +61,31 @@ public class TrapManager {
 
   /** Returns the list of traps caught at Unit u in Body b. */
   public static List<Trap> getTrapsAt(Unit unit, Body b) {
-    List<Trap> trapsList = new ArrayList<Trap>();
+    List<Trap> trapsList = new ArrayList<>();
     Chain<Unit> units = b.getUnits();
 
-    for (Trap t : b.getTraps()) {
+    b.getTraps().forEach(t -> {
       Iterator<Unit> it = units.iterator(t.getBeginUnit(), units.getPredOf(t.getEndUnit()));
       while (it.hasNext()) {
         if (unit.equals(it.next())) {
           trapsList.add(t);
         }
       }
-    }
+    });
 
     return trapsList;
   }
 
   /** Returns a set of units which lie inside the range of any trap. */
   public static Set<Unit> getTrappedUnitsOf(Body b) {
-    Set<Unit> trapsSet = new HashSet<Unit>();
+    Set<Unit> trapsSet = new HashSet<>();
     Chain<Unit> units = b.getUnits();
 
-    for (Trap t : b.getTraps()) {
-      Iterator<Unit> it = units.iterator(t.getBeginUnit(), units.getPredOf(t.getEndUnit()));
-      while (it.hasNext()) {
-        trapsSet.add(it.next());
-      }
-    }
+    b.getTraps().stream().map(t -> units.iterator(t.getBeginUnit(), units.getPredOf(t.getEndUnit()))).forEach(it -> {
+		while (it.hasNext()) {
+		    trapsSet.add(it.next());
+		  }
+	});
     return trapsSet;
   }
 
@@ -145,13 +144,9 @@ public class TrapManager {
    * Given a body and a unit handling an exception, returns the list of exception types possibly caught by the handler.
    */
   public static List<RefType> getExceptionTypesOf(Unit u, Body body) {
-    List<RefType> possibleTypes = new ArrayList<RefType>();
+    List<RefType> possibleTypes = new ArrayList<>();
 
-    for (Trap trap : body.getTraps()) {
-      if (trap.getHandlerUnit() == u) {
-        possibleTypes.add(RefType.v(trap.getException().getName()));
-      }
-    }
+    body.getTraps().stream().filter(trap -> trap.getHandlerUnit() == u).forEach(trap -> possibleTypes.add(RefType.v(trap.getException().getName())));
 
     return possibleTypes;
   }

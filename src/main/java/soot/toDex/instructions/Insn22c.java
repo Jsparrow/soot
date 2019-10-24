@@ -49,11 +49,13 @@ public class Insn22c extends AbstractInsn implements TwoRegInsn {
     this.referencedItem = referencedItem;
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 
-  public Register getRegB() {
+  @Override
+public Register getRegB() {
     return regs.get(REG_B_IDX);
   }
 
@@ -76,6 +78,6 @@ public class Insn22c extends AbstractInsn implements TwoRegInsn {
 
   @Override
   public String toString() {
-    return super.toString() + " ref: " + referencedItem;
+    return new StringBuilder().append(super.toString()).append(" ref: ").append(referencedItem).toString();
   }
 }

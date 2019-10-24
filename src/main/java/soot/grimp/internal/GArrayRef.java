@@ -34,19 +34,21 @@ public class GArrayRef extends JArrayRef implements Precedence {
     super(Grimp.v().newObjExprBox(base), Grimp.v().newExprBox(index));
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 950;
   }
 
   private String toString(Value op1, String leftOp, String rightOp) {
     if (op1 instanceof Precedence && ((Precedence) op1).getPrecedence() < getPrecedence()) {
-      leftOp = "(" + leftOp + ")";
+      leftOp = new StringBuilder().append("(").append(leftOp).append(")").toString();
     }
 
-    return leftOp + "[" + rightOp + "]";
+    return new StringBuilder().append(leftOp).append("[").append(rightOp).append("]").toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (PrecedenceTest.needsBrackets(baseBox, this)) {
       up.literal("(");
     }
@@ -59,14 +61,18 @@ public class GArrayRef extends JArrayRef implements Precedence {
     up.literal("]");
   }
 
-  public String toString() {
-    Value op1 = getBase(), op2 = getIndex();
-    String leftOp = op1.toString(), rightOp = op2.toString();
+  @Override
+public String toString() {
+    Value op1 = getBase();
+	Value op2 = getIndex();
+    String leftOp = op1.toString();
+	String rightOp = op2.toString();
 
     return toString(op1, leftOp, rightOp);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GArrayRef(Grimp.cloneIfNecessary(getBase()), Grimp.cloneIfNecessary(getIndex()));
   }
 

@@ -53,7 +53,8 @@ public abstract class Predicate<T> {
   public Predicate<T> not() {
     final Predicate<T> originalPredicate = this;
     return new Predicate<T>() {
-      public boolean test(T obj_) {
+      @Override
+	public boolean test(T obj_) {
         return !originalPredicate.test(obj_);
       }
     };
@@ -65,7 +66,8 @@ public abstract class Predicate<T> {
   public Predicate<T> and(final Predicate<T> conjunct_) {
     final Predicate<T> originalPredicate = this;
     return new Predicate<T>() {
-      public boolean test(T obj_) {
+      @Override
+	public boolean test(T obj_) {
         return originalPredicate.test(obj_) && conjunct_.test(obj_);
       }
     };
@@ -77,7 +79,8 @@ public abstract class Predicate<T> {
   public Predicate<T> or(final Predicate<T> disjunct_) {
     final Predicate<T> originalPredicate = this;
     return new Predicate<T>() {
-      public boolean test(T obj_) {
+      @Override
+	public boolean test(T obj_) {
         return originalPredicate.test(obj_) || disjunct_.test(obj_);
       }
     };

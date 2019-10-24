@@ -47,26 +47,31 @@ public abstract class AbstractInsn implements Insn {
       throw new IllegalArgumentException("opcode must not be null");
     }
     this.opc = opc;
-    regs = new ArrayList<Register>();
+    regs = new ArrayList<>();
   }
 
-  public Opcode getOpcode() {
+  @Override
+public Opcode getOpcode() {
     return opc;
   }
 
-  public List<Register> getRegs() {
+  @Override
+public List<Register> getRegs() {
     return regs;
   }
 
-  public BitSet getIncompatibleRegs() {
+  @Override
+public BitSet getIncompatibleRegs() {
     return new BitSet(0);
   }
 
-  public boolean hasIncompatibleRegs() {
+  @Override
+public boolean hasIncompatibleRegs() {
     return getIncompatibleRegs().cardinality() > 0;
   }
 
-  public int getMinimumRegsNeeded() {
+  @Override
+public int getMinimumRegsNeeded() {
     BitSet incompatRegs = getIncompatibleRegs();
     int resultNeed = 0;
     int miscRegsNeed = 0;
@@ -104,10 +109,11 @@ public abstract class AbstractInsn implements Insn {
 
   @Override
   public String toString() {
-    return opc.toString() + " " + regs;
+    return new StringBuilder().append(opc.toString()).append(" ").append(regs).toString();
   }
 
-  public int getSize() {
+  @Override
+public int getSize() {
     return opc.format.size / 2; // the format size is in byte count, we need word count
   }
 }

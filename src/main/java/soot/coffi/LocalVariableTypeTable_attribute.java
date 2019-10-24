@@ -93,8 +93,9 @@ class LocalVariableTypeTable_attribute extends attribute_info {
     return null;
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
     for (int i = 0; i < local_variable_type_table_length; i++) {
       buffer.append(local_variable_type_table[i].toString() + "\n");

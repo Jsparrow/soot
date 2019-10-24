@@ -42,20 +42,22 @@ class MethodLocal {
     return l;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return m.hashCode() + l.hashCode();
   }
 
-  public boolean equals(Object other) {
-    if (other instanceof MethodLocal) {
-      MethodLocal another = (MethodLocal) other;
-      return m.equals(another.getMethod()) && l.equals(another.getLocal());
-    }
-
-    return false;
+  @Override
+public boolean equals(Object other) {
+    if (!(other instanceof MethodLocal)) {
+		return false;
+	}
+	MethodLocal another = (MethodLocal) other;
+	return m.equals(another.getMethod()) && l.equals(another.getLocal());
   }
 
-  public String toString() {
-    return "[" + m.getSignature() + " : " + l.toString() + "]";
+  @Override
+public String toString() {
+    return new StringBuilder().append("[").append(m.getSignature()).append(" : ").append(l.toString()).append("]").toString();
   }
 }

@@ -18,17 +18,135 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @production PrimitiveCompilationUnit : {@link CompilationUnit};
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:7
  */
-public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneable {
-  /**
+public class PrimitiveCompilationUnit extends CompilationUnit {
+  private static final Logger logger = LoggerFactory.getLogger(PrimitiveCompilationUnit.class);
+/**
+   * @apilevel internal
+   */
+  protected boolean typeBoolean_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeBoolean_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeByte_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeByte_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeShort_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeShort_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeChar_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeChar_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeInt_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeInt_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeLong_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeLong_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeFloat_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeFloat_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeDouble_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeDouble_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeVoid_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeVoid_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean typeNull_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeNull_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean unknownType_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl unknownType_value;
+/**
+   * @ast method 
+   * 
+   */
+  public PrimitiveCompilationUnit() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public PrimitiveCompilationUnit(java.lang.String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
+    setPackageDecl(p0);
+    setChild(p1, 0);
+    setChild(p2, 1);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public PrimitiveCompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
+    setPackageDecl(p0);
+    setChild(p1, 0);
+    setChild(p2, 1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     typeBoolean_computed = false;
     typeBoolean_value = null;
@@ -53,16 +171,18 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     unknownType_computed = false;
     unknownType_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public PrimitiveCompilationUnit clone() throws CloneNotSupportedException {
     PrimitiveCompilationUnit node = (PrimitiveCompilationUnit)super.clone();
     node.typeBoolean_computed = false;
@@ -91,29 +211,33 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public PrimitiveCompilationUnit copy() {
     try {
       PrimitiveCompilationUnit node = (PrimitiveCompilationUnit) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public PrimitiveCompilationUnit fullCopy() {
     PrimitiveCompilationUnit tree = (PrimitiveCompilationUnit) copy();
     if (children != null) {
@@ -127,16 +251,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     }
     return tree;
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public PrimitiveCompilationUnit() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -144,99 +259,90 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[2];
     setChild(new List(), 0);
     setChild(new List(), 1);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public PrimitiveCompilationUnit(java.lang.String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
-    setPackageDecl(p0);
-    setChild(p1, 0);
-    setChild(p2, 1);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public PrimitiveCompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
-    setPackageDecl(p0);
-    setChild(p1, 0);
-    setChild(p2, 1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 2;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the lexeme PackageDecl.
    * @param value The new value for the lexeme PackageDecl.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setPackageDecl(java.lang.String value) {
+  @Override
+public void setPackageDecl(java.lang.String value) {
     tokenjava_lang_String_PackageDecl = value;
   }
-  /**
+/**
    * JastAdd-internal setter for lexeme PackageDecl using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
-  public void setPackageDecl(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setPackageDecl is only valid for String lexemes");
+  @Override
+public void setPackageDecl(beaver.Symbol symbol) {
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setPackageDecl is only valid for String lexemes");
+	}
     tokenjava_lang_String_PackageDecl = (String)symbol.value;
     PackageDeclstart = symbol.getStart();
     PackageDeclend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme PackageDecl.
    * @return The value for the lexeme PackageDecl.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public java.lang.String getPackageDecl() {
+  @Override
+public java.lang.String getPackageDecl() {
     return tokenjava_lang_String_PackageDecl != null ? tokenjava_lang_String_PackageDecl : "";
   }
-  /**
+/**
    * Replaces the ImportDecl list.
    * @param list The new list node to be used as the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setImportDeclList(List<ImportDecl> list) {
+  @Override
+public void setImportDeclList(List<ImportDecl> list) {
     setChild(list, 0);
   }
-  /**
+/**
    * Retrieves the number of children in the ImportDecl list.
    * @return Number of children in the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public int getNumImportDecl() {
+  @Override
+public int getNumImportDecl() {
     return getImportDeclList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the ImportDecl list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the ImportDecl list.
@@ -244,10 +350,11 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public int getNumImportDeclNoTransform() {
+  @Override
+public int getNumImportDeclNoTransform() {
     return getImportDeclListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the ImportDecl list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the ImportDecl list.
@@ -255,31 +362,34 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ImportDecl getImportDecl(int i) {
     return (ImportDecl)getImportDeclList().getChild(i);
   }
-  /**
+/**
    * Append an element to the ImportDecl list.
    * @param node The element to append to the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void addImportDecl(ImportDecl node) {
+  @Override
+public void addImportDecl(ImportDecl node) {
     List<ImportDecl> list = (parent == null || state == null) ? getImportDeclListNoTransform() : getImportDeclList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  public void addImportDeclNoTransform(ImportDecl node) {
+  @Override
+public void addImportDeclNoTransform(ImportDecl node) {
     List<ImportDecl> list = getImportDeclListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the ImportDecl list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -287,21 +397,23 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public void setImportDecl(ImportDecl node, int i) {
+  @Override
+public void setImportDecl(ImportDecl node, int i) {
     List<ImportDecl> list = getImportDeclList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * @return The node representing the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public List<ImportDecl> getImportDecls() {
+  @Override
+public List<ImportDecl> getImportDecls() {
     return getImportDeclList();
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the ImportDecl list.
@@ -309,23 +421,25 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public List<ImportDecl> getImportDeclsNoTransform() {
+  @Override
+public List<ImportDecl> getImportDeclsNoTransform() {
     return getImportDeclListNoTransform();
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * @return The node representing the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<ImportDecl> getImportDeclList() {
     List<ImportDecl> list = (List<ImportDecl>)getChild(0);
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the ImportDecl list.
@@ -333,31 +447,34 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<ImportDecl> getImportDeclListNoTransform() {
     return (List<ImportDecl>)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the TypeDecl list.
    * @param list The new list node to be used as the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setTypeDeclList(List<TypeDecl> list) {
+  @Override
+public void setTypeDeclList(List<TypeDecl> list) {
     setChild(list, 1);
   }
-  /**
+/**
    * Retrieves the number of children in the TypeDecl list.
    * @return Number of children in the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public int getNumTypeDecl() {
+  @Override
+public int getNumTypeDecl() {
     return getTypeDeclList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the TypeDecl list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the TypeDecl list.
@@ -365,10 +482,11 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public int getNumTypeDeclNoTransform() {
+  @Override
+public int getNumTypeDeclNoTransform() {
     return getTypeDeclListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the TypeDecl list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the TypeDecl list.
@@ -376,31 +494,34 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl getTypeDecl(int i) {
     return (TypeDecl)getTypeDeclList().getChild(i);
   }
-  /**
+/**
    * Append an element to the TypeDecl list.
    * @param node The element to append to the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void addTypeDecl(TypeDecl node) {
+  @Override
+public void addTypeDecl(TypeDecl node) {
     List<TypeDecl> list = (parent == null || state == null) ? getTypeDeclListNoTransform() : getTypeDeclList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  public void addTypeDeclNoTransform(TypeDecl node) {
+  @Override
+public void addTypeDeclNoTransform(TypeDecl node) {
     List<TypeDecl> list = getTypeDeclListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the TypeDecl list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -408,21 +529,23 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public void setTypeDecl(TypeDecl node, int i) {
+  @Override
+public void setTypeDecl(TypeDecl node, int i) {
     List<TypeDecl> list = getTypeDeclList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * @return The node representing the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public List<TypeDecl> getTypeDecls() {
+  @Override
+public List<TypeDecl> getTypeDecls() {
     return getTypeDeclList();
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the TypeDecl list.
@@ -430,23 +553,25 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public List<TypeDecl> getTypeDeclsNoTransform() {
+  @Override
+public List<TypeDecl> getTypeDeclsNoTransform() {
     return getTypeDeclListNoTransform();
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * @return The node representing the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<TypeDecl> getTypeDeclList() {
     List<TypeDecl> list = (List<TypeDecl>)getChild(1);
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the TypeDecl list.
@@ -454,19 +579,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<TypeDecl> getTypeDeclListNoTransform() {
     return (List<TypeDecl>)getChildNoTransform(1);
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeBoolean_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeBoolean_value;
-  /* ES: Replacing this with a create method used in type lookup the first time a primitive type is requested
+/* ES: Replacing this with a create method used in type lookup the first time a primitive type is requested
   private boolean Program.initPrimTypes = false;
   public void Program.addPrimitiveTypes() {
     if(!initPrimTypes) {
@@ -579,10 +697,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeBoolean_value = typeBoolean_compute();
     typeBoolean_value.setParent(this);
     typeBoolean_value.is$Final = true;
-      if(true) typeBoolean_computed = true;
+      if(true) {
+		typeBoolean_computed = true;
+	}
     return typeBoolean_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeBoolean_compute() {
@@ -592,15 +712,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(unknownType().createQualifiedAccess());
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeByte_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeByte_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:120
@@ -616,10 +728,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeByte_value = typeByte_compute();
     typeByte_value.setParent(this);
     typeByte_value.is$Final = true;
-      if(true) typeByte_computed = true;
+      if(true) {
+		typeByte_computed = true;
+	}
     return typeByte_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeByte_compute() {
@@ -629,15 +743,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(typeShort().createQualifiedAccess());
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeShort_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeShort_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:127
@@ -653,10 +759,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeShort_value = typeShort_compute();
     typeShort_value.setParent(this);
     typeShort_value.is$Final = true;
-      if(true) typeShort_computed = true;
+      if(true) {
+		typeShort_computed = true;
+	}
     return typeShort_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeShort_compute() {
@@ -666,15 +774,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(typeInt().createQualifiedAccess());
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeChar_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeChar_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:134
@@ -690,10 +790,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeChar_value = typeChar_compute();
     typeChar_value.setParent(this);
     typeChar_value.is$Final = true;
-      if(true) typeChar_computed = true;
+      if(true) {
+		typeChar_computed = true;
+	}
     return typeChar_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeChar_compute() {
@@ -703,15 +805,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(typeInt().createQualifiedAccess());
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeInt_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeInt_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:141
@@ -727,10 +821,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeInt_value = typeInt_compute();
     typeInt_value.setParent(this);
     typeInt_value.is$Final = true;
-      if(true) typeInt_computed = true;
+      if(true) {
+		typeInt_computed = true;
+	}
     return typeInt_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeInt_compute() {
@@ -740,15 +836,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(typeLong().createQualifiedAccess());
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeLong_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeLong_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:148
@@ -764,10 +852,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeLong_value = typeLong_compute();
     typeLong_value.setParent(this);
     typeLong_value.is$Final = true;
-      if(true) typeLong_computed = true;
+      if(true) {
+		typeLong_computed = true;
+	}
     return typeLong_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeLong_compute() {
@@ -778,15 +868,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(typeFloat().createQualifiedAccess()); 
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeFloat_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeFloat_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:156
@@ -802,10 +884,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeFloat_value = typeFloat_compute();
     typeFloat_value.setParent(this);
     typeFloat_value.is$Final = true;
-      if(true) typeFloat_computed = true;
+      if(true) {
+		typeFloat_computed = true;
+	}
     return typeFloat_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeFloat_compute() {
@@ -815,15 +899,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(typeDouble().createQualifiedAccess());
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeDouble_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeDouble_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:163
@@ -839,10 +915,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeDouble_value = typeDouble_compute();
     typeDouble_value.setParent(this);
     typeDouble_value.is$Final = true;
-      if(true) typeDouble_computed = true;
+      if(true) {
+		typeDouble_computed = true;
+	}
     return typeDouble_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeDouble_compute() {
@@ -852,15 +930,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     type.setSuperClassAccess(unknownType().createQualifiedAccess());
     return type;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeVoid_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeVoid_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:170
@@ -876,10 +946,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeVoid_value = typeVoid_compute();
     typeVoid_value.setParent(this);
     typeVoid_value.is$Final = true;
-      if(true) typeVoid_computed = true;
+      if(true) {
+		typeVoid_computed = true;
+	}
     return typeVoid_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeVoid_compute() {
@@ -888,15 +960,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     classDecl.setID("void");
     return classDecl;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeNull_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeNull_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:176
@@ -912,10 +976,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     typeNull_value = typeNull_compute();
     typeNull_value.setParent(this);
     typeNull_value.is$Final = true;
-      if(true) typeNull_computed = true;
+      if(true) {
+		typeNull_computed = true;
+	}
     return typeNull_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeNull_compute() {
@@ -924,15 +990,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     classDecl.setID("null");
     return classDecl;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean unknownType_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl unknownType_value;
-  /**
+/**
    * @attribute syn
    * @aspect PrimitiveTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrimitiveTypes.jrag:182
@@ -948,10 +1006,12 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     unknownType_value = unknownType_compute();
     unknownType_value.setParent(this);
     unknownType_value.is$Final = true;
-      if(true) unknownType_computed = true;
+      if(true) {
+		unknownType_computed = true;
+	}
     return unknownType_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl unknownType_compute() {
@@ -989,10 +1049,11 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     classDecl.addBodyDecl(constrDecl);      
     return classDecl;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

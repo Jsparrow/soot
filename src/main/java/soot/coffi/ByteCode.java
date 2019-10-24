@@ -998,28 +998,28 @@ class ByteCode {
       i = i.next;
     }
     // build array of instructions
-    if (icount > 0) {
-      instructions = new Instruction[icount];
-      // and put the instructions into the array
+	if (icount <= 0) {
+		return;
+	}
+	instructions = new Instruction[icount];
+	// and put the instructions into the array
       // identify targets of branch instructions. Why build an array
       // when we already have a list? In order to be able to locate
       // an instruction given its numeric label quickly.
       int k;
-      k = 0;
-      i = insts;
-      while (i != null) {
+	k = 0;
+	i = insts;
+	while (i != null) {
         instructions[k] = i;
         k++;
         i = i.next;
       }
-
-      // now convert all offsets to pointers
+	// now convert all offsets to pointers
       i = insts;
-      while (i != null) {
+	while (i != null) {
         i.offsetToPointer(this);
         i = i.next;
       }
-    }
   }
 
   /**
@@ -1061,7 +1061,7 @@ class ByteCode {
       } else {
         pref = "   ";
       }
-      logger.debug("" + pref + i + ": ");
+      logger.debug(new StringBuilder().append("").append(pref).append(i).append(": ").toString());
       logger.debug("" + j.toString(constant_pool));
       i = j.nextOffset(i);
       j = j.next;

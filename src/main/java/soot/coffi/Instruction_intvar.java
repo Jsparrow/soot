@@ -60,26 +60,31 @@ class Instruction_intvar extends Instruction implements Interface_OneIntArg {
     super(c);
   }
 
-  public String toString(cp_info constant_pool[]) {
-    return super.toString(constant_pool) + argsep + LOCALPREFIX + arg_i;
+  @Override
+public String toString(cp_info constant_pool[]) {
+    return new StringBuilder().append(super.toString(constant_pool)).append(argsep).append(LOCALPREFIX).append(arg_i).toString();
   }
 
-  public int nextOffset(int curr) {
+  @Override
+public int nextOffset(int curr) {
     return curr + 3;
   }
 
-  public int parse(byte bc[], int index) {
+  @Override
+public int parse(byte bc[], int index) {
     arg_i = getShort(bc, index);
     return index + 2;
   }
 
-  public int compile(byte bc[], int index) {
+  @Override
+public int compile(byte bc[], int index) {
     bc[index++] = code;
     shortToBytes((short) arg_i, bc, index);
     return index + 2;
   }
 
-  public int getIntArg() {
+  @Override
+public int getIntArg() {
     return arg_i;
   }
 }

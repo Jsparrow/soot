@@ -57,18 +57,20 @@ public class ValueUnitPair extends AbstractValueBox implements UnitBox, EquivTo 
     setUnit(unit);
   }
 
-  public boolean canContainValue(Value value) {
+  @Override
+public boolean canContainValue(Value value) {
     return true;
   }
 
   /**
    * @see soot.UnitBox#setUnit(Unit)
    **/
-  public void setUnit(Unit unit) {
+  @Override
+public void setUnit(Unit unit) {
     /* Code copied from AbstractUnitBox */
 
     if (!canContainUnit(unit)) {
-      throw new RuntimeException("Cannot put " + unit + " in this box");
+      throw new RuntimeException(new StringBuilder().append("Cannot put ").append(unit).append(" in this box").toString());
     }
 
     // Remove this from set of back pointers.
@@ -88,29 +90,34 @@ public class ValueUnitPair extends AbstractValueBox implements UnitBox, EquivTo 
   /**
    * @see soot.UnitBox#getUnit()
    **/
-  public Unit getUnit() {
+  @Override
+public Unit getUnit() {
     return unit;
   }
 
   /**
    * @see soot.UnitBox#canContainUnit(Unit)
    **/
-  public boolean canContainUnit(Unit u) {
+  @Override
+public boolean canContainUnit(Unit u) {
     return true;
   }
 
   /**
    * @see soot.UnitBox#isBranchTarget()
    **/
-  public boolean isBranchTarget() {
+  @Override
+public boolean isBranchTarget() {
     return true;
   }
 
-  public String toString() {
-    return "Value = " + getValue() + ", Unit = " + getUnit();
+  @Override
+public String toString() {
+    return new StringBuilder().append("Value = ").append(getValue()).append(", Unit = ").append(getUnit()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     super.toString(up);
 
     if (isBranchTarget()) {
@@ -124,14 +131,16 @@ public class ValueUnitPair extends AbstractValueBox implements UnitBox, EquivTo 
     up.endUnitBox(this);
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     // If you need to change this implementation, please change it
     // in a subclass. Otherwise, Shimple is likely to break in evil
     // ways.
     return super.hashCode();
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     // If you need to change this implementation, please change it
     // in a subclass. Otherwise, Shimple is likely to break in evil
     // ways.
@@ -145,7 +154,8 @@ public class ValueUnitPair extends AbstractValueBox implements UnitBox, EquivTo 
    *          another ValueUnitPair
    * @return true if other contains the same objects as this.
    **/
-  public boolean equivTo(Object other) {
+  @Override
+public boolean equivTo(Object other) {
     return (other instanceof ValueUnitPair) && ((ValueUnitPair) other).getValue().equivTo(this.getValue())
         && ((ValueUnitPair) other).getUnit().equals(getUnit());
   }
@@ -158,13 +168,15 @@ public class ValueUnitPair extends AbstractValueBox implements UnitBox, EquivTo 
    * <b>Note:</b> If you are concerned about non-determinism, remember that current implementations of equivHashCode() in
    * other parts of Soot are non-deterministic as well (see Constant.java for example).
    **/
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     // this is not deterministic because a Unit's hash code is
     // non-deterministic.
     return (getUnit().hashCode() * 17) + (getValue().equivHashCode() * 101);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     // Note to self: Do not try to "fix" this. Yes, it should be
     // a shallow copy in order to conform with the rest of Soot.
     // When a body is cloned, the Values are cloned explicitly and

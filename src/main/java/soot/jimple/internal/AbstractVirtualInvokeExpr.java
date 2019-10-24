@@ -47,42 +47,48 @@ public abstract class AbstractVirtualInvokeExpr extends AbstractInstanceInvokeEx
     }
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof AbstractVirtualInvokeExpr) {
-      AbstractVirtualInvokeExpr ie = (AbstractVirtualInvokeExpr) o;
-      if (!(baseBox.getValue().equivTo(ie.baseBox.getValue()) && getMethod().equals(ie.getMethod())
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof AbstractVirtualInvokeExpr)) {
+		return false;
+	}
+	AbstractVirtualInvokeExpr ie = (AbstractVirtualInvokeExpr) o;
+	if (!(baseBox.getValue().equivTo(ie.baseBox.getValue()) && getMethod().equals(ie.getMethod())
           && (argBoxes == null ? 0 : argBoxes.length) == (ie.argBoxes == null ? 0 : ie.argBoxes.length))) {
         return false;
       }
-      if (argBoxes != null) {
+	if (argBoxes != null) {
         for (int i = 0; i < argBoxes.length; i++) {
           if (!(argBoxes[i]).getValue().equivTo(ie.argBoxes[i].getValue())) {
             return false;
           }
         }
       }
-      return true;
-    }
-    return false;
+	return true;
   }
 
   /**
    * Returns a hash code for this object, consistent with structural equality.
    */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return baseBox.getValue().equivHashCode() * 101 + getMethod().equivHashCode() * 17;
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseVirtualInvokeExpr(this);
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
-    buffer.append(Jimple.VIRTUALINVOKE + " " + baseBox.getValue().toString() + "." + methodRef.getSignature() + "(");
+    buffer.append(new StringBuilder().append(Jimple.VIRTUALINVOKE).append(" ").append(baseBox.getValue().toString()).append(".").append(methodRef.getSignature()).append("(")
+			.toString());
 
     if (argBoxes != null) {
       for (int i = 0; i < argBoxes.length; i++) {
@@ -99,7 +105,8 @@ public abstract class AbstractVirtualInvokeExpr extends AbstractInstanceInvokeEx
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.VIRTUALINVOKE);
     up.literal(" ");
     baseBox.toString(up);
@@ -120,7 +127,8 @@ public abstract class AbstractVirtualInvokeExpr extends AbstractInstanceInvokeEx
     up.literal(")");
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) (getBase())).convertToBaf(context, out);
 
     if (argBoxes != null) {

@@ -84,7 +84,7 @@ public enum NewValidator implements BodyValidator {
           }
 
           // We search for a JSpecialInvokeExpr on the local.
-          LinkedHashSet<Local> locals = new LinkedHashSet<Local>();
+          LinkedHashSet<Local> locals = new LinkedHashSet<>();
           locals.add((Local) assign.getLeftOp());
 
           checkForInitializerOnPath(g, assign, exceptions);
@@ -115,11 +115,11 @@ public enum NewValidator implements BodyValidator {
    * @return true if a call to a &lt;init&gt;-Method has been found on this way.
    */
   private boolean checkForInitializerOnPath(UnitGraph g, AssignStmt newStmt, List<ValidationException> exception) {
-    List<Unit> workList = new ArrayList<Unit>();
-    Set<Unit> doneSet = new HashSet<Unit>();
+    List<Unit> workList = new ArrayList<>();
+    Set<Unit> doneSet = new HashSet<>();
     workList.add(newStmt);
 
-    Set<Local> aliasingLocals = new HashSet<Local>();
+    Set<Local> aliasingLocals = new HashSet<>();
     aliasingLocals.add((Local) newStmt.getLeftOp());
 
     while (!workList.isEmpty()) {
@@ -155,13 +155,11 @@ public enum NewValidator implements BodyValidator {
         boolean creatingAlias = false;
         if (curStmt instanceof AssignStmt) {
           AssignStmt assignCheck = (AssignStmt) curStmt;
-          if (aliasingLocals.contains(assignCheck.getRightOp())) {
-            if (assignCheck.getLeftOp() instanceof Local) {
-              // A new alias is created.
-              aliasingLocals.add((Local) assignCheck.getLeftOp());
-              creatingAlias = true;
-            }
-          }
+          if (aliasingLocals.contains(assignCheck.getRightOp()) && assignCheck.getLeftOp() instanceof Local) {
+		  // A new alias is created.
+		  aliasingLocals.add((Local) assignCheck.getLeftOp());
+		  creatingAlias = true;
+		}
           Local originalLocal = aliasingLocals.iterator().next();
           if (originalLocal.equals(assignCheck.getLeftOp())) {
             // In case of dead assignments:

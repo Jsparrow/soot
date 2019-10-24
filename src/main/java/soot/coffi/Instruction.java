@@ -108,14 +108,16 @@ abstract class Instruction implements Cloneable {
     returns = false;
   }
 
-  protected Object clone() throws CloneNotSupportedException {
+  @Override
+protected Object clone() throws CloneNotSupportedException {
 
     return super.clone();
 
   }
 
-  public String toString() {
-    return label + ": " + name + "[" + originalIndex + "]";
+  @Override
+public String toString() {
+    return new StringBuilder().append(label).append(": ").append(name).append("[").append(originalIndex).append("]").toString();
   }
 
   /**
@@ -210,8 +212,9 @@ abstract class Instruction implements Cloneable {
    *
    * @return unique hash code for this instruction, assuming labels are unique.
    */
-  public int hashCode() {
-    return (new Integer(label)).hashCode();
+  @Override
+public int hashCode() {
+    return (Integer.valueOf(label)).hashCode();
   }
 
   /**
@@ -241,7 +244,9 @@ abstract class Instruction implements Cloneable {
    * @see Instruction#shortToBytes
    */
   public static short getShort(byte bc[], int index) {
-    short s, bh, bl;
+    short s;
+	short bh;
+	short bl;
     bh = (bc[index]);
     bl = (bc[index + 1]);
     s = (short) (((bh << 8) & 0xff00) | (bl & 0xff));
@@ -262,7 +267,11 @@ abstract class Instruction implements Cloneable {
    * @see Instruction#intToBytes
    */
   public static int getInt(byte bc[], int index) {
-    int i, bhh, bhl, blh, bll;
+    int i;
+	int bhh;
+	int bhl;
+	int blh;
+	int bll;
     bhh = (((bc[index])) << 24) & 0xff000000;
     bhl = (((bc[index + 1])) << 16) & 0xff0000;
     blh = (((bc[index + 2])) << 8) & 0xff00;

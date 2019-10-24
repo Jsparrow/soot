@@ -33,14 +33,14 @@ class Lock {
   Lock() {
     level = 0;
     owner = null;
-    q = new LinkedList<Thread>();
+    q = new LinkedList<>();
   }
 
   public Thread nextThread() {
     return q.getFirst();
   }
 
-  public Thread deQ(Thread t) throws IllegalMonitorStateException {
+  public Thread deQ(Thread t) {
     if (t != q.getFirst()) {
       throw new IllegalMonitorStateException();
     }

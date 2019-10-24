@@ -45,11 +45,13 @@ package soot.dexpler.tags;
 import soot.tagkit.Tag;
 
 public class DoubleOpTag implements Tag {
-  public String getName() {
+  @Override
+public String getName() {
     return "DoubleOpTag";
   }
 
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     byte[] b = new byte[1];
     b[0] = 0;
     return b;

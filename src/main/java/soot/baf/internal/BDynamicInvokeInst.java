@@ -48,16 +48,19 @@ public class BDynamicInvokeInst extends AbstractInvokeInst implements DynamicInv
     this.tag = tag;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return methodRef.parameterTypes().size();
 
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BDynamicInvokeInst(bsmRef, bsmArgs, methodRef, tag);
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     if (methodRef.returnType() instanceof VoidType) {
       return 0;
     } else {
@@ -65,24 +68,29 @@ public class BDynamicInvokeInst extends AbstractInvokeInst implements DynamicInv
     }
   }
 
-  public SootMethodRef getBootstrapMethodRef() {
+  @Override
+public SootMethodRef getBootstrapMethodRef() {
     return bsmRef;
   }
 
-  public List<Value> getBootstrapArgs() {
+  @Override
+public List<Value> getBootstrapArgs() {
     return bsmArgs;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "dynamicinvoke";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseDynamicInvokeInst(this);
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
     buffer.append(Jimple.DYNAMICINVOKE);
     buffer.append(" \"");
@@ -105,11 +113,10 @@ public class BDynamicInvokeInst extends AbstractInvokeInst implements DynamicInv
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.DYNAMICINVOKE);
-    up.literal(" \"" + methodRef.name() + "\" <"
-        + SootMethod.getSubSignature(""/* no method name here */, methodRef.parameterTypes(), methodRef.returnType())
-        + "> ");
+    up.literal(new StringBuilder().append(" \"").append(methodRef.name()).append("\" <").append(SootMethod.getSubSignature(""/* no method name here */, methodRef.parameterTypes(), methodRef.returnType())).append("> ").toString());
     up.methodRef(bsmRef);
     up.literal("(");
 

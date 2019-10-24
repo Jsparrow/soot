@@ -39,23 +39,20 @@ import soot.util.BitVector;
 @Deprecated
 class StronglyConnectedComponentsBV {
   private static final Logger logger = LoggerFactory.getLogger(StronglyConnectedComponentsBV.class);
-  BitVector variables;
-  Set<TypeVariableBV> black;
-  LinkedList<TypeVariableBV> finished;
+private static final boolean DEBUG = false;
+BitVector variables;
+Set<TypeVariableBV> black;
+LinkedList<TypeVariableBV> finished;
+TypeResolverBV resolver;
+LinkedList<LinkedList<TypeVariableBV>> forest = new LinkedList<>();
+LinkedList<TypeVariableBV> current_tree;
 
-  TypeResolverBV resolver;
-
-  LinkedList<LinkedList<TypeVariableBV>> forest = new LinkedList<LinkedList<TypeVariableBV>>();
-  LinkedList<TypeVariableBV> current_tree;
-
-  private static final boolean DEBUG = false;
-
-  public StronglyConnectedComponentsBV(BitVector typeVariableList, TypeResolverBV resolver) throws TypeException {
+public StronglyConnectedComponentsBV(BitVector typeVariableList, TypeResolverBV resolver) throws TypeException {
     this.resolver = resolver;
     variables = typeVariableList;
 
-    black = new TreeSet<TypeVariableBV>();
-    finished = new LinkedList<TypeVariableBV>();
+    black = new TreeSet<>();
+    finished = new LinkedList<>();
 
     for (BitSetIterator i = variables.iterator(); i.hasNext();) {
       TypeVariableBV var = resolver.typeVariableForId(i.next());
@@ -66,30 +63,26 @@ class StronglyConnectedComponentsBV {
       }
     }
 
-    black = new TreeSet<TypeVariableBV>();
+    black = new TreeSet<>();
 
-    for (TypeVariableBV var : finished) {
-      if (!black.contains(var)) {
-        current_tree = new LinkedList<TypeVariableBV>();
+    finished.stream().filter(var -> !black.contains(var)).forEach(var -> {
+        current_tree = new LinkedList<>();
         forest.add(current_tree);
         black.add(var);
         dfsgt_visit(var);
-      }
-    }
+      });
 
     for (Iterator<LinkedList<TypeVariableBV>> i = forest.iterator(); i.hasNext();) {
       LinkedList<TypeVariableBV> list = i.next();
       TypeVariableBV previous = null;
-      StringBuffer s = null;
+      StringBuilder s = null;
       if (DEBUG) {
-        s = new StringBuffer("scc:\n");
+        s = new StringBuilder("scc:\n");
       }
 
-      for (Iterator<TypeVariableBV> j = list.iterator(); j.hasNext();) {
-        TypeVariableBV current = j.next();
-
+      for (TypeVariableBV current : list) {
         if (DEBUG) {
-          s.append(" " + current + "\n");
+          s.append(new StringBuilder().append(" ").append(current).append("\n").toString());
         }
 
         if (previous == null) {
@@ -108,7 +101,7 @@ class StronglyConnectedComponentsBV {
     }
   }
 
-  private void dfsg_visit(TypeVariableBV var) {
+private void dfsg_visit(TypeVariableBV var) {
     BitVector parents = var.parents();
 
     for (BitSetIterator i = parents.iterator(); i.hasNext();) {
@@ -123,7 +116,7 @@ class StronglyConnectedComponentsBV {
     finished.add(0, var);
   }
 
-  private void dfsgt_visit(TypeVariableBV var) {
+private void dfsgt_visit(TypeVariableBV var) {
     current_tree.add(var);
 
     BitVector children = var.children();

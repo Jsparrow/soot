@@ -38,8 +38,9 @@ public class CONSTANT_NameAndType_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
-      return "NameAndTypeInfo: " + name_index + " " + descriptor_index;
+    @Override
+	public String toString() {
+      return new StringBuilder().append("NameAndTypeInfo: ").append(name_index).append(" ").append(descriptor_index).toString();
     }
 
 

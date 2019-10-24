@@ -70,7 +70,7 @@ public class ForLoopCreationHelper {
   public ForLoopCreationHelper(ASTStatementSequenceNode stmtSeqNode, ASTWhileNode whileNode) {
     this.stmtSeqNode = stmtSeqNode;
     this.whileNode = whileNode;
-    varToStmtMap = new HashMap<String, Integer>();
+    varToStmtMap = new HashMap<>();
   }
 
   /*
@@ -80,7 +80,7 @@ public class ForLoopCreationHelper {
    * The new body is then returned;
    */
   public List<Object> createNewBody(List<Object> oldSubBody, int nodeNumber) {
-    List<Object> newSubBody = new ArrayList<Object>();
+    List<Object> newSubBody = new ArrayList<>();
 
     if (oldSubBody.size() <= nodeNumber) {
       // something is wrong since the oldSubBody has lesser nodes than
@@ -136,7 +136,7 @@ public class ForLoopCreationHelper {
       return null;
     }
 
-    List<String> toReturn = new ArrayList<String>();
+    List<String> toReturn = new ArrayList<>();
 
     int stmtNum = 0;
     for (AugmentedStmt as : stmtSeqNode.getStatements()) {
@@ -146,10 +146,10 @@ public class ForLoopCreationHelper {
       if (s instanceof DefinitionStmt) {
         Value left = ((DefinitionStmt) s).getLeftOp();
         toReturn.add(left.toString());
-        varToStmtMap.put(left.toString(), new Integer(stmtNum));
+        varToStmtMap.put(left.toString(), Integer.valueOf(stmtNum));
       } else {
-        toReturn = new ArrayList<String>();
-        varToStmtMap = new HashMap<String, Integer>();
+        toReturn = new ArrayList<>();
+        varToStmtMap = new HashMap<>();
       }
       stmtNum++;
     } // going through all statements
@@ -170,7 +170,7 @@ public class ForLoopCreationHelper {
   }
 
   private List<String> getCond(ASTCondition cond) {
-    List<String> toReturn = new ArrayList<String>();
+    List<String> toReturn = new ArrayList<>();
 
     if (cond instanceof ASTUnaryCondition) {
       toReturn.add(((ASTUnaryCondition) cond).toString());
@@ -188,15 +188,9 @@ public class ForLoopCreationHelper {
 
   private List<String> getCommonVars(List<String> defs, List<String> condUses) {
 
-    List<String> toReturn = new ArrayList<String>();
-    Iterator<String> defIt = defs.iterator();
-
-    while (defIt.hasNext()) {
-      String defString = defIt.next();
-      Iterator<String> condIt = condUses.iterator();
-      while (condIt.hasNext()) {
-        String condString = condIt.next();
-
+    List<String> toReturn = new ArrayList<>();
+    for (String defString : defs) {
+      for (String condString : condUses) {
         if (condString.compareTo(defString) == 0) {
           // match
           toReturn.add(defString);
@@ -287,7 +281,7 @@ public class ForLoopCreationHelper {
   }
 
   private List<AugmentedStmt> getUpdate(List<String> defs, List<String> condUses, List<String> commonUses) {
-    List<AugmentedStmt> toReturn = new ArrayList<AugmentedStmt>();
+    List<AugmentedStmt> toReturn = new ArrayList<>();
 
     // most naive approach
     List<Object> subBodies = whileNode.get_SubBodies();
@@ -326,9 +320,7 @@ public class ForLoopCreationHelper {
 
       // check if it assigns to a def
       Value left = ((DefinitionStmt) lastStmt).getLeftOp();
-      Iterator<String> defIt = defs.iterator();
-      while (defIt.hasNext()) {
-        String defString = defIt.next();
+      for (String defString : defs) {
         if (left.toString().compareTo(defString) == 0) {
           // match
           toReturn.add(last);
@@ -337,11 +329,9 @@ public class ForLoopCreationHelper {
           removeLast = true;
           // stmts.remove(stmts.size()-1);
 
-          // see if commonUses has this otherwise add it
-          Iterator<String> coIt = commonUses.iterator();
           boolean matched = false;
-          while (coIt.hasNext()) {
-            if (defString.compareTo(coIt.next()) == 0) {
+          for (String commonUse : commonUses) {
+            if (defString.compareTo(commonUse) == 0) {
               matched = true;
             }
           }
@@ -354,11 +344,7 @@ public class ForLoopCreationHelper {
         }
       }
 
-      // the code gets here only in the case when none of the def strings
-      // matched the updated variable
-      Iterator<String> condIt = condUses.iterator();
-      while (condIt.hasNext()) {
-        String condString = condIt.next();
+      for (String condString : condUses) {
         if (left.toString().compareTo(condString) == 0) {
           // match
           toReturn.add(last);
@@ -367,11 +353,9 @@ public class ForLoopCreationHelper {
           removeLast = true;
           // stmts.remove(stmts.size()-1);
 
-          // see if commonUses has this otherwise add it
-          Iterator<String> coIt = commonUses.iterator();
           boolean matched = false;
-          while (coIt.hasNext()) {
-            if (condString.compareTo(coIt.next()) == 0) {
+          for (String commonUse : commonUses) {
+            if (condString.compareTo(commonUse) == 0) {
               matched = true;
             }
           }
@@ -392,14 +376,13 @@ public class ForLoopCreationHelper {
     int currentLowestPosition = 999;
     for (String temp : commonVars) {
       Integer tempInt = varToStmtMap.get(temp);
-      if (tempInt != null) {
-        if (tempInt.intValue() < currentLowestPosition) {
-          currentLowestPosition = tempInt.intValue();
-        }
-      }
+      boolean condition = tempInt != null && tempInt.intValue() < currentLowestPosition;
+	if (condition) {
+	  currentLowestPosition = tempInt.intValue();
+	}
     }
 
-    List<AugmentedStmt> stmts = new ArrayList<AugmentedStmt>();
+    List<AugmentedStmt> stmts = new ArrayList<>();
 
     List<AugmentedStmt> statements = stmtSeqNode.getStatements();
     Iterator<AugmentedStmt> stmtIt = statements.iterator();
@@ -416,7 +399,7 @@ public class ForLoopCreationHelper {
       newStmtSeqNode = null;
     }
 
-    List<AugmentedStmt> init = new ArrayList<AugmentedStmt>();
+    List<AugmentedStmt> init = new ArrayList<>();
     while (stmtIt.hasNext()) {
       init.add(stmtIt.next());
     }

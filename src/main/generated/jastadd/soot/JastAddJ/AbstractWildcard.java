@@ -23,68 +23,74 @@ import soot.coffi.CoffiMethodSource;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.ast:20
  */
-public abstract class AbstractWildcard extends Access implements Cloneable {
+public abstract class AbstractWildcard extends Access {
   /**
-   * @apilevel low-level
-   */
-  public void flushCache() {
-    super.flushCache();
-  }
-  /**
-   * @apilevel internal
-   */
-  public void flushCollectionCache() {
-    super.flushCollectionCache();
-  }
-  /**
-   * @apilevel internal
-   */
-  @SuppressWarnings({"unchecked", "cast"})
-  public AbstractWildcard clone() throws CloneNotSupportedException {
-    AbstractWildcard node = (AbstractWildcard)super.clone();
-    node.in$Circle(false);
-    node.is$Final(false);
-    return node;
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public AbstractWildcard() {
-    super();
-
-
-  }
-  /**
-   * Initializes the child array to the correct size.
-   * Initializes List and Opt nta children.
-   * @apilevel internal
-   * @ast method
-   * @ast method 
-   * 
-   */
-  public void init$Children() {
-  }
-  /**
-   * @apilevel low-level
-   * @ast method 
-   * 
-   */
-  protected int numChildren() {
-    return 0;
-  }
-  /**
-   * @apilevel internal
-   * @ast method 
-   * 
-   */
-  public boolean mayHaveRewrite() {
-    return false;
-  }
-  /**
-   * @apilevel internal
-   */
-  public ASTNode rewriteTo() {
-    return super.rewriteTo();
-  }
+	   * @ast method 
+	   * 
+	   */
+	  public AbstractWildcard() {
+	
+	
+	  }
+	/**
+	   * @apilevel low-level
+	   */
+	  @Override
+	public void flushCache() {
+	    super.flushCache();
+	  }
+	/**
+	   * @apilevel internal
+	   */
+	  @Override
+	public void flushCollectionCache() {
+	    super.flushCollectionCache();
+	  }
+	/**
+	   * @apilevel internal
+	   */
+	  @Override
+	@SuppressWarnings({"unchecked", "cast"})
+	  public AbstractWildcard clone() throws CloneNotSupportedException {
+	    AbstractWildcard node = (AbstractWildcard)super.clone();
+	    node.in$Circle(false);
+	    node.is$Final(false);
+	    return node;
+	  }
+	/**
+	   * Initializes the child array to the correct size.
+	   * Initializes List and Opt nta children.
+	   * @apilevel internal
+	   * @ast method
+	   * @ast method 
+	   * 
+	   */
+	  @Override
+	public void init$Children() {
+	  }
+	/**
+	   * @apilevel low-level
+	   * @ast method 
+	   * 
+	   */
+	  @Override
+	protected int numChildren() {
+	    return 0;
+	  }
+	/**
+	   * @apilevel internal
+	   * @ast method 
+	   * 
+	   */
+	  @Override
+	public boolean mayHaveRewrite() {
+	    return false;
+	  }
+	/**
+	   * @apilevel internal
+	   */
+	  @Override
+	public ASTNode rewriteTo() {
+	    return super.rewriteTo();
+	  }
 }

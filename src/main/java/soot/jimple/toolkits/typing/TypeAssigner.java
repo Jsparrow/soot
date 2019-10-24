@@ -127,7 +127,7 @@ public class TypeAssigner extends BodyTransformer {
       long runtime = finish.getTime() - start.getTime();
       long mins = runtime / 60000;
       long secs = (runtime % 60000) / 1000;
-      logger.debug("[TypeAssigner] typing system ended. It took " + mins + " mins and " + secs + " secs.");
+      logger.debug(new StringBuilder().append("[TypeAssigner] typing system ended. It took ").append(mins).append(" mins and ").append(secs).append(" secs.").toString());
     }
 
     if (!opt.ignore_nullpointer_dereferences()) {
@@ -148,7 +148,7 @@ public class TypeAssigner extends BodyTransformer {
    * @param b
    */
   protected static void replaceNullType(Body b) {
-    List<Local> localsToRemove = new ArrayList<Local>();
+    List<Local> localsToRemove = new ArrayList<>();
     boolean hasNullType = false;
 
     // check if any local has null_type
@@ -166,56 +166,51 @@ public class TypeAssigner extends BodyTransformer {
 
     // force to propagate null constants
     Map<String, String> opts = PhaseOptions.v().getPhaseOptions("jop.cpf");
-    if (!opts.containsKey("enabled") || !opts.get("enabled").equals("true")) {
+    if (!opts.containsKey("enabled") || !"true".equals(opts.get("enabled"))) {
       logger.warn("Cannot run TypeAssigner.replaceNullType(Body). Try to enable jop.cfg.");
       return;
     }
     ConstantPropagatorAndFolder.v().transform(b);
 
-    List<Unit> unitToReplaceByException = new ArrayList<Unit>();
-    for (Unit u : b.getUnits()) {
-      for (ValueBox vb : u.getUseBoxes()) {
-        if (vb.getValue() instanceof Local && ((Local) vb.getValue()).getType() instanceof NullType) {
+    List<Unit> unitToReplaceByException = new ArrayList<>();
+    b.getUnits().forEach(u -> u.getUseBoxes().stream()
+			.filter(vb -> vb.getValue() instanceof Local && ((Local) vb.getValue()).getType() instanceof NullType)
+			.forEach(vb -> {
+				Local l = (Local) vb.getValue();
+				Stmt s = (Stmt) u;
+				boolean replace = false;
+				if (s.containsArrayRef()) {
+					ArrayRef r = s.getArrayRef();
+					if (r.getBase() == l) {
+						replace = true;
+					}
+				} else if (s.containsFieldRef()) {
+					FieldRef r = s.getFieldRef();
+					if (r instanceof InstanceFieldRef) {
+						InstanceFieldRef ir = (InstanceFieldRef) r;
+						if (ir.getBase() == l) {
+							replace = true;
+						}
+					}
+				} else if (s.containsInvokeExpr()) {
+					InvokeExpr ie = s.getInvokeExpr();
+					if (ie instanceof InstanceInvokeExpr) {
+						InstanceInvokeExpr iie = (InstanceInvokeExpr) ie;
+						if (iie.getBase() == l) {
+							replace = true;
+						}
+					}
+				}
+				if (replace) {
+					unitToReplaceByException.add(u);
+				}
+			}));
 
-          Local l = (Local) vb.getValue();
-          Stmt s = (Stmt) u;
-
-          boolean replace = false;
-          if (s.containsArrayRef()) {
-            ArrayRef r = s.getArrayRef();
-            if (r.getBase() == l) {
-              replace = true;
-            }
-          } else if (s.containsFieldRef()) {
-            FieldRef r = s.getFieldRef();
-            if (r instanceof InstanceFieldRef) {
-              InstanceFieldRef ir = (InstanceFieldRef) r;
-              if (ir.getBase() == l) {
-                replace = true;
-              }
-            }
-          } else if (s.containsInvokeExpr()) {
-            InvokeExpr ie = s.getInvokeExpr();
-            if (ie instanceof InstanceInvokeExpr) {
-              InstanceInvokeExpr iie = (InstanceInvokeExpr) ie;
-              if (iie.getBase() == l) {
-                replace = true;
-              }
-            }
-          }
-
-          if (replace) {
-            unitToReplaceByException.add(u);
-          }
-        }
-      }
-    }
-
-    for (Unit u : unitToReplaceByException) {
+    unitToReplaceByException.forEach(u -> {
       soot.dexpler.Util.addExceptionAfterUnit(b, "java.lang.NullPointerException", u,
           "This statement would have triggered an Exception: " + u);
       b.getUnits().remove(u);
-    }
+    });
 
     // should be done on a separate phase
     DeadAssignmentEliminator.v().transform(b);
@@ -224,9 +219,12 @@ public class TypeAssigner extends BodyTransformer {
   }
 
   private void compareTypeAssigners(Body b, boolean useOlderTypeAssigner) {
-    JimpleBody jb = (JimpleBody) b, oldJb, newJb;
+    JimpleBody jb = (JimpleBody) b;
+	JimpleBody oldJb;
+	JimpleBody newJb;
     int size = jb.getUnits().size();
-    long oldTime, newTime;
+    long oldTime;
+	long newTime;
     if (useOlderTypeAssigner) {
       // Use old type assigner last
       newJb = (JimpleBody) jb.clone();
@@ -258,7 +256,8 @@ public class TypeAssigner extends BodyTransformer {
       cmp = compareTypings(oldJb, newJb);
     }
 
-    logger.debug("cmp;" + jb.getMethod() + ";" + size + ";" + oldTime + ";" + newTime + ";" + cmp);
+    logger.debug(new StringBuilder().append("cmp;").append(jb.getMethod()).append(";").append(size).append(";").append(oldTime).append(";")
+			.append(newTime).append(";").append(cmp).toString());
   }
 
   private boolean typingFailed(JimpleBody b) {
@@ -286,7 +285,8 @@ public class TypeAssigner extends BodyTransformer {
 
     Iterator<Local> ib = b.getLocals().iterator();
     for (Local v : a.getLocals()) {
-      Type ta = v.getType(), tb = ib.next().getType();
+      Type ta = v.getType();
+	Type tb = ib.next().getType();
 
       if (soot.jimple.toolkits.typing.fast.TypeResolver.typesEqual(ta, tb)) {
         continue;

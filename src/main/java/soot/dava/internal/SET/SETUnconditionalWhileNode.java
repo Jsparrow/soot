@@ -33,15 +33,18 @@ public class SETUnconditionalWhileNode extends SETCycleNode {
     add_SubBody(body);
   }
 
-  public IterableSet get_NaturalExits() {
+  @Override
+public IterableSet get_NaturalExits() {
     return new IterableSet();
   }
 
-  public ASTNode emit_AST() {
+  @Override
+public ASTNode emit_AST() {
     return new ASTUnconditionalLoopNode(get_Label(), emit_ASTBody(body2childChain.get(subBodies.get(0))));
   }
 
-  public AugmentedStmt get_EntryStmt() {
+  @Override
+public AugmentedStmt get_EntryStmt() {
     return get_CharacterizingStmt();
   }
 }

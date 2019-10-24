@@ -33,7 +33,6 @@ public class StringTrie {
   private StringTrie[] tries = new StringTrie[0];
 
   public StringTrie() {
-    super();
   }
 
   public void add(char[] chars, int index) {

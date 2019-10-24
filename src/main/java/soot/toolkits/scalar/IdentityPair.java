@@ -89,7 +89,8 @@ public class IdentityPair<T, U> {
     return o2;
   }
 
-  public String toString() {
-    return "IdentityPair " + o1 + "," + o2;
+  @Override
+public String toString() {
+    return new StringBuilder().append("IdentityPair ").append(o1).append(",").append(o2).toString();
   }
 }

@@ -73,7 +73,8 @@ public class CommonPrecedingEqualValueAnalysis extends BackwardFlowAnalysis {
     return ancestorList;
   }
 
-  protected void merge(Object in1, Object in2, Object out) {
+  @Override
+protected void merge(Object in1, Object in2, Object out) {
     FlowSet inSet1 = (FlowSet) in1;
     FlowSet inSet2 = (FlowSet) in2;
     FlowSet outSet = (FlowSet) out;
@@ -82,7 +83,8 @@ public class CommonPrecedingEqualValueAnalysis extends BackwardFlowAnalysis {
     // inSet1.union(inSet2, outSet);
   }
 
-  protected void flowThrough(Object inValue, Object unit, Object outValue) {
+  @Override
+protected void flowThrough(Object inValue, Object unit, Object outValue) {
     FlowSet in = (FlowSet) inValue;
     FlowSet out = (FlowSet) outValue;
     Stmt stmt = (Stmt) unit;
@@ -90,7 +92,7 @@ public class CommonPrecedingEqualValueAnalysis extends BackwardFlowAnalysis {
     in.copy(out);
 
     // get list of definitions at this unit
-    List<EquivalentValue> newDefs = new ArrayList<EquivalentValue>();
+    List<EquivalentValue> newDefs = new ArrayList<>();
     Iterator newDefBoxesIt = stmt.getDefBoxes().iterator();
     while (newDefBoxesIt.hasNext()) {
       newDefs.add(new EquivalentValue(((ValueBox) newDefBoxesIt.next()).getValue()));
@@ -106,17 +108,15 @@ public class CommonPrecedingEqualValueAnalysis extends BackwardFlowAnalysis {
         out.add(aliasIt.next());
       }
     } else if (stmt instanceof DefinitionStmt) {
-      Iterator<EquivalentValue> newDefsIt = newDefs.iterator();
-      while (newDefsIt.hasNext()) {
-        out.remove(newDefsIt.next());
-        // to be smarter, we could also add the right side to the list of aliases...
-      }
+      // to be smarter, we could also add the right side to the list of aliases...
+	newDefs.forEach(out::remove);
     }
 
     // logger.debug(""+stmt + " HAS ALIASES in" + in + " out" + out);
   }
 
-  protected void copy(Object source, Object dest) {
+  @Override
+protected void copy(Object source, Object dest) {
 
     FlowSet sourceSet = (FlowSet) source;
     FlowSet destSet = (FlowSet) dest;
@@ -125,11 +125,13 @@ public class CommonPrecedingEqualValueAnalysis extends BackwardFlowAnalysis {
 
   }
 
-  protected Object entryInitialFlow() {
+  @Override
+protected Object entryInitialFlow() {
     return new ArraySparseSet(); // should be a full set, not an empty one
   }
 
-  protected Object newInitialFlow() {
+  @Override
+protected Object newInitialFlow() {
     return new ArraySparseSet(); // should be a full set, not an empty one
   }
 }

@@ -48,7 +48,7 @@ public class IntegerNumberer implements Numberer<Long> {
     if (number == 0) {
       return null;
     }
-    return new Long(number);
+    return Long.valueOf(number);
   }
 
   /** Should return the number of objects that have been assigned numbers. */

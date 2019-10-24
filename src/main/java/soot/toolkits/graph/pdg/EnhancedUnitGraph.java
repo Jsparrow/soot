@@ -38,6 +38,7 @@ import soot.toolkits.graph.MHGDominatorsFinder;
 import soot.toolkits.graph.MHGPostDominatorsFinder;
 import soot.toolkits.graph.UnitGraph;
 import soot.util.Chain;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -64,15 +65,15 @@ public class EnhancedUnitGraph extends UnitGraph {
     super(body);
 
     // try2nop = new Hashtable<GuardedBlock, Unit>();
-    try2nop = new Hashtable<Unit, Unit>();
-    handler2header = new Hashtable<Unit, Unit>();
+    try2nop = new Hashtable<>();
+    handler2header = new Hashtable<>();
 
     // there could be a maximum of traps.size() of nop
     // units added to the CFG plus potentially START/STOP nodes.
     int size = unitChain.size() + body.getTraps().size() + 2;
 
-    unitToSuccs = new HashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
-    unitToPreds = new HashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
+    unitToSuccs = new HashMap<>(size * 2 + 1, 0.7f);
+    unitToPreds = new HashMap<>(size * 2 + 1, 0.7f);
 
     /*
      * Compute the head and tails at each phase because other phases might rely on them.
@@ -98,29 +99,27 @@ public class EnhancedUnitGraph extends UnitGraph {
    */
 
   protected void handleMultipleReturns() {
-    if (this.getTails().size() > 1) {
-      Unit stop = new ExitStmt();
-      List<Unit> predsOfstop = new ArrayList<Unit>();
-
-      for (Unit tail : this.getTails()) {
+    if (this.getTails().size() <= 1) {
+		return;
+	}
+	Unit stop = new ExitStmt();
+	List<Unit> predsOfstop = new ArrayList<>();
+	this.getTails().forEach(tail -> {
         predsOfstop.add(tail);
 
         List<Unit> tailSuccs = this.unitToSuccs.get(tail);
         if (tailSuccs == null) {
-          tailSuccs = new ArrayList<Unit>();
+          tailSuccs = new ArrayList<>();
           this.unitToSuccs.put(tail, tailSuccs);
         }
         tailSuccs.add(stop);
-      }
-
-      this.unitToPreds.put(stop, predsOfstop);
-      this.unitToSuccs.put(stop, new ArrayList<Unit>());
-
-      Chain<Unit> units = body.getUnits().getNonPatchingChain();
-      if (!units.contains(stop)) {
+      });
+	this.unitToPreds.put(stop, predsOfstop);
+	this.unitToSuccs.put(stop, new ArrayList<>());
+	Chain<Unit> units = body.getUnits().getNonPatchingChain();
+	if (!units.contains(stop)) {
         units.addLast(stop);
       }
-    }
   }
 
   /**
@@ -138,19 +137,14 @@ public class EnhancedUnitGraph extends UnitGraph {
         }
 
         this.unitToPreds.remove(head);
-        for (Unit succ : this.unitToSuccs.get(head)) {
-          List<Unit> tobeRemoved = new ArrayList<Unit>();
+        this.unitToSuccs.get(head).forEach(succ -> {
+          List<Unit> tobeRemoved = new ArrayList<>();
           List<Unit> predOfSuccs = this.unitToPreds.get(succ);
           if (predOfSuccs != null) {
-            for (Unit pred : predOfSuccs) {
-              if (pred == head) {
-                tobeRemoved.add(pred);
-              }
-
-            }
+            tobeRemoved.addAll(predOfSuccs.stream().filter(pred -> pred == head).collect(Collectors.toList()));
             predOfSuccs.removeAll(tobeRemoved);
           }
-        }
+        });
 
         this.unitToSuccs.remove(head);
 
@@ -164,17 +158,16 @@ public class EnhancedUnitGraph extends UnitGraph {
   }
 
   protected void handleExplicitThrowEdges() {
-    MHGDominatorTree<Unit> dom = new MHGDominatorTree<Unit>(new MHGDominatorsFinder<Unit>(this));
-    MHGDominatorTree<Unit> pdom = new MHGDominatorTree<Unit>(new MHGPostDominatorsFinder<Unit>(this));
+    MHGDominatorTree<Unit> dom = new MHGDominatorTree<>(new MHGDominatorsFinder<Unit>(this));
+    MHGDominatorTree<Unit> pdom = new MHGDominatorTree<>(new MHGPostDominatorsFinder<Unit>(this));
 
     // this keeps a map from the entry of a try-catch-block to a selected
     // merge point
-    Hashtable<Unit, Unit> x2mergePoint = new Hashtable<Unit, Unit>();
+    Hashtable<Unit, Unit> x2mergePoint = new Hashtable<>();
 
     List<Unit> tails = this.getTails();
 
-    TailsLoop: for (Iterator<Unit> itr = tails.iterator(); itr.hasNext();) {
-      Unit tail = itr.next();
+    TailsLoop: for (Unit tail : tails) {
       if (!(tail instanceof ThrowStmt)) {
         continue;
       }
@@ -355,7 +348,7 @@ public class EnhancedUnitGraph extends UnitGraph {
 
       List<Unit> throwSuccs = this.unitToSuccs.get(tail);
       if (throwSuccs == null) {
-        throwSuccs = new ArrayList<Unit>();
+        throwSuccs = new ArrayList<>();
         this.unitToSuccs.put(tail, throwSuccs);
       }
 
@@ -363,7 +356,7 @@ public class EnhancedUnitGraph extends UnitGraph {
 
       List<Unit> mergePreds = this.unitToPreds.get(mergePoint);
       if (mergePreds == null) {
-        mergePreds = new ArrayList<Unit>();
+        mergePreds = new ArrayList<>();
         this.unitToPreds.put(mergePoint, mergePreds);
       }
       mergePreds.add(tail);
@@ -414,7 +407,7 @@ public class EnhancedUnitGraph extends UnitGraph {
     }
 
     // Only add a nop once
-    Hashtable<Unit, Boolean> nop2added = new Hashtable<Unit, Boolean>();
+    Hashtable<Unit, Boolean> nop2added = new Hashtable<>();
 
     // Now actually add the edge
     AddExceptionalEdge: for (Iterator<Trap> trapIt = body.getTraps().iterator(); trapIt.hasNext();) {
@@ -436,8 +429,8 @@ public class EnhancedUnitGraph extends UnitGraph {
 
       if (this.unitToPreds.containsKey(handler)) {
         List<Unit> handlerPreds = this.unitToPreds.get(handler);
-        for (Iterator<Unit> preditr = handlerPreds.iterator(); preditr.hasNext();) {
-          if (try2nop.containsValue(preditr.next())) {
+        for (Unit handlerPred : handlerPreds) {
+          if (try2nop.containsValue(handlerPred)) {
             continue AddExceptionalEdge;
           }
         }
@@ -451,18 +444,18 @@ public class EnhancedUnitGraph extends UnitGraph {
 
       if (!nop2added.containsKey(ehnop)) {
         List<Unit> predsOfB = getPredsOf(b);
-        List<Unit> predsOfehnop = new ArrayList<Unit>(predsOfB);
+        List<Unit> predsOfehnop = new ArrayList<>(predsOfB);
 
-        for (Unit a : predsOfB) {
+        predsOfB.forEach(a -> {
           List<Unit> succsOfA = this.unitToSuccs.get(a);
           if (succsOfA == null) {
-            succsOfA = new ArrayList<Unit>();
+            succsOfA = new ArrayList<>();
             this.unitToSuccs.put(a, succsOfA);
           } else {
             succsOfA.remove(b);
           }
           succsOfA.add((Unit) ehnop);
-        }
+        });
 
         predsOfB.clear();
         predsOfB.add((Unit) ehnop);
@@ -472,7 +465,7 @@ public class EnhancedUnitGraph extends UnitGraph {
 
       List<Unit> succsOfehnop = this.unitToSuccs.get(ehnop);
       if (succsOfehnop == null) {
-        succsOfehnop = new ArrayList<Unit>();
+        succsOfehnop = new ArrayList<>();
         this.unitToSuccs.put(ehnop, succsOfehnop);
       }
 
@@ -484,7 +477,7 @@ public class EnhancedUnitGraph extends UnitGraph {
 
       List<Unit> predsOfhandler = this.unitToPreds.get(handler);
       if (predsOfhandler == null) {
-        predsOfhandler = new ArrayList<Unit>();
+        predsOfhandler = new ArrayList<>();
         this.unitToPreds.put(handler, predsOfhandler);
       }
 
@@ -511,14 +504,16 @@ public class EnhancedUnitGraph extends UnitGraph {
  */
 class GuardedBlock {
 
-  Unit start, end;
+  Unit start;
+Unit end;
 
   public GuardedBlock(Unit s, Unit e) {
     this.start = s;
     this.end = e;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     // Following Joshua Bloch's recipe in "Effective Java", Item 8:
     int result = 17;
     result = 37 * result + this.start.hashCode();
@@ -526,7 +521,8 @@ class GuardedBlock {
     return result;
   }
 
-  public boolean equals(Object rhs) {
+  @Override
+public boolean equals(Object rhs) {
     if (rhs == this) {
       return true;
     }
@@ -552,15 +548,18 @@ class EHNopStmt extends JNopStmt {
   public EHNopStmt() {
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new EHNopStmt();
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 
@@ -579,15 +578,18 @@ class EntryStmt extends JNopStmt {
   public EntryStmt() {
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new EntryStmt();
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 
@@ -607,15 +609,18 @@ class ExitStmt extends JNopStmt {
   public ExitStmt() {
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ExitStmt();
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

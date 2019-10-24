@@ -35,7 +35,7 @@ public class DotGraphNode implements Renderable {
   private List<DotGraphAttribute> attributes;
 
   public DotGraphNode(String name) {
-    this.name = "\"" + DotGraphUtility.replaceQuotes(name) + "\"";
+    this.name = new StringBuilder().append("\"").append(DotGraphUtility.replaceQuotes(name)).append("\"").toString();
   }
 
   // make any illegal name to be legal
@@ -46,7 +46,7 @@ public class DotGraphNode implements Renderable {
   public void setLabel(String label) {
     label = DotGraphUtility.replaceQuotes(label);
     label = DotGraphUtility.replaceReturns(label);
-    this.setAttribute("label", "\"" + label + "\"");
+    this.setAttribute("label", new StringBuilder().append("\"").append(label).append("\"").toString());
   }
 
   public void setHTMLLabel(String label) {
@@ -64,7 +64,7 @@ public class DotGraphNode implements Renderable {
 
   public void setAttribute(String id, String value) {
     if (this.attributes == null) {
-      this.attributes = new LinkedList<DotGraphAttribute>();
+      this.attributes = new LinkedList<>();
     }
 
     this.setAttribute(new DotGraphAttribute(id, value));
@@ -72,20 +72,21 @@ public class DotGraphNode implements Renderable {
 
   public void setAttribute(DotGraphAttribute attr) {
     if (this.attributes == null) {
-      this.attributes = new LinkedList<DotGraphAttribute>();
+      this.attributes = new LinkedList<>();
     }
 
     this.attributes.add(attr);
   }
 
-  public void render(OutputStream out, int indent) throws IOException {
-    StringBuffer line = new StringBuffer(this.getName());
+  @Override
+public void render(OutputStream out, int indent) throws IOException {
+    StringBuilder line = new StringBuilder(this.getName());
     if (this.attributes != null) {
       line.append(" [");
-      for (DotGraphAttribute attr : this.attributes) {
+      this.attributes.forEach(attr -> {
         line.append(attr.toString());
         line.append(",");
-      }
+      });
       line.append("];");
     }
     DotGraphUtility.renderLine(out, new String(line), indent);

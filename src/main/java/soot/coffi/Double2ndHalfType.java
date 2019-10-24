@@ -38,7 +38,8 @@ public class Double2ndHalfType extends Type {
     return otherType instanceof Double2ndHalfType;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "double2ndhalf";
   }
 }

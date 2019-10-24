@@ -33,14 +33,16 @@ public class DShortcutAssignStmt extends DAssignStmt {
     this.type = type;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.type(type);
     up.literal(" ");
     super.toString(up);
   }
 
-  public String toString() {
-    return type.toString() + " " + leftBox.getValue().toString() + " = " + rightBox.getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(type.toString()).append(" ").append(leftBox.getValue().toString()).append(" = ").append(rightBox.getValue().toString()).toString();
   }
 
 }

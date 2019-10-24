@@ -42,7 +42,8 @@ public class ClinitElimAnalysis extends ForwardFlowAnalysis {
     doAnalysis();
   }
 
-  public void merge(Object in1, Object in2, Object out) {
+  @Override
+public void merge(Object in1, Object in2, Object out) {
 
     FlowSet inSet1 = (FlowSet) in1;
     FlowSet inSet2 = (FlowSet) in2;
@@ -51,7 +52,8 @@ public class ClinitElimAnalysis extends ForwardFlowAnalysis {
     inSet1.intersection(inSet2, outSet);
   }
 
-  public void copy(Object src, Object dest) {
+  @Override
+public void copy(Object src, Object dest) {
 
     FlowSet srcIn = (FlowSet) src;
     FlowSet destOut = (FlowSet) dest;
@@ -60,7 +62,8 @@ public class ClinitElimAnalysis extends ForwardFlowAnalysis {
   }
 
   // out(s) = in(s) intersect { target methods of s where edge kind is clinit}
-  protected void flowThrough(Object inVal, Object stmt, Object outVal) {
+  @Override
+protected void flowThrough(Object inVal, Object stmt, Object outVal) {
     FlowSet in = (FlowSet) inVal;
     FlowSet out = (FlowSet) outVal;
     Stmt s = (Stmt) stmt;
@@ -79,13 +82,15 @@ public class ClinitElimAnalysis extends ForwardFlowAnalysis {
     }
   }
 
-  protected Object entryInitialFlow() {
+  @Override
+protected Object entryInitialFlow() {
 
     return new ArraySparseSet();
 
   }
 
-  protected Object newInitialFlow() {
+  @Override
+protected Object newInitialFlow() {
     ArraySparseSet set = new ArraySparseSet();
     CallGraph cg = Scene.v().getCallGraph();
 

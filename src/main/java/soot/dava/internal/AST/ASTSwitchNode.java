@@ -50,14 +50,13 @@ public class ASTSwitchNode extends ASTLabeledNode {
     this.indexList = indexList;
     this.index2BodyList = index2BodyList;
 
-    Iterator<Object> it = indexList.iterator();
-    while (it.hasNext()) {
-      List body = index2BodyList.get(it.next());
+    indexList.forEach(anIndexList -> {
+      List body = index2BodyList.get(anIndexList);
 
       if (body != null) {
         subBodies.add(body);
       }
-    }
+    });
   }
 
   /*
@@ -74,15 +73,14 @@ public class ASTSwitchNode extends ASTLabeledNode {
   public void replaceIndex2BodyList(Map<Object, List<Object>> index2BodyList) {
     this.index2BodyList = index2BodyList;
 
-    subBodies = new ArrayList<Object>();
-    Iterator<Object> it = indexList.iterator();
-    while (it.hasNext()) {
-      List body = index2BodyList.get(it.next());
+    subBodies = new ArrayList<>();
+    indexList.forEach(anIndexList -> {
+      List body = index2BodyList.get(anIndexList);
 
       if (body != null) {
         subBodies.add(body);
       }
-    }
+    });
   }
 
   public ValueBox getKeyBox() {
@@ -97,11 +95,13 @@ public class ASTSwitchNode extends ASTLabeledNode {
     this.keyBox = Jimple.v().newRValueBox(key);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ASTSwitchNode(get_Label(), get_Key(), indexList, index2BodyList);
   }
 
-  public void perform_Analysis(ASTAnalysis a) {
+  @Override
+public void perform_Analysis(ASTAnalysis a) {
     ASTWalker.v().walk_value(a, get_Key());
 
     if (a instanceof TryContentsFinder) {
@@ -111,7 +111,8 @@ public class ASTSwitchNode extends ASTLabeledNode {
     perform_AnalysisOnSubBodies(a);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     label_toString(up);
 
     up.literal("switch");
@@ -160,8 +161,9 @@ public class ASTSwitchNode extends ASTLabeledNode {
     up.newline();
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
     b.append(label_toString());
 
@@ -211,7 +213,8 @@ public class ASTSwitchNode extends ASTLabeledNode {
    * Nomair A. Naeem, 7-FEB-05 Part of Visitor Design Implementation for AST See: soot.dava.toolkits.base.AST.analysis For
    * details
    */
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTSwitchNode(this);
   }
 }

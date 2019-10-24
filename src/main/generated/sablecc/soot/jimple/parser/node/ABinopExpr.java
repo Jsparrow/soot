@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ABinopExpr extends PBinopExpr
 {
-    private PImmediate _left_;
-    private PBinop _binop_;
-    private PImmediate _right_;
+    private PImmediate left;
+    private PBinop binop;
+    private PImmediate right;
 
     public ABinopExpr()
     {
@@ -34,9 +34,9 @@ public final class ABinopExpr extends PBinopExpr
     public Object clone()
     {
         return new ABinopExpr(
-            cloneNode(this._left_),
-            cloneNode(this._binop_),
-            cloneNode(this._right_));
+            cloneNode(this.left),
+            cloneNode(this.binop),
+            cloneNode(this.right));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class ABinopExpr extends PBinopExpr
 
     public PImmediate getLeft()
     {
-        return this._left_;
+        return this.left;
     }
 
     public void setLeft(PImmediate node)
     {
-        if(this._left_ != null)
+        if(this.left != null)
         {
-            this._left_.parent(null);
+            this.left.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class ABinopExpr extends PBinopExpr
             node.parent(this);
         }
 
-        this._left_ = node;
+        this.left = node;
     }
 
     public PBinop getBinop()
     {
-        return this._binop_;
+        return this.binop;
     }
 
     public void setBinop(PBinop node)
     {
-        if(this._binop_ != null)
+        if(this.binop != null)
         {
-            this._binop_.parent(null);
+            this.binop.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class ABinopExpr extends PBinopExpr
             node.parent(this);
         }
 
-        this._binop_ = node;
+        this.binop = node;
     }
 
     public PImmediate getRight()
     {
-        return this._right_;
+        return this.right;
     }
 
     public void setRight(PImmediate node)
     {
-        if(this._right_ != null)
+        if(this.right != null)
         {
-            this._right_.parent(null);
+            this.right.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class ABinopExpr extends PBinopExpr
             node.parent(this);
         }
 
-        this._right_ = node;
+        this.right = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._left_)
-            + toString(this._binop_)
-            + toString(this._right_);
+        return new StringBuilder().append("").append(toString(this.left)).append(toString(this.binop)).append(toString(this.right)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._left_ == child)
+        if(this.left == child)
         {
-            this._left_ = null;
+            this.left = null;
             return;
         }
 
-        if(this._binop_ == child)
+        if(this.binop == child)
         {
-            this._binop_ = null;
+            this.binop = null;
             return;
         }
 
-        if(this._right_ == child)
+        if(this.right == child)
         {
-            this._right_ = null;
+            this.right = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class ABinopExpr extends PBinopExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._left_ == oldChild)
+        if(this.left == oldChild)
         {
             setLeft((PImmediate) newChild);
             return;
         }
 
-        if(this._binop_ == oldChild)
+        if(this.binop == oldChild)
         {
             setBinop((PBinop) newChild);
             return;
         }
 
-        if(this._right_ == oldChild)
+        if(this.right == oldChild)
         {
             setRight((PImmediate) newChild);
             return;

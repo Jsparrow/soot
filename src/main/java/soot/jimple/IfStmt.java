@@ -28,18 +28,18 @@ import soot.Value;
 import soot.ValueBox;
 
 public interface IfStmt extends Stmt {
-  public Value getCondition();
+  Value getCondition();
 
   /**
    * condition must be soot.jimple.ConditionExpr
    */
-  public void setCondition(Value condition);
+  void setCondition(Value condition);
 
-  public ValueBox getConditionBox();
+  ValueBox getConditionBox();
 
-  public Stmt getTarget();
+  Stmt getTarget();
 
-  public void setTarget(Unit target);
+  void setTarget(Unit target);
 
-  public UnitBox getTargetBox();
+  UnitBox getTargetBox();
 }

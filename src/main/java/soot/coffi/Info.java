@@ -47,28 +47,31 @@ class Info {
   public void verboseReport(PrintStream ps) {
     int total;
 
-    ps.println("<INFO> -- Debigulation Report on " + cf.fn + " --");
+    ps.println(new StringBuilder().append("<INFO> -- Debigulation Report on ").append(cf.fn).append(" --").toString());
     ps.println("<INFO>   Length: " + flength);
-    ps.println("<INFO>       CP: " + cp + " reduced to " + cf.constant_pool_count);
-    ps.println("<INFO>   Fields: " + fields + " (" + pfields + " private)" + " reduced to " + cf.fields_count);
-    ps.println("<INFO>  Methods: " + methods + " (" + pmethods + " private)" + " reduced to " + cf.methods_count);
+    ps.println(new StringBuilder().append("<INFO>       CP: ").append(cp).append(" reduced to ").append(cf.constant_pool_count).toString());
+    ps.println(new StringBuilder().append("<INFO>   Fields: ").append(fields).append(" (").append(pfields).append(" private)").append(" reduced to ")
+			.append(cf.fields_count).toString());
+    ps.println(new StringBuilder().append("<INFO>  Methods: ").append(methods).append(" (").append(pmethods).append(" private)").append(" reduced to ")
+			.append(cf.methods_count).toString());
     total = attribsave + attribcpsave + psave;
-    if (total > 0) {
-      ps.println("<INFO> -- Savings through debigulation --");
-      if (attribsave > 0) {
+    if (total <= 0) {
+		return;
+	}
+	ps.println("<INFO> -- Savings through debigulation --");
+	if (attribsave > 0) {
         ps.println("<INFO>         Attributes: " + attribsave);
       }
-      if (attribcpsave > 0) {
+	if (attribcpsave > 0) {
         ps.println("<INFO>     CP Compression: " + attribcpsave);
       }
-      if (psave > 0) {
+	if (psave > 0) {
         ps.println("<INFO>   Private renaming: " + psave);
       }
-      ps.println("<INFO>  Total savings: " + total);
-      double d = ((total) * 100000.0) / (flength);
-      int x = (int) d;
-      d = (x) / 1000.0;
-      ps.println("<INFO>          ratio: " + d + "%");
-    }
+	ps.println("<INFO>  Total savings: " + total);
+	double d = ((total) * 100000.0) / (flength);
+	int x = (int) d;
+	d = (x) / 1000.0;
+	ps.println(new StringBuilder().append("<INFO>          ratio: ").append(d).append("%").toString());
   }
 }

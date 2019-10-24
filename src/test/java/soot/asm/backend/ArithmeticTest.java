@@ -74,19 +74,19 @@ public class ArithmeticTest extends AbstractASMBackendTest {
 		fv.visitEnd();
 		}
 		{
-		fv = cw.visitField(ACC_FINAL, "cInt", "I", null, new Integer(1));
+		fv = cw.visitField(ACC_FINAL, "cInt", "I", null, Integer.valueOf(1));
 		fv.visitEnd();
 		}
 		{
-		fv = cw.visitField(ACC_FINAL, "cFloat", "F", null, new Float("1.0"));
+		fv = cw.visitField(ACC_FINAL, "cFloat", "F", null, Float.valueOf("1.0"));
 		fv.visitEnd();
 		}
 		{
-		fv = cw.visitField(ACC_FINAL, "cLong", "J", null, new Long(1L));
+		fv = cw.visitField(ACC_FINAL, "cLong", "J", null, Long.valueOf(1L));
 		fv.visitEnd();
 		}
 		{
-		fv = cw.visitField(ACC_FINAL, "cDouble", "D", null, new Double("1.0"));
+		fv = cw.visitField(ACC_FINAL, "cDouble", "D", null, Double.valueOf("1.0"));
 		fv.visitEnd();
 		}
 		{
@@ -165,7 +165,7 @@ public class ArithmeticTest extends AbstractASMBackendTest {
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rInt", "I");
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(DLOAD, 1);
-		mv.visitLdcInsn(new Double("6.0"));
+		mv.visitLdcInsn(Double.valueOf("6.0"));
 		mv.visitInsn(DMUL);
 		mv.visitInsn(D2L);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rLong", "J");
@@ -177,7 +177,7 @@ public class ArithmeticTest extends AbstractASMBackendTest {
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rFloat", "F");
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(DLOAD, 1);
-		mv.visitLdcInsn(new Double("4.0"));
+		mv.visitLdcInsn(Double.valueOf("4.0"));
 		mv.visitInsn(DSUB);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rDouble", "D");
 		mv.visitVarInsn(ALOAD, 0);
@@ -191,13 +191,13 @@ public class ArithmeticTest extends AbstractASMBackendTest {
 		mv.visitCode();
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(FLOAD, 1);
-		mv.visitLdcInsn(new Float("13.0"));
+		mv.visitLdcInsn(Float.valueOf("13.0"));
 		mv.visitInsn(FDIV);
 		mv.visitInsn(F2I);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rInt", "I");
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(FLOAD, 1);
-		mv.visitLdcInsn(new Float("3.0"));
+		mv.visitLdcInsn(Float.valueOf("3.0"));
 		mv.visitInsn(FMUL);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rFloat", "F");
 		mv.visitVarInsn(ALOAD, 0);
@@ -255,24 +255,24 @@ public class ArithmeticTest extends AbstractASMBackendTest {
 		mv.visitCode();
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(LLOAD, 1);
-		mv.visitLdcInsn(new Long(5L));
+		mv.visitLdcInsn(Long.valueOf(5L));
 		mv.visitInsn(LMUL);
 		mv.visitInsn(L2I);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rInt", "I");
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(LLOAD, 1);
-		mv.visitLdcInsn(new Long(2L));
+		mv.visitLdcInsn(Long.valueOf(2L));
 		mv.visitInsn(LADD);
 		mv.visitInsn(L2F);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rFloat", "F");
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(LLOAD, 1);
-		mv.visitLdcInsn(new Long(6L));
+		mv.visitLdcInsn(Long.valueOf(6L));
 		mv.visitInsn(LMUL);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rLong", "J");
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(LLOAD, 1);
-		mv.visitLdcInsn(new Long(6L));
+		mv.visitLdcInsn(Long.valueOf(6L));
 		mv.visitInsn(LDIV);
 		mv.visitInsn(L2D);
 		mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/ArithmeticLib", "rDouble", "D");

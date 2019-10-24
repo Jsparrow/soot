@@ -31,12 +31,14 @@ public class SyntheticParamTag implements Tag {
   public SyntheticParamTag() {
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "SyntheticParamTag";
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "SyntheticParamTag";
   }
 
@@ -45,7 +47,8 @@ public class SyntheticParamTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("SyntheticParamTag has no value for bytecode");
   }
 }

@@ -73,7 +73,8 @@ public class Aggregator extends BodyTransformer {
    *
    * option: only-stack-locals; if this is true, only aggregate variables starting with $
    */
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     StmtBody body = (StmtBody) b;
     boolean onlyStackVars = PhaseOptions.getBoolean(options, "only-stack-locals");
 
@@ -85,28 +86,24 @@ public class Aggregator extends BodyTransformer {
 
     boolean changed = false;
 
-    Map<ValueBox, Zone> boxToZone = new HashMap<ValueBox, Zone>(body.getUnits().size() * 2 + 1, 0.7f);
+    Map<ValueBox, Zone> boxToZone = new HashMap<>(body.getUnits().size() * 2 + 1, 0.7f);
 
     // Determine the zone of every box
     {
       Zonation zonation = new Zonation(body);
 
-      for (Unit u : body.getUnits()) {
+      body.getUnits().forEach(u -> {
         Zone zone = zonation.getZoneOf(u);
 
-        for (ValueBox box : u.getUseBoxes()) {
-          boxToZone.put(box, zone);
-        }
+        u.getUseBoxes().forEach(box -> boxToZone.put(box, zone));
 
-        for (ValueBox box : u.getDefBoxes()) {
-          boxToZone.put(box, zone);
-        }
-      }
+        u.getDefBoxes().forEach(box -> boxToZone.put(box, zone));
+      });
     }
 
     do {
       if (Options.v().verbose()) {
-        logger.debug("" + "[" + body.getMethod().getName() + "] Aggregating iteration " + aggregateCount + "...");
+        logger.debug(new StringBuilder().append("").append("[").append(body.getMethod().getName()).append("] Aggregating iteration ").append(aggregateCount).append("...").toString());
       }
 
       // body.printTo(new java.io.PrintWriter(G.v().out, true));
@@ -178,9 +175,9 @@ public class Aggregator extends BodyTransformer {
       boolean propagatingInvokeExpr = false;
       boolean propagatingFieldRef = false;
       boolean propagatingArrayRef = false;
-      List<FieldRef> fieldRefList = new ArrayList<FieldRef>();
+      List<FieldRef> fieldRefList = new ArrayList<>();
 
-      List<Value> localsUsed = new ArrayList<Value>();
+      List<Value> localsUsed = new ArrayList<>();
       for (ValueBox vb : s.getUseBoxes()) {
         Value v = vb.getValue();
         if (v instanceof Local) {

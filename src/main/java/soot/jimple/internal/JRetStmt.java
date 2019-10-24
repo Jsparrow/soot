@@ -46,34 +46,41 @@ public class JRetStmt extends AbstractStmt implements RetStmt {
 
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JRetStmt(Jimple.cloneIfNecessary(getStmtAddress()));
   }
 
-  public String toString() {
-    return Jimple.RET + " " + stmtAddressBox.getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(Jimple.RET).append(" ").append(stmtAddressBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.RET);
     up.literal(" ");
     stmtAddressBox.toString(up);
   }
 
-  public Value getStmtAddress() {
+  @Override
+public Value getStmtAddress() {
     return stmtAddressBox.getValue();
   }
 
-  public ValueBox getStmtAddressBox() {
+  @Override
+public ValueBox getStmtAddressBox() {
     return stmtAddressBox;
   }
 
-  public void setStmtAddress(Value stmtAddress) {
+  @Override
+public void setStmtAddress(Value stmtAddress) {
     stmtAddressBox.setValue(stmtAddress);
   }
 
-  public List<ValueBox> getUseBoxes() {
-    List<ValueBox> useBoxes = new ArrayList<ValueBox>();
+  @Override
+public List<ValueBox> getUseBoxes() {
+    List<ValueBox> useBoxes = new ArrayList<>();
 
     useBoxes.addAll(stmtAddressBox.getValue().getUseBoxes());
     useBoxes.add(stmtAddressBox);
@@ -81,15 +88,18 @@ public class JRetStmt extends AbstractStmt implements RetStmt {
     return useBoxes;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseRetStmt(this);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

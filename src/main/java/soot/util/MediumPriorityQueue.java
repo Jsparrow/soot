@@ -37,21 +37,12 @@ import java.util.Map;
  *
  */
 class MediumPriorityQueue<E> extends PriorityQueue<E> {
-  final static int MAX_CAPACITY = Long.SIZE * Long.SIZE;
+  static final int MAX_CAPACITY = Long.SIZE * Long.SIZE;
 
   private int size = 0;
   private long modCount = 0;
   private long[] data;
   private long lookup = 0;
-
-  void addAll() {
-    size = N;
-    Arrays.fill(data, -1);
-    data[data.length - 1] = -1L >>> -size;
-    lookup = -1L >>> -data.length;
-    min = 0;
-    modCount++;
-  }
 
   MediumPriorityQueue(List<? extends E> universe, Map<E, Integer> ordinalMap) {
     super(universe, ordinalMap);
@@ -60,7 +51,17 @@ class MediumPriorityQueue<E> extends PriorityQueue<E> {
     assert N <= MAX_CAPACITY;
   }
 
-  @Override
+@Override
+void addAll() {
+    size = N;
+    Arrays.fill(data, -1);
+    data[data.length - 1] = -1L >>> -size;
+    lookup = -1L >>> -data.length;
+    min = 0;
+    modCount++;
+  }
+
+@Override
   public void clear() {
     size = 0;
     Arrays.fill(data, 0);
@@ -69,7 +70,7 @@ class MediumPriorityQueue<E> extends PriorityQueue<E> {
     modCount++;
   }
 
-  @Override
+@Override
   int nextSetBit(int fromIndex) {
     assert fromIndex >= 0;
 
@@ -110,7 +111,7 @@ class MediumPriorityQueue<E> extends PriorityQueue<E> {
     return fromIndex;
   }
 
-  @Override
+@Override
   boolean add(int ordinal) {
     int bucket = ordinal >>> 6;
     long prv = data[bucket];
@@ -126,14 +127,14 @@ class MediumPriorityQueue<E> extends PriorityQueue<E> {
     return true;
   }
 
-  @Override
+@Override
   boolean contains(int ordinal) {
     assert ordinal >= 0;
     assert ordinal < N;
     return ((data[ordinal >>> 6] >>> ordinal) & 1L) == 1L;
   }
 
-  @Override
+@Override
   boolean remove(int index) {
     assert index >= 0;
     assert index < N;
@@ -162,7 +163,7 @@ class MediumPriorityQueue<E> extends PriorityQueue<E> {
     return true;
   }
 
-  @Override
+@Override
   public Iterator<E> iterator() {
     return new Itr() {
       @Override
@@ -172,7 +173,7 @@ class MediumPriorityQueue<E> extends PriorityQueue<E> {
     };
   }
 
-  @Override
+@Override
   public int size() {
     return size;
   }

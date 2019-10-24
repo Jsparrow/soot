@@ -45,8 +45,8 @@ public class TagCollector {
   private final ArrayList<Key> keys;
 
   public TagCollector() {
-    attributes = new ArrayList<Attribute>();
-    keys = new ArrayList<Key>();
+    attributes = new ArrayList<>();
+    keys = new ArrayList<>();
   }
 
   public boolean isEmpty() {
@@ -70,9 +70,7 @@ public class TagCollector {
     collectClassTags(sc);
 
     // tag fields
-    for (SootField sf : sc.getFields()) {
-      collectFieldTags(sf);
-    }
+	sc.getFields().forEach(this::collectFieldTags);
 
     // tag methods
     for (SootMethod sm : sc.getMethods()) {
@@ -87,22 +85,15 @@ public class TagCollector {
   }
 
   public void collectKeyTags(SootClass sc) {
-    for (Tag next : sc.getTags()) {
-      if (next instanceof KeyTag) {
-        KeyTag kt = (KeyTag) next;
-        Key k = new Key(kt.red(), kt.green(), kt.blue(), kt.key());
-        k.aType(kt.analysisType());
-        keys.add(k);
-      }
-    }
+    sc.getTags().stream().filter(next -> next instanceof KeyTag).map(next -> (KeyTag) next).forEach(kt -> {
+		Key k = new Key(kt.red(), kt.green(), kt.blue(), kt.key());
+		k.aType(kt.analysisType());
+		keys.add(k);
+	});
   }
 
   public void printKeys(PrintWriter writerOut) {
-    Iterator<Key> it = keys.iterator();
-    while (it.hasNext()) {
-      Key k = it.next();
-      k.print(writerOut);
-    }
+    keys.forEach(k -> k.print(writerOut));
   }
 
   private void addAttribute(Attribute a) {
@@ -117,15 +108,12 @@ public class TagCollector {
   }
 
   private void collectHostTags(Host h, Predicate<Tag> include) {
-    if (!h.getTags().isEmpty()) {
-      Attribute a = new Attribute();
-      for (Tag t : h.getTags()) {
-        if (include.test(t)) {
-          a.addTag(t);
-        }
-      }
-      addAttribute(a);
-    }
+    if (h.getTags().isEmpty()) {
+		return;
+	}
+	Attribute a = new Attribute();
+	h.getTags().stream().filter(include::test).forEach(a::addTag);
+	addAttribute(a);
   }
 
   public void collectClassTags(SootClass sc) {
@@ -133,7 +121,8 @@ public class TagCollector {
     // is not worth outputing because it can be inferred from
     // other information (like the name of the XML file).
     Predicate<Tag> noSFTags = new Predicate<Tag>() {
-      public boolean test(Tag t) {
+      @Override
+	public boolean test(Tag t) {
         return !(t instanceof SourceFileTag);
       }
     };
@@ -151,7 +140,7 @@ public class TagCollector {
   }
 
   public synchronized void collectBodyTags(Body b) {
-    for (Unit u : b.getUnits()) {
+    b.getUnits().forEach(u -> {
       Attribute ua = new Attribute();
       JimpleLineNumberTag jlnt = null;
       for (Tag t : u.getTags()) {
@@ -179,16 +168,12 @@ public class TagCollector {
           // System.out.println("added att: "+va);
         }
       }
-    }
+    });
   }
 
   public void printTags(PrintWriter writerOut) {
 
-    Iterator<Attribute> it = attributes.iterator();
-    while (it.hasNext()) {
-      Attribute a = it.next();
-      // System.out.println("will print attr: "+a);
-      a.print(writerOut);
-    }
+    // System.out.println("will print attr: "+a);
+	attributes.forEach(a -> a.print(writerOut));
   }
 }

@@ -38,13 +38,13 @@ public class InnerTypesIncrementalHeuristic implements FieldCheckHeuristic {
 
   private final TypeManager manager;
 
-  private final Set<RefType> typesToCheck = new HashSet<RefType>();
+  private final Set<RefType> typesToCheck = new HashSet<>();
 
   private String newTypeOnQuery = null;
 
-  private final Set<RefType> bothEndsTypes = new HashSet<RefType>();
+  private final Set<RefType> bothEndsTypes = new HashSet<>();
 
-  private final Set<RefType> notBothEndsTypes = new HashSet<RefType>();
+  private final Set<RefType> notBothEndsTypes = new HashSet<>();
 
   private int numPasses = 0;
 
@@ -57,7 +57,8 @@ public class InnerTypesIncrementalHeuristic implements FieldCheckHeuristic {
     this.passesInDirection = maxPasses / 2;
   }
 
-  public boolean runNewPass() {
+  @Override
+public boolean runNewPass() {
     numPasses++;
     if (numPasses == passesInDirection) {
       return switchToNotBothEnds();
@@ -80,18 +81,18 @@ public class InnerTypesIncrementalHeuristic implements FieldCheckHeuristic {
   }
 
   private boolean switchToNotBothEnds() {
-    if (!allNotBothEnds) {
-      numPasses = 0;
-      allNotBothEnds = true;
-      newTypeOnQuery = null;
-      typesToCheck.clear();
-      return true;
-    } else {
-      return false;
-    }
+    if (allNotBothEnds) {
+		return false;
+	}
+	numPasses = 0;
+	allNotBothEnds = true;
+	newTypeOnQuery = null;
+	typesToCheck.clear();
+	return true;
   }
 
-  public boolean validateMatchesForField(SparkField field) {
+  @Override
+public boolean validateMatchesForField(SparkField field) {
     if (field instanceof ArrayElement) {
       return true;
     }
@@ -117,7 +118,8 @@ public class InnerTypesIncrementalHeuristic implements FieldCheckHeuristic {
     return false;
   }
 
-  public boolean validFromBothEnds(SparkField field) {
+  @Override
+public boolean validFromBothEnds(SparkField field) {
     if (allNotBothEnds) {
       return false;
     }

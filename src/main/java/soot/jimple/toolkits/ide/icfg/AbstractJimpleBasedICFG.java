@@ -53,7 +53,7 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
   protected final boolean enableExceptions;
 
   @DontSynchronize("written by single thread; read afterwards")
-  protected final Map<Unit, Body> unitToOwner = new HashMap<Unit, Body>();
+  protected final Map<Unit, Body> unitToOwner = new HashMap<>();
 
   @SynchronizedBy("by use of synchronized LoadingCache class")
   protected LoadingCache<Body, DirectedGraph<Unit>> bodyToUnitGraph
@@ -92,7 +92,7 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
 
   @Override
   public SootMethod getMethodOf(Unit u) {
-    assert unitToOwner.containsKey(u) : "Statement " + u + " not in unit-to-owner mapping";
+    assert unitToOwner.containsKey(u) : new StringBuilder().append("Statement ").append(u).append(" not in unit-to-owner mapping").toString();
     Body b = unitToOwner.get(u);
     return b == null ? null : b.getMethod();
   }
@@ -125,7 +125,7 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
     for (Unit u : m.getActiveBody().getUnits()) {
       if (isCallStmt(u)) {
         if (res == null) {
-          res = new LinkedHashSet<Unit>();
+          res = new LinkedHashSet<>();
         }
         res.add(u);
       }
@@ -163,26 +163,22 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
     if (!u.branches()) {
       return false;
     }
-    for (UnitBox ub : u.getUnitBoxes()) {
-      if (ub.getUnit() == succ) {
-        return true;
-      }
-    }
-    return false;
+    return u.getUnitBoxes().stream().anyMatch(ub -> ub.getUnit() == succ);
   }
 
-  public List<Value> getParameterRefs(SootMethod m) {
+  @Override
+public List<Value> getParameterRefs(SootMethod m) {
     return methodToParameterRefs.getUnchecked(m);
   }
 
   @Override
   public Collection<Unit> getStartPointsOf(SootMethod m) {
-    if (m.hasActiveBody()) {
-      Body body = m.getActiveBody();
-      DirectedGraph<Unit> unitGraph = getOrCreateUnitGraph(body);
-      return unitGraph.getHeads();
-    }
-    return Collections.emptySet();
+    if (!m.hasActiveBody()) {
+		return Collections.emptySet();
+	}
+	Body body = m.getActiveBody();
+	DirectedGraph<Unit> unitGraph = getOrCreateUnitGraph(body);
+	return unitGraph.getHeads();
   }
 
   @Override
@@ -192,7 +188,7 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
 
   @Override
   public Set<Unit> allNonCallStartNodes() {
-    Set<Unit> res = new LinkedHashSet<Unit>(unitToOwner.keySet());
+    Set<Unit> res = new LinkedHashSet<>(unitToOwner.keySet());
     for (Iterator<Unit> iter = res.iterator(); iter.hasNext();) {
       Unit u = iter.next();
       if (isStartPoint(u) || isCallStmt(u)) {
@@ -204,7 +200,7 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
 
   @Override
   public Set<Unit> allNonCallEndNodes() {
-    Set<Unit> res = new LinkedHashSet<Unit>(unitToOwner.keySet());
+    Set<Unit> res = new LinkedHashSet<>(unitToOwner.keySet());
     for (Iterator<Unit> iter = res.iterator(); iter.hasNext();) {
       Unit u = iter.next();
       if (isExitStmt(u) || isCallStmt(u)) {
@@ -237,12 +233,12 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
 
   @Override
   public Collection<Unit> getEndPointsOf(SootMethod m) {
-    if (m.hasActiveBody()) {
-      Body body = m.getActiveBody();
-      DirectedGraph<Unit> unitGraph = getOrCreateUnitGraph(body);
-      return unitGraph.getTails();
-    }
-    return Collections.emptySet();
+    if (!m.hasActiveBody()) {
+		return Collections.emptySet();
+	}
+	Body body = m.getActiveBody();
+	DirectedGraph<Unit> unitGraph = getOrCreateUnitGraph(body);
+	return unitGraph.getTails();
   }
 
   @Override
@@ -252,12 +248,7 @@ public abstract class AbstractJimpleBasedICFG implements BiDiInterproceduralCFG<
 
   @Override
   public boolean isReturnSite(Unit n) {
-    for (Unit pred : getPredsOf(n)) {
-      if (isCallStmt(pred)) {
-        return true;
-      }
-    }
-    return false;
+    return getPredsOf(n).stream().anyMatch(this::isCallStmt);
   }
 
   @Override

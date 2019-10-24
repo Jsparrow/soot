@@ -18,31 +18,67 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Java null literal.
  * @production NullLiteral : {@link Literal};
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.ast:42
  */
-public class NullLiteral extends Literal implements Cloneable {
-  /**
+public class NullLiteral extends Literal {
+  private static final Logger logger = LoggerFactory.getLogger(NullLiteral.class);
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+/**
+   * @ast method 
+   * 
+   */
+  public NullLiteral() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public NullLiteral(String p0) {
+    setLITERAL(p0);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public NullLiteral(beaver.Symbol p0) {
+    setLITERAL(p0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     type_computed = false;
     type_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public NullLiteral clone() throws CloneNotSupportedException {
     NullLiteral node = (NullLiteral)super.clone();
     node.type_computed = false;
@@ -51,29 +87,33 @@ public class NullLiteral extends Literal implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public NullLiteral copy() {
     try {
       NullLiteral node = (NullLiteral) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public NullLiteral fullCopy() {
     NullLiteral tree = (NullLiteral) copy();
     if (children != null) {
@@ -87,24 +127,16 @@ public class NullLiteral extends Literal implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:35
    */
-  public soot.Value eval(Body b) {
+  @Override
+public soot.Value eval(Body b) {
     return soot.jimple.NullConstant.v();
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public NullLiteral() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -112,96 +144,83 @@ public class NullLiteral extends Literal implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public NullLiteral(String p0) {
-    setLITERAL(p0);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public NullLiteral(beaver.Symbol p0) {
-    setLITERAL(p0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 0;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the lexeme LITERAL.
    * @param value The new value for the lexeme LITERAL.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setLITERAL(String value) {
+  @Override
+public void setLITERAL(String value) {
     tokenString_LITERAL = value;
   }
-  /**
+/**
    * JastAdd-internal setter for lexeme LITERAL using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
-  public void setLITERAL(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setLITERAL is only valid for String lexemes");
+  @Override
+public void setLITERAL(beaver.Symbol symbol) {
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setLITERAL is only valid for String lexemes");
+	}
     tokenString_LITERAL = (String)symbol.value;
     LITERALstart = symbol.getStart();
     LITERALend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme LITERAL.
    * @return The value for the lexeme LITERAL.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public String getLITERAL() {
+  @Override
+public String getLITERAL() {
     return tokenString_LITERAL != null ? tokenString_LITERAL : "";
   }
-  /**
+/**
    * @attribute syn
    * @aspect ConstantExpression
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/ConstantExpression.jrag:336
    */
-  public boolean isConstant() {
+  @Override
+public boolean isConstant() {
     ASTNode$State state = state();
     try {  return false;  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
    * @attribute syn
    * @aspect TypeAnalysis
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:307
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -210,17 +229,20 @@ public class NullLiteral extends Literal implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {  return typeNull();  }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

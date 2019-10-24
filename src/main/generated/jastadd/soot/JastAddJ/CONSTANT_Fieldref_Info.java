@@ -38,9 +38,9 @@ public class CONSTANT_Fieldref_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
-      return "FieldRefInfo: " + p.constantPool[class_index] + " "
-        + p.constantPool[name_and_type_index];
+    @Override
+	public String toString() {
+      return new StringBuilder().append("FieldRefInfo: ").append(p.constantPool[class_index]).append(" ").append(p.constantPool[name_and_type_index]).toString();
     }
 
 

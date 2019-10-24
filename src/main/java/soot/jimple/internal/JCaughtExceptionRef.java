@@ -37,36 +37,44 @@ public class JCaughtExceptionRef implements CaughtExceptionRef {
   public JCaughtExceptionRef() {
   }
 
-  public boolean equivTo(Object c) {
+  @Override
+public boolean equivTo(Object c) {
     return c instanceof CaughtExceptionRef;
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return 1729;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JCaughtExceptionRef();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "@caughtexception";
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.identityRef(this);
   }
 
-  public final List<ValueBox> getUseBoxes() {
+  @Override
+public final List<ValueBox> getUseBoxes() {
     return Collections.emptyList();
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return RefType.v("java.lang.Throwable");
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((RefSwitch) sw).caseCaughtExceptionRef(this);
   }
 }

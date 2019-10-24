@@ -33,7 +33,7 @@ import java.util.NoSuchElementException;
  */
 final class BBQ {
 
-  private final ArrayList<BasicBlock> q = new ArrayList<BasicBlock>();
+  private final ArrayList<BasicBlock> q = new ArrayList<>();
 
   /**
    * Adds a block to the end of the queue, but only if its <i>inq</i> flag is false.
@@ -43,10 +43,12 @@ final class BBQ {
    * @see BasicBlock#inq
    */
   public void push(BasicBlock b) {
-    if (b.inq != true) { // ensure only in queue once...
-      b.inq = true;
-      q.add(b);
-    }
+    // ensure only in queue once...
+	if (b.inq == true) {
+		return;
+	}
+	b.inq = true;
+	q.add(b);
   }
 
   /**
@@ -57,7 +59,7 @@ final class BBQ {
    *              if the queue is empty.
    * @see BasicBlock#inq
    */
-  public BasicBlock pull() throws NoSuchElementException {
+  public BasicBlock pull() {
     if (q.size() == 0) {
       throw new NoSuchElementException("Pull from empty BBQ");
     }

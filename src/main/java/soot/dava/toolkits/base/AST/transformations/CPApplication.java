@@ -88,7 +88,8 @@ public class CPApplication extends DepthFirstAdapter {
     cp = new CP(AST, constantValueFields, classNameFieldNameToSootFieldMapping);
   }
 
-  public void inASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void inASTSwitchNode(ASTSwitchNode node) {
     Object obj = cp.getBeforeSet(node);
     if (obj == null) {
       return;
@@ -121,7 +122,7 @@ public class CPApplication extends DepthFirstAdapter {
       FieldRef useField = (FieldRef) key;
       // System.out.println("switch key is a FieldRef which is: "+useField);
       SootField usedSootField = useField.getField();
-      Object value = beforeSet.contains(usedSootField.getDeclaringClass().getName(), usedSootField.getName().toString());
+      Object value = beforeSet.contains(usedSootField.getDeclaringClass().getName(), usedSootField.getName());
       if (value != null) {
         // System.out.println("FieldRef "+usedSootField+"is present in before set with value"+value);
         // create constant value for the value and replace this local
@@ -138,7 +139,8 @@ public class CPApplication extends DepthFirstAdapter {
     }
   }
 
-  public void inASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void inASTForLoopNode(ASTForLoopNode node) {
     /*
      * For the init part we should actually use the before set for each init stmt
      */
@@ -188,23 +190,18 @@ public class CPApplication extends DepthFirstAdapter {
     changedCondition(cond, afterSet);
 
     // update
-    for (AugmentedStmt as : node.getUpdate()) {
-      Stmt s = as.get_Stmt();
-
-      List useBoxes = s.getUseBoxes();
-
-      // System.out.println("For update Statement: "+s);
-      // System.out.println("After set is: "+afterSet.toString());
-
-      /*
-       * get all use boxes see if their value is determined from the before set if yes replace them
-       */
-      substituteUses(useBoxes, afterSet);
-    }
+	node.getUpdate().stream().map(AugmentedStmt::get_Stmt).forEach(s -> {
+		List useBoxes = s.getUseBoxes();
+		/*
+		   * get all use boxes see if their value is determined from the before set if yes replace them
+		   */
+		  substituteUses(useBoxes, afterSet);
+	});
 
   }
 
-  public void inASTWhileNode(ASTWhileNode node) {
+  @Override
+public void inASTWhileNode(ASTWhileNode node) {
     Object obj = cp.getAfterSet(node);
 
     if (obj == null) {
@@ -225,7 +222,8 @@ public class CPApplication extends DepthFirstAdapter {
     changedCondition(cond, afterSet);
   }
 
-  public void inASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void inASTDoWhileNode(ASTDoWhileNode node) {
     Object obj = cp.getAfterSet(node);
 
     if (obj == null) {
@@ -246,7 +244,8 @@ public class CPApplication extends DepthFirstAdapter {
     changedCondition(cond, afterSet);
   }
 
-  public void inASTIfNode(ASTIfNode node) {
+  @Override
+public void inASTIfNode(ASTIfNode node) {
     // System.out.println(node);
     Object obj = cp.getBeforeSet(node);
 
@@ -270,7 +269,8 @@ public class CPApplication extends DepthFirstAdapter {
     changedCondition(cond, beforeSet);
   }
 
-  public void inASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void inASTIfElseNode(ASTIfElseNode node) {
     Object obj = cp.getBeforeSet(node);
 
     if (obj == null) {
@@ -322,7 +322,7 @@ public class CPApplication extends DepthFirstAdapter {
       } else if (val instanceof FieldRef) {
         FieldRef useField = (FieldRef) val;
         SootField usedSootField = useField.getField();
-        Object value = set.contains(usedSootField.getDeclaringClass().getName(), usedSootField.getName().toString());
+        Object value = set.contains(usedSootField.getDeclaringClass().getName(), usedSootField.getName());
         if (value != null) {
           // System.out.println("if condition FieldRef "+usedSootField+"is present in before set with value"+value);
           // create constant value for the value and replace this
@@ -352,7 +352,8 @@ public class CPApplication extends DepthFirstAdapter {
     }
   }
 
-  public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
     for (AugmentedStmt as : node.getStatements()) {
       Stmt s = as.get_Stmt();
 
@@ -406,7 +407,7 @@ public class CPApplication extends DepthFirstAdapter {
         FieldRef useField = (FieldRef) use;
         // System.out.println("FieldRef is: "+useField);
         SootField usedSootField = useField.getField();
-        Object value = beforeSet.contains(usedSootField.getDeclaringClass().getName(), usedSootField.getName().toString());
+        Object value = beforeSet.contains(usedSootField.getDeclaringClass().getName(), usedSootField.getName());
         if (value != null) {
           // System.out.println("FieldRef "+usedSootField+"is present in before set with value"+value);
           // create constant value for the value and replace this

@@ -37,25 +37,27 @@ import org.slf4j.LoggerFactory;
 public class DotGraph implements Renderable {
   private static final Logger logger = LoggerFactory.getLogger(DotGraph.class);
 
-  /*
+/**
+   * The extension added to output files, exported so that clients can search for the filenames.
+   */
+  public static final String DOT_EXTENSION = ".dot";
+
+/*
    * allow a serialized drawing, following steps: 1. new DotGraph 2. draw(Directed)Edge / drawUndirectedEdge
    * attachAttributes, addNode 3. plot
    */
   private String graphname;
-  private boolean isSubGraph;
 
-  private HashMap<String, DotGraphNode> nodes;
-  /* draw elements are sub graphs, edges, commands */
+private boolean isSubGraph;
+
+private HashMap<String, DotGraphNode> nodes;
+
+/* draw elements are sub graphs, edges, commands */
   private List<Renderable> drawElements;
 
-  private List<DotGraphAttribute> attributes;
+private List<DotGraphAttribute> attributes;
 
-  /**
-   * The extension added to output files, exported so that clients can search for the filenames.
-   */
-  public final static String DOT_EXTENSION = ".dot";
-
-  /**
+/**
    * Creates a new graph for drawing.
    *
    * @param graphname,
@@ -64,29 +66,26 @@ public class DotGraph implements Renderable {
   public DotGraph(String graphname) {
     this.graphname = graphname;
     this.isSubGraph = false;
-    this.nodes = new HashMap<String, DotGraphNode>(100);
-    this.drawElements = new LinkedList<Renderable>();
-    this.attributes = new LinkedList<DotGraphAttribute>();
+    this.nodes = new HashMap<>(100);
+    this.drawElements = new LinkedList<>();
+    this.attributes = new LinkedList<>();
   }
 
-  /**
+/**
    * Generates the drawing on canvas to the dot file.
    *
    * @param filename
    *          the name for the output file. By convention, it should end with DOT_EXTENSION, but this is not enforced.
    */
   public void plot(String filename) {
-    try {
-      BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
-
+    try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename))) {
       render(out, 0);
-      out.close();
     } catch (IOException ioe) {
       logger.debug("" + ioe.getMessage());
     }
   }
 
-  /**
+/**
    * Draws a directed edge (including the source and end nodes, if they have not already been drawn).
    *
    * @param from,
@@ -105,7 +104,7 @@ public class DotGraph implements Renderable {
     return edge;
   }
 
-  /**
+/**
    * Draws a node.
    *
    * @param name,
@@ -126,7 +125,7 @@ public class DotGraph implements Renderable {
     return node;
   }
 
-  /**
+/**
    * Gets the graph node by name.
    *
    * @param name,
@@ -146,72 +145,72 @@ public class DotGraph implements Renderable {
     return node;
   }
 
-  /**
+/**
    * Sets all node shapes, see the list of node shapes in DotGraphConstants.
    *
    * @param shape,
    *          the node shape
    */
   public void setNodeShape(String shape) {
-    StringBuffer command = new StringBuffer("node [shape=");
+    StringBuilder command = new StringBuilder("node [shape=");
     command.append(shape);
     command.append("];");
     this.drawElements.add(new DotGraphCommand(new String(command)));
   }
 
-  /**
+/**
    * Sets all node styles
    *
    * @param style,
    *          the node style
    */
   public void setNodeStyle(String style) {
-    StringBuffer command = new StringBuffer("node [style=");
+    StringBuilder command = new StringBuilder("node [style=");
     command.append(style);
     command.append("];");
     this.drawElements.add(new DotGraphCommand(new String(command)));
   }
 
-  /**
+/**
    * sets the size of drawing area, in inches
    */
   public void setGraphSize(double width, double height) {
-    String size = "\"" + width + "," + height + "\"";
+    String size = new StringBuilder().append("\"").append(width).append(",").append(height).append("\"").toString();
     this.setGraphAttribute("size", size);
   }
 
-  /**
+/**
    * sets the pages size, once this is set, the generated graph will be broken into several pages.
    */
   public void setPageSize(double width, double height) {
-    String size = "\"" + width + ", " + height + "\"";
+    String size = new StringBuilder().append("\"").append(width).append(", ").append(height).append("\"").toString();
     this.setGraphAttribute("page", size);
   }
 
-  /**
+/**
    * sets the graph rotation angles
    */
   public void setOrientation(String orientation) {
     this.setGraphAttribute("orientation", orientation);
   }
 
-  /**
+/**
    * sets the graph name
    */
   public void setGraphName(String name) {
     this.graphname = name;
   }
 
-  /**
+/**
    * sets the graph label
    */
   public void setGraphLabel(String label) {
     label = DotGraphUtility.replaceQuotes(label);
     label = DotGraphUtility.replaceReturns(label);
-    this.setGraphAttribute("label", "\"" + label + "\"");
+    this.setGraphAttribute("label", new StringBuilder().append("\"").append(label).append("\"").toString());
   }
 
-  /**
+/**
    * sets any general attributes
    *
    * @param id
@@ -223,7 +222,7 @@ public class DotGraph implements Renderable {
     this.setGraphAttribute(new DotGraphAttribute(id, value));
   }
 
-  /**
+/**
    * sets any general attributes
    *
    * @param attr
@@ -233,7 +232,7 @@ public class DotGraph implements Renderable {
     this.attributes.add(attr);
   }
 
-  /**
+/**
    * draws an undirected edge
    *
    * @param label1,
@@ -242,7 +241,7 @@ public class DotGraph implements Renderable {
   public void drawUndirectedEdge(String label1, String label2) {
   }
 
-  /**
+/**
    * creates a sub graph.
    *
    * @return the newly created sub graph.
@@ -257,15 +256,16 @@ public class DotGraph implements Renderable {
     return subgraph;
   }
 
-  /* implements renderable interface. */
-  public void render(OutputStream out, int indent) throws IOException {
+/* implements renderable interface. */
+  @Override
+public void render(OutputStream out, int indent) throws IOException {
     // header
     String graphname = this.graphname;
 
     if (!isSubGraph) {
-      DotGraphUtility.renderLine(out, "digraph \"" + graphname + "\" {", indent);
+      DotGraphUtility.renderLine(out, new StringBuilder().append("digraph \"").append(graphname).append("\" {").toString(), indent);
     } else {
-      DotGraphUtility.renderLine(out, "subgraph \"" + graphname + "\" {", indent);
+      DotGraphUtility.renderLine(out, new StringBuilder().append("subgraph \"").append(graphname).append("\" {").toString(), indent);
     }
 
     /* render graph attributes */

@@ -18,32 +18,90 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production EnumConstant : {@link FieldDeclaration} ::= <span class="component">{@link Modifiers}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">Arg:{@link Expr}*</span> <span class="component">[Init:{@link Expr}]</span> <span class="component">TypeAccess:{@link Access}</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.ast:3
  */
-public class EnumConstant extends FieldDeclaration implements Cloneable {
-  /**
+public class EnumConstant extends FieldDeclaration {
+  private static final Logger logger = LoggerFactory.getLogger(EnumConstant.class);
+/**
+   * @apilevel internal
+   */
+  protected boolean getTypeAccess_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected Access getTypeAccess_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean localMethodsSignatureMap_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected HashMap localMethodsSignatureMap_value;
+/**
+   * @ast method 
+   * @aspect Enums
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:197
+   */
+  public EnumConstant(Modifiers mods, String name, List<Expr> args, List<BodyDecl> bds) {
+    this(mods, name, args, new Opt<Expr>(new EnumInstanceExpr(createOptAnonymousDecl(bds))));
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public EnumConstant() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public EnumConstant(Modifiers p0, String p1, List<Expr> p2, Opt<Expr> p3) {
+    setChild(p0, 0);
+    setID(p1);
+    setChild(p2, 1);
+    setChild(p3, 2);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public EnumConstant(Modifiers p0, beaver.Symbol p1, List<Expr> p2, Opt<Expr> p3) {
+    setChild(p0, 0);
+    setID(p1);
+    setChild(p2, 1);
+    setChild(p3, 2);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     getTypeAccess_computed = false;
     getTypeAccess_value = null;
     localMethodsSignatureMap_computed = false;
     localMethodsSignatureMap_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public EnumConstant clone() throws CloneNotSupportedException {
     EnumConstant node = (EnumConstant)super.clone();
     node.getTypeAccess_computed = false;
@@ -54,29 +112,33 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public EnumConstant copy() {
     try {
       EnumConstant node = (EnumConstant) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public EnumConstant fullCopy() {
     EnumConstant tree = (EnumConstant) copy();
     if (children != null) {
@@ -95,23 +157,16 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     }
     return tree;
   }
-  /**
-   * @ast method 
-   * @aspect Enums
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:197
-   */
-  public EnumConstant(Modifiers mods, String name, List<Expr> args, List<BodyDecl> bds) {
-    this(mods, name, args, new Opt<Expr>(new EnumInstanceExpr(createOptAnonymousDecl(bds))));
-  }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:236
    */
   private static Opt<TypeDecl> createOptAnonymousDecl(List<BodyDecl> bds) {
-    if(bds.getNumChildNoTransform() == 0)
-      return new Opt<TypeDecl>();
-    return new Opt<TypeDecl>(
+    if(bds.getNumChildNoTransform() == 0) {
+		return new Opt<>();
+	}
+    return new Opt<>(
       new AnonymousDecl(
         new Modifiers(),
         "Anonymous",
@@ -119,7 +174,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
       )
     );
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:249
@@ -127,33 +182,40 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public int getNumBodyDecl() {
     int cnt = 0;
     ClassInstanceExpr init = (ClassInstanceExpr)getInit();
-    if(!init.hasTypeDecl())
-      return 0;
-    for(BodyDecl bd : init.getTypeDecl().getBodyDecls())
-      if(!(bd instanceof ConstructorDecl))
-        ++cnt;
+    if(!init.hasTypeDecl()) {
+		return 0;
+	}
+    for(BodyDecl bd : init.getTypeDecl().getBodyDecls()) {
+		if(!(bd instanceof ConstructorDecl)) {
+			++cnt;
+		}
+	}
     return cnt;
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:260
    */
   public BodyDecl getBodyDecl(int i) {
     ClassInstanceExpr init = (ClassInstanceExpr)getInit();
-    if(init.hasTypeDecl())
-      for(BodyDecl bd : init.getTypeDecl().getBodyDecls())
-        if(!(bd instanceof ConstructorDecl))
-          if(i-- == 0)
-            return bd;
+    if(init.hasTypeDecl()) {
+		for(BodyDecl bd : init.getTypeDecl().getBodyDecls()) {
+			boolean condition = !(bd instanceof ConstructorDecl) && i-- == 0;
+			if(condition) {
+				return bd;
+			}
+		}
+	}
     throw new ArrayIndexOutOfBoundsException(i);
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:592
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     s.append(indent());
     getModifiers().toString(s);
     s.append(getID());
@@ -176,16 +238,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     }
     s.append(",\n");
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public EnumConstant() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -193,68 +246,53 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[4];
     setChild(new List(), 1);
     setChild(new Opt(), 2);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public EnumConstant(Modifiers p0, String p1, List<Expr> p2, Opt<Expr> p3) {
-    setChild(p0, 0);
-    setID(p1);
-    setChild(p2, 1);
-    setChild(p3, 2);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public EnumConstant(Modifiers p0, beaver.Symbol p1, List<Expr> p2, Opt<Expr> p3) {
-    setChild(p0, 0);
-    setID(p1);
-    setChild(p2, 1);
-    setChild(p3, 2);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 3;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Modifiers child.
    * @param node The new node to replace the Modifiers child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setModifiers(Modifiers node) {
+  @Override
+public void setModifiers(Modifiers node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the Modifiers child.
    * @return The current node used as the Modifiers child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public Modifiers getModifiers() {
+  @Override
+public Modifiers getModifiers() {
     return (Modifiers)getChild(0);
   }
-  /**
+/**
    * Retrieves the Modifiers child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Modifiers child.
@@ -262,43 +300,48 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
    * @ast method 
    * 
    */
-  public Modifiers getModifiersNoTransform() {
+  @Override
+public Modifiers getModifiersNoTransform() {
     return (Modifiers)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the lexeme ID.
    * @param value The new value for the lexeme ID.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setID(String value) {
+  @Override
+public void setID(String value) {
     tokenString_ID = value;
   }
-  /**
+/**
    * JastAdd-internal setter for lexeme ID using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
-  public void setID(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setID is only valid for String lexemes");
+  @Override
+public void setID(beaver.Symbol symbol) {
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setID is only valid for String lexemes");
+	}
     tokenString_ID = (String)symbol.value;
     IDstart = symbol.getStart();
     IDend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme ID.
    * @return The value for the lexeme ID.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public String getID() {
+  @Override
+public String getID() {
     return tokenString_ID != null ? tokenString_ID : "";
   }
-  /**
+/**
    * Replaces the Arg list.
    * @param list The new list node to be used as the Arg list.
    * @apilevel high-level
@@ -308,7 +351,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public void setArgList(List<Expr> list) {
     setChild(list, 1);
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * @return Number of children in the Arg list.
    * @apilevel high-level
@@ -318,7 +361,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public int getNumArg() {
     return getArgList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the Arg list.
@@ -329,7 +372,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public int getNumArgNoTransform() {
     return getArgListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the Arg list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the Arg list.
@@ -341,7 +384,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public Expr getArg(int i) {
     return (Expr)getArgList().getChild(i);
   }
-  /**
+/**
    * Append an element to the Arg list.
    * @param node The element to append to the Arg list.
    * @apilevel high-level
@@ -352,7 +395,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     List<Expr> list = (parent == null || state == null) ? getArgListNoTransform() : getArgList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -361,7 +404,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     List<Expr> list = getArgListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the Arg list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -373,7 +416,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     List<Expr> list = getArgList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -383,7 +426,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public List<Expr> getArgs() {
     return getArgList();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -394,7 +437,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public List<Expr> getArgsNoTransform() {
     return getArgListNoTransform();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -407,7 +450,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -419,57 +462,62 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   public List<Expr> getArgListNoTransform() {
     return (List<Expr>)getChildNoTransform(1);
   }
-  /**
+/**
    * Replaces the optional node for the Init child. This is the {@code Opt} node containing the child Init, not the actual child!
    * @param opt The new node to be used as the optional node for the Init child.
    * @apilevel low-level
    * @ast method 
    * 
    */
-  public void setInitOpt(Opt<Expr> opt) {
+  @Override
+public void setInitOpt(Opt<Expr> opt) {
     setChild(opt, 2);
   }
-  /**
+/**
    * Check whether the optional Init child exists.
    * @return {@code true} if the optional Init child exists, {@code false} if it does not.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public boolean hasInit() {
+  @Override
+public boolean hasInit() {
     return getInitOpt().getNumChild() != 0;
   }
-  /**
+/**
    * Retrieves the (optional) Init child.
    * @return The Init child, if it exists. Returns {@code null} otherwise.
    * @apilevel low-level
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Expr getInit() {
     return (Expr)getInitOpt().getChild(0);
   }
-  /**
+/**
    * Replaces the (optional) Init child.
    * @param node The new node to be used as the Init child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setInit(Expr node) {
+  @Override
+public void setInit(Expr node) {
     getInitOpt().setChild(node, 0);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Opt<Expr> getInitOpt() {
     return (Opt<Expr>)getChild(2);
   }
-  /**
+/**
    * Retrieves the optional node for child Init. This is the {@code Opt} node containing the child Init, not the actual child!
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The optional node for child Init.
@@ -477,21 +525,23 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Opt<Expr> getInitOptNoTransform() {
     return (Opt<Expr>)getChildNoTransform(2);
   }
-  /**
+/**
    * Replaces the TypeAccess child.
    * @param node The new node to replace the TypeAccess child.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setTypeAccess(Access node) {
+  @Override
+public void setTypeAccess(Access node) {
     setChild(node, 3);
   }
-  /**
+/**
    * Retrieves the TypeAccess child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the TypeAccess child.
@@ -499,10 +549,11 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
    * @ast method 
    * 
    */
-  public Access getTypeAccessNoTransform() {
+  @Override
+public Access getTypeAccessNoTransform() {
     return (Access)getChildNoTransform(3);
   }
-  /**
+/**
    * Retrieves the child position of the optional child TypeAccess.
    * @return The the child position of the optional child TypeAccess.
    * @apilevel low-level
@@ -512,64 +563,61 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   protected int getTypeAccessChildPosition() {
     return 3;
   }
-  /**
+/**
    * @attribute syn
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:26
    */
-  public boolean isEnumConstant() {
+  @Override
+public boolean isEnumConstant() {
     ASTNode$State state = state();
     try {  return true;  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:239
    */
-  public boolean isPublic() {
+  @Override
+public boolean isPublic() {
     ASTNode$State state = state();
     try {  return true;  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:242
    */
-  public boolean isStatic() {
+  @Override
+public boolean isStatic() {
     ASTNode$State state = state();
     try {  return true;  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Modifiers
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/Modifiers.jrag:244
    */
-  public boolean isFinal() {
+  @Override
+public boolean isFinal() {
     ASTNode$State state = state();
     try {  return true;  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean getTypeAccess_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected Access getTypeAccess_value;
-  /**
+/**
    * @attribute syn nta
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:193
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Access getTypeAccess() {
     if(getTypeAccess_computed) {
       return (Access) getChild(getTypeAccessChildPosition());
@@ -579,16 +627,18 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   boolean isFinal = this.is$Final();
     getTypeAccess_value = getTypeAccess_compute();
       setTypeAccess(getTypeAccess_value);
-      if(isFinal && num == state().boundariesCrossed) getTypeAccess_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		getTypeAccess_computed = true;
+	}
     return (Access) getChild(getTypeAccessChildPosition());
   }
-  /**
+/**
    * @apilevel internal
    */
   private Access getTypeAccess_compute() {
     return hostType().createQualifiedAccess();
   }
-  /**
+/**
    * @attribute syn
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:689
@@ -597,21 +647,15 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     ASTNode$State state = state();
     try {
     SimpleSet set = (SimpleSet)localMethodsSignatureMap().get(signature);
-    if(set != null) return set;
+    if(set != null) {
+		return set;
+	}
     return SimpleSet.emptySet;
   }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean localMethodsSignatureMap_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected HashMap localMethodsSignatureMap_value;
-  /**
+/**
    * @attribute syn
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:696
@@ -625,10 +669,12 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     localMethodsSignatureMap_value = localMethodsSignatureMap_compute();
-      if(isFinal && num == state().boundariesCrossed) localMethodsSignatureMap_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		localMethodsSignatureMap_computed = true;
+	}
     return localMethodsSignatureMap_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private HashMap localMethodsSignatureMap_compute() {
@@ -641,7 +687,7 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     }
     return map;
   }
-  /**
+/**
    * @attribute syn
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:707
@@ -652,40 +698,44 @@ public class EnumConstant extends FieldDeclaration implements Cloneable {
     SimpleSet set = (SimpleSet)localMethodsSignature(method.signature());
     if (set.size() == 1) {
       MethodDecl n = (MethodDecl)set.iterator().next();
-      if (!n.isAbstract())
-  return true;
+      if (!n.isAbstract()) {
+		return true;
+	}
     }
     return false;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect EmitJimple
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/EmitJimple.jrag:127
    */
-  public int sootTypeModifiers() {
+  @Override
+public int sootTypeModifiers() {
     ASTNode$State state = state();
     try {  return super.sootTypeModifiers() | Modifiers.ACC_ENUM;  }
     finally {
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:489
    * @apilevel internal
    */
-  public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
+  @Override
+public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
     if(caller == getTypeAccessNoTransform()) {
       return NameType.TYPE_NAME;
     }
     else {      return super.Define_NameType_nameType(caller, child);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

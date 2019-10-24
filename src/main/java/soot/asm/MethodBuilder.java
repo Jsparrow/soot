@@ -88,7 +88,8 @@ class MethodBuilder extends JSRInlinerAdapter {
 
   @Override
   public AnnotationVisitor visitParameterAnnotation(int parameter, final String desc, boolean visible) {
-    VisibilityAnnotationTag vat, vats[];
+    VisibilityAnnotationTag vat;
+	VisibilityAnnotationTag vats[];
     if (visible) {
       vats = visibleParamAnnotations;
       if (vats == null) {
@@ -136,11 +137,7 @@ class MethodBuilder extends JSRInlinerAdapter {
   @Override
   public void visitFieldInsn(int opcode, String owner, String name, String desc) {
     super.visitFieldInsn(opcode, owner, name, desc);
-    for (Type t : AsmUtil.toJimpleDesc(desc)) {
-      if (t instanceof RefType) {
-        scb.addDep(t);
-      }
-    }
+    AsmUtil.toJimpleDesc(desc).stream().filter(t -> t instanceof RefType).forEach(scb::addDep);
 
     scb.addDep(AsmUtil.toQualifiedName(owner));
   }
@@ -148,9 +145,7 @@ class MethodBuilder extends JSRInlinerAdapter {
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean isInterf) {
     super.visitMethodInsn(opcode, owner, name, desc, isInterf);
-    for (Type t : AsmUtil.toJimpleDesc(desc)) {
-      addDeps(t);
-    }
+    AsmUtil.toJimpleDesc(desc).forEach(this::addDeps);
 
     scb.addDep(AsmUtil.toBaseType(owner));
   }
@@ -159,10 +154,11 @@ class MethodBuilder extends JSRInlinerAdapter {
   public void visitLdcInsn(Object cst) {
     super.visitLdcInsn(cst);
 
-    if (cst instanceof Handle) {
-      Handle methodHandle = (Handle) cst;
-      scb.addDep(AsmUtil.toBaseType(methodHandle.getOwner()));
-    }
+    if (!(cst instanceof Handle)) {
+		return;
+	}
+	Handle methodHandle = (Handle) cst;
+	scb.addDep(AsmUtil.toBaseType(methodHandle.getOwner()));
   }
 
   private void addDeps(Type t) {

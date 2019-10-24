@@ -42,7 +42,8 @@ public class metricPrettyPrinter extends PrettyPrinter {
     this.astMetric = astMetric;
   }
 
-  public void print(Node parent, Node child, CodeWriter w) {
+  @Override
+public void print(Node parent, Node child, CodeWriter w) {
     astMetric.printAstMetric(child, w);
     super.print(parent, child, w);
   }

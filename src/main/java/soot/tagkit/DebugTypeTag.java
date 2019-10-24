@@ -32,21 +32,25 @@ public class DebugTypeTag extends SignatureTag {
     super(signature);
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "DebugType: " + getSignature();
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "DebugTypeTag";
   }
 
-  public String getInfo() {
+  @Override
+public String getInfo() {
     return "DebugType";
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("DebugTypeTag has no value for bytecode");
   }
 }

@@ -39,19 +39,23 @@ public class ASTBinaryCondition extends ASTUnaryBinaryCondition {
     return condition;
   }
 
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTBinaryCondition(this);
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return condition.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     (Jimple.v().newConditionExprBox(condition)).toString(up);
   }
 
-  public void flip() {
+  @Override
+public void flip() {
     this.condition = ConditionFlipper.flip(condition);
   }
 
@@ -59,7 +63,8 @@ public class ASTBinaryCondition extends ASTUnaryBinaryCondition {
    * Since a conditionExpr can always be flipped we always return true
    * 
    */
-  public boolean isNotted() {
+  @Override
+public boolean isNotted() {
     return true;
   }
 }

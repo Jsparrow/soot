@@ -55,6 +55,8 @@ import soot.toolkits.graph.DominatorTree;
 import soot.toolkits.graph.ReversibleGraph;
 import soot.util.HashMultiMap;
 import soot.util.MultiMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class does the real high-level work. It takes a Jimple body or Jimple/Shimple hybrid body and produces pure Shimple.
@@ -80,14 +82,16 @@ import soot.util.MultiMap;
  *      the Control Dependence Graph</a>
  **/
 public class PiNodeManager {
-  protected ShimpleBody body;
+  private static final Logger logger = LoggerFactory.getLogger(PiNodeManager.class);
+protected ShimpleBody body;
   protected ShimpleFactory sf;
   protected DominatorTree<Block> dt;
   protected DominanceFrontier<Block> df;
   protected ReversibleGraph<Block> cfg;
   protected boolean trimmed;
+protected MultiMap<Local, Block> varToBlocks;
 
-  /**
+/**
    * Transforms the provided body to pure SSA form.
    **/
   public PiNodeManager(ShimpleBody body, boolean trimmed, ShimpleFactory sf) {
@@ -96,30 +100,27 @@ public class PiNodeManager {
     this.sf = sf;
   }
 
-  public void update() {
+public void update() {
     cfg = sf.getReverseBlockGraph();
     dt = sf.getReverseDominatorTree();
     df = sf.getReverseDominanceFrontier();
   }
 
-  protected MultiMap<Local, Block> varToBlocks;
-
-  public boolean insertTrivialPiNodes() {
+public boolean insertTrivialPiNodes() {
     update();
     boolean change = false;
-    MultiMap<Local, Block> localsToUsePoints = new SHashMultiMap<Local, Block>();
-    varToBlocks = new HashMultiMap<Local, Block>();
+    MultiMap<Local, Block> localsToUsePoints = new SHashMultiMap<>();
+    varToBlocks = new HashMultiMap<>();
 
     // compute localsToUsePoints and varToBlocks
     for (Block block : cfg) {
       for (Unit unit : block) {
         List<ValueBox> useBoxes = unit.getUseBoxes();
-        for (Iterator<ValueBox> useBoxesIt = useBoxes.iterator(); useBoxesIt.hasNext();) {
-          Value use = useBoxesIt.next().getValue();
-          if (use instanceof Local) {
-            localsToUsePoints.put((Local) use, block);
-          }
-        }
+        useBoxes.stream().map(ValueBox::getValue).forEach(use -> {
+			if (use instanceof Local) {
+			    localsToUsePoints.put((Local) use, block);
+			  }
+		});
 
         if (Shimple.isPiNode(unit)) {
           varToBlocks.put(Shimple.getLhsLocal(unit), block);
@@ -133,7 +134,7 @@ public class PiNodeManager {
     int[] hasAlreadyFlags = new int[cfg.size()];
 
     int iterCount = 0;
-    Stack<Block> workList = new Stack<Block>();
+    Stack<Block> workList = new Stack<>();
 
     /* Main Cytron algorithm. */
 
@@ -179,7 +180,7 @@ public class PiNodeManager {
     return change;
   }
 
-  public void insertPiNodes(Local local, Block frontierBlock) {
+public void insertPiNodes(Local local, Block frontierBlock) {
     if (varToBlocks.get(local).contains(frontierBlock.getSuccs().get(0))) {
       return;
     }
@@ -206,7 +207,7 @@ public class PiNodeManager {
     }
   }
 
-  public void piHandleIfStmt(Local local, IfStmt u) {
+public void piHandleIfStmt(Local local, IfStmt u) {
     Unit target = u.getTarget();
 
     PiExpr pit = Shimple.v().newPiExpr(local, u, Boolean.TRUE);
@@ -232,7 +233,8 @@ public class PiNodeManager {
       try {
         predOfTarget = units.getPredOf(target);
       } catch (NoSuchElementException e) {
-        predOfTarget = null;
+        logger.error(e.getMessage(), e);
+		predOfTarget = null;
       }
 
       if (predOfTarget == null) {
@@ -250,9 +252,9 @@ public class PiNodeManager {
     u.setTarget(addt);
   }
 
-  public void piHandleSwitchStmt(Local local, Unit u) {
-    List<UnitBox> targetBoxes = new ArrayList<UnitBox>();
-    List<Object> targetKeys = new ArrayList<Object>();
+public void piHandleSwitchStmt(Local local, Unit u) {
+    List<UnitBox> targetBoxes = new ArrayList<>();
+    List<Object> targetKeys = new ArrayList<>();
 
     if (u instanceof LookupSwitchStmt) {
       LookupSwitchStmt lss = (LookupSwitchStmt) u;
@@ -273,7 +275,7 @@ public class PiNodeManager {
         targetBoxes.add(tss.getTargetBox(i));
       }
       for (int i = low; i <= hi; i++) {
-        targetKeys.add(new Integer(i));
+        targetKeys.add(Integer.valueOf(i));
       }
     } else {
       throw new RuntimeException("Assertion failed.");
@@ -300,7 +302,8 @@ public class PiNodeManager {
         try {
           predOfTarget = (Unit) units.getPredOf(target);
         } catch (NoSuchElementException e) {
-          predOfTarget = null;
+          logger.error(e.getMessage(), e);
+		predOfTarget = null;
         }
 
         if (predOfTarget == null) {
@@ -319,10 +322,10 @@ public class PiNodeManager {
     }
   }
 
-  public void eliminatePiNodes(boolean smart) {
+public void eliminatePiNodes(boolean smart) {
     if (smart) {
-      Map<Local, Value> newToOld = new HashMap<Local, Value>();
-      List<ValueBox> boxes = new ArrayList<ValueBox>();
+      Map<Local, Value> newToOld = new HashMap<>();
+      List<ValueBox> boxes = new ArrayList<>();
 
       for (Iterator<Unit> unitsIt = body.getUnits().iterator(); unitsIt.hasNext();) {
         Unit u = unitsIt.next();
@@ -335,35 +338,32 @@ public class PiNodeManager {
         }
       }
 
-      for (Iterator<ValueBox> boxesIt = boxes.iterator(); boxesIt.hasNext();) {
-        ValueBox box = boxesIt.next();
+      boxes.forEach(box -> {
         Value value = box.getValue();
         Value old = newToOld.get(value);
         if (old != null) {
           box.setValue(old);
         }
-      }
+      });
 
       DeadAssignmentEliminator.v().transform(body);
       CopyPropagator.v().transform(body);
       DeadAssignmentEliminator.v().transform(body);
     } else {
-      for (Unit u : body.getUnits()) {
+      body.getUnits().forEach(u -> {
         PiExpr pe = Shimple.getPiExpr(u);
         if (pe != null) {
           ((AssignStmt) u).setRightOp(pe.getValue());
         }
-      }
+      });
     }
   }
 
-  public static List<ValueBox> getUseBoxesFromBlock(Block block) {
-    Iterator<Unit> unitsIt = block.iterator();
+public static List<ValueBox> getUseBoxesFromBlock(Block block) {
+    List<ValueBox> useBoxesList = new ArrayList<>();
 
-    List<ValueBox> useBoxesList = new ArrayList<ValueBox>();
-
-    while (unitsIt.hasNext()) {
-      useBoxesList.addAll(unitsIt.next().getUseBoxes());
+    for (Unit aBlock : block) {
+      useBoxesList.addAll(aBlock.getUseBoxes());
     }
 
     return useBoxesList;

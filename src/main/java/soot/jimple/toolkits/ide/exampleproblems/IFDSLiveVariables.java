@@ -66,29 +66,23 @@ public class IFDSLiveVariables extends DefaultJimpleIFDSTabulationProblem<Value,
         final Stmt s = (Stmt) curr;
 
         return new FlowFunction<Value>() {
-          public Set<Value> computeTargets(Value source) {
+          @Override
+		public Set<Value> computeTargets(Value source) {
             // kill defs
             List<ValueBox> defs = s.getDefBoxes();
-            if (!defs.isEmpty()) {
-              if (defs.get(0).getValue().equivTo(source)) {
+            boolean condition = !defs.isEmpty() && defs.get(0).getValue().equivTo(source);
+			if (condition) {
                 return Collections.emptySet();
               }
-            }
 
             // gen uses out of zero value
-            if (source.equals(zeroValue())) {
-              Set<Value> liveVars = new HashSet<Value>();
-
-              for (ValueBox useBox : s.getUseBoxes()) {
-                Value value = useBox.getValue();
-                liveVars.add(value);
-              }
-
-              return liveVars;
-            }
-
-            // else just propagate
-            return Collections.singleton(source);
+			if (!source.equals(zeroValue())) {
+				// else just propagate
+				return Collections.singleton(source);
+			}
+			Set<Value> liveVars = new HashSet<>();
+			s.getUseBoxes().stream().map(ValueBox::getValue).forEach(liveVars::add);
+			return liveVars;
           }
         };
       }
@@ -97,17 +91,13 @@ public class IFDSLiveVariables extends DefaultJimpleIFDSTabulationProblem<Value,
       public FlowFunction<Value> getCallFlowFunction(Unit callStmt, final SootMethod destinationMethod) {
         final Stmt s = (Stmt) callStmt;
         return new FlowFunction<Value>() {
-          public Set<Value> computeTargets(Value source) {
+          @Override
+		public Set<Value> computeTargets(Value source) {
             if (!s.getDefBoxes().isEmpty()) {
               Value callerSideReturnValue = s.getDefBoxes().get(0).getValue();
               if (callerSideReturnValue.equivTo(source)) {
-                Set<Value> calleeSideReturnValues = new HashSet<Value>();
-                for (Unit calleeUnit : interproceduralCFG().getStartPointsOf(destinationMethod)) {
-                  if (calleeUnit instanceof ReturnStmt) {
-                    ReturnStmt returnStmt = (ReturnStmt) calleeUnit;
-                    calleeSideReturnValues.add(returnStmt.getOp());
-                  }
-                }
+                Set<Value> calleeSideReturnValues = new HashSet<>();
+                interproceduralCFG().getStartPointsOf(destinationMethod).stream().filter(calleeUnit -> calleeUnit instanceof ReturnStmt).map(calleeUnit -> (ReturnStmt) calleeUnit).forEach(returnStmt -> calleeSideReturnValues.add(returnStmt.getOp()));
                 return calleeSideReturnValues;
               }
             }
@@ -124,13 +114,14 @@ public class IFDSLiveVariables extends DefaultJimpleIFDSTabulationProblem<Value,
         Stmt s = (Stmt) callSite;
         InvokeExpr ie = s.getInvokeExpr();
         final List<Value> callArgs = ie.getArgs();
-        final List<Local> paramLocals = new ArrayList<Local>();
+        final List<Local> paramLocals = new ArrayList<>();
         for (int i = 0; i < calleeMethod.getParameterCount(); i++) {
           paramLocals.add(calleeMethod.getActiveBody().getParameterLocal(i));
         }
         return new FlowFunction<Value>() {
-          public Set<Value> computeTargets(Value source) {
-            Set<Value> liveParamsAtCallee = new HashSet<Value>();
+          @Override
+		public Set<Value> computeTargets(Value source) {
+            Set<Value> liveParamsAtCallee = new HashSet<>();
             for (int i = 0; i < paramLocals.size(); i++) {
               if (paramLocals.get(i).equivTo(source)) {
                 liveParamsAtCallee.add(callArgs.get(i));
@@ -150,45 +141,43 @@ public class IFDSLiveVariables extends DefaultJimpleIFDSTabulationProblem<Value,
         final Stmt s = (Stmt) callSite;
 
         return new FlowFunction<Value>() {
-          public Set<Value> computeTargets(Value source) {
+          @Override
+		public Set<Value> computeTargets(Value source) {
             // kill defs
             List<ValueBox> defs = s.getDefBoxes();
-            if (!defs.isEmpty()) {
-              if (defs.get(0).getValue().equivTo(source)) {
+            boolean condition = !defs.isEmpty() && defs.get(0).getValue().equivTo(source);
+			if (condition) {
                 return Collections.emptySet();
               }
-            }
 
             // gen uses out of zero value
-            if (source.equals(zeroValue())) {
-              Set<Value> liveVars = new HashSet<Value>();
-
-              // only "gen" those values that are not parameter values;
+			if (!source.equals(zeroValue())) {
+				// else just propagate
+				return Collections.singleton(source);
+			}
+			Set<Value> liveVars = new HashSet<>();
+			// only "gen" those values that are not parameter values;
               // the latter are taken care of by the return-flow function
               List<Value> args = s.getInvokeExpr().getArgs();
-              for (ValueBox useBox : s.getUseBoxes()) {
-                Value value = useBox.getValue();
-                if (!args.contains(value)) {
+			s.getUseBoxes().stream().map(ValueBox::getValue).forEach(value -> {
+				if (!args.contains(value)) {
                   liveVars.add(value);
                 }
-              }
-
-              return liveVars;
-            }
-
-            // else just propagate
-            return Collections.singleton(source);
+			});
+			return liveVars;
           }
         };
       }
     };
   }
 
-  public Map<Unit, Set<Value>> initialSeeds() {
+  @Override
+public Map<Unit, Set<Value>> initialSeeds() {
     return DefaultSeeds.make(interproceduralCFG().getStartPointsOf(Scene.v().getMainMethod()), zeroValue());
   }
 
-  public Value createZeroValue() {
+  @Override
+public Value createZeroValue() {
     return new JimpleLocal("<<zero>>", NullType.v());
   }
 

@@ -45,37 +45,44 @@ public class JEnterMonitorStmt extends AbstractOpStmt implements EnterMonitorStm
     super(opBox);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JEnterMonitorStmt(Jimple.cloneIfNecessary(getOp()));
   }
 
-  public String toString() {
-    return Jimple.ENTERMONITOR + " " + opBox.getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(Jimple.ENTERMONITOR).append(" ").append(opBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.ENTERMONITOR);
     up.literal(" ");
     opBox.toString(up);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseEnterMonitorStmt(this);
 
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) (getOp())).convertToBaf(context, out);
     Unit u = Baf.v().newEnterMonitorInst();
     u.addAllTagsOf(this);
     out.add(u);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

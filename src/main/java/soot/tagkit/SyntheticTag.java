@@ -31,12 +31,14 @@ public class SyntheticTag implements Tag {
   public SyntheticTag() {
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "Synthetic";
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "SyntheticTag";
   }
 
@@ -45,7 +47,8 @@ public class SyntheticTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("SyntheticTag has no value for bytecode");
   }
 }

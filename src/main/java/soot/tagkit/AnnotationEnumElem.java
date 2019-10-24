@@ -41,7 +41,7 @@ public class AnnotationEnumElem extends AnnotationElem {
 
   @Override
   public String toString() {
-    return super.toString() + " type name: " + typeName + " constant name: " + constantName;
+    return new StringBuilder().append(super.toString()).append(" type name: ").append(typeName).append(" constant name: ").append(constantName).toString();
   }
 
   public String getTypeName() {

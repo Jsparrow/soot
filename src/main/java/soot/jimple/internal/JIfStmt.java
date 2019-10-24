@@ -83,7 +83,8 @@ public class JIfStmt extends AbstractStmt implements IfStmt {
     if (!t.branches()) {
       target = t.toString();
     }
-    return Jimple.IF + " " + getCondition().toString() + " " + Jimple.GOTO + " " + target;
+    return new StringBuilder().append(Jimple.IF).append(" ").append(getCondition().toString()).append(" ").append(Jimple.GOTO)
+			.append(" ").append(target).toString();
   }
 
   @Override
@@ -129,7 +130,7 @@ public class JIfStmt extends AbstractStmt implements IfStmt {
 
   @Override
   public List<ValueBox> getUseBoxes() {
-    List<ValueBox> useBoxes = new ArrayList<ValueBox>();
+    List<ValueBox> useBoxes = new ArrayList<>();
 
     useBoxes.addAll(conditionBox.getValue().getUseBoxes());
     useBoxes.add(conditionBox);

@@ -37,7 +37,8 @@ import soot.Transform;
 public class DumpNumAppReachableMethods extends SceneTransformer {
   private static final Logger logger = LoggerFactory.getLogger(DumpNumAppReachableMethods.class);
 
-  protected void internalTransform(String phaseName, Map options) {
+  @Override
+protected void internalTransform(String phaseName, Map options) {
     int numAppMethods = 0;
     for (Iterator mIt = Scene.v().getReachableMethods().listener(); mIt.hasNext();) {
       final SootMethod m = (SootMethod) mIt.next();

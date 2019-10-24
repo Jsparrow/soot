@@ -64,36 +64,36 @@ import soot.util.dot.DotGraphConstants;
 
 public class InfoFlowAnalysis {
   private static final Logger logger = LoggerFactory.getLogger(InfoFlowAnalysis.class);
-  boolean includePrimitiveInfoFlow;
-  boolean includeInnerFields;
-  boolean printDebug;
+static int nodecount = 0;
+boolean includePrimitiveInfoFlow;
+boolean includeInnerFields;
+boolean printDebug;
+Map<SootClass, ClassInfoFlowAnalysis> classToClassInfoFlowAnalysis;
 
-  Map<SootClass, ClassInfoFlowAnalysis> classToClassInfoFlowAnalysis;
-
-  public InfoFlowAnalysis(boolean includePrimitiveDataFlow, boolean includeInnerFields) {
+public InfoFlowAnalysis(boolean includePrimitiveDataFlow, boolean includeInnerFields) {
     this(includePrimitiveDataFlow, includeInnerFields, false);
   }
 
-  public InfoFlowAnalysis(boolean includePrimitiveDataFlow, boolean includeInnerFields, boolean printDebug) {
+public InfoFlowAnalysis(boolean includePrimitiveDataFlow, boolean includeInnerFields, boolean printDebug) {
     this.includePrimitiveInfoFlow = includePrimitiveDataFlow;
     this.includeInnerFields = includeInnerFields;
     this.printDebug = printDebug;
-    classToClassInfoFlowAnalysis = new HashMap<SootClass, ClassInfoFlowAnalysis>();
+    classToClassInfoFlowAnalysis = new HashMap<>();
   }
 
-  public boolean includesPrimitiveInfoFlow() {
+public boolean includesPrimitiveInfoFlow() {
     return includePrimitiveInfoFlow;
   }
 
-  public boolean includesInnerFields() {
+public boolean includesInnerFields() {
     return includeInnerFields;
   }
 
-  public boolean printDebug() {
+public boolean printDebug() {
     return printDebug;
   }
 
-  /*
+/*
    * public void doApplicationClassesAnalysis() { Iterator appClassesIt = Scene.v().getApplicationClasses().iterator(); while
    * (appClassesIt.hasNext()) { SootClass appClass = (SootClass) appClassesIt.next();
    *
@@ -118,12 +118,12 @@ public class InfoFlowAnalysis {
     return classToClassInfoFlowAnalysis.get(sc);
   }
 
-  public SmartMethodInfoFlowAnalysis getMethodInfoFlowAnalysis(SootMethod sm) {
+public SmartMethodInfoFlowAnalysis getMethodInfoFlowAnalysis(SootMethod sm) {
     ClassInfoFlowAnalysis cdfa = getClassInfoFlowAnalysis(sm.getDeclaringClass());
     return cdfa.getMethodInfoFlowAnalysis(sm);
   }
 
-  /**
+/**
    * Returns a BACKED MutableDirectedGraph whose nodes are EquivalentValue wrapped Refs. It's perfectly safe to modify this
    * graph, just so long as new nodes are EquivalentValue wrapped Refs.
    */
@@ -131,12 +131,12 @@ public class InfoFlowAnalysis {
     return getMethodInfoFlowSummary(sm, true);
   }
 
-  public HashMutableDirectedGraph<EquivalentValue> getMethodInfoFlowSummary(SootMethod sm, boolean doFullAnalysis) {
+public HashMutableDirectedGraph<EquivalentValue> getMethodInfoFlowSummary(SootMethod sm, boolean doFullAnalysis) {
     ClassInfoFlowAnalysis cdfa = getClassInfoFlowAnalysis(sm.getDeclaringClass());
     return cdfa.getMethodInfoFlowSummary(sm, doFullAnalysis);
   }
 
-  /**
+/**
    * Returns an unmodifiable list of EquivalentValue wrapped Refs that source flows to when method sm is called.
    */
   /*
@@ -158,7 +158,7 @@ public class InfoFlowAnalysis {
     return getNodeForFieldRef(sm, sf, null);
   }
 
-  public static EquivalentValue getNodeForFieldRef(SootMethod sm, SootField sf, Local realLocal) {
+public static EquivalentValue getNodeForFieldRef(SootMethod sm, SootField sf, Local realLocal) {
     if (sf.isStatic()) {
       return new CachedEquivalentValue(Jimple.v().newStaticFieldRef(sf.makeRef()));
     } else {
@@ -178,25 +178,25 @@ public class InfoFlowAnalysis {
     }
   }
 
-  // Returns an EquivalentValue wrapped Ref for @parameter i
+// Returns an EquivalentValue wrapped Ref for @parameter i
   // that is suitable for comparison to the nodes of a Data Flow Graph
   public static EquivalentValue getNodeForParameterRef(SootMethod sm, int i) {
     return new CachedEquivalentValue(new ParameterRef(sm.getParameterType(i), i));
   }
 
-  // Returns an EquivalentValue wrapped Ref for the return value
+// Returns an EquivalentValue wrapped Ref for the return value
   // that is suitable for comparison to the nodes of a Data Flow Graph
   public static EquivalentValue getNodeForReturnRef(SootMethod sm) {
     return new CachedEquivalentValue(new ParameterRef(sm.getReturnType(), -1));
   }
 
-  // Returns an EquivalentValue wrapped ThisRef
+// Returns an EquivalentValue wrapped ThisRef
   // that is suitable for comparison to the nodes of a Data Flow Graph
   public static EquivalentValue getNodeForThisRef(SootMethod sm) {
     return new CachedEquivalentValue(new ThisRef(sm.getDeclaringClass().getType()));
   }
 
-  protected HashMutableDirectedGraph<EquivalentValue> getInvokeInfoFlowSummary(InvokeExpr ie, Stmt is, SootMethod context) {
+protected HashMutableDirectedGraph<EquivalentValue> getInvokeInfoFlowSummary(InvokeExpr ie, Stmt is, SootMethod context) {
     // get the data flow graph for each possible target of ie,
     // then combine them conservatively and return the result.
     HashMutableDirectedGraph<EquivalentValue> ret = null;
@@ -231,14 +231,14 @@ public class InfoFlowAnalysis {
     // return getMethodInfoFlowSummary(methodRef.resolve(), context.getDeclaringClass().isApplicationClass());
   }
 
-  protected MutableDirectedGraph<EquivalentValue> getInvokeAbbreviatedInfoFlowGraph(InvokeExpr ie, SootMethod context) {
+protected MutableDirectedGraph<EquivalentValue> getInvokeAbbreviatedInfoFlowGraph(InvokeExpr ie, SootMethod context) {
     // get the data flow graph for each possible target of ie,
     // then combine them conservatively and return the result.
     SootMethodRef methodRef = ie.getMethodRef();
     return getMethodInfoFlowAnalysis(methodRef.resolve()).getMethodAbbreviatedInfoFlowGraph();
   }
 
-  public static void printInfoFlowSummary(DirectedGraph<EquivalentValue> g) {
+public static void printInfoFlowSummary(DirectedGraph<EquivalentValue> g) {
     if (g.size() > 0) {
       logger.debug("    " + " --> ");
     }
@@ -287,7 +287,7 @@ public class InfoFlowAnalysis {
     }
   }
 
-  public static void printGraphToDotFile(String filename, DirectedGraph<EquivalentValue> graph, String graphname,
+public static void printGraphToDotFile(String filename, DirectedGraph<EquivalentValue> graph, String graphname,
       boolean onePage) {
     // this makes the node name unique
     nodecount = 0; // reset node counter first.
@@ -305,20 +305,18 @@ public class InfoFlowAnalysis {
       canvas.drawNode(getNodeName(node));
       canvas.getNode(getNodeName(node)).setLabel(getNodeLabel(node));
 
-      for (EquivalentValue s : graph.getSuccsOf(node)) {
+      graph.getSuccsOf(node).forEach(s -> {
         canvas.drawNode(getNodeName(s));
         canvas.getNode(getNodeName(s)).setLabel(getNodeLabel(s));
 
         canvas.drawEdge(getNodeName(node), getNodeName(s));
-      }
+      });
     }
 
     canvas.plot(filename + ".dot");
   }
 
-  static int nodecount = 0;
-
-  // static Map nodeToNodeName = new HashMap();
+// static Map nodeToNodeName = new HashMap();
   public static String getNodeName(Object o) {
     // if(!nodeToNodeName.containsKey(o)) // Since this uses all different kinds of objects, we
     // // were getting weird collisions, causing wrong graphs.
@@ -328,17 +326,17 @@ public class InfoFlowAnalysis {
     return getNodeLabel(o);
   }
 
-  public static String getNodeLabel(Object o) {
+public static String getNodeLabel(Object o) {
     Value node = ((EquivalentValue) o).getValue();
     /*
-     * if(node instanceof InstanceFieldRef) { InstanceFieldRef ifr = (InstanceFieldRef) node; if(ifr.getBase() instanceof
-     * FakeJimpleLocal) return ifr.getField().getDeclaringClass().getShortName() + "." + ifr.getFieldRef().name(); else
-     * return ifr.getField().getDeclaringClass().getShortName() + "." + ifr.getFieldRef().name(); } else
-     */
-    if (node instanceof FieldRef) {
-      FieldRef fr = (FieldRef) node;
-      return fr.getField().getDeclaringClass().getShortName() + "." + fr.getFieldRef().name();
-    }
-    return node.toString();
+	     * if(node instanceof InstanceFieldRef) { InstanceFieldRef ifr = (InstanceFieldRef) node; if(ifr.getBase() instanceof
+	     * FakeJimpleLocal) return ifr.getField().getDeclaringClass().getShortName() + "." + ifr.getFieldRef().name(); else
+	     * return ifr.getField().getDeclaringClass().getShortName() + "." + ifr.getFieldRef().name(); } else
+	     */
+	if (!(node instanceof FieldRef)) {
+		return node.toString();
+	}
+	FieldRef fr = (FieldRef) node;
+	return new StringBuilder().append(fr.getField().getDeclaringClass().getShortName()).append(".").append(fr.getFieldRef().name()).toString();
   }
 }

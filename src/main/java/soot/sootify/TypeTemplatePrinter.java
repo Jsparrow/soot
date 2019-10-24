@@ -46,98 +46,115 @@ public class TypeTemplatePrinter extends TypeSwitch {
   private String varName;
   private final TemplatePrinter p;
 
-  public void printAssign(String v, Type t) {
+  public TypeTemplatePrinter(TemplatePrinter p) {
+    this.p = p;
+  }
+
+public void printAssign(String v, Type t) {
     String oldName = varName;
     varName = v;
     t.apply(this);
     varName = oldName;
   }
 
-  public TypeTemplatePrinter(TemplatePrinter p) {
-    this.p = p;
-  }
-
-  public void setVariableName(String name) {
+public void setVariableName(String name) {
     this.varName = name;
   }
 
-  private void emit(String rhs) {
-    p.println("Type " + varName + " = " + rhs + ";");
+private void emit(String rhs) {
+    p.println(new StringBuilder().append("Type ").append(varName).append(" = ").append(rhs).append(";").toString());
   }
 
-  private void emitSpecial(String type, String rhs) {
-    p.println(type + " " + varName + " = " + rhs + ";");
+private void emitSpecial(String type, String rhs) {
+    p.println(new StringBuilder().append(type).append(" ").append(varName).append(" = ").append(rhs).append(";").toString());
   }
 
-  public void caseAnySubType(AnySubType t) {
+@Override
+public void caseAnySubType(AnySubType t) {
     throw new IllegalArgumentException("cannot print this type");
   }
 
-  public void caseArrayType(ArrayType t) {
+@Override
+public void caseArrayType(ArrayType t) {
     printAssign("baseType", t.getElementType());
 
-    p.println("int numDimensions=" + t.numDimensions + ";");
+    p.println(new StringBuilder().append("int numDimensions=").append(t.numDimensions).append(";").toString());
 
     emit("ArrayType.v(baseType, numDimensions)");
   }
 
-  public void caseBooleanType(BooleanType t) {
+@Override
+public void caseBooleanType(BooleanType t) {
     emit("BooleanType.v()");
   }
 
-  public void caseByteType(ByteType t) {
+@Override
+public void caseByteType(ByteType t) {
     emit("ByteType.v()");
   }
 
-  public void caseCharType(CharType t) {
+@Override
+public void caseCharType(CharType t) {
     emit("CharType.v()");
   }
 
-  public void defaultCase(Type t) {
+@Override
+public void defaultCase(Type t) {
     throw new IllegalArgumentException("cannot print this type");
   }
 
-  public void caseDoubleType(DoubleType t) {
+@Override
+public void caseDoubleType(DoubleType t) {
     emit("DoubleType.v()");
   }
 
-  public void caseErroneousType(ErroneousType t) {
+@Override
+public void caseErroneousType(ErroneousType t) {
     throw new IllegalArgumentException("cannot print this type");
   }
 
-  public void caseFloatType(FloatType t) {
+@Override
+public void caseFloatType(FloatType t) {
     emit("FloatType.v()");
   }
 
-  public void caseIntType(IntType t) {
+@Override
+public void caseIntType(IntType t) {
     emit("IntType.v()");
   }
 
-  public void caseLongType(LongType t) {
+@Override
+public void caseLongType(LongType t) {
     emit("LongType.v()");
   }
 
-  public void caseNullType(NullType t) {
+@Override
+public void caseNullType(NullType t) {
     emit("NullType.v()");
   }
 
-  public void caseRefType(RefType t) {
-    emitSpecial("RefType", "RefType.v(\"" + t.getClassName() + "\")");
+@Override
+public void caseRefType(RefType t) {
+    emitSpecial("RefType", new StringBuilder().append("RefType.v(\"").append(t.getClassName()).append("\")").toString());
   }
 
-  public void caseShortType(ShortType t) {
+@Override
+public void caseShortType(ShortType t) {
     emit("ShortType.v()");
   }
 
-  public void caseStmtAddressType(StmtAddressType t) {
+@Override
+public void caseStmtAddressType(StmtAddressType t) {
     throw new IllegalArgumentException("cannot print this type");
   }
 
-  public void caseUnknownType(UnknownType t) {
+@Override
+public void caseUnknownType(UnknownType t) {
     throw new IllegalArgumentException("cannot print this type");
   }
 
-  public void caseVoidType(VoidType t) {
+@Override
+public void caseVoidType(VoidType t) {
     emit("VoidType.v()");
   }
 

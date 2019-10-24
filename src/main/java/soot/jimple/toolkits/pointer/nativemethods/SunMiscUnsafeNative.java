@@ -34,12 +34,13 @@ public class SunMiscUnsafeNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.Object allocateInstance(java.lang.Class)")) {
+    if ("java.lang.Object allocateInstance(java.lang.Class)".equals(subSignature)) {
       sun_misc_Unsafe_allocateInstance(method, thisVar, returnVar, params);
       return;
     }

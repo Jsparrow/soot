@@ -45,26 +45,31 @@ public abstract class AbstractInstanceOfExpr implements InstanceOfExpr {
     this.checkType = checkType;
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof AbstractInstanceOfExpr) {
-      AbstractInstanceOfExpr aie = (AbstractInstanceOfExpr) o;
-      return opBox.getValue().equivTo(aie.opBox.getValue()) && checkType.equals(aie.checkType);
-    }
-    return false;
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof AbstractInstanceOfExpr)) {
+		return false;
+	}
+	AbstractInstanceOfExpr aie = (AbstractInstanceOfExpr) o;
+	return opBox.getValue().equivTo(aie.opBox.getValue()) && checkType.equals(aie.checkType);
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return opBox.getValue().equivHashCode() * 101 + checkType.hashCode() * 17;
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public String toString() {
-    return opBox.getValue().toString() + " " + Jimple.INSTANCEOF + " " + checkType.toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(opBox.getValue().toString()).append(" ").append(Jimple.INSTANCEOF).append(" ").append(checkType.toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     opBox.toString(up);
     up.literal(" ");
     up.literal(Jimple.INSTANCEOF);
@@ -89,7 +94,7 @@ public abstract class AbstractInstanceOfExpr implements InstanceOfExpr {
 
   @Override
   public final List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+    List<ValueBox> list = new ArrayList<>();
 
     list.addAll(opBox.getValue().getUseBoxes());
     list.add(opBox);
@@ -97,19 +102,23 @@ public abstract class AbstractInstanceOfExpr implements InstanceOfExpr {
     return list;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return BooleanType.v();
   }
 
-  public Type getCheckType() {
+  @Override
+public Type getCheckType() {
     return checkType;
   }
 
-  public void setCheckType(Type checkType) {
+  @Override
+public void setCheckType(Type checkType) {
     this.checkType = checkType;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseInstanceOfExpr(this);
   }
 }

@@ -39,122 +39,121 @@ import soot.toolkits.graph.Block;
 
 public class PDGNode {
 
-  public enum Type {
-    REGION, CFGNODE
-  };
-
-  public enum Attribute {
-    NORMAL, ENTRY, CONDHEADER, LOOPHEADER
-  };
-
   protected Type m_type;
-  protected Object m_node = null;
-  protected List<PDGNode> m_dependents = new ArrayList<PDGNode>();
-  protected List<PDGNode> m_backDependents = new ArrayList<PDGNode>();
-  // This is used to keep an ordered list of the nodes in a region, based on the control-flow
-  // between them (if any).
-  protected PDGNode m_next = null;
-  protected PDGNode m_prev = null;
+	protected Object m_node = null;
+	protected List<PDGNode> m_dependents = new ArrayList<>();
+	protected List<PDGNode> m_backDependents = new ArrayList<>();
+	// This is used to keep an ordered list of the nodes in a region, based on the control-flow
+	  // between them (if any).
+	  protected PDGNode m_next = null;
+	protected PDGNode m_prev = null;
+	protected Attribute m_attrib = Attribute.NORMAL;
+	// The following is used to keep track of the nodes that are visited in post-order traversal. This should
+	  // probably be moved into an aspect.
+	  protected boolean m_visited = false;
 
-  protected Attribute m_attrib = Attribute.NORMAL;
+	public PDGNode(Object obj, Type t) {
+	    this.m_node = obj;
+	    this.m_type = t;
+	  }
 
-  public PDGNode(Object obj, Type t) {
-    this.m_node = obj;
-    this.m_type = t;
-  }
+	public Type getType() {
+	    return this.m_type;
+	  }
 
-  public Type getType() {
-    return this.m_type;
-  }
+	public void setType(Type t) {
+	    this.m_type = t;
+	  }
 
-  public void setType(Type t) {
-    this.m_type = t;
-  }
+	public Object getNode() {
+	    return this.m_node;
+	  }
 
-  public Object getNode() {
-    return this.m_node;
-  }
+	public void setNext(PDGNode n) {
+	    this.m_next = n;
+	  }
 
-  public void setNext(PDGNode n) {
-    this.m_next = n;
-  }
+	public PDGNode getNext() {
+	    return this.m_next;
+	  }
 
-  public PDGNode getNext() {
-    return this.m_next;
-  }
+	public void setPrev(PDGNode n) {
+	    this.m_prev = n;
+	  }
 
-  public void setPrev(PDGNode n) {
-    this.m_prev = n;
-  }
+	public PDGNode getPrev() {
+	    return this.m_prev;
+	  }
 
-  public PDGNode getPrev() {
-    return this.m_prev;
-  }
+	public void setVisited(boolean v) {
+	    this.m_visited = v;
+	  }
 
-  // The following is used to keep track of the nodes that are visited in post-order traversal. This should
-  // probably be moved into an aspect.
-  protected boolean m_visited = false;
+	public boolean getVisited() {
+	    return this.m_visited;
+	  }
 
-  public void setVisited(boolean v) {
-    this.m_visited = v;
-  }
+	public void setNode(Object obj) {
+	    this.m_node = obj;
+	  }
 
-  public boolean getVisited() {
-    return this.m_visited;
-  }
+	public Attribute getAttrib() {
+	    return this.m_attrib;
+	  }
 
-  public void setNode(Object obj) {
-    this.m_node = obj;
-  }
+	public void setAttrib(Attribute a) {
+	    this.m_attrib = a;
+	  }
 
-  public Attribute getAttrib() {
-    return this.m_attrib;
-  }
+	public void addDependent(PDGNode node) {
+	    if (!this.m_dependents.contains(node)) {
+	      this.m_dependents.add(node);
+	    }
+	  }
 
-  public void setAttrib(Attribute a) {
-    this.m_attrib = a;
-  }
+	public void addBackDependent(PDGNode node) {
+	    this.m_backDependents.add(node);
+	  }
 
-  public void addDependent(PDGNode node) {
-    if (!this.m_dependents.contains(node)) {
-      this.m_dependents.add(node);
-    }
-  }
+	public void removeDependent(PDGNode node) {
+	    this.m_dependents.remove(node);
+	  }
 
-  public void addBackDependent(PDGNode node) {
-    this.m_backDependents.add(node);
-  }
+	public List<PDGNode> getDependents() {
+	    return this.m_dependents;
+	  }
 
-  public void removeDependent(PDGNode node) {
-    this.m_dependents.remove(node);
-  }
+	public List<PDGNode> getBackDependets() {
+	    return this.m_backDependents;
+	  }
 
-  public List<PDGNode> getDependents() {
-    return this.m_dependents;
-  }
+	@Override
+	public String toString() {
+	    String s = "";
+	    s = "Type: " + ((this.m_type == Type.REGION) ? "REGION: " : "CFGNODE: ");
+	    s += this.m_node;
+	    return s;
+	
+	  }
 
-  public List<PDGNode> getBackDependets() {
-    return this.m_backDependents;
-  }
+	public String toShortString() {
+	    String s = "";
+	    s = "Type: " + ((this.m_type == Type.REGION) ? "REGION: " : "CFGNODE: ");
+	    if (this.m_type == Type.REGION) {
+	      s += ((IRegion) this.m_node).getID();
+	    } else {
+	      s += ((Block) this.m_node).toShortString();
+	    }
+	
+	    return s;
+	  }
 
-  public String toString() {
-    String s = new String();
-    s = "Type: " + ((this.m_type == Type.REGION) ? "REGION: " : "CFGNODE: ");
-    s += this.m_node;
-    return s;
+	public enum Type {
+	    REGION, CFGNODE
+	  }
 
-  }
-
-  public String toShortString() {
-    String s = new String();
-    s = "Type: " + ((this.m_type == Type.REGION) ? "REGION: " : "CFGNODE: ");
-    if (this.m_type == Type.REGION) {
-      s += ((IRegion) this.m_node).getID();
-    } else {
-      s += ((Block) this.m_node).toShortString();
-    }
-
-    return s;
-  }
+	public enum Attribute {
+	    NORMAL, ENTRY, CONDHEADER, LOOPHEADER
+	  }
 
 }

@@ -45,51 +45,53 @@ import soot.util.DeterministicHashMap;
 public class Printer {
   private static final Logger logger = LoggerFactory.getLogger(Printer.class);
 
-  public Printer(Singletons.Global g) {
+private static final char fileSeparator = System.getProperty("file.separator").charAt(0);
+
+public static final int USE_ABBREVIATIONS = 0x0001;
+
+public static final int ADD_JIMPLE_LN = 0x0010;
+
+int options = 0;
+
+int jimpleLnNum = 0; // actual line number
+
+public Printer(Singletons.Global g) {
   }
 
-  public static Printer v() {
+public static Printer v() {
     return G.v().soot_Printer();
   }
 
-  final private static char fileSeparator = System.getProperty("file.separator").charAt(0);
-
-  public static final int USE_ABBREVIATIONS = 0x0001, ADD_JIMPLE_LN = 0x0010;
-
-  public boolean useAbbreviations() {
+public boolean useAbbreviations() {
     return (options & USE_ABBREVIATIONS) != 0;
   }
 
-  public boolean addJimpleLn() {
+public boolean addJimpleLn() {
     return (options & ADD_JIMPLE_LN) != 0;
   }
 
-  int options = 0;
-
-  public void setOption(int opt) {
+public void setOption(int opt) {
     options |= opt;
   }
 
-  public void clearOption(int opt) {
+public void clearOption(int opt) {
     options &= ~opt;
   }
 
-  int jimpleLnNum = 0; // actual line number
-
-  public int getJimpleLnNum() {
+public int getJimpleLnNum() {
     return jimpleLnNum;
   }
 
-  public void setJimpleLnNum(int newVal) {
+public void setJimpleLnNum(int newVal) {
     jimpleLnNum = newVal;
   }
 
-  public void incJimpleLnNum() {
+public void incJimpleLnNum() {
     jimpleLnNum++;
     // logger.debug("jimple Ln Num: "+jimpleLnNum);
   }
 
-  public void printTo(SootClass cl, PrintWriter out) {
+public void printTo(SootClass cl, PrintWriter out) {
     // add jimple line number tags
     setJimpleLnNum(1);
 
@@ -98,7 +100,7 @@ public class Printer {
       StringTokenizer st = new StringTokenizer(Modifier.toString(cl.getModifiers()));
       while (st.hasMoreTokens()) {
         String tok = st.nextToken();
-        if (cl.isInterface() && tok.equals("abstract")) {
+        if (cl.isInterface() && "abstract".equals(tok)) {
           continue;
         }
         out.print(tok + " ");
@@ -111,13 +113,13 @@ public class Printer {
         classPrefix = classPrefix.trim();
       }
 
-      out.print(classPrefix + " " + Scene.v().quotedNameOf(cl.getName()) + "");
+      out.print(new StringBuilder().append(classPrefix).append(" ").append(Scene.v().quotedNameOf(cl.getName())).append("").toString());
     }
 
     // Print extension
     {
       if (cl.hasSuperclass()) {
-        out.print(" extends " + Scene.v().quotedNameOf(cl.getSuperclass().getName()) + "");
+        out.print(new StringBuilder().append(" extends ").append(Scene.v().quotedNameOf(cl.getSuperclass().getName())).append("").toString());
       }
     }
 
@@ -128,11 +130,11 @@ public class Printer {
       if (interfaceIt.hasNext()) {
         out.print(" implements ");
 
-        out.print("" + Scene.v().quotedNameOf(interfaceIt.next().getName()) + "");
+        out.print(new StringBuilder().append("").append(Scene.v().quotedNameOf(interfaceIt.next().getName())).append("").toString());
 
         while (interfaceIt.hasNext()) {
           out.print(",");
-          out.print(" " + Scene.v().quotedNameOf(interfaceIt.next().getName()) + "");
+          out.print(new StringBuilder().append(" ").append(Scene.v().quotedNameOf(interfaceIt.next().getName())).append("").toString());
         }
       }
     }
@@ -176,7 +178,7 @@ public class Printer {
               out.println("*/");
             }
           }
-          out.println("    " + f.getDeclaration() + ";");
+          out.println(new StringBuilder().append("    ").append(f.getDeclaration()).append(";").toString());
           if (addJimpleLn()) {
             setJimpleLnNum(addJimpleLnTags(getJimpleLnNum(), f));
           }
@@ -207,7 +209,7 @@ public class Printer {
             if (!method.hasActiveBody()) {
               method.retrieveActiveBody(); // force loading the body
               if (!method.hasActiveBody()) {
-                throw new RuntimeException("method " + method.getName() + " has no active body!");
+                throw new RuntimeException(new StringBuilder().append("method ").append(method.getName()).append(" has no active body!").toString());
               }
             } else if (Options.v().print_tags_in_output()) {
               Iterator<Tag> mTagIterator = method.getTags().iterator();
@@ -252,7 +254,7 @@ public class Printer {
     incJimpleLnNum();
   }
 
-  /**
+/**
    * Prints out the method corresponding to b Body, (declaration and body), in the textual format corresponding to the IR
    * used to encode b body.
    *
@@ -310,7 +312,7 @@ public class Printer {
 
   }
 
-  /** Prints the given <code>JimpleBody</code> to the specified <code>PrintWriter</code>. */
+/** Prints the given <code>JimpleBody</code> to the specified <code>PrintWriter</code>. */
   private void printStatementsInBody(Body body, java.io.PrintWriter out, LabeledUnitPrinter up, UnitGraph unitGraph) {
     Chain<Unit> units = body.getUnits();
     Unit previousStmt;
@@ -395,9 +397,8 @@ public class Printer {
       while (trapIt.hasNext()) {
         Trap trap = trapIt.next();
 
-        out.println("        catch " + Scene.v().quotedNameOf(trap.getException().getName()) + " from "
-            + up.labels().get(trap.getBeginUnit()) + " to " + up.labels().get(trap.getEndUnit()) + " with "
-            + up.labels().get(trap.getHandlerUnit()) + ";");
+        out.println(new StringBuilder().append("        catch ").append(Scene.v().quotedNameOf(trap.getException().getName())).append(" from ").append(up.labels().get(trap.getBeginUnit())).append(" to ").append(up.labels().get(trap.getEndUnit()))
+				.append(" with ").append(up.labels().get(trap.getHandlerUnit())).append(";").toString());
 
         incJimpleLnNum();
 
@@ -406,23 +407,23 @@ public class Printer {
 
   }
 
-  private int addJimpleLnTags(int lnNum, SootMethod meth) {
+private int addJimpleLnTags(int lnNum, SootMethod meth) {
     meth.addTag(new JimpleLineNumberTag(lnNum));
     lnNum++;
     return lnNum;
   }
 
-  private int addJimpleLnTags(int lnNum, SootField f) {
+private int addJimpleLnTags(int lnNum, SootField f) {
     f.addTag(new JimpleLineNumberTag(lnNum));
     lnNum++;
     return lnNum;
   }
 
-  /** Prints the given <code>JimpleBody</code> to the specified <code>PrintWriter</code>. */
+/** Prints the given <code>JimpleBody</code> to the specified <code>PrintWriter</code>. */
   private void printLocalsInBody(Body body, UnitPrinter up) {
     // Print out local variables
     {
-      Map<Type, List<Local>> typeToLocals = new DeterministicHashMap<Type, List<Local>>(body.getLocalCount() * 2 + 1, 0.7f);
+      Map<Type, List<Local>> typeToLocals = new DeterministicHashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
 
       // Collect locals
       {
@@ -438,7 +439,7 @@ public class Printer {
           if (typeToLocals.containsKey(t)) {
             localList = typeToLocals.get(t);
           } else {
-            localList = new ArrayList<Local>();
+            localList = new ArrayList<>();
             typeToLocals.put(t, localList);
           }
 

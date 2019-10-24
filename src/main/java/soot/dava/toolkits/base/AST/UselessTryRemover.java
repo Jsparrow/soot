@@ -39,16 +39,19 @@ public class UselessTryRemover extends ASTAnalysis {
     return G.v().soot_dava_toolkits_base_AST_UselessTryRemover();
   }
 
-  public int getAnalysisDepth() {
+  @Override
+public int getAnalysisDepth() {
     return ANALYSE_AST;
   }
 
-  public void analyseASTNode(ASTNode n) {
+  @Override
+public void analyseASTNode(ASTNode n) {
     Iterator<Object> sbit = n.get_SubBodies().iterator();
 
     while (sbit.hasNext()) {
 
-      List<Object> subBody = null, toRemove = new ArrayList<Object>();
+      List<Object> subBody = null;
+	List<Object> toRemove = new ArrayList<>();
 
       if (n instanceof ASTTryNode) {
         subBody = (List<Object>) ((ASTTryNode.container) sbit.next()).o;
@@ -56,24 +59,15 @@ public class UselessTryRemover extends ASTAnalysis {
         subBody = (List<Object>) sbit.next();
       }
 
-      Iterator<Object> cit = subBody.iterator();
-      while (cit.hasNext()) {
-        Object child = cit.next();
+      subBody.stream().filter(child -> child instanceof ASTTryNode).map(child -> (ASTTryNode) child).forEach(tryNode -> {
+		tryNode.perform_Analysis(TryContentsFinder.v());
+		if ((tryNode.get_CatchList().isEmpty()) || (tryNode.isEmpty())) {
+		    toRemove.add(tryNode);
+		  }
+	});
 
-        if (child instanceof ASTTryNode) {
-          ASTTryNode tryNode = (ASTTryNode) child;
-
-          tryNode.perform_Analysis(TryContentsFinder.v());
-
-          if ((tryNode.get_CatchList().isEmpty()) || (tryNode.isEmpty())) {
-            toRemove.add(tryNode);
-          }
-        }
-      }
-
-      Iterator<Object> trit = toRemove.iterator();
-      while (trit.hasNext()) {
-        ASTTryNode tryNode = (ASTTryNode) trit.next();
+      for (Object aToRemove : toRemove) {
+        ASTTryNode tryNode = (ASTTryNode) aToRemove;
 
         subBody.addAll(subBody.indexOf(tryNode), tryNode.get_TryBody());
         subBody.remove(tryNode);

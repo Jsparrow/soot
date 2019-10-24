@@ -33,7 +33,6 @@ public class AndroidPlatformException extends RuntimeException {
   private static final long serialVersionUID = 5582559536663042315L;
 
   public AndroidPlatformException() {
-    super();
   }
 
   public AndroidPlatformException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {

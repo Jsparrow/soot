@@ -36,19 +36,23 @@ public class CharType extends PrimType implements IntegerType {
     return G.v().soot_CharType();
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "char";
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x739EA474;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseCharType(this);
   }
 

@@ -47,10 +47,10 @@ public class ArrayType extends RefLikeType {
 
   private ArrayType(Type baseType, int numDimensions) {
     if (!(baseType instanceof PrimType || baseType instanceof RefType || baseType instanceof NullType)) {
-      throw new RuntimeException("oops,  base type must be PrimType or RefType but not '" + baseType + "'");
+      throw new RuntimeException(new StringBuilder().append("oops,  base type must be PrimType or RefType but not '").append(baseType).append("'").toString());
     }
     if (numDimensions < 1) {
-      throw new RuntimeException("attempt to create array with " + numDimensions + " dimensions");
+      throw new RuntimeException(new StringBuilder().append("attempt to create array with ").append(numDimensions).append(" dimensions").toString());
     }
     this.baseType = baseType;
     this.numDimensions = numDimensions;
@@ -92,7 +92,8 @@ public class ArrayType extends RefLikeType {
    *          object to test for equality
    * @return true if t is an ArrayType and is parametrized identically to this.
    */
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return t == this;
     /*
      * if(t instanceof ArrayType) { ArrayType arrayType = (ArrayType) t;
@@ -109,8 +110,9 @@ public class ArrayType extends RefLikeType {
     }
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
     buffer.append(baseType.toString());
 
@@ -135,11 +137,13 @@ public class ArrayType extends RefLikeType {
     return buffer.toString();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return baseType.hashCode() + 0x432E0341 * numDimensions;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseArrayType(this);
   }
 
@@ -149,7 +153,8 @@ public class ArrayType extends RefLikeType {
    * RefLikeType. If t is an array, then the answer is the same as getElementType(). But t could also be Object,
    * Serializable, or Cloneable, which can all hold any array, so then the answer is Object.
    */
-  public Type getArrayElementType() {
+  @Override
+public Type getArrayElementType() {
     return getElementType();
   }
 
@@ -165,11 +170,13 @@ public class ArrayType extends RefLikeType {
     }
   }
 
-  public ArrayType makeArrayType() {
+  @Override
+public ArrayType makeArrayType() {
     return ArrayType.v(baseType, numDimensions + 1);
   }
 
-  public boolean isAllowedInFinalCode() {
+  @Override
+public boolean isAllowedInFinalCode() {
     return true;
   }
 

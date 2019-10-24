@@ -53,7 +53,7 @@ public class ReflInliner {
     Scene.v().addBasicClass(DefaultHandler.class.getName(), SootClass.BODIES);
     Scene.v().addBasicClass(OpaquePredicate.class.getName(), SootClass.BODIES);
     Scene.v().addBasicClass(ReflectiveCalls.class.getName(), SootClass.BODIES);
-    ArrayList<String> argList = new ArrayList<String>(Arrays.asList(args));
+    ArrayList<String> argList = new ArrayList<>(Arrays.asList(args));
     argList.add("-w");
     argList.add("-p");
     argList.add("cg");
@@ -66,7 +66,7 @@ public class ReflInliner {
     try {
       soot.Main.main(argList.toArray(new String[0]));
     } catch (CompilationDeathException e) {
-      logger.debug("\nERROR: " + e.getMessage() + "\n");
+      logger.debug(new StringBuilder().append("\nERROR: ").append(e.getMessage()).append("\n").toString());
       logger.debug(
           "The command-line options are described at:\n" + "http://www.sable.mcgill.ca/soot/tutorial/usage/index.html");
       if (Options.v().verbose()) {

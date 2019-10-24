@@ -42,39 +42,44 @@ import soot.jimple.JimpleToBafContext;
 import soot.util.Switch;
 
 @SuppressWarnings("serial")
-abstract public class AbstractCastExpr implements CastExpr, ConvertToBaf {
+public abstract class AbstractCastExpr implements CastExpr, ConvertToBaf {
   final ValueBox opBox;
   Type type;
-
-  AbstractCastExpr(Value op, Type type) {
-    this(Jimple.v().newImmediateBox(op), type);
-  }
-
-  public abstract Object clone();
 
   protected AbstractCastExpr(ValueBox opBox, Type type) {
     this.opBox = opBox;
     this.type = type;
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof AbstractCastExpr) {
-      AbstractCastExpr ace = (AbstractCastExpr) o;
-      return opBox.getValue().equivTo(ace.opBox.getValue()) && type.equals(ace.type);
-    }
-    return false;
+AbstractCastExpr(Value op, Type type) {
+    this(Jimple.v().newImmediateBox(op), type);
   }
 
-  /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+@Override
+public abstract Object clone();
+
+@Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof AbstractCastExpr)) {
+		return false;
+	}
+	AbstractCastExpr ace = (AbstractCastExpr) o;
+	return opBox.getValue().equivTo(ace.opBox.getValue()) && type.equals(ace.type);
+  }
+
+/** Returns a hash code for this object, consistent with structural equality. */
+  @Override
+public int equivHashCode() {
     return opBox.getValue().equivHashCode() * 101 + type.hashCode() + 17;
   }
 
-  public String toString() {
-    return "(" + type.toString() + ") " + opBox.getValue().toString();
+@Override
+public String toString() {
+    return new StringBuilder().append("(").append(type.toString()).append(") ").append(opBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public void toString(UnitPrinter up) {
     up.literal("(");
     up.type(type);
     up.literal(") ");
@@ -87,24 +92,24 @@ abstract public class AbstractCastExpr implements CastExpr, ConvertToBaf {
     }
   }
 
-  @Override
+@Override
   public Value getOp() {
     return opBox.getValue();
   }
 
-  @Override
+@Override
   public void setOp(Value op) {
     opBox.setValue(op);
   }
 
-  @Override
+@Override
   public ValueBox getOpBox() {
     return opBox;
   }
 
-  @Override
+@Override
   public final List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+    List<ValueBox> list = new ArrayList<>();
 
     list.addAll(opBox.getValue().getUseBoxes());
     list.add(opBox);
@@ -112,23 +117,28 @@ abstract public class AbstractCastExpr implements CastExpr, ConvertToBaf {
     return list;
   }
 
-  public Type getCastType() {
+@Override
+public Type getCastType() {
     return type;
   }
 
-  public void setCastType(Type castType) {
+@Override
+public void setCastType(Type castType) {
     this.type = castType;
   }
 
-  public Type getType() {
+@Override
+public Type getType() {
     return type;
   }
 
-  public void apply(Switch sw) {
+@Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseCastExpr(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+@Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     final Type toType = getCastType();
     final Type fromType = getOp().getType();
 

@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AEmptyMethodBody extends PMethodBody
 {
-    private TSemicolon _semicolon_;
+    private TSemicolon semicolon;
 
     public AEmptyMethodBody()
     {
@@ -26,7 +26,7 @@ public final class AEmptyMethodBody extends PMethodBody
     public Object clone()
     {
         return new AEmptyMethodBody(
-            cloneNode(this._semicolon_));
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AEmptyMethodBody extends PMethodBody
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AEmptyMethodBody extends PMethodBody
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._semicolon_);
+            + toString(this.semicolon);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AEmptyMethodBody extends PMethodBody
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ALabelStatement extends PStatement
 {
-    private PLabelName _labelName_;
-    private TColon _colon_;
+    private PLabelName labelName;
+    private TColon colon;
 
     public ALabelStatement()
     {
@@ -30,8 +30,8 @@ public final class ALabelStatement extends PStatement
     public Object clone()
     {
         return new ALabelStatement(
-            cloneNode(this._labelName_),
-            cloneNode(this._colon_));
+            cloneNode(this.labelName),
+            cloneNode(this.colon));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class ALabelStatement extends PStatement
 
     public PLabelName getLabelName()
     {
-        return this._labelName_;
+        return this.labelName;
     }
 
     public void setLabelName(PLabelName node)
     {
-        if(this._labelName_ != null)
+        if(this.labelName != null)
         {
-            this._labelName_.parent(null);
+            this.labelName.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class ALabelStatement extends PStatement
             node.parent(this);
         }
 
-        this._labelName_ = node;
+        this.labelName = node;
     }
 
     public TColon getColon()
     {
-        return this._colon_;
+        return this.colon;
     }
 
     public void setColon(TColon node)
     {
-        if(this._colon_ != null)
+        if(this.colon != null)
         {
-            this._colon_.parent(null);
+            this.colon.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class ALabelStatement extends PStatement
             node.parent(this);
         }
 
-        this._colon_ = node;
+        this.colon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._labelName_)
-            + toString(this._colon_);
+        return new StringBuilder().append("").append(toString(this.labelName)).append(toString(this.colon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._labelName_ == child)
+        if(this.labelName == child)
         {
-            this._labelName_ = null;
+            this.labelName = null;
             return;
         }
 
-        if(this._colon_ == child)
+        if(this.colon == child)
         {
-            this._colon_ = null;
+            this.colon = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class ALabelStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._labelName_ == oldChild)
+        if(this.labelName == oldChild)
         {
             setLabelName((PLabelName) newChild);
             return;
         }
 
-        if(this._colon_ == oldChild)
+        if(this.colon == oldChild)
         {
             setColon((TColon) newChild);
             return;

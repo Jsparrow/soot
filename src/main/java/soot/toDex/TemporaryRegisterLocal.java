@@ -40,7 +40,8 @@ public class TemporaryRegisterLocal implements Local {
     setType(regType);
   }
 
-  public Local clone() {
+  @Override
+public Local clone() {
     throw new RuntimeException("Not implemented");
   }
 

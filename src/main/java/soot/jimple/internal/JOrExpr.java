@@ -35,19 +35,23 @@ public class JOrExpr extends AbstractJimpleIntLongBinopExpr implements OrExpr {
     super(op1, op2);
   }
 
-  public String getSymbol() {
+  @Override
+public String getSymbol() {
     return " | ";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseOrExpr(this);
   }
 
-  Object makeBafInst(Type opType) {
+  @Override
+Object makeBafInst(Type opType) {
     return Baf.v().newOrInst(this.getOp1().getType());
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JOrExpr(Jimple.cloneIfNecessary(getOp1()), Jimple.cloneIfNecessary(getOp2()));
   }
 

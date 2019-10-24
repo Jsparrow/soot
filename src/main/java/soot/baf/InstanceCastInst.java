@@ -25,7 +25,7 @@ package soot.baf;
 import soot.Type;
 
 public interface InstanceCastInst extends Inst {
-  public Type getCastType();
+  Type getCastType();
 
-  public void setCastType(Type type);
+  void setCastType(Type type);
 }

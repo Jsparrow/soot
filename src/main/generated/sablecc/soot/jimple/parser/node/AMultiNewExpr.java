@@ -8,11 +8,11 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AMultiNewExpr extends PNewExpr
 {
-    private TNewmultiarray _newmultiarray_;
-    private TLParen _lParen_;
-    private PBaseType _baseType_;
-    private TRParen _rParen_;
-    private final LinkedList<PArrayDescriptor> _arrayDescriptor_ = new LinkedList<PArrayDescriptor>();
+    private TNewmultiarray newmultiarray;
+    private TLParen lParen;
+    private PBaseType baseType;
+    private TRParen rParen;
+    private final LinkedList<PArrayDescriptor> arrayDescriptor = new LinkedList<>();
 
     public AMultiNewExpr()
     {
@@ -43,11 +43,11 @@ public final class AMultiNewExpr extends PNewExpr
     public Object clone()
     {
         return new AMultiNewExpr(
-            cloneNode(this._newmultiarray_),
-            cloneNode(this._lParen_),
-            cloneNode(this._baseType_),
-            cloneNode(this._rParen_),
-            cloneList(this._arrayDescriptor_));
+            cloneNode(this.newmultiarray),
+            cloneNode(this.lParen),
+            cloneNode(this.baseType),
+            cloneNode(this.rParen),
+            cloneList(this.arrayDescriptor));
     }
 
     @Override
@@ -58,14 +58,14 @@ public final class AMultiNewExpr extends PNewExpr
 
     public TNewmultiarray getNewmultiarray()
     {
-        return this._newmultiarray_;
+        return this.newmultiarray;
     }
 
     public void setNewmultiarray(TNewmultiarray node)
     {
-        if(this._newmultiarray_ != null)
+        if(this.newmultiarray != null)
         {
-            this._newmultiarray_.parent(null);
+            this.newmultiarray.parent(null);
         }
 
         if(node != null)
@@ -78,19 +78,19 @@ public final class AMultiNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._newmultiarray_ = node;
+        this.newmultiarray = node;
     }
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -103,19 +103,19 @@ public final class AMultiNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PBaseType getBaseType()
     {
-        return this._baseType_;
+        return this.baseType;
     }
 
     public void setBaseType(PBaseType node)
     {
-        if(this._baseType_ != null)
+        if(this.baseType != null)
         {
-            this._baseType_.parent(null);
+            this.baseType.parent(null);
         }
 
         if(node != null)
@@ -128,19 +128,19 @@ public final class AMultiNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._baseType_ = node;
+        this.baseType = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -153,75 +153,65 @@ public final class AMultiNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     public LinkedList<PArrayDescriptor> getArrayDescriptor()
     {
-        return this._arrayDescriptor_;
+        return this.arrayDescriptor;
     }
 
     public void setArrayDescriptor(List<?> list)
     {
-        for(PArrayDescriptor e : this._arrayDescriptor_)
-        {
-            e.parent(null);
-        }
-        this._arrayDescriptor_.clear();
+        this.arrayDescriptor.forEach(e -> e.parent(null));
+        this.arrayDescriptor.clear();
 
-        for(Object obj_e : list)
-        {
-            PArrayDescriptor e = (PArrayDescriptor) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PArrayDescriptor) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._arrayDescriptor_.add(e);
-        }
+			e.parent(this);
+			this.arrayDescriptor.add(e);
+		});
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._newmultiarray_)
-            + toString(this._lParen_)
-            + toString(this._baseType_)
-            + toString(this._rParen_)
-            + toString(this._arrayDescriptor_);
+        return new StringBuilder().append("").append(toString(this.newmultiarray)).append(toString(this.lParen)).append(toString(this.baseType)).append(toString(this.rParen))
+				.append(toString(this.arrayDescriptor)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._newmultiarray_ == child)
+        if(this.newmultiarray == child)
         {
-            this._newmultiarray_ = null;
+            this.newmultiarray = null;
             return;
         }
 
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._baseType_ == child)
+        if(this.baseType == child)
         {
-            this._baseType_ = null;
+            this.baseType = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
-        if(this._arrayDescriptor_.remove(child))
+        if(this.arrayDescriptor.remove(child))
         {
             return;
         }
@@ -233,31 +223,31 @@ public final class AMultiNewExpr extends PNewExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._newmultiarray_ == oldChild)
+        if(this.newmultiarray == oldChild)
         {
             setNewmultiarray((TNewmultiarray) newChild);
             return;
         }
 
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._baseType_ == oldChild)
+        if(this.baseType == oldChild)
         {
             setBaseType((PBaseType) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;
         }
 
-        for(ListIterator<PArrayDescriptor> i = this._arrayDescriptor_.listIterator(); i.hasNext();)
+        for(ListIterator<PArrayDescriptor> i = this.arrayDescriptor.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {

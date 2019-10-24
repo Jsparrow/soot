@@ -81,14 +81,13 @@ public class DexIfTransformer extends AbstractNullTransformer {
 
   private boolean usedAsObject;
   private boolean doBreak = false;
+Local l = null;
 
-  public static DexIfTransformer v() {
+public static DexIfTransformer v() {
     return new DexIfTransformer();
   }
 
-  Local l = null;
-
-  @Override
+@Override
   protected void internalTransform(final Body body, String phaseName, Map<String, String> options) {
     final DexDefUseAnalysis localDefs = new DexDefUseAnalysis(body);
 
@@ -108,8 +107,7 @@ public class DexIfTransformer extends AbstractNullTransformer {
           if (u instanceof DefinitionStmt) {
             l = (Local) ((DefinitionStmt) u).getLeftOp();
           } else {
-            throw new RuntimeException("ERROR: def can not be something else than Assign or Identity statement! (def: " + u
-                + " class: " + u.getClass() + "");
+            throw new RuntimeException(new StringBuilder().append("ERROR: def can not be something else than Assign or Identity statement! (def: ").append(u).append(" class: ").append(u.getClass()).append("").toString());
           }
 
           // check defs
@@ -172,13 +170,14 @@ public class DexIfTransformer extends AbstractNullTransformer {
 
             @Override
             public void caseIdentityStmt(IdentityStmt stmt) {
-              if (stmt.getLeftOp() == l) {
-                usedAsObject = isObject(stmt.getRightOp().getType());
-                if (usedAsObject) {
-                  doBreak = true;
-                }
-                return;
-              }
+              if (stmt.getLeftOp() != l) {
+				return;
+			}
+			usedAsObject = isObject(stmt.getRightOp().getType());
+			if (usedAsObject) {
+			  doBreak = true;
+			}
+			return;
             }
           });
           if (doBreak) {
@@ -199,15 +198,14 @@ public class DexIfTransformer extends AbstractNullTransformer {
                 }
                 // check for base
                 SootMethodRef sm = e.getMethodRef();
-                if (!sm.isStatic()) {
-                  if (e instanceof AbstractInvokeExpr) {
+                boolean condition = !sm.isStatic() && e instanceof AbstractInvokeExpr;
+				if (condition) {
                     AbstractInstanceInvokeExpr aiiexpr = (AbstractInstanceInvokeExpr) e;
                     Value b = aiiexpr.getBase();
                     if (b == l) {
                       return true;
                     }
                   }
-                }
                 return false;
               }
 
@@ -226,12 +224,11 @@ public class DexIfTransformer extends AbstractNullTransformer {
                 Value left = stmt.getLeftOp();
                 Value r = stmt.getRightOp();
 
-                if (left instanceof ArrayRef) {
-                  if (((ArrayRef) left).getIndex() == l) {
+                boolean condition = left instanceof ArrayRef && ((ArrayRef) left).getIndex() == l;
+				if (condition) {
                     // doBreak = true;
                     return;
                   }
-                }
 
                 // IMPOSSIBLE! WOULD BE DEF!
                 // // gets value assigned
@@ -411,7 +408,7 @@ public class DexIfTransformer extends AbstractNullTransformer {
         Set<Unit> defsOp1 = localDefs.collectDefinitionsWithAliases(twoIfLocals[0]);
         Set<Unit> defsOp2 = localDefs.collectDefinitionsWithAliases(twoIfLocals[1]);
         defsOp1.addAll(defsOp2);
-        for (Unit u : defsOp1) {
+        defsOp1.forEach(u -> {
           Stmt s = (Stmt) u;
           // If we have a[x] = 0 and a is an object, we may not conclude 0 -> null
           if (!s.containsArrayRef()
@@ -420,39 +417,37 @@ public class DexIfTransformer extends AbstractNullTransformer {
           }
 
           Local l = (Local) ((DefinitionStmt) u).getLeftOp();
-          for (Unit uuse : localDefs.getUsesOf(l)) {
-            Stmt use = (Stmt) uuse;
-            // If we have a[x] = 0 and a is an object, we may not conclude 0 -> null
+          localDefs.getUsesOf(l).stream().map(uuse -> (Stmt) uuse).forEach(use -> {
+			// If we have a[x] = 0 and a is an object, we may not conclude 0 -> null
             if (!use.containsArrayRef()
                 || (twoIfLocals[0] != use.getArrayRef().getBase()) && twoIfLocals[1] != use.getArrayRef().getBase()) {
               replaceWithNull(use);
             }
-          }
-        }
+		});
+        });
       } // end if
 
     } // for if statements
   }
 
-  /**
+/**
    * Collect all the if statements comparing two locals with an Eq or Ne expression
    *
    * @param body
    *          the body to analyze
    */
   private Set<IfStmt> getNullIfCandidates(Body body) {
-    Set<IfStmt> candidates = new HashSet<IfStmt>();
+    Set<IfStmt> candidates = new HashSet<>();
     Iterator<Unit> i = body.getUnits().iterator();
     while (i.hasNext()) {
       Unit u = i.next();
       if (u instanceof IfStmt) {
         ConditionExpr expr = (ConditionExpr) ((IfStmt) u).getCondition();
         boolean isTargetIf = false;
-        if (((expr instanceof EqExpr) || (expr instanceof NeExpr))) {
-          if (expr.getOp1() instanceof Local && expr.getOp2() instanceof Local) {
+        boolean condition = ((expr instanceof EqExpr) || (expr instanceof NeExpr)) && expr.getOp1() instanceof Local && expr.getOp2() instanceof Local;
+		if (condition) {
             isTargetIf = true;
           }
-        }
         if (isTargetIf) {
           candidates.add((IfStmt) u);
         }

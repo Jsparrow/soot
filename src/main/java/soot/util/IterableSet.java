@@ -27,15 +27,14 @@ import java.util.Set;
 
 public class IterableSet<T> extends HashChain<T> implements Set<T> {
   public IterableSet(Collection<T> c) {
-    super();
     addAll(c);
   }
 
   public IterableSet() {
-    super();
   }
 
-  public boolean add(T o) {
+  @Override
+public boolean add(T o) {
     if (o == null) {
       throw new IllegalArgumentException("Cannot add \"null\" to an IterableSet.");
     }
@@ -47,7 +46,8 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
     return super.add(o);
   }
 
-  public boolean remove(Object o) {
+  @Override
+public boolean remove(Object o) {
     if ((o == null) || (contains(o) == false)) {
       return false;
     }
@@ -55,7 +55,8 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
     return super.remove(o);
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     if (o == null) {
       return false;
     }
@@ -75,13 +76,7 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
       return false;
     }
 
-    for (T t : this) {
-      if (!other.contains(t)) {
-        return false;
-      }
-    }
-
-    return true;
+    return this.stream().allMatch(other::contains);
   }
 
   @Override
@@ -94,8 +89,9 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
     return code;
   }
 
-  public Object clone() {
-    IterableSet<T> s = new IterableSet<T>();
+  @Override
+public Object clone() {
+    IterableSet<T> s = new IterableSet<>();
     s.addAll(this);
     return s;
   }
@@ -109,13 +105,7 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
       return false;
     }
 
-    for (T t : this) {
-      if (!other.contains(t)) {
-        return false;
-      }
-    }
-
-    return true;
+    return this.stream().allMatch(other::contains);
   }
 
   public boolean isSupersetOf(IterableSet<T> other) {
@@ -127,13 +117,7 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
       return false;
     }
 
-    for (T t : other) {
-      if (!contains(t)) {
-        return false;
-      }
-    }
-
-    return true;
+    return other.stream().allMatch(t -> contains(t));
   }
 
   public boolean isStrictSubsetOf(IterableSet<T> other) {
@@ -187,20 +171,12 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
       throw new IllegalArgumentException("Cannot set intersect an IterableSet with \"null\".");
     }
 
-    IterableSet<T> c = new IterableSet<T>();
+    IterableSet<T> c = new IterableSet<>();
 
     if (other.size() < size()) {
-      for (T t : other) {
-        if (contains(t)) {
-          c.add(t);
-        }
-      }
+      other.stream().filter(t -> contains(t)).forEach(c::add);
     } else {
-      for (T t : this) {
-        if (other.contains(t)) {
-          c.add(t);
-        }
-      }
+      this.stream().filter(other::contains).forEach(c::add);
     }
     return c;
   }
@@ -210,7 +186,7 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
       throw new IllegalArgumentException("Cannot set union an IterableSet with \"null\".");
     }
 
-    IterableSet<T> c = new IterableSet<T>();
+    IterableSet<T> c = new IterableSet<>();
 
     c.addAll(this);
     c.addAll(other);
@@ -218,18 +194,19 @@ public class IterableSet<T> extends HashChain<T> implements Set<T> {
     return c;
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
-    for (T t : this) {
+    this.forEach(t -> {
       b.append(t.toString());
       b.append("\n");
-    }
+    });
 
     return b.toString();
   }
 
   public UnmodifiableIterableSet<T> asUnmodifiable() {
-    return new UnmodifiableIterableSet<T>(this);
+    return new UnmodifiableIterableSet<>(this);
   }
 }

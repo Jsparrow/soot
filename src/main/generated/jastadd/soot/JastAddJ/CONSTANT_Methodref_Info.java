@@ -38,8 +38,9 @@ public class CONSTANT_Methodref_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
-      return "MethodRefInfo: " + class_index + " " + name_and_type_index;
+    @Override
+	public String toString() {
+      return new StringBuilder().append("MethodRefInfo: ").append(class_index).append(" ").append(name_and_type_index).toString();
     }
 
 

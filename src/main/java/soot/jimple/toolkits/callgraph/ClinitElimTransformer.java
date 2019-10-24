@@ -34,7 +34,8 @@ import soot.toolkits.scalar.FlowSet;
 
 public class ClinitElimTransformer extends BodyTransformer {
 
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
     ClinitElimAnalysis a = new ClinitElimAnalysis(new BriefUnitGraph(b));
 
     CallGraph cg = Scene.v().getCallGraph();

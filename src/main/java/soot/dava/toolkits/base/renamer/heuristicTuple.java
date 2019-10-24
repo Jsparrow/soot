@@ -37,10 +37,10 @@ public class heuristicTuple {
 
   public heuristicTuple(int bits) {
     heuristics = new BitSet(bits);
-    this.methodName = new Vector<String>();
-    this.objectClassName = new Vector<String>();
-    this.fieldName = new Vector<String>();
-    this.castStrings = new Vector<String>();
+    this.methodName = new Vector<>();
+    this.objectClassName = new Vector<>();
+    this.fieldName = new Vector<>();
+    this.castStrings = new Vector<>();
     bitSetSize = bits;
   }
 
@@ -99,21 +99,21 @@ public class heuristicTuple {
     String temp = "BitSet: ";
     for (int i = 0; i < bitSetSize; i++) {
       if (getHeuristic(i)) {
-        temp = temp.concat("1");
+        temp = temp + "1";
       } else {
-        temp = temp.concat("0");
+        temp = temp + "0";
       }
     }
 
-    temp = temp.concat("  Field: " + fieldName.toString());
+    temp = new StringBuilder().append(temp).append("  Field: ").append(fieldName.toString()).toString();
 
-    temp = temp.concat("  Method: ");
+    temp = temp + "  Method: ";
     Iterator<String> it = getMethodName().iterator();
     while (it.hasNext()) {
-      temp = temp.concat(it.next() + " , ");
+      temp = new StringBuilder().append(temp).append(it.next()).append(" , ").toString();
     }
 
-    temp = temp.concat("  Class: " + objectClassName.toString());
+    temp = new StringBuilder().append(temp).append("  Class: ").append(objectClassName.toString()).toString();
 
     // System.out.println("TUPLE:"+temp);
     return temp;

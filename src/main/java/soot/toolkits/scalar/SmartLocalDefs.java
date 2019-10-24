@@ -63,33 +63,6 @@ public class SmartLocalDefs implements LocalDefs {
   private final LocalDefsAnalysis analysis;
   private final Map<Unit, BitSet> liveLocalsAfter;
 
-  public void printAnswer() {
-    System.out.println(answer.toString());
-  }
-
-  /**
-   * Intersects 2 sets and returns the result as a list
-   *
-   * @param a
-   * @param b
-   * @return
-   */
-  private static <T> List<T> asList(Set<T> a, Set<T> b) {
-    if (a == null || b == null || a.isEmpty() || b.isEmpty()) {
-      return Collections.<T>emptyList();
-    }
-
-    if (a.size() < b.size()) {
-      List<T> c = new ArrayList<T>(a);
-      c.retainAll(b);
-      return c;
-    } else {
-      List<T> c = new ArrayList<T>(b);
-      c.retainAll(a);
-      return c;
-    }
-  }
-
   public SmartLocalDefs(UnitGraph g, LiveLocals live) {
     this.graph = g;
 
@@ -98,20 +71,18 @@ public class SmartLocalDefs implements LocalDefs {
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + g.getBody().getMethod().getName() + "]     Constructing SmartLocalDefs...");
+      logger.debug(new StringBuilder().append("[").append(g.getBody().getMethod().getName()).append("]     Constructing SmartLocalDefs...").toString());
     }
 
     final LocalBitSetPacker localPacker = new LocalBitSetPacker(g.getBody());
     localPacker.pack();
 
-    localToDefs = new HashMap<Local, Set<Unit>>();
-    liveLocalsAfter = new HashMap<Unit, BitSet>();
+    localToDefs = new HashMap<>();
+    liveLocalsAfter = new HashMap<>();
     for (Unit u : graph) {
       // translate locals to bits
       BitSet set = new BitSet(localPacker.getLocalCount());
-      for (Local l : live.getLiveLocalsAfter(u)) {
-        set.set(l.getNumber());
-      }
+      live.getLiveLocalsAfter(u).forEach(l -> set.set(l.getNumber()));
       liveLocalsAfter.put(u, set);
 
       Local l = localDef(u);
@@ -123,16 +94,16 @@ public class SmartLocalDefs implements LocalDefs {
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + g.getBody().getMethod().getName() + "]        done localToDefs map...");
+      logger.debug(new StringBuilder().append("[").append(g.getBody().getMethod().getName()).append("]        done localToDefs map...").toString());
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + g.getBody().getMethod().getName() + "]        done unitToMask map...");
+      logger.debug(new StringBuilder().append("[").append(g.getBody().getMethod().getName()).append("]        done unitToMask map...").toString());
     }
 
     analysis = new LocalDefsAnalysis(graph);
 
-    answer = new HashMap<Cons<Unit, Local>, List<Unit>>();
+    answer = new HashMap<>();
     for (Unit u : graph) {
       Set<Unit> s1 = analysis.getFlowBefore(u);
       if (s1 == null || s1.isEmpty()) {
@@ -154,10 +125,8 @@ public class SmartLocalDefs implements LocalDefs {
             continue;
           }
 
-          Cons<Unit, Local> key = new Cons<Unit, Local>(u, l);
-          if (!answer.containsKey(key)) {
-            answer.put(key, lst);
-          }
+          Cons<Unit, Local> key = new Cons<>(u, l);
+          answer.putIfAbsent(key, lst);
         }
       }
     }
@@ -169,11 +138,38 @@ public class SmartLocalDefs implements LocalDefs {
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + g.getBody().getMethod().getName() + "]     SmartLocalDefs finished.");
+      logger.debug(new StringBuilder().append("[").append(g.getBody().getMethod().getName()).append("]     SmartLocalDefs finished.").toString());
     }
   }
 
-  private Local localDef(Unit u) {
+public void printAnswer() {
+    logger.info(answer.toString());
+  }
+
+/**
+   * Intersects 2 sets and returns the result as a list
+   *
+   * @param a
+   * @param b
+   * @return
+   */
+  private static <T> List<T> asList(Set<T> a, Set<T> b) {
+    if (a == null || b == null || a.isEmpty() || b.isEmpty()) {
+      return Collections.<T>emptyList();
+    }
+
+    if (a.size() < b.size()) {
+      List<T> c = new ArrayList<>(a);
+      c.retainAll(b);
+      return c;
+    } else {
+      List<T> c = new ArrayList<>(b);
+      c.retainAll(a);
+      return c;
+    }
+  }
+
+private Local localDef(Unit u) {
     List<ValueBox> defBoxes = u.getDefBoxes();
     int size = defBoxes.size();
     if (size == 0) {
@@ -190,7 +186,7 @@ public class SmartLocalDefs implements LocalDefs {
     return (Local) v;
   }
 
-  private Set<Unit> defsOf(Local l) {
+private Set<Unit> defsOf(Local l) {
     Set<Unit> s = localToDefs.get(l);
     if (s == null) {
       return Collections.emptySet();
@@ -198,15 +194,38 @@ public class SmartLocalDefs implements LocalDefs {
     return s;
   }
 
-  private void addDefOf(Local l, Unit u) {
+private void addDefOf(Local l, Unit u) {
     Set<Unit> s = localToDefs.get(l);
     if (s == null) {
-      localToDefs.put(l, s = new HashSet<Unit>());
+      localToDefs.put(l, s = new HashSet<>());
     }
     s.add(u);
   }
 
-  class LocalDefsAnalysis extends ForwardFlowAnalysisExtended<Unit, Set<Unit>> {
+@Override
+  public List<Unit> getDefsOfAt(Local l, Unit s) {
+    List<Unit> lst = answer.get(new Cons<Unit, Local>(s, l));
+    if (lst == null) {
+      return Collections.emptyList();
+    }
+    return lst;
+  }
+
+@Override
+  public List<Unit> getDefsOf(Local l) {
+    List<Unit> result = new ArrayList<>();
+    answer.keySet().stream().filter(cons -> cons.cdr() == l).forEach(cons -> result.addAll(answer.get(cons)));
+    return result;
+  }
+
+/**
+   * Returns the associated unit graph.
+   */
+  public UnitGraph getGraph() {
+    return graph;
+  }
+
+class LocalDefsAnalysis extends ForwardFlowAnalysisExtended<Unit, Set<Unit>> {
     LocalDefsAnalysis(UnitGraph g) {
       super(g);
       doAnalysis();
@@ -232,11 +251,7 @@ public class SmartLocalDefs implements LocalDefs {
       Local l = localDef(u);
 
       if (l == null) { // add all units contained in mask
-        for (Unit inU : in) {
-          if (liveLocals.get(localDef(inU).getNumber())) {
-            out.add(inU);
-          }
-        }
+        in.stream().filter(inU -> liveLocals.get(localDef(inU).getNumber())).forEach(out::add);
       } else { // check unit whether contained in allDefUnits before add
         // into out set.
         Set<Unit> allDefUnits = defsOf(l);
@@ -251,22 +266,20 @@ public class SmartLocalDefs implements LocalDefs {
         }
 
         for (Unit inU : in) {
-          if (liveLocals.get(localDef(inU).getNumber())) {
-            // If we have a = foo and foo can throw an exception, we
-            // must keep the old definition of a.
-            if (isExceptionalTarget || !allDefUnits.contains(inU)) {
-              out.add(inU);
-            }
-          }
+          boolean condition = liveLocals.get(localDef(inU).getNumber()) && (isExceptionalTarget || !allDefUnits.contains(inU));
+			// If we have a = foo and foo can throw an exception, we
+			// must keep the old definition of a.
+		if (condition) {
+		  out.add(inU);
+		}
         }
 
         assert isExceptionalTarget || !out.removeAll(allDefUnits);
 
-        if (liveLocals.get(l.getNumber())) {
-          if (!isExceptionalTarget) {
+        boolean condition1 = liveLocals.get(l.getNumber()) && !isExceptionalTarget;
+		if (condition1) {
             out.add(u);
           }
-        }
       }
     }
 
@@ -278,40 +291,13 @@ public class SmartLocalDefs implements LocalDefs {
 
     @Override
     protected Set<Unit> newInitialFlow() {
-      return new HashSet<Unit>();
+      return new HashSet<>();
     }
 
     @Override
     protected Set<Unit> entryInitialFlow() {
-      return new HashSet<Unit>();
+      return new HashSet<>();
     }
-  }
-
-  @Override
-  public List<Unit> getDefsOfAt(Local l, Unit s) {
-    List<Unit> lst = answer.get(new Cons<Unit, Local>(s, l));
-    if (lst == null) {
-      return Collections.emptyList();
-    }
-    return lst;
-  }
-
-  @Override
-  public List<Unit> getDefsOf(Local l) {
-    List<Unit> result = new ArrayList<Unit>();
-    for (Cons<Unit, Local> cons : answer.keySet()) {
-      if (cons.cdr() == l) {
-        result.addAll(answer.get(cons));
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Returns the associated unit graph.
-   */
-  public UnitGraph getGraph() {
-    return graph;
   }
 
 }

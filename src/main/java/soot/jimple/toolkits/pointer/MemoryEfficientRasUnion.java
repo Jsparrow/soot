@@ -31,19 +31,16 @@ import soot.PointsToSet;
 public class MemoryEfficientRasUnion extends Union {
   HashSet<PointsToSet> subsets;
 
-  public boolean isEmpty() {
+  @Override
+public boolean isEmpty() {
     if (subsets == null) {
       return true;
     }
-    for (PointsToSet subset : subsets) {
-      if (!subset.isEmpty()) {
-        return false;
-      }
-    }
-    return true;
+    return subsets.stream().allMatch(PointsToSet::isEmpty);
   }
 
-  public boolean hasNonEmptyIntersection(PointsToSet other) {
+  @Override
+public boolean hasNonEmptyIntersection(PointsToSet other) {
     if (subsets == null) {
       return true;
     }
@@ -61,11 +58,12 @@ public class MemoryEfficientRasUnion extends Union {
     return false;
   }
 
-  public boolean addAll(PointsToSet s) {
+  @Override
+public boolean addAll(PointsToSet s) {
     boolean result;
 
     if (subsets == null) {
-      subsets = new HashSet<PointsToSet>();
+      subsets = new HashSet<>();
     }
     if (s instanceof MemoryEfficientRasUnion) {
       MemoryEfficientRasUnion meru = (MemoryEfficientRasUnion) s;
@@ -80,27 +78,28 @@ public class MemoryEfficientRasUnion extends Union {
     return result;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     MemoryEfficientRasUnion ret = new MemoryEfficientRasUnion();
     ret.addAll(this);
     return ret;
   }
 
-  public Set possibleTypes() {
+  @Override
+public Set possibleTypes() {
     if (subsets == null) {
       return Collections.EMPTY_SET;
     }
     HashSet ret = new HashSet();
-    for (PointsToSet subset : subsets) {
-      ret.addAll(subset.possibleTypes());
-    }
+    subsets.forEach(subset -> ret.addAll(subset.possibleTypes()));
     return ret;
   }
 
   /**
    * {@inheritDoc}
    */
-  public int hashCode() {
+  @Override
+public int hashCode() {
     final int PRIME = 31;
     int result = 1;
     result = PRIME * result + ((subsets == null) ? 0 : subsets.hashCode());
@@ -110,7 +109,8 @@ public class MemoryEfficientRasUnion extends Union {
   /**
    * {@inheritDoc}
    */
-  public boolean equals(Object obj) {
+  @Override
+public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }
@@ -134,7 +134,8 @@ public class MemoryEfficientRasUnion extends Union {
   /**
    * {@inheritDoc}
    */
-  public String toString() {
+  @Override
+public String toString() {
     if (subsets == null) {
       return "[]";
     } else {

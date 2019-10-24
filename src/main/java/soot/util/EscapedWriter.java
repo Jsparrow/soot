@@ -35,29 +35,30 @@ public class EscapedWriter extends FilterWriter {
   public final String lineSeparator = System.getProperty("line.separator");
   private final int cr = lineSeparator.charAt(0);
   private final int lf = (lineSeparator.length() == 2) ? lineSeparator.charAt(1) : -1;
+private final StringBuffer mini = new StringBuffer();
 
-  /** Constructs an EscapedWriter around the given Writer. */
+/** Constructs an EscapedWriter around the given Writer. */
   public EscapedWriter(Writer fos) {
     super(fos);
   }
 
-  private final StringBuffer mini = new StringBuffer();
-
-  /** Print a single character (unsupported). */
+/** Print a single character (unsupported). */
   public void print(int ch) throws IOException {
     write(ch);
     throw new RuntimeException();
   }
 
-  /** Write a segment of the given String. */
-  public void write(String s, int off, int len) throws IOException {
+/** Write a segment of the given String. */
+  @Override
+public void write(String s, int off, int len) throws IOException {
     for (int i = off; i < off + len; i++) {
       write(s.charAt(i));
     }
   }
 
-  /** Write a single character. */
-  public void write(int ch) throws IOException {
+/** Write a single character. */
+  @Override
+public void write(int ch) throws IOException {
     if (ch >= 32 && ch <= 126 || ch == cr || ch == lf || ch == ' ') {
       super.write(ch);
       return;

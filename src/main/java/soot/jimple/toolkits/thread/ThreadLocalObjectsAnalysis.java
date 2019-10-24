@@ -56,16 +56,15 @@ import soot.jimple.toolkits.thread.mhp.MhpTester;
 
 public class ThreadLocalObjectsAnalysis extends LocalObjectsAnalysis implements IThreadLocalObjectsAnalysis {
   private static final Logger logger = LoggerFactory.getLogger(ThreadLocalObjectsAnalysis.class);
-  MhpTester mhp;
-  List<AbstractRuntimeThread> threads;
-  InfoFlowAnalysis primitiveDfa;
-  static boolean printDebug = false;
+static boolean printDebug = false;
+MhpTester mhp;
+List<AbstractRuntimeThread> threads;
+InfoFlowAnalysis primitiveDfa;
+Map valueCache;
+Map fieldCache;
+Map invokeCache;
 
-  Map valueCache;
-  Map fieldCache;
-  Map invokeCache;
-
-  public ThreadLocalObjectsAnalysis(MhpTester mhp) // must include main class
+public ThreadLocalObjectsAnalysis(MhpTester mhp) // must include main class
   {
     super(new InfoFlowAnalysis(false, true, printDebug)); // ref-only, with inner fields
     this.mhp = mhp;
@@ -77,41 +76,38 @@ public class ThreadLocalObjectsAnalysis extends LocalObjectsAnalysis implements 
     invokeCache = new HashMap();
   }
 
-  // Forces the majority of computation to take place immediately, rather than on-demand
+// Forces the majority of computation to take place immediately, rather than on-demand
   // might occasionally compute more than is necessary
   public void precompute() {
-    for (AbstractRuntimeThread thread : threads) {
-      for (Object item : thread.getRunMethods()) {
-        SootMethod runMethod = (SootMethod) item;
-        if (runMethod.getDeclaringClass().isApplicationClass()) {
-          getClassLocalObjectsAnalysis(runMethod.getDeclaringClass());
-        }
-      }
-    }
+    threads.forEach(thread -> thread.getRunMethods().forEach(item -> {
+		SootMethod runMethod = (SootMethod) item;
+		if (runMethod.getDeclaringClass().isApplicationClass()) {
+			getClassLocalObjectsAnalysis(runMethod.getDeclaringClass());
+		}
+	}));
   }
 
-  // override
-  protected ClassLocalObjectsAnalysis newClassLocalObjectsAnalysis(LocalObjectsAnalysis loa, InfoFlowAnalysis dfa,
+// override
+  @Override
+protected ClassLocalObjectsAnalysis newClassLocalObjectsAnalysis(LocalObjectsAnalysis loa, InfoFlowAnalysis dfa,
       UseFinder uf, SootClass sc) {
     // find the right run methods to use for threads of type sc
-    List<SootMethod> runMethods = new ArrayList<SootMethod>();
-    Iterator<AbstractRuntimeThread> threadsIt = threads.iterator();
-    while (threadsIt.hasNext()) {
-      AbstractRuntimeThread thread = threadsIt.next();
-      Iterator<Object> runMethodsIt = thread.getRunMethods().iterator();
-      while (runMethodsIt.hasNext()) {
-        SootMethod runMethod = (SootMethod) runMethodsIt.next();
-        if (runMethod.getDeclaringClass() == sc) {
-          runMethods.add(runMethod);
-        }
-      }
-    }
+    List<SootMethod> runMethods = new ArrayList<>();
+    threads.stream().map(thread -> thread.getRunMethods().iterator()).forEach(runMethodsIt -> {
+		while (runMethodsIt.hasNext()) {
+		    SootMethod runMethod = (SootMethod) runMethodsIt.next();
+		    if (runMethod.getDeclaringClass() == sc) {
+		      runMethods.add(runMethod);
+		    }
+		  }
+	});
 
     return new ClassLocalObjectsAnalysis(loa, dfa, primitiveDfa, uf, sc, runMethods);
   }
 
-  // Determines if a RefType Local or a FieldRef is Thread-Local
-  public boolean isObjectThreadLocal(Value localOrRef, SootMethod sm) {
+// Determines if a RefType Local or a FieldRef is Thread-Local
+  @Override
+public boolean isObjectThreadLocal(Value localOrRef, SootMethod sm) {
     if (threads.size() <= 1) {
       return true;
       // Pair cacheKey = new Pair(new EquivalentValue(localOrRef), sm);
@@ -122,7 +118,7 @@ public class ThreadLocalObjectsAnalysis extends LocalObjectsAnalysis implements 
     }
 
     if (printDebug) {
-      logger.debug("- " + localOrRef + " in " + sm + " is...");
+      logger.debug(new StringBuilder().append("- ").append(localOrRef).append(" in ").append(sm).append(" is...").toString());
     }
     Collection<AbstractRuntimeThread> mhpThreads = mhp.getThreads();
     if (mhpThreads != null) {
@@ -132,8 +128,8 @@ public class ThreadLocalObjectsAnalysis extends LocalObjectsAnalysis implements 
 
           if (runMethod.getDeclaringClass().isApplicationClass() && !isObjectLocalToContext(localOrRef, sm, runMethod)) {
             if (printDebug) {
-              logger.debug("  THREAD-SHARED (simpledfa " + ClassInfoFlowAnalysis.methodCount + " smartdfa "
-                  + SmartMethodInfoFlowAnalysis.counter + " smartloa " + SmartMethodLocalObjectsAnalysis.counter + ")");
+              logger.debug(new StringBuilder().append("  THREAD-SHARED (simpledfa ").append(ClassInfoFlowAnalysis.methodCount).append(" smartdfa ").append(SmartMethodInfoFlowAnalysis.counter).append(" smartloa ")
+					.append(SmartMethodLocalObjectsAnalysis.counter).append(")").toString());
             }
             // valueCache.put(cacheKey, Boolean.FALSE);
             // escapesThrough(localOrRef, sm);
@@ -143,8 +139,8 @@ public class ThreadLocalObjectsAnalysis extends LocalObjectsAnalysis implements 
       }
     }
     if (printDebug) {
-      logger.debug("  THREAD-LOCAL (simpledfa " + ClassInfoFlowAnalysis.methodCount + " smartdfa "
-          + SmartMethodInfoFlowAnalysis.counter + " smartloa " + SmartMethodLocalObjectsAnalysis.counter + ")");// (" +
+      logger.debug(new StringBuilder().append("  THREAD-LOCAL (simpledfa ").append(ClassInfoFlowAnalysis.methodCount).append(" smartdfa ").append(SmartMethodInfoFlowAnalysis.counter).append(" smartloa ")
+			.append(SmartMethodLocalObjectsAnalysis.counter).append(")").toString());// (" +
                                                                                                                 // localOrRef
                                                                                                                 // + " in " +
                                                                                                                 // sm + ")");
@@ -153,7 +149,7 @@ public class ThreadLocalObjectsAnalysis extends LocalObjectsAnalysis implements 
     return true;
   }
 
-  /*
+/*
    * public boolean isFieldThreadLocal(SootField sf, SootMethod sm) // this is kind of meaningless..., if we're looking in a
    * particular method, we'd use isObjectThreadLocal { logger.debug("- Checking if " + sf + " in " + sm +
    * " is thread-local"); Iterator threadClassesIt = threadClasses.iterator(); while(threadClassesIt.hasNext()) { SootClass
@@ -184,54 +180,48 @@ public class ThreadLocalObjectsAnalysis extends LocalObjectsAnalysis implements 
      */
   }
 
-  /**
+/**
    * Returns a list of thread-shared sources and sinks. Returns empty list if not actually a shared value.
    */
   public List escapesThrough(Value sharedValue, SootMethod containingMethod) {
     List ret = new ArrayList();
 
-    // The containingMethod might be called from multiple threads
-    // It is possible for interestingValue to be thread-shared from some threads but not others,
-    // so we must look at each thread separately.
-    for (AbstractRuntimeThread thread : mhp.getThreads()) {
-      // Each "abstract thread" from the MHP analysis actually represents a "Thread.start()" statement that could
-      // be starting one of several different kinds of threads. We must consider each kind separately.
-      for (Object meth : thread.getRunMethods()) {
-        SootMethod runMethod = (SootMethod) meth;
-
-        // We can only analyze application classes for TLO
-        if (runMethod.getDeclaringClass().isApplicationClass()
-            && !isObjectLocalToContext(sharedValue, containingMethod, runMethod)) {
-          // This is one of the threads for which sharedValue is thread-shared
-          // so now we will look for which object it escapes through
-          ClassLocalObjectsAnalysis cloa = getClassLocalObjectsAnalysis(containingMethod.getDeclaringClass());
-          CallLocalityContext clc = cloa.getMergedContext(containingMethod);
-
-          // Get the method info flow analysis object
-          SmartMethodInfoFlowAnalysis smifa = dfa.getMethodInfoFlowAnalysis(containingMethod);
-
-          // Get an IFA node for our sharedValue
-          EquivalentValue sharedValueEqVal;
-          if (sharedValue instanceof InstanceFieldRef) {
-            sharedValueEqVal = InfoFlowAnalysis.getNodeForFieldRef(containingMethod, ((FieldRef) sharedValue).getField());
-          } else {
-            sharedValueEqVal = new EquivalentValue(sharedValue);
-          }
-
-          // Get the sources of our interesting value
-          List<EquivalentValue> sources = smifa.sourcesOf(sharedValueEqVal);
-          for (EquivalentValue source : sources) {
-            if (source.getValue() instanceof Ref) {
-              if (clc != null && !clc.isFieldLocal(source)) // (bail out if clc is null)
-              {
-                ret.add(source);
-                // System.out.println(sharedValue + " in " + containingMethod + " escapes through " + source);
-              }
-            }
-          }
-        }
-      }
-    }
+    // Each "abstract thread" from the MHP analysis actually represents a "Thread.start()" statement that could
+	// be starting one of several different kinds of threads. We must consider each kind separately.
+	// We can only analyze application classes for TLO
+	// This is one of the threads for which sharedValue is thread-shared
+	// so now we will look for which object it escapes through
+	// Get the method info flow analysis object
+	// Get an IFA node for our sharedValue
+	// Get the sources of our interesting value
+	// (bail out if clc is null)
+	// System.out.println(sharedValue + " in " + containingMethod + " escapes through " + source);
+	// The containingMethod might be called from multiple threads
+	// It is possible for interestingValue to be thread-shared from some threads but not others,
+	// so we must look at each thread separately.
+	mhp.getThreads().forEach(thread -> thread.getRunMethods().forEach(meth -> {
+		SootMethod runMethod = (SootMethod) meth;
+		if (runMethod.getDeclaringClass().isApplicationClass()
+				&& !isObjectLocalToContext(sharedValue, containingMethod, runMethod)) {
+			ClassLocalObjectsAnalysis cloa = getClassLocalObjectsAnalysis(containingMethod.getDeclaringClass());
+			CallLocalityContext clc = cloa.getMergedContext(containingMethod);
+			SmartMethodInfoFlowAnalysis smifa = dfa.getMethodInfoFlowAnalysis(containingMethod);
+			EquivalentValue sharedValueEqVal;
+			if (sharedValue instanceof InstanceFieldRef) {
+				sharedValueEqVal = InfoFlowAnalysis.getNodeForFieldRef(containingMethod,
+						((FieldRef) sharedValue).getField());
+			} else {
+				sharedValueEqVal = new EquivalentValue(sharedValue);
+			}
+			List<EquivalentValue> sources = smifa.sourcesOf(sharedValueEqVal);
+			sources.forEach(source -> {
+				boolean condition = source.getValue() instanceof Ref && clc != null && !clc.isFieldLocal(source);
+				if (condition) {
+					ret.add(source);
+				}
+			});
+		}
+	}));
     return ret;
   }
 }

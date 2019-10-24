@@ -35,7 +35,9 @@ import java.util.List;
  */
 public class AbstractHost implements Host {
 
-  protected int line, col;
+  protected int line;
+
+protected int col;
 
   // avoid creating an empty list for each element, when it is not used
   // use lazy instantiation (in addTag) instead
@@ -63,9 +65,7 @@ public class AbstractHost implements Host {
     }
 
     int i = 0;
-    Iterator<Tag> it = mTagList.iterator();
-    while (it.hasNext()) {
-      Tag tag = it.next();
+    for (Tag tag : mTagList) {
       if (tag != null && tag.getName().equals(aName)) {
         return i;
       }
@@ -95,7 +95,7 @@ public class AbstractHost implements Host {
   @Override
   public void addTag(Tag t) {
     if (mTagList == null) {
-      mTagList = new ArrayList<Tag>(1);
+      mTagList = new ArrayList<>(1);
     }
     mTagList.add(t);
   }
@@ -115,7 +115,7 @@ public class AbstractHost implements Host {
     }
 
     if (mTagList == null) {
-      mTagList = new ArrayList<Tag>(tags.size());
+      mTagList = new ArrayList<>(tags.size());
     }
 
     mTagList.addAll(tags);

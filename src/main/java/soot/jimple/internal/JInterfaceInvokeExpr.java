@@ -41,8 +41,7 @@ public class JInterfaceInvokeExpr extends AbstractInterfaceInvokeExpr {
     methodRef.declaringClass().checkLevelIgnoreResolving(SootClass.HIERARCHY);
     // now check if the class is valid
     if (!methodRef.declaringClass().isInterface() && !methodRef.declaringClass().isPhantom()) {
-      throw new RuntimeException("Trying to create interface invoke expression for non-interface type: "
-          + methodRef.declaringClass() + " Use JVirtualInvokeExpr or JSpecialInvokeExpr instead!");
+      throw new RuntimeException(new StringBuilder().append("Trying to create interface invoke expression for non-interface type: ").append(methodRef.declaringClass()).append(" Use JVirtualInvokeExpr or JSpecialInvokeExpr instead!").toString());
     }
 
     for (int i = 0; i < args.size(); i++) {
@@ -50,8 +49,9 @@ public class JInterfaceInvokeExpr extends AbstractInterfaceInvokeExpr {
     }
   }
 
-  public Object clone() {
-    List<Value> argList = new ArrayList<Value>(getArgCount());
+  @Override
+public Object clone() {
+    List<Value> argList = new ArrayList<>(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {
       argList.add(i, Jimple.cloneIfNecessary(getArg(i)));

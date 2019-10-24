@@ -41,35 +41,42 @@ public class BDup2Inst extends BDupInst implements Dup2Inst {
     mOp2Type = Baf.getDescriptorTypeOf(aOp2Type);
   }
 
-  public Type getOp1Type() {
+  @Override
+public Type getOp1Type() {
     return mOp1Type;
   }
 
-  public Type getOp2Type() {
+  @Override
+public Type getOp2Type() {
     return mOp2Type;
   }
 
-  public List<Type> getOpTypes() {
-    List<Type> res = new ArrayList<Type>();
+  @Override
+public List<Type> getOpTypes() {
+    List<Type> res = new ArrayList<>();
     res.add(mOp1Type);
     res.add(mOp2Type);
     return res;
   }
 
-  public List<Type> getUnderTypes() {
-    return new ArrayList<Type>();
+  @Override
+public List<Type> getUnderTypes() {
+    return new ArrayList<>();
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "dup2";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseDup2Inst(this);
   }
 
-  public String toString() {
-    return "dup2." + Baf.bafDescriptorOf(mOp1Type) + Baf.bafDescriptorOf(mOp2Type);
+  @Override
+public String toString() {
+    return new StringBuilder().append("dup2.").append(Baf.bafDescriptorOf(mOp1Type)).append(Baf.bafDescriptorOf(mOp2Type)).toString();
   }
 
 }

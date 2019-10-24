@@ -61,23 +61,28 @@ public class Insn35c extends AbstractInsn implements FiveRegInsn {
     this.referencedItem = referencedItem;
   }
 
-  public Register getRegD() {
+  @Override
+public Register getRegD() {
     return regs.get(REG_D_IDX);
   }
 
-  public Register getRegE() {
+  @Override
+public Register getRegE() {
     return regs.get(REG_E_IDX);
   }
 
-  public Register getRegF() {
+  @Override
+public Register getRegF() {
     return regs.get(REG_F_IDX);
   }
 
-  public Register getRegG() {
+  @Override
+public Register getRegG() {
     return regs.get(REG_G_IDX);
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 
@@ -144,6 +149,6 @@ public class Insn35c extends AbstractInsn implements FiveRegInsn {
 
   @Override
   public String toString() {
-    return super.toString() + " (" + regCount + " regs), ref: " + referencedItem;
+    return new StringBuilder().append(super.toString()).append(" (").append(regCount).append(" regs), ref: ").append(referencedItem).toString();
   }
 }

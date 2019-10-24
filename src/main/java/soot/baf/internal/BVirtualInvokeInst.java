@@ -36,23 +36,28 @@ public class BVirtualInvokeInst extends AbstractInvokeInst implements VirtualInv
     this.methodRef = methodRef;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return super.getInMachineCount() + 1;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return super.getInCount() + 1;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BVirtualInvokeInst(methodRef);
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "virtualinvoke";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseVirtualInvokeInst(this);
   }
 }

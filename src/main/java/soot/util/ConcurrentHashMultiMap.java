@@ -39,7 +39,7 @@ public class ConcurrentHashMultiMap<K, V> extends AbstractMultiMap<K, V> {
 
   private static final long serialVersionUID = -3182515910302586044L;
 
-  Map<K, ConcurrentMap<V, V>> m = new ConcurrentHashMap<K, ConcurrentMap<V, V>>(0);
+  Map<K, ConcurrentMap<V, V>> m = new ConcurrentHashMap<>(0);
 
   public ConcurrentHashMultiMap() {
   }
@@ -60,16 +60,11 @@ public class ConcurrentHashMultiMap<K, V> extends AbstractMultiMap<K, V> {
 
   @Override
   public boolean containsValue(V value) {
-    for (Map<V, V> s : m.values()) {
-      if (s.containsKey(value)) {
-        return true;
-      }
-    }
-    return false;
+    return m.values().stream().anyMatch(s -> s.containsKey(value));
   }
 
   protected ConcurrentMap<V, V> newSet() {
-    return new ConcurrentHashMap<V, V>();
+    return new ConcurrentHashMap<>();
   }
 
   private ConcurrentMap<V, V> findSet(K key) {
@@ -114,9 +109,7 @@ public class ConcurrentHashMultiMap<K, V> extends AbstractMultiMap<K, V> {
         s = m.get(key);
         if (s == null) {
           ConcurrentMap<V, V> newSet = newSet();
-          for (V v : values) {
-            newSet.put(v, v);
-          }
+          values.forEach(v -> newSet.put(v, v));
           m.put(key, newSet);
           return true;
         }
@@ -187,10 +180,8 @@ public class ConcurrentHashMultiMap<K, V> extends AbstractMultiMap<K, V> {
 
   @Override
   public Set<V> values() {
-    Set<V> ret = new HashSet<V>(m.size());
-    for (Map<V, V> s : m.values()) {
-      ret.addAll(s.keySet());
-    }
+    Set<V> ret = new HashSet<>(m.size());
+    m.values().forEach(s -> ret.addAll(s.keySet()));
     return ret;
   }
 

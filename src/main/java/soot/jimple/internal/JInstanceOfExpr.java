@@ -37,14 +37,16 @@ public class JInstanceOfExpr extends AbstractInstanceOfExpr implements ConvertTo
     super(Jimple.v().newImmediateBox(op), checkType);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) (getOp())).convertToBaf(context, out);
     Unit u = Baf.v().newInstanceOfInst(getCheckType());
     u.addAllTagsOf(context.getCurrentUnit());
     out.add(u);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JInstanceOfExpr(Jimple.cloneIfNecessary(getOp()), checkType);
   }
 

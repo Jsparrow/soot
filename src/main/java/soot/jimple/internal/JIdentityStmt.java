@@ -49,15 +49,18 @@ public class JIdentityStmt extends AbstractDefinitionStmt implements IdentityStm
     super(localBox, identityValueBox);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JIdentityStmt(Jimple.cloneIfNecessary(getLeftOp()), Jimple.cloneIfNecessary(getRightOp()));
   }
 
-  public String toString() {
-    return leftBox.getValue().toString() + " := " + rightBox.getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(leftBox.getValue().toString()).append(" := ").append(rightBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     leftBox.toString(up);
     up.literal(" := ");
     rightBox.toString(up);
@@ -71,11 +74,13 @@ public class JIdentityStmt extends AbstractDefinitionStmt implements IdentityStm
     rightBox.setValue(identityRef);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseIdentityStmt(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     Value currentRhs = getRightOp();
     Value newRhs;
 

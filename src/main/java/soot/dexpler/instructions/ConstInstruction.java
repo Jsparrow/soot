@@ -55,7 +55,7 @@ public class ConstInstruction extends DexlibAbstractInstruction {
   public void jimplify(DexBody body) {
     int dest = ((OneRegisterInstruction) instruction).getRegisterA();
 
-    Constant cst = getConstant(dest, body);
+    Constant cst = getConstant();
     AssignStmt assign = Jimple.v().newAssignStmt(body.getRegisterLocal(dest), cst);
     setUnit(assign);
     addTags(assign);
@@ -75,10 +75,8 @@ public class ConstInstruction extends DexlibAbstractInstruction {
    *
    * @param register
    *          the register number to fill
-   * @param body
-   *          the body containing the instruction
    */
-  private Constant getConstant(int dest, DexBody body) {
+  private Constant getConstant() {
 
     long literal = 0;
 

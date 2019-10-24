@@ -35,20 +35,21 @@ public class JavaIoObjectInputStreamNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.ClassLoader latestUserDefinedLoader()")) {
+    if ("java.lang.ClassLoader latestUserDefinedLoader()".equals(subSignature)) {
       java_io_ObjectInputStream_latestUserDefinedLoader(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object allocateNewObject(java.lang.Class,java.lang.Class)")) {
+    } else if ("java.lang.Object allocateNewObject(java.lang.Class,java.lang.Class)".equals(subSignature)) {
       java_io_ObjectInputStream_allocateNewObject(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object allocateNewArray(java.lang.Class,int)")) {
+    } else if ("java.lang.Object allocateNewArray(java.lang.Class,int)".equals(subSignature)) {
       java_io_ObjectInputStream_allocateNewArray(method, thisVar, returnVar, params);
       return;
 

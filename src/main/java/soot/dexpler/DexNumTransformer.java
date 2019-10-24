@@ -156,10 +156,11 @@ public class DexNumTransformer extends DexTransformer {
 
           @Override
           public void caseIdentityStmt(IdentityStmt stmt) {
-            if (stmt.getLeftOp() == l) {
-              usedAsFloatingPoint = isFloatingPointLike(stmt.getRightOp().getType());
-              doBreak = true;
-            }
+            if (stmt.getLeftOp() != l) {
+				return;
+			}
+			usedAsFloatingPoint = isFloatingPointLike(stmt.getRightOp().getType());
+			doBreak = true;
           }
         });
 
@@ -263,9 +264,7 @@ public class DexNumTransformer extends DexTransformer {
 
       // change values
       if (usedAsFloatingPoint) {
-        for (Unit u : defs) {
-          replaceWithFloatingPoint(u);
-        }
+        defs.forEach(this::replaceWithFloatingPoint);
       } // end if
 
     }
@@ -289,7 +288,7 @@ public class DexNumTransformer extends DexTransformer {
    *          the body to analyze
    */
   private Set<Local> getNumCandidates(Body body) {
-    Set<Local> candidates = new HashSet<Local>();
+    Set<Local> candidates = new HashSet<>();
     for (Unit u : body.getUnits()) {
       if (u instanceof AssignStmt) {
         AssignStmt a = (AssignStmt) u;
@@ -314,17 +313,18 @@ public class DexNumTransformer extends DexTransformer {
    *          the unit where 0 will be replaced with null.
    */
   private void replaceWithFloatingPoint(Unit u) {
-    if (u instanceof AssignStmt) {
-      AssignStmt s = (AssignStmt) u;
-      Value v = s.getRightOp();
-      if ((v instanceof IntConstant)) {
+    if (!(u instanceof AssignStmt)) {
+		return;
+	}
+	AssignStmt s = (AssignStmt) u;
+	Value v = s.getRightOp();
+	if ((v instanceof IntConstant)) {
         int vVal = ((IntConstant) v).value;
         s.setRightOp(FloatConstant.v(Float.intBitsToFloat(vVal)));
       } else if (v instanceof LongConstant) {
         long vVal = ((LongConstant) v).value;
         s.setRightOp(DoubleConstant.v(Double.longBitsToDouble(vVal)));
       }
-    }
 
   }
 

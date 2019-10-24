@@ -54,7 +54,8 @@ public class NullPointerColorer extends BodyTransformer {
     return G.v().soot_jimple_toolkits_annotation_nullcheck_NullPointerColorer();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
 
     BranchedRefVarsAnalysis analysis = new BranchedRefVarsAnalysis(new ExceptionalUnitGraph(b));
 
@@ -84,17 +85,16 @@ public class NullPointerColorer extends BodyTransformer {
     boolean keysAdded = false;
     while (keysIt.hasNext()) {
       Tag next = keysIt.next();
-      if (next instanceof KeyTag) {
-        if (((KeyTag) next).analysisType().equals("NullCheckTag")) {
-          keysAdded = true;
-        }
-      }
+      if (next instanceof KeyTag && "NullCheckTag".equals(((KeyTag) next).analysisType())) {
+	  keysAdded = true;
+	}
     }
-    if (!keysAdded) {
-      b.getMethod().getDeclaringClass().addTag(new KeyTag(ColorTag.RED, "Nullness: Null", "NullCheckTag"));
-      b.getMethod().getDeclaringClass().addTag(new KeyTag(ColorTag.GREEN, "Nullness: Not Null", "NullCheckTag"));
-      b.getMethod().getDeclaringClass().addTag(new KeyTag(ColorTag.BLUE, "Nullness: Nullness Unknown", "NullCheckTag"));
-    }
+    if (keysAdded) {
+		return;
+	}
+	b.getMethod().getDeclaringClass().addTag(new KeyTag(ColorTag.RED, "Nullness: Null", "NullCheckTag"));
+	b.getMethod().getDeclaringClass().addTag(new KeyTag(ColorTag.GREEN, "Nullness: Not Null", "NullCheckTag"));
+	b.getMethod().getDeclaringClass().addTag(new KeyTag(ColorTag.BLUE, "Nullness: Nullness Unknown", "NullCheckTag"));
   }
 
   private void addColorTags(ValueBox vBox, FlowSet set, Stmt s, BranchedRefVarsAnalysis analysis) {

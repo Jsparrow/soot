@@ -36,26 +36,25 @@ public class BAFCounter extends BodyTransformer implements IJbcoTransform {
 
   static int count = 0;
   public static String dependancies[] = new String[] { "bb.jbco_counter" };
+public static String name = "bb.jbco_counter";
 
-  public String[] getDependencies() {
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_counter";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
     out.println("Count: " + count);
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
-    for (Unit u : b.getUnits()) {
-      if (u instanceof TargetArgInst && !(u instanceof GotoInst) && !(u instanceof JSRInst)) {
-        count++;
-      }
-    }
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+    b.getUnits().stream().filter(u -> u instanceof TargetArgInst && !(u instanceof GotoInst) && !(u instanceof JSRInst)).forEach(u -> count++);
   }
 }

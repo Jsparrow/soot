@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AInterfaceNonstaticInvoke extends PNonstaticInvoke
 {
-    private TInterfaceinvoke _interfaceinvoke_;
+    private TInterfaceinvoke interfaceinvoke;
 
     public AInterfaceNonstaticInvoke()
     {
@@ -26,7 +26,7 @@ public final class AInterfaceNonstaticInvoke extends PNonstaticInvoke
     public Object clone()
     {
         return new AInterfaceNonstaticInvoke(
-            cloneNode(this._interfaceinvoke_));
+            cloneNode(this.interfaceinvoke));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AInterfaceNonstaticInvoke extends PNonstaticInvoke
 
     public TInterfaceinvoke getInterfaceinvoke()
     {
-        return this._interfaceinvoke_;
+        return this.interfaceinvoke;
     }
 
     public void setInterfaceinvoke(TInterfaceinvoke node)
     {
-        if(this._interfaceinvoke_ != null)
+        if(this.interfaceinvoke != null)
         {
-            this._interfaceinvoke_.parent(null);
+            this.interfaceinvoke.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AInterfaceNonstaticInvoke extends PNonstaticInvoke
             node.parent(this);
         }
 
-        this._interfaceinvoke_ = node;
+        this.interfaceinvoke = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._interfaceinvoke_);
+            + toString(this.interfaceinvoke);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._interfaceinvoke_ == child)
+        if(this.interfaceinvoke == child)
         {
-            this._interfaceinvoke_ = null;
+            this.interfaceinvoke = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AInterfaceNonstaticInvoke extends PNonstaticInvoke
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._interfaceinvoke_ == oldChild)
+        if(this.interfaceinvoke == oldChild)
         {
             setInterfaceinvoke((TInterfaceinvoke) newChild);
             return;

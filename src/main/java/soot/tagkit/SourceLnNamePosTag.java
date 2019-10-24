@@ -44,8 +44,9 @@ public class SourceLnNamePosTag extends SourceLnPosTag {
   /**
    * {@inheritDoc}
    */
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
     sb.append(super.toString());
     sb.append(" file: ");
     sb.append(fileName);

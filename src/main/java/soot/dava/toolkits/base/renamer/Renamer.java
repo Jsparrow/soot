@@ -35,9 +35,12 @@ import soot.SootField;
 import soot.Type;
 import soot.dava.internal.AST.ASTMethodNode;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Renamer {
-  public final boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(Renamer.class);
+public final boolean DEBUG = false;
   heuristicSet heuristics;
 
   List locals; // a list of locals in scope
@@ -54,13 +57,13 @@ public class Renamer {
     locals = null;
     methodNode = node;
 
-    changedOrNot = new HashMap<Local, Boolean>();
+    changedOrNot = new HashMap<>();
     Iterator<Local> localIt = info.getLocalsIterator();
     while (localIt.hasNext()) {
-      changedOrNot.put(localIt.next(), new Boolean(false));
+      changedOrNot.put(localIt.next(), Boolean.valueOf(false));
     }
 
-    forLoopNames = new ArrayList<String>();
+    forLoopNames = new ArrayList<>();
     forLoopNames.add("i");
     forLoopNames.add("j");
     forLoopNames.add("k");
@@ -118,7 +121,7 @@ public class Renamer {
 
       Type type = tempLocal.getType();
       if (type instanceof ArrayType) {
-        debug("arraysGetTypeArray", "Local:" + tempLocal + " is an Array Type: " + type.toString());
+        debug("arraysGetTypeArray", new StringBuilder().append("Local:").append(tempLocal).append(" is an Array Type: ").append(type.toString()).toString());
         String tempClassName = type.toString();
         // remember that a toString of an array gives you the square brackets
         if (tempClassName.indexOf('[') >= 0) {
@@ -168,7 +171,7 @@ public class Renamer {
       }
 
       if (type instanceof RefLikeType) {
-        debug("objectsGetClassName", "Local:" + tempLocal + " Type: " + type.toString());
+        debug("objectsGetClassName", new StringBuilder().append("Local:").append(tempLocal).append(" Type: ").append(type.toString()).toString());
         // debug("objectsGetClassName","getting array type"+type.getArrayType());
         String tempClassName = type.toString();
         // debug("objectsGetClassName","type of object is"+tempClassName);
@@ -207,10 +210,8 @@ public class Renamer {
         debug("castedObject", "checking " + tempLocal);
         List<String> classes = heuristics.getCastStrings(tempLocal);
 
-        Iterator<String> itClass = classes.iterator();
         String classNameToUse = null;
-        while (itClass.hasNext()) {
-          String tempClassName = itClass.next();
+        for (String tempClassName : classes) {
           if (tempClassName.indexOf('.') != -1) {
             // contains a dot have to remove that
             tempClassName = tempClassName.substring(tempClassName.lastIndexOf('.') + 1);
@@ -259,10 +260,8 @@ public class Renamer {
       if (!alreadyChanged(tempLocal)) {
         debug("newClassName", "checking " + tempLocal);
         List<String> classes = heuristics.getObjectClassName(tempLocal);
-        Iterator<String> itClass = classes.iterator();
         String classNameToUse = null;
-        while (itClass.hasNext()) {
-          String tempClassName = itClass.next();
+        for (String tempClassName : classes) {
           if (tempClassName.indexOf('.') != -1) {
             // contains a dot have to remove that
             tempClassName = tempClassName.substring(tempClassName.lastIndexOf('.') + 1);
@@ -368,7 +367,7 @@ public class Renamer {
       Local tempLocal = it.next();
       Type localType = tempLocal.getType();
       String typeString = localType.toString();
-      if (typeString.indexOf("Exception") >= 0) {
+      if (typeString.contains("Exception")) {
         // the string xception occurs in this type
         debug("exceptionNaming", "Type is an exception" + tempLocal);
 
@@ -468,19 +467,19 @@ public class Renamer {
 
     // if it wasnt in there add it
     if (truthValue == null) {
-      changedOrNot.put(var, new Boolean(false));
+      changedOrNot.put(var, Boolean.valueOf(false));
     } else {
       if (((Boolean) truthValue).booleanValue()) {
         // already changed just return
-        debug("setName", "Var: " + var + " had already been renamed");
+        debug("setName", new StringBuilder().append("Var: ").append(var).append(" had already been renamed").toString());
         return;
       }
     }
     // will only get here if the var had not been changed
 
-    debug("setName", "Changed " + var.getName() + " to " + newName);
+    debug("setName", new StringBuilder().append("Changed ").append(var.getName()).append(" to ").append(newName).toString());
     var.setName(newName);
-    changedOrNot.put(var, new Boolean(true));
+    changedOrNot.put(var, Boolean.valueOf(true));
   }
 
   /*
@@ -495,12 +494,12 @@ public class Renamer {
 
     // if it wasnt in there add it
     if (truthValue == null) {
-      changedOrNot.put(var, new Boolean(false));
+      changedOrNot.put(var, Boolean.valueOf(false));
       return false;
     } else {
       if (((Boolean) truthValue).booleanValue()) {
         // already changed just return
-        debug("alreadyChanged", "Var: " + var + " had already been renamed");
+        debug("alreadyChanged", new StringBuilder().append("Var: ").append(var).append(" had already been renamed").toString());
         return true;
       } else {
         return false;
@@ -517,10 +516,10 @@ public class Renamer {
     while (it.hasNext()) {
       Local tempLocal = (Local) it.next();
       if (tempLocal.getName().equals(name)) {
-        debug("isUniqueName", "New Name " + name + " is not unique (matches some local)..changing");
+        debug("isUniqueName", new StringBuilder().append("New Name ").append(name).append(" is not unique (matches some local)..changing").toString());
         return false;
       } else {
-        debug("isUniqueName", "New Name " + name + " is different from local " + tempLocal.getName());
+        debug("isUniqueName", new StringBuilder().append("New Name ").append(name).append(" is different from local ").append(tempLocal.getName()).toString());
       }
     }
 
@@ -529,10 +528,10 @@ public class Renamer {
     while (it.hasNext()) {
       SootField tempField = (SootField) it.next();
       if (tempField.getName().equals(name)) {
-        debug("isUniqueName", "New Name " + name + " is not unique (matches field)..changing");
+        debug("isUniqueName", new StringBuilder().append("New Name ").append(name).append(" is not unique (matches field)..changing").toString());
         return false;
       } else {
-        debug("isUniqueName", "New Name " + name + " is different from field " + tempField.getName());
+        debug("isUniqueName", new StringBuilder().append("New Name ").append(name).append(" is different from field ").append(tempField.getName()).toString());
       }
     }
     return true;
@@ -569,7 +568,7 @@ public class Renamer {
   public void debug(String methodName, String debug) {
 
     if (DEBUG) {
-      System.out.println(methodName + "    DEBUG: " + debug);
+      logger.info(new StringBuilder().append(methodName).append("    DEBUG: ").append(debug).toString());
     }
   }
 

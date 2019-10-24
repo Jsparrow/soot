@@ -45,19 +45,23 @@ public class GenericAttribute implements Attribute {
     mValue = value;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return mName;
   }
 
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     return mValue;
   }
 
-  public String toString() {
-    return mName + " " + Base64.encode(mValue).toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(mName).append(" ").append(Base64.encode(mValue).toString()).toString();
   }
 
-  public void setValue(byte[] value) {
+  @Override
+public void setValue(byte[] value) {
     mValue = value;
   }
 

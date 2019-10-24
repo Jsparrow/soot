@@ -51,11 +51,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
     {
         inAFile(node);
         {
-            List<PModifier> copy = new ArrayList<PModifier>(node.getModifier());
-            for(PModifier e : copy)
-            {
-                e.apply(this);
-            }
+            List<PModifier> copy = new ArrayList<>(node.getModifier());
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getFileType() != null)
         {
@@ -464,11 +461,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getLBrace().apply(this);
         }
         {
-            List<PMember> copy = new ArrayList<PMember>(node.getMember());
-            for(PMember e : copy)
-            {
-                e.apply(this);
-            }
+            List<PMember> copy = new ArrayList<>(node.getMember());
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getRBrace() != null)
         {
@@ -592,11 +586,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
     {
         inAFieldMember(node);
         {
-            List<PModifier> copy = new ArrayList<PModifier>(node.getModifier());
-            for(PModifier e : copy)
-            {
-                e.apply(this);
-            }
+            List<PModifier> copy = new ArrayList<>(node.getModifier());
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getType() != null)
         {
@@ -628,11 +619,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
     {
         inAMethodMember(node);
         {
-            List<PModifier> copy = new ArrayList<PModifier>(node.getModifier());
-            for(PModifier e : copy)
-            {
-                e.apply(this);
-            }
+            List<PModifier> copy = new ArrayList<>(node.getModifier());
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getType() != null)
         {
@@ -1221,11 +1209,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getBaseTypeNoName().apply(this);
         }
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
+            copy.forEach(e -> e.apply(this));
         }
         outABaseNonvoidType(node);
     }
@@ -1249,11 +1234,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getQuotedName().apply(this);
         }
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
+            copy.forEach(e -> e.apply(this));
         }
         outAQuotedNonvoidType(node);
     }
@@ -1277,11 +1259,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getIdentifier().apply(this);
         }
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
+            copy.forEach(e -> e.apply(this));
         }
         outAIdentNonvoidType(node);
     }
@@ -1305,11 +1284,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getFullIdentifier().apply(this);
         }
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
+            copy.forEach(e -> e.apply(this));
         }
         outAFullIdentNonvoidType(node);
     }
@@ -1379,25 +1355,16 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getLBrace().apply(this);
         }
         {
-            List<PDeclaration> copy = new ArrayList<PDeclaration>(node.getDeclaration());
-            for(PDeclaration e : copy)
-            {
-                e.apply(this);
-            }
+            List<PDeclaration> copy = new ArrayList<>(node.getDeclaration());
+            copy.forEach(e -> e.apply(this));
         }
         {
-            List<PStatement> copy = new ArrayList<PStatement>(node.getStatement());
-            for(PStatement e : copy)
-            {
-                e.apply(this);
-            }
+            List<PStatement> copy = new ArrayList<>(node.getStatement());
+            copy.forEach(e -> e.apply(this));
         }
         {
-            List<PCatchClause> copy = new ArrayList<PCatchClause>(node.getCatchClause());
-            for(PCatchClause e : copy)
-            {
-                e.apply(this);
-            }
+            List<PCatchClause> copy = new ArrayList<>(node.getCatchClause());
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getRBrace() != null)
         {
@@ -1691,11 +1658,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getLBrace().apply(this);
         }
         {
-            List<PCaseStmt> copy = new ArrayList<PCaseStmt>(node.getCaseStmt());
-            for(PCaseStmt e : copy)
-            {
-                e.apply(this);
-            }
+            List<PCaseStmt> copy = new ArrayList<>(node.getCaseStmt());
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getRBrace() != null)
         {
@@ -1743,11 +1707,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getLBrace().apply(this);
         }
         {
-            List<PCaseStmt> copy = new ArrayList<PCaseStmt>(node.getCaseStmt());
-            for(PCaseStmt e : copy)
-            {
-                e.apply(this);
-            }
+            List<PCaseStmt> copy = new ArrayList<>(node.getCaseStmt());
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getRBrace() != null)
         {
@@ -2513,11 +2474,8 @@ public class DepthFirstAdapter extends AnalysisAdapter
             node.getRParen().apply(this);
         }
         {
-            List<PArrayDescriptor> copy = new ArrayList<PArrayDescriptor>(node.getArrayDescriptor());
-            for(PArrayDescriptor e : copy)
-            {
-                e.apply(this);
-            }
+            List<PArrayDescriptor> copy = new ArrayList<>(node.getArrayDescriptor());
+            copy.forEach(e -> e.apply(this));
         }
         outAMultiNewExpr(node);
     }

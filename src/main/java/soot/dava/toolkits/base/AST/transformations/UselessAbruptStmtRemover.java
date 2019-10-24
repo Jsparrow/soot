@@ -43,6 +43,8 @@ import soot.dava.toolkits.base.AST.analysis.DepthFirstAdapter;
 import soot.dava.toolkits.base.AST.traversals.ASTParentNodeFinder;
 import soot.dava.toolkits.base.AST.traversals.LabelToNodeMapper;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * It has been seen that a lot of times there are break statements targeting
@@ -66,7 +68,9 @@ import soot.jimple.Stmt;
  *    if the construct carrying this node has become empty and so on..... 
  */
 public class UselessAbruptStmtRemover extends DepthFirstAdapter {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(UselessAbruptStmtRemover.class);
+
+public static boolean DEBUG = false;
 
   ASTParentNodeFinder finder;
   ASTMethodNode methodNode;
@@ -81,13 +85,15 @@ public class UselessAbruptStmtRemover extends DepthFirstAdapter {
     finder = null;
   }
 
-  public void inASTMethodNode(ASTMethodNode node) {
+  @Override
+public void inASTMethodNode(ASTMethodNode node) {
     methodNode = node;
     mapper = new LabelToNodeMapper();
     methodNode.apply(mapper);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
     Iterator<AugmentedStmt> it = node.getStatements().iterator();
     AugmentedStmt remove = null;
     ASTLabeledNode target = null;
@@ -130,7 +136,7 @@ public class UselessAbruptStmtRemover extends DepthFirstAdapter {
       }
 
       if (DEBUG) {
-        System.out.println("Starting useless check for abrupt stmt: " + abrupt);
+        logger.info("Starting useless check for abrupt stmt: " + abrupt);
       }
 
       // start condition is that ancestor is the stmt seq node
@@ -144,13 +150,13 @@ public class UselessAbruptStmtRemover extends DepthFirstAdapter {
 
         ASTNode ancestorsParent = (ASTNode) tempParent;
         if (DEBUG) {
-          System.out.println("\tCurrent ancestorsParent has type" + ancestorsParent.getClass());
+          logger.info("\tCurrent ancestorsParent has type" + ancestorsParent.getClass());
         }
 
         // ancestor should be last child of ancestorsParent
         if (!checkChildLastInParent(ancestor, ancestorsParent)) {
           if (DEBUG) {
-            System.out.println("\t\tCurrent ancestorParent has more children after this ancestor");
+            logger.info("\t\tCurrent ancestorParent has more children after this ancestor");
           }
 
           // return from the method since this is the last stmt and we cant do anything
@@ -162,7 +168,7 @@ public class UselessAbruptStmtRemover extends DepthFirstAdapter {
             || ancestorsParent instanceof ASTUnconditionalLoopNode || ancestorsParent instanceof ASTForLoopNode
             || ancestorsParent instanceof ASTSwitchNode) {
           if (DEBUG) {
-            System.out.println("\t\tAncestorsParent is a loop shouldnt remove abrupt stmt");
+            logger.info("\t\tAncestorsParent is a loop shouldnt remove abrupt stmt");
           }
           return;
         }
@@ -170,32 +176,31 @@ public class UselessAbruptStmtRemover extends DepthFirstAdapter {
       }
 
       if (DEBUG) {
-        System.out.println("\tGot to target without returning means we can remove stmt");
+        logger.info("\tGot to target without returning means we can remove stmt");
       }
 
       remove = as;
     } // end of while going through the statement sequence
 
-    if (remove != null) {
-      List<AugmentedStmt> stmts = node.getStatements();
-      stmts.remove(remove);
-      if (DEBUG) {
-        System.out.println("\tRemoved abrupt stmt");
+    if (remove == null) {
+		return;
+	}
+	List<AugmentedStmt> stmts = node.getStatements();
+	stmts.remove(remove);
+	if (DEBUG) {
+        logger.info("\tRemoved abrupt stmt");
       }
-
-      if (target != null) {
+	if (target != null) {
         if (DEBUG) {
-          System.out.println("Invoking findAndKill on the target");
+          logger.info("Invoking findAndKill on the target");
         }
         UselessLabelFinder.v().findAndKill(target);
       }
       // TODO what if we just emptied a stmt seq block??
       // not doing this for the moment
-
-      // set modified flag make finder null
+	// set modified flag make finder null
       G.v().ASTTransformations_modified = true;
-      finder = null;
-    }
+	finder = null;
   }
 
   public boolean checkChildLastInParent(ASTNode child, ASTNode parent) {

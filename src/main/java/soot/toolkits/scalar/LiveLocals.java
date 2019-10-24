@@ -32,7 +32,25 @@ import soot.toolkits.graph.UnitGraph;
  * Provides an interface for querying for the list of Locals that are live before an after a given unit in a method.
  */
 public interface LiveLocals {
-  static final public class Factory {
+  /**
+	   * Returns the list of Locals that are live before the specified Unit.
+	   * 
+	   * @param s
+	   *          the Unit that defines this query.
+	   * @return a list of Locals that are live before the specified unit in the method.
+	   */
+	  List<Local> getLiveLocalsBefore(Unit s);
+
+	/**
+	   * Returns the list of Locals that are live after the specified Unit.
+	   * 
+	   * @param s
+	   *          the Unit that defines this query.
+	   * @return a list of Locals that are live after the specified unit in the method.
+	   */
+	  List<Local> getLiveLocalsAfter(Unit s);
+
+public static final class Factory {
     private Factory() {
     }
 
@@ -40,22 +58,4 @@ public interface LiveLocals {
       return new SimpleLiveLocals(graph);
     }
   }
-
-  /**
-   * Returns the list of Locals that are live before the specified Unit.
-   * 
-   * @param s
-   *          the Unit that defines this query.
-   * @return a list of Locals that are live before the specified unit in the method.
-   */
-  public List<Local> getLiveLocalsBefore(Unit s);
-
-  /**
-   * Returns the list of Locals that are live after the specified Unit.
-   * 
-   * @param s
-   *          the Unit that defines this query.
-   * @return a list of Locals that are live after the specified unit in the method.
-   */
-  public List<Local> getLiveLocalsAfter(Unit s);
 }

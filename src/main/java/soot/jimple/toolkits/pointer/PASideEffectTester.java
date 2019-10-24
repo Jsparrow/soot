@@ -63,7 +63,8 @@ public class PASideEffectTester implements SideEffectTester {
   public PASideEffectTester() {
     if (G.v().Union_factory == null) {
       G.v().Union_factory = new UnionFactory() {
-        public Union newUnion() {
+        @Override
+		public Union newUnion() {
           return FullObjectSet.v();
         }
       };
@@ -71,10 +72,11 @@ public class PASideEffectTester implements SideEffectTester {
   }
 
   /** Call this when starting to analyze a new method to setup the cache. */
-  public void newMethod(SootMethod m) {
-    unitToRead = new HashMap<Unit, RWSet>();
-    unitToWrite = new HashMap<Unit, RWSet>();
-    localToReachingObjects = new HashMap<Local, PointsToSet>();
+  @Override
+public void newMethod(SootMethod m) {
+    unitToRead = new HashMap<>();
+    unitToWrite = new HashMap<>();
+    localToReachingObjects = new HashMap<>();
     currentMethod = m;
     sea.findNTRWSets(currentMethod);
   }
@@ -106,14 +108,16 @@ public class PASideEffectTester implements SideEffectTester {
   /**
    * Returns true if the unit can read from v. Does not deal with expressions; deals with Refs.
    */
-  public boolean unitCanReadFrom(Unit u, Value v) {
+  @Override
+public boolean unitCanReadFrom(Unit u, Value v) {
     return valueTouchesRWSet(readSet(u), v, u.getUseBoxes());
   }
 
   /**
    * Returns true if the unit can read from v. Does not deal with expressions; deals with Refs.
    */
-  public boolean unitCanWriteTo(Unit u, Value v) {
+  @Override
+public boolean unitCanWriteTo(Unit u, Value v) {
     return valueTouchesRWSet(writeSet(u), v, u.getDefBoxes());
   }
 

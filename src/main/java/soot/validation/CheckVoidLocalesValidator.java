@@ -37,11 +37,7 @@ public enum CheckVoidLocalesValidator implements BodyValidator {
 
   @Override
   public void validate(Body body, List<ValidationException> exception) {
-    for (Local l : body.getLocals()) {
-      if (l.getType() instanceof VoidType) {
-        exception.add(new ValidationException(l, "Local " + l + " in " + body.getMethod() + " defined with void type"));
-      }
-    }
+    body.getLocals().stream().filter(l -> l.getType() instanceof VoidType).forEach(l -> exception.add(new ValidationException(l, new StringBuilder().append("Local ").append(l).append(" in ").append(body.getMethod()).append(" defined with void type").toString())));
   }
 
   @Override

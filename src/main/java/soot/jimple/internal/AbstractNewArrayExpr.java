@@ -49,31 +49,36 @@ public abstract class AbstractNewArrayExpr implements NewArrayExpr, ConvertToBaf
     this.sizeBox = sizeBox;
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof AbstractNewArrayExpr) {
-      AbstractNewArrayExpr ae = (AbstractNewArrayExpr) o;
-      return sizeBox.getValue().equivTo(ae.sizeBox.getValue()) && baseType.equals(ae.baseType);
-    }
-    return false;
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof AbstractNewArrayExpr)) {
+		return false;
+	}
+	AbstractNewArrayExpr ae = (AbstractNewArrayExpr) o;
+	return sizeBox.getValue().equivTo(ae.sizeBox.getValue()) && baseType.equals(ae.baseType);
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return sizeBox.getValue().equivHashCode() * 101 + baseType.hashCode() * 17;
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
-    buffer.append(Jimple.NEWARRAY + " (" + getBaseTypeString() + ")");
-    buffer.append("[" + sizeBox.getValue().toString() + "]");
+    buffer.append(new StringBuilder().append(Jimple.NEWARRAY).append(" (").append(getBaseTypeString()).append(")").toString());
+    buffer.append(new StringBuilder().append("[").append(sizeBox.getValue().toString()).append("]").toString());
 
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.NEWARRAY);
     up.literal(" ");
     up.literal("(");
@@ -88,29 +93,34 @@ public abstract class AbstractNewArrayExpr implements NewArrayExpr, ConvertToBaf
     return baseType.toString();
   }
 
-  public Type getBaseType() {
+  @Override
+public Type getBaseType() {
     return baseType;
   }
 
-  public void setBaseType(Type type) {
+  @Override
+public void setBaseType(Type type) {
     baseType = type;
   }
 
-  public ValueBox getSizeBox() {
+  @Override
+public ValueBox getSizeBox() {
     return sizeBox;
   }
 
-  public Value getSize() {
+  @Override
+public Value getSize() {
     return sizeBox.getValue();
   }
 
-  public void setSize(Value size) {
+  @Override
+public void setSize(Value size) {
     sizeBox.setValue(size);
   }
 
   @Override
   public final List<ValueBox> getUseBoxes() {
-    List<ValueBox> useBoxes = new ArrayList<ValueBox>();
+    List<ValueBox> useBoxes = new ArrayList<>();
 
     useBoxes.addAll(sizeBox.getValue().getUseBoxes());
     useBoxes.add(sizeBox);
@@ -118,7 +128,8 @@ public abstract class AbstractNewArrayExpr implements NewArrayExpr, ConvertToBaf
     return useBoxes;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     if (baseType instanceof ArrayType) {
       return ArrayType.v(((ArrayType) baseType).baseType, ((ArrayType) baseType).numDimensions + 1);
     } else {
@@ -126,11 +137,13 @@ public abstract class AbstractNewArrayExpr implements NewArrayExpr, ConvertToBaf
     }
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseNewArrayExpr(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) (getSize())).convertToBaf(context, out);
 
     Unit u = Baf.v().newNewArrayInst(getBaseType());

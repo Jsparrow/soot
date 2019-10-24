@@ -39,25 +39,27 @@ public class ToppedSet<T> extends AbstractFlowSet<T> {
   FlowSet<T> underlyingSet;
   boolean isTop;
 
-  public void setTop(boolean top) {
-    isTop = top;
-  }
-
-  public boolean isTop() {
-    return isTop;
-  }
-
   public ToppedSet(FlowSet<T> under) {
     underlyingSet = under;
   }
 
-  public ToppedSet<T> clone() {
-    ToppedSet<T> newSet = new ToppedSet<T>(underlyingSet.clone());
+public void setTop(boolean top) {
+    isTop = top;
+  }
+
+public boolean isTop() {
+    return isTop;
+  }
+
+@Override
+public ToppedSet<T> clone() {
+    ToppedSet<T> newSet = new ToppedSet<>(underlyingSet.clone());
     newSet.setTop(isTop());
     return newSet;
   }
 
-  public void copy(FlowSet<T> d) {
+@Override
+public void copy(FlowSet<T> d) {
     if (this == d) {
       return;
     }
@@ -69,16 +71,19 @@ public class ToppedSet<T> extends AbstractFlowSet<T> {
     }
   }
 
-  public FlowSet<T> emptySet() {
-    return new ToppedSet<T>(underlyingSet.emptySet());
+@Override
+public FlowSet<T> emptySet() {
+    return new ToppedSet<>(underlyingSet.emptySet());
   }
 
-  public void clear() {
+@Override
+public void clear() {
     isTop = false;
     underlyingSet.clear();
   }
 
-  public void union(FlowSet<T> o, FlowSet<T> d) {
+@Override
+public void union(FlowSet<T> o, FlowSet<T> d) {
     if (o instanceof ToppedSet && d instanceof ToppedSet) {
       ToppedSet<T> other = (ToppedSet<T>) o;
       ToppedSet<T> dest = (ToppedSet<T>) d;
@@ -99,13 +104,15 @@ public class ToppedSet<T> extends AbstractFlowSet<T> {
     }
   }
 
-  public void intersection(FlowSet<T> o, FlowSet<T> d) {
+@Override
+public void intersection(FlowSet<T> o, FlowSet<T> d) {
     if (isTop()) {
       o.copy(d);
       return;
     }
 
-    ToppedSet<T> other = (ToppedSet<T>) o, dest = (ToppedSet<T>) d;
+    ToppedSet<T> other = (ToppedSet<T>) o;
+	ToppedSet<T> dest = (ToppedSet<T>) d;
 
     if (other.isTop()) {
       copy(dest);
@@ -116,8 +123,10 @@ public class ToppedSet<T> extends AbstractFlowSet<T> {
     }
   }
 
-  public void difference(FlowSet<T> o, FlowSet<T> d) {
-    ToppedSet<T> other = (ToppedSet<T>) o, dest = (ToppedSet<T>) d;
+@Override
+public void difference(FlowSet<T> o, FlowSet<T> d) {
+    ToppedSet<T> other = (ToppedSet<T>) o;
+	ToppedSet<T> dest = (ToppedSet<T>) d;
 
     if (isTop()) {
       if (other.isTop()) {
@@ -136,49 +145,56 @@ public class ToppedSet<T> extends AbstractFlowSet<T> {
     }
   }
 
-  public boolean isEmpty() {
+@Override
+public boolean isEmpty() {
     if (isTop()) {
       return false;
     }
     return underlyingSet.isEmpty();
   }
 
-  public int size() {
+@Override
+public int size() {
     if (isTop()) {
       throw new UnsupportedOperationException();
     }
     return underlyingSet.size();
   }
 
-  public void add(T obj) {
+@Override
+public void add(T obj) {
     if (isTop()) {
       return;
     }
     underlyingSet.add(obj);
   }
 
-  public void remove(T obj) {
+@Override
+public void remove(T obj) {
     if (isTop()) {
       return;
     }
     underlyingSet.remove(obj);
   }
 
-  public boolean contains(T obj) {
+@Override
+public boolean contains(T obj) {
     if (isTop()) {
       return true;
     }
     return underlyingSet.contains(obj);
   }
 
-  public List<T> toList() {
+@Override
+public List<T> toList() {
     if (isTop()) {
       throw new UnsupportedOperationException();
     }
     return underlyingSet.toList();
   }
 
-  public boolean equals(Object o) {
+@Override
+public boolean equals(Object o) {
     if (!(o instanceof ToppedSet)) {
       return false;
     }
@@ -191,7 +207,8 @@ public class ToppedSet<T> extends AbstractFlowSet<T> {
     return underlyingSet.equals(other.underlyingSet);
   }
 
-  public String toString() {
+@Override
+public String toString() {
     if (isTop()) {
       return "{TOP}";
     } else {
@@ -199,7 +216,7 @@ public class ToppedSet<T> extends AbstractFlowSet<T> {
     }
   }
 
-  @Override
+@Override
   public Iterator<T> iterator() {
     if (isTop()) {
       throw new UnsupportedOperationException();

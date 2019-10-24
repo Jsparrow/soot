@@ -29,19 +29,19 @@ import soot.ValueBox;
 import soot.util.Switch;
 
 public interface ArrayRef extends ConcreteRef {
-  public Value getBase();
+  Value getBase();
 
-  public void setBase(Local base);
+  void setBase(Local base);
 
-  public ValueBox getBaseBox();
+  ValueBox getBaseBox();
 
-  public Value getIndex();
+  Value getIndex();
 
-  public void setIndex(Value index);
+  void setIndex(Value index);
 
-  public ValueBox getIndexBox();
+  ValueBox getIndexBox();
 
-  public Type getType();
+  @Override Type getType();
 
-  public void apply(Switch sw);
+  @Override void apply(Switch sw);
 }

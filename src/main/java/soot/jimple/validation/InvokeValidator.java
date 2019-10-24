@@ -37,11 +37,15 @@ import soot.jimple.Stmt;
 import soot.jimple.VirtualInvokeExpr;
 import soot.validation.BodyValidator;
 import soot.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum InvokeValidator implements BodyValidator {
   INSTANCE;
 
-  public static InvokeValidator v() {
+  private static final Logger logger = LoggerFactory.getLogger(InvokeValidator.class);
+
+public static InvokeValidator v() {
     return INSTANCE;
   }
 
@@ -99,12 +103,12 @@ public enum InvokeValidator implements BodyValidator {
                     "specialinvoke should be used on private or constructor methods. Should be specialinvoke instead."));
               }
             }
-            if (shouldBeVirtual) {
-              if (!(invokeExpr instanceof VirtualInvokeExpr)) {
+            boolean condition = shouldBeVirtual && !(invokeExpr instanceof VirtualInvokeExpr);
+			if (condition) {
                 exceptions.add(new ValidationException(unit, "virtualinvoke should be used."));
               }
-            }
           } catch (Exception e) {
+			logger.error(e.getMessage(), e);
             // Error on resolving
           }
         }

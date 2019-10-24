@@ -74,12 +74,13 @@ public class CommonSubexpressionEliminator extends BodyTransformer {
   }
 
   /** Common subexpression eliminator. */
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     int counter = 0;
 
     // Sigh. check for name collisions.
     Iterator<Local> localsIt = b.getLocals().iterator();
-    Set<String> localNames = new HashSet<String>(b.getLocals().size());
+    Set<String> localNames = new HashSet<>(b.getLocals().size());
     while (localsIt.hasNext()) {
       localNames.add((localsIt.next()).getName());
     }
@@ -93,8 +94,8 @@ public class CommonSubexpressionEliminator extends BodyTransformer {
     sideEffect.newMethod(b.getMethod());
 
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     Eliminating common subexpressions "
-          + (sideEffect instanceof NaiveSideEffectTester ? "(naively)" : "") + "...");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     Eliminating common subexpressions ").append(sideEffect instanceof NaiveSideEffectTester ? "(naively)" : "").append("...")
+			.toString());
     }
 
     AvailableExpressions ae = // new SlowAvailableExpressions(b);
@@ -153,7 +154,7 @@ public class CommonSubexpressionEliminator extends BodyTransformer {
       }
     }
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     Eliminating common subexpressions done!");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     Eliminating common subexpressions done!").toString());
     }
   }
 }

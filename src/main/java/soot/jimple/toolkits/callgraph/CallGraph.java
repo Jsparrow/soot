@@ -43,12 +43,12 @@ import soot.util.queue.QueueReader;
  * @author Ondrej Lhotak
  */
 public class CallGraph implements Iterable<Edge> {
-  protected Set<Edge> edges = new HashSet<Edge>();
-  protected ChunkedQueue<Edge> stream = new ChunkedQueue<Edge>();
+  protected Set<Edge> edges = new HashSet<>();
+  protected ChunkedQueue<Edge> stream = new ChunkedQueue<>();
   protected QueueReader<Edge> reader = stream.reader();
-  protected Map<MethodOrMethodContext, Edge> srcMethodToEdge = new HashMap<MethodOrMethodContext, Edge>();
-  protected Map<Unit, Edge> srcUnitToEdge = new HashMap<Unit, Edge>();
-  protected Map<MethodOrMethodContext, Edge> tgtToEdge = new HashMap<MethodOrMethodContext, Edge>();
+  protected Map<MethodOrMethodContext, Edge> srcMethodToEdge = new HashMap<>();
+  protected Map<Unit, Edge> srcUnitToEdge = new HashMap<>();
+  protected Map<MethodOrMethodContext, Edge> tgtToEdge = new HashMap<>();
   protected Edge dummy = new Edge(null, null, null, Kind.INVALID);
 
   /**
@@ -205,7 +205,53 @@ public class CallGraph implements Iterable<Edge> {
     return new TargetsOfUnitIterator(u);
   }
 
-  class TargetsOfUnitIterator implements Iterator<Edge> {
+  /** Returns an iterator over all edges that have m as their source method. */
+  public Iterator<Edge> edgesOutOf(MethodOrMethodContext m) {
+    return new TargetsOfMethodIterator(m);
+  }
+
+/** Returns an iterator over all edges that have m as their target method. */
+  public Iterator<Edge> edgesInto(MethodOrMethodContext m) {
+    return new CallersOfMethodIterator(m);
+  }
+
+/**
+   * Returns a QueueReader object containing all edges added so far, and which will be informed of any new edges that are
+   * later added to the graph.
+   */
+  public QueueReader<Edge> listener() {
+    return reader.clone();
+  }
+
+/**
+   * Returns a QueueReader object which will contain ONLY NEW edges which will be added to the graph.
+   */
+  public QueueReader<Edge> newListener() {
+    return stream.reader();
+  }
+
+@Override
+public String toString() {
+    QueueReader<Edge> reader = listener();
+    StringBuilder out = new StringBuilder();
+    while (reader.hasNext()) {
+      Edge e = (Edge) reader.next();
+      out.append(e.toString() + "\n");
+    }
+    return out.toString();
+  }
+
+/** Returns the number of edges in the call graph. */
+  public int size() {
+    return edges.size();
+  }
+
+@Override
+  public Iterator<Edge> iterator() {
+    return edges.iterator();
+  }
+
+class TargetsOfUnitIterator implements Iterator<Edge> {
     private Edge position = null;
     private Unit u;
 
@@ -220,7 +266,8 @@ public class CallGraph implements Iterable<Edge> {
       }
     }
 
-    public boolean hasNext() {
+    @Override
+	public boolean hasNext() {
       if (position.srcUnit() != u) {
         return false;
       }
@@ -230,20 +277,17 @@ public class CallGraph implements Iterable<Edge> {
       return true;
     }
 
-    public Edge next() {
+    @Override
+	public Edge next() {
       Edge ret = position;
       position = position.nextByUnit();
       return ret;
     }
 
-    public void remove() {
+    @Override
+	public void remove() {
       throw new UnsupportedOperationException();
     }
-  }
-
-  /** Returns an iterator over all edges that have m as their source method. */
-  public Iterator<Edge> edgesOutOf(MethodOrMethodContext m) {
-    return new TargetsOfMethodIterator(m);
   }
 
   class TargetsOfMethodIterator implements Iterator<Edge> {
@@ -261,7 +305,8 @@ public class CallGraph implements Iterable<Edge> {
       }
     }
 
-    public boolean hasNext() {
+    @Override
+	public boolean hasNext() {
       if (position.getSrc() != m) {
         return false;
       }
@@ -271,20 +316,17 @@ public class CallGraph implements Iterable<Edge> {
       return true;
     }
 
-    public Edge next() {
+    @Override
+	public Edge next() {
       Edge ret = position;
       position = position.nextBySrc();
       return ret;
     }
 
-    public void remove() {
+    @Override
+	public void remove() {
       throw new UnsupportedOperationException();
     }
-  }
-
-  /** Returns an iterator over all edges that have m as their target method. */
-  public Iterator<Edge> edgesInto(MethodOrMethodContext m) {
-    return new CallersOfMethodIterator(m);
   }
 
   class CallersOfMethodIterator implements Iterator<Edge> {
@@ -302,7 +344,8 @@ public class CallGraph implements Iterable<Edge> {
       }
     }
 
-    public boolean hasNext() {
+    @Override
+	public boolean hasNext() {
       if (position.getTgt() != m) {
         return false;
       }
@@ -312,49 +355,16 @@ public class CallGraph implements Iterable<Edge> {
       return true;
     }
 
-    public Edge next() {
+    @Override
+	public Edge next() {
       Edge ret = position;
       position = position.nextByTgt();
       return ret;
     }
 
-    public void remove() {
+    @Override
+	public void remove() {
       throw new UnsupportedOperationException();
     }
-  }
-
-  /**
-   * Returns a QueueReader object containing all edges added so far, and which will be informed of any new edges that are
-   * later added to the graph.
-   */
-  public QueueReader<Edge> listener() {
-    return reader.clone();
-  }
-
-  /**
-   * Returns a QueueReader object which will contain ONLY NEW edges which will be added to the graph.
-   */
-  public QueueReader<Edge> newListener() {
-    return stream.reader();
-  }
-
-  public String toString() {
-    QueueReader<Edge> reader = listener();
-    StringBuffer out = new StringBuffer();
-    while (reader.hasNext()) {
-      Edge e = (Edge) reader.next();
-      out.append(e.toString() + "\n");
-    }
-    return out.toString();
-  }
-
-  /** Returns the number of edges in the call graph. */
-  public int size() {
-    return edges.size();
-  }
-
-  @Override
-  public Iterator<Edge> iterator() {
-    return edges.iterator();
   }
 }

@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AMultiNameList extends PNameList
 {
-    private PName _name_;
-    private TComma _comma_;
-    private PNameList _nameList_;
+    private PName name;
+    private TComma comma;
+    private PNameList nameList;
 
     public AMultiNameList()
     {
@@ -34,9 +34,9 @@ public final class AMultiNameList extends PNameList
     public Object clone()
     {
         return new AMultiNameList(
-            cloneNode(this._name_),
-            cloneNode(this._comma_),
-            cloneNode(this._nameList_));
+            cloneNode(this.name),
+            cloneNode(this.comma),
+            cloneNode(this.nameList));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class AMultiNameList extends PNameList
 
     public PName getName()
     {
-        return this._name_;
+        return this.name;
     }
 
     public void setName(PName node)
     {
-        if(this._name_ != null)
+        if(this.name != null)
         {
-            this._name_.parent(null);
+            this.name.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class AMultiNameList extends PNameList
             node.parent(this);
         }
 
-        this._name_ = node;
+        this.name = node;
     }
 
     public TComma getComma()
     {
-        return this._comma_;
+        return this.comma;
     }
 
     public void setComma(TComma node)
     {
-        if(this._comma_ != null)
+        if(this.comma != null)
         {
-            this._comma_.parent(null);
+            this.comma.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AMultiNameList extends PNameList
             node.parent(this);
         }
 
-        this._comma_ = node;
+        this.comma = node;
     }
 
     public PNameList getNameList()
     {
-        return this._nameList_;
+        return this.nameList;
     }
 
     public void setNameList(PNameList node)
     {
-        if(this._nameList_ != null)
+        if(this.nameList != null)
         {
-            this._nameList_.parent(null);
+            this.nameList.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class AMultiNameList extends PNameList
             node.parent(this);
         }
 
-        this._nameList_ = node;
+        this.nameList = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._name_)
-            + toString(this._comma_)
-            + toString(this._nameList_);
+        return new StringBuilder().append("").append(toString(this.name)).append(toString(this.comma)).append(toString(this.nameList)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._name_ == child)
+        if(this.name == child)
         {
-            this._name_ = null;
+            this.name = null;
             return;
         }
 
-        if(this._comma_ == child)
+        if(this.comma == child)
         {
-            this._comma_ = null;
+            this.comma = null;
             return;
         }
 
-        if(this._nameList_ == child)
+        if(this.nameList == child)
         {
-            this._nameList_ = null;
+            this.nameList = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class AMultiNameList extends PNameList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._name_ == oldChild)
+        if(this.name == oldChild)
         {
             setName((PName) newChild);
             return;
         }
 
-        if(this._comma_ == oldChild)
+        if(this.comma == oldChild)
         {
             setComma((TComma) newChild);
             return;
         }
 
-        if(this._nameList_ == oldChild)
+        if(this.nameList == oldChild)
         {
             setNameList((PNameList) newChild);
             return;

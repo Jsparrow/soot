@@ -42,6 +42,8 @@ import soot.dava.toolkits.base.AST.traversals.ASTParentNodeFinder;
 import soot.jimple.ReturnStmt;
 import soot.jimple.ReturnVoidStmt;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  *  look for patterns of the form
@@ -62,7 +64,8 @@ import soot.jimple.Stmt;
  *    has the abrupt statement in that case we just negated the condition
  */
 public class IfElseSplitter extends DepthFirstAdapter {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(IfElseSplitter.class);
+public static boolean DEBUG = false;
   boolean targeted = false;
   ASTMethodNode methodNode;
 
@@ -80,11 +83,13 @@ public class IfElseSplitter extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void inASTMethodNode(ASTMethodNode node) {
+  @Override
+public void inASTMethodNode(ASTMethodNode node) {
     methodNode = node;
   }
 
-  public void outASTMethodNode(ASTMethodNode a) {
+  @Override
+public void outASTMethodNode(ASTMethodNode a) {
     if (!transform) {
       return;
     }
@@ -99,7 +104,7 @@ public class IfElseSplitter extends DepthFirstAdapter {
         subBody = (List<Object>) it.next();
       }
 
-      if (subBody.indexOf(toReplace) > -1) {
+      if (subBody.contains(toReplace)) {
         // in the subBody list the node is present
         subBody.add(subBody.indexOf(toReplace), toInsert);
         subBody.addAll(subBody.indexOf(toReplace), bodyAfterInsert);
@@ -110,7 +115,8 @@ public class IfElseSplitter extends DepthFirstAdapter {
 
   }
 
-  public void outASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void outASTIfElseNode(ASTIfElseNode node) {
     // if some pattern has already matched cant do another one in this go
     if (transform) {
       return;
@@ -131,7 +137,7 @@ public class IfElseSplitter extends DepthFirstAdapter {
 
     if (patternMatched) {
       if (DEBUG) {
-        System.out.println("First pattern matched");
+        logger.info("First pattern matched");
       }
       newIfBody = ifBody;
       outerScopeBody = elseBody;
@@ -140,7 +146,7 @@ public class IfElseSplitter extends DepthFirstAdapter {
       patternMatched = tryBodyPattern(elseBody, node.get_Label(), ifBody);
       if (patternMatched) {
         if (DEBUG) {
-          System.out.println("Second pattern matched");
+          logger.info("Second pattern matched");
         }
 
         newIfBody = elseBody;
@@ -150,41 +156,36 @@ public class IfElseSplitter extends DepthFirstAdapter {
     }
 
     // if at this point newIfBody and outerScopeBody are non null we got ourselves a transformation :)
-    if (newIfBody != null && outerScopeBody != null) {
-      ASTCondition cond = node.get_Condition();
-      if (negateIfCondition) {
+	if (!(newIfBody != null && outerScopeBody != null)) {
+		return;
+	}
+	ASTCondition cond = node.get_Condition();
+	if (negateIfCondition) {
         cond.flip();
       }
-
-      ASTIfNode newNode = new ASTIfNode(node.get_Label(), cond, newIfBody);
-      if (DEBUG) {
-        System.out.println("New IF Node is: " + newNode.toString());
-        System.out.println("Outer scope body list is:\n");
-        for (int i = 0; i < outerScopeBody.size(); i++) {
-          System.out.println("\n\n " + outerScopeBody.get(i).toString());
-        }
+	ASTIfNode newNode = new ASTIfNode(node.get_Label(), cond, newIfBody);
+	if (DEBUG) {
+        logger.info("New IF Node is: " + newNode.toString());
+        logger.info("Outer scope body list is:\n");
+        outerScopeBody.forEach(anOuterScopeBody -> logger.info("\n\n " + anOuterScopeBody.toString()));
       }
-
-      ASTParentNodeFinder finder = new ASTParentNodeFinder();
-      methodNode.apply(finder);
-      Object returned = finder.getParentOf(node);
-      if (returned == null) {
+	ASTParentNodeFinder finder = new ASTParentNodeFinder();
+	methodNode.apply(finder);
+	Object returned = finder.getParentOf(node);
+	if (returned == null) {
         // coundnt find parent so cant do anything
         return;
       }
-
-      /*
+	/*
        * Setting globals since everything is ready for transformation BECAUSE we cant modify the parent here we are going to
        * do some bad coding style store the information needed for this into globals set a flag and the outASTMethod checks
        * for this
        */
       parent = (ASTNode) returned;
-      toReplace = node;
-      toInsert = newNode;
-      bodyAfterInsert = outerScopeBody;
-      transform = true;
-
-    }
+	toReplace = node;
+	toInsert = newNode;
+	bodyAfterInsert = outerScopeBody;
+	transform = true;
   }
 
   public boolean tryBodyPattern(List<Object> body, SETNodeLabel label, List<Object> otherBody) {
@@ -226,16 +227,14 @@ public class IfElseSplitter extends DepthFirstAdapter {
 
     final String strLabel = label.toString();
 
-    // go through the body use traversal to find whether there is an abrupt stmt targeting this
-    Iterator<Object> it = body.iterator();
-
     targeted = false;
-    while (it.hasNext()) {
-      ASTNode temp = (ASTNode) it.next();
+    for (Object aBody : body) {
+      ASTNode temp = (ASTNode) aBody;
 
       temp.apply(new DepthFirstAdapter() {
         // set targeted to true if DAbruptStmt targets it
-        public void inStmt(Stmt s) {
+        @Override
+		public void inStmt(Stmt s) {
           // only interested in abrupt stmts
           if (!(s instanceof DAbruptStmt)) {
             return;

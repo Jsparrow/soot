@@ -37,12 +37,13 @@ public class UnorderedPair<U, V> {
    * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
-  public boolean equals(Object obj) {
-    if (obj != null && obj.getClass() == UnorderedPair.class) {
-      UnorderedPair u = (UnorderedPair) obj;
-      return (u.o1.equals(o1) && u.o2.equals(o2)) || (u.o1.equals(o2) && u.o2.equals(o1));
-    }
-    return false;
+  @Override
+public boolean equals(Object obj) {
+    if (!(obj != null && obj.getClass() == UnorderedPair.class)) {
+		return false;
+	}
+	UnorderedPair u = (UnorderedPair) obj;
+	return (u.o1.equals(o1) && u.o2.equals(o2)) || (u.o1.equals(o2) && u.o2.equals(o1));
   }
 
   /*
@@ -50,12 +51,14 @@ public class UnorderedPair<U, V> {
    * 
    * @see java.lang.Object#hashCode()
    */
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return o1.hashCode() + o2.hashCode();
   }
 
-  public String toString() {
-    return "{" + o1.toString() + ", " + o2.toString() + "}";
+  @Override
+public String toString() {
+    return new StringBuilder().append("{").append(o1.toString()).append(", ").append(o2.toString()).append("}").toString();
   }
 
 }

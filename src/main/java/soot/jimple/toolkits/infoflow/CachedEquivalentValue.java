@@ -36,20 +36,22 @@ public class CachedEquivalentValue extends EquivalentValue {
 
   protected int code = Integer.MAX_VALUE;
 
-  protected WeakHashMap<Value, Boolean> isEquivalent = new WeakHashMap<Value, Boolean>();
+  protected WeakHashMap<Value, Boolean> isEquivalent = new WeakHashMap<>();
 
   public CachedEquivalentValue(Value e) {
     super(e);
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     if (code == Integer.MAX_VALUE) {
       code = super.hashCode();
     }
     return code;
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     if (this.getClass() != o.getClass()) {
       return false;
     }

@@ -96,9 +96,7 @@ public class ASMBackendUtils {
   public static String toTypeDesc(List<Type> parameterTypes, Type returnType) {
     StringBuilder sb = new StringBuilder();
     sb.append('(');
-    for (Type t : parameterTypes) {
-      sb.append(toTypeDesc(t));
-    }
+    parameterTypes.forEach(t -> sb.append(toTypeDesc(t)));
     sb.append(')');
     sb.append(toTypeDesc(returnType));
     return sb.toString();
@@ -115,54 +113,66 @@ public class ASMBackendUtils {
     final StringBuilder sb = new StringBuilder(1);
     type.apply(new TypeSwitch() {
 
-      public void defaultCase(Type t) {
+      @Override
+	public void defaultCase(Type t) {
         throw new RuntimeException("Invalid type " + t.toString());
       }
 
-      public void caseDoubleType(DoubleType t) {
+      @Override
+	public void caseDoubleType(DoubleType t) {
         sb.append('D');
       }
 
-      public void caseFloatType(FloatType t) {
+      @Override
+	public void caseFloatType(FloatType t) {
         sb.append('F');
       }
 
-      public void caseIntType(IntType t) {
+      @Override
+	public void caseIntType(IntType t) {
         sb.append('I');
       }
 
-      public void caseByteType(ByteType t) {
+      @Override
+	public void caseByteType(ByteType t) {
         sb.append('B');
       }
 
-      public void caseShortType(ShortType t) {
+      @Override
+	public void caseShortType(ShortType t) {
         sb.append('S');
       }
 
-      public void caseCharType(CharType t) {
+      @Override
+	public void caseCharType(CharType t) {
         sb.append('C');
       }
 
-      public void caseBooleanType(BooleanType t) {
+      @Override
+	public void caseBooleanType(BooleanType t) {
         sb.append('Z');
       }
 
-      public void caseLongType(LongType t) {
+      @Override
+	public void caseLongType(LongType t) {
         sb.append('J');
       }
 
-      public void caseArrayType(ArrayType t) {
+      @Override
+	public void caseArrayType(ArrayType t) {
         sb.append('[');
         t.getElementType().apply(this);
       }
 
-      public void caseRefType(RefType t) {
+      @Override
+	public void caseRefType(RefType t) {
         sb.append('L');
         sb.append(slashify(t.getClassName()));
         sb.append(';');
       }
 
-      public void caseVoidType(VoidType t) {
+      @Override
+	public void caseVoidType(VoidType t) {
         sb.append('V');
       }
     });
@@ -205,11 +215,11 @@ public class ASMBackendUtils {
    * @return <code>true</code> if the field is of type String or sub-type, <code>false</code> otherwise.
    */
   public static boolean acceptsStringInitialValue(SootField field) {
-    if (field.getType() instanceof RefType) {
-      SootClass fieldClass = ((RefType) field.getType()).getSootClass();
-      return fieldClass.getName().equals("java.lang.String");
-    }
-    return false;
+    if (!(field.getType() instanceof RefType)) {
+		return false;
+	}
+	SootClass fieldClass = ((RefType) field.getType()).getSootClass();
+	return "java.lang.String".equals(fieldClass.getName());
   }
 
   /**

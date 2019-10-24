@@ -36,7 +36,8 @@ public class JjCast_c extends Cast_c {
     super(pos, castType, expr);
   }
 
-  public Type childExpectedType(Expr child, AscriptionVisitor av) {
+  @Override
+public Type childExpectedType(Expr child, AscriptionVisitor av) {
     TypeSystem ts = av.typeSystem();
 
     if (child == expr) {

@@ -40,7 +40,16 @@ public class Register implements Cloneable {
 
   public static final Register EMPTY_REGISTER = new Register(IntType.v(), 0);
 
-  private static boolean fitsInto(int regNumber, int maxNumber, boolean isWide) {
+private final Type type;
+
+private int number;
+
+public Register(Type type, int number) {
+    this.type = type;
+    this.number = number;
+  }
+
+private static boolean fitsInto(int regNumber, int maxNumber, boolean isWide) {
     if (isWide) {
       // reg occupies number and number + 1, hence the "<"
       return regNumber >= 0 && regNumber < maxNumber;
@@ -48,60 +57,51 @@ public class Register implements Cloneable {
     return regNumber >= 0 && regNumber <= maxNumber;
   }
 
-  public static boolean fitsUnconstrained(int regNumber, boolean isWide) {
+public static boolean fitsUnconstrained(int regNumber, boolean isWide) {
     return fitsInto(regNumber, MAX_REG_NUM_UNCONSTRAINED, isWide);
   }
 
-  public static boolean fitsShort(int regNumber, boolean isWide) {
+public static boolean fitsShort(int regNumber, boolean isWide) {
     return fitsInto(regNumber, MAX_REG_NUM_SHORT, isWide);
   }
 
-  public static boolean fitsByte(int regNumber, boolean isWide) {
+public static boolean fitsByte(int regNumber, boolean isWide) {
     return fitsInto(regNumber, MAX_REG_NUM_BYTE, isWide);
   }
 
-  private final Type type;
-
-  private int number;
-
-  public Register(Type type, int number) {
-    this.type = type;
-    this.number = number;
-  }
-
-  public boolean isEmptyReg() {
+public boolean isEmptyReg() {
     return this == EMPTY_REGISTER;
   }
 
-  public boolean isWide() {
+public boolean isWide() {
     return SootToDexUtils.isWide(type);
   }
 
-  public boolean isObject() {
+public boolean isObject() {
     return SootToDexUtils.isObject(type);
   }
 
-  public boolean isFloat() {
+public boolean isFloat() {
     return type instanceof FloatType;
   }
 
-  public boolean isDouble() {
+public boolean isDouble() {
     return type instanceof DoubleType;
   }
 
-  public Type getType() {
+public Type getType() {
     return type;
   }
 
-  public String getTypeString() {
+public String getTypeString() {
     return type.toString();
   }
 
-  public int getNumber() {
+public int getNumber() {
     return number;
   }
 
-  public void setNumber(int number) {
+public void setNumber(int number) {
     if (isEmptyReg()) {
       // number of empty register stays at zero - that's part of its purpose
       return;
@@ -109,7 +109,7 @@ public class Register implements Cloneable {
     this.number = number;
   }
 
-  private boolean fitsInto(int maxNumber) {
+private boolean fitsInto(int maxNumber) {
     if (isEmptyReg()) {
       // empty reg fits into anything
       return true;
@@ -117,32 +117,32 @@ public class Register implements Cloneable {
     return fitsInto(number, maxNumber, isWide());
   }
 
-  public boolean fitsUnconstrained() {
+public boolean fitsUnconstrained() {
     return fitsInto(MAX_REG_NUM_UNCONSTRAINED);
   }
 
-  public boolean fitsShort() {
+public boolean fitsShort() {
     return fitsInto(MAX_REG_NUM_SHORT);
   }
 
-  public boolean fitsByte() {
+public boolean fitsByte() {
     return fitsInto(MAX_REG_NUM_BYTE);
   }
 
-  @Override
+@Override
   public Register clone() {
     return new Register(this.type, this.number);
   }
 
-  @Override
+@Override
   public String toString() {
     if (isEmptyReg()) {
       return "the empty reg";
     }
-    return "reg(" + number + "):" + type.toString();
+    return new StringBuilder().append("reg(").append(number).append("):").append(type.toString()).toString();
   }
 
-  @Override
+@Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -151,7 +151,7 @@ public class Register implements Cloneable {
     return result;
   }
 
-  @Override
+@Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;

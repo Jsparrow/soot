@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ASpecialNonstaticInvoke extends PNonstaticInvoke
 {
-    private TSpecialinvoke _specialinvoke_;
+    private TSpecialinvoke specialinvoke;
 
     public ASpecialNonstaticInvoke()
     {
@@ -26,7 +26,7 @@ public final class ASpecialNonstaticInvoke extends PNonstaticInvoke
     public Object clone()
     {
         return new ASpecialNonstaticInvoke(
-            cloneNode(this._specialinvoke_));
+            cloneNode(this.specialinvoke));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ASpecialNonstaticInvoke extends PNonstaticInvoke
 
     public TSpecialinvoke getSpecialinvoke()
     {
-        return this._specialinvoke_;
+        return this.specialinvoke;
     }
 
     public void setSpecialinvoke(TSpecialinvoke node)
     {
-        if(this._specialinvoke_ != null)
+        if(this.specialinvoke != null)
         {
-            this._specialinvoke_.parent(null);
+            this.specialinvoke.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ASpecialNonstaticInvoke extends PNonstaticInvoke
             node.parent(this);
         }
 
-        this._specialinvoke_ = node;
+        this.specialinvoke = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._specialinvoke_);
+            + toString(this.specialinvoke);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._specialinvoke_ == child)
+        if(this.specialinvoke == child)
         {
-            this._specialinvoke_ = null;
+            this.specialinvoke = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ASpecialNonstaticInvoke extends PNonstaticInvoke
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._specialinvoke_ == oldChild)
+        if(this.specialinvoke == oldChild)
         {
             setSpecialinvoke((TSpecialinvoke) newChild);
             return;

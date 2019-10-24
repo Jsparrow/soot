@@ -18,16 +18,82 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production ClassInstanceExpr : {@link Access} ::= <span class="component">{@link Access}</span> <span class="component">Arg:{@link Expr}*</span> <span class="component">[{@link TypeDecl}]</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:37
  */
-public class ClassInstanceExpr extends Access implements Cloneable {
-  /**
+public class ClassInstanceExpr extends Access {
+  private static final Logger logger = LoggerFactory.getLogger(ClassInstanceExpr.class);
+/**
+   * @ast method 
+   * @aspect InnerClasses
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:481
+   */
+  
+
+  // add val$name as arguments to the constructor
+  protected boolean addEnclosingVariables = true;
+protected java.util.Map isDAafterInstance_Variable_values;
+protected java.util.Map computeDAbefore_int_Variable_values;
+protected java.util.Map computeDUbefore_int_Variable_values;
+/**
+   * @apilevel internal
+   */
+  protected boolean decls_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected SimpleSet decls_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean decl_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected ConstructorDecl decl_value;
+protected java.util.Map localLookupType_String_values;
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+/**
+   * @ast method 
+   * @aspect NodeConstructors
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NodeConstructors.jrag:82
+   */
+  public ClassInstanceExpr(Access type, List args) {
+    this(type, args, new Opt());
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public ClassInstanceExpr() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public ClassInstanceExpr(Access p0, List<Expr> p1, Opt<TypeDecl> p2) {
+    setChild(p0, 0);
+    setChild(p1, 1);
+    setChild(p2, 2);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     isDAafterInstance_Variable_values = null;
     computeDAbefore_int_Variable_values = null;
@@ -40,16 +106,18 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     type_computed = false;
     type_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ClassInstanceExpr clone() throws CloneNotSupportedException {
     ClassInstanceExpr node = (ClassInstanceExpr)super.clone();
     node.isDAafterInstance_Variable_values = null;
@@ -66,29 +134,33 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ClassInstanceExpr copy() {
     try {
       ClassInstanceExpr node = (ClassInstanceExpr) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ClassInstanceExpr fullCopy() {
     ClassInstanceExpr tree = (ClassInstanceExpr) copy();
     if (children != null) {
@@ -102,50 +174,57 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect AccessControl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/AccessControl.jrag:139
    */
-  public void accessControl() {
+  @Override
+public void accessControl() {
     super.accessControl();
-    if(type().isAbstract())
-      error("Can not instantiate abstract class " + type().fullName());
-    if(!decl().accessibleFrom(hostType()))
-      error("constructor " + decl().signature() + " is not accessible");
+    if(type().isAbstract()) {
+		error("Can not instantiate abstract class " + type().fullName());
+	}
+    if(!decl().accessibleFrom(hostType())) {
+		error(new StringBuilder().append("constructor ").append(decl().signature()).append(" is not accessible").toString());
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:119
    */
-  public void exceptionHandling() {
+  @Override
+public void exceptionHandling() {
     for (Access exception : decl().getExceptionList()) {
       TypeDecl exceptionType = exception.type();
-      if (!handlesException(exceptionType))
-        error("" + this + " may throw uncaught exception " +
-            exceptionType.fullName() + "; it must be caught or declared as being thrown");
+      if (!handlesException(exceptionType)) {
+		error(new StringBuilder().append("").append(this).append(" may throw uncaught exception ").append(exceptionType.fullName()).append("; it must be caught or declared as being thrown").toString());
+	}
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:281
    */
-  protected boolean reachedException(TypeDecl catchType) {
+  @Override
+protected boolean reachedException(TypeDecl catchType) {
     ConstructorDecl decl = decl();
     for(int i = 0; i < decl.getNumException(); i++) {
       TypeDecl exceptionType = decl.getException(i).type();
-      if(catchType.mayCatch(exceptionType))
-        return true;
+      if(catchType.mayCatch(exceptionType)) {
+		return true;
+	}
     }
     for(int i = 0; i < getNumArg(); i++) {
-      if(getArg(i).reachedException(catchType))
-        return true;
+      if(getArg(i).reachedException(catchType)) {
+		return true;
+	}
     }
     return false;
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:414
@@ -160,36 +239,29 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     return newSet;
   }
-  /**
+/**
    * @ast method 
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:142
    */
   public void refined_NameCheck_ClassInstanceExpr_nameCheck() {
     super.nameCheck();
-    if(decls().isEmpty())
-      error("can not instantiate " + type().typeName() + " no matching constructor found in " + type().typeName());
-    else if(decls().size() > 1 && validArgs()) {
+    if(decls().isEmpty()) {
+		error(new StringBuilder().append("can not instantiate ").append(type().typeName()).append(" no matching constructor found in ").append(type().typeName()).toString());
+	} else if(decls().size() > 1 && validArgs()) {
       error("several most specific constructors found");
       for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
         error("         " + ((ConstructorDecl)iter.next()).signature());
       }
     }
   }
-  /**
-   * @ast method 
-   * @aspect NodeConstructors
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NodeConstructors.jrag:82
-   */
-  public ClassInstanceExpr(Access type, List args) {
-    this(type, args, new Opt());
-  }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:327
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     s.append("new ");
     getAccess().toString(s);
     s.append("(");
@@ -202,44 +274,49 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     s.append(")");
 
-    if(hasTypeDecl()) {
-      TypeDecl decl = getTypeDecl();
-      s.append(" {");
-      for(int i = 0; i < decl.getNumBodyDecl(); i++) {
-        if(!(decl.getBodyDecl(i) instanceof ConstructorDecl))
-          decl.getBodyDecl(i).toString(s);
+    if (!hasTypeDecl()) {
+		return;
+	}
+	TypeDecl decl = getTypeDecl();
+	s.append(" {");
+	for(int i = 0; i < decl.getNumBodyDecl(); i++) {
+        if(!(decl.getBodyDecl(i) instanceof ConstructorDecl)) {
+			decl.getBodyDecl(i).toString(s);
+		}
       }
-      s.append(typeDeclIndent());
-      s.append("}");
-    }
+	s.append(typeDeclIndent());
+	s.append("}");
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:434
    */
-  public void typeCheck() {
-    if(isQualified() && qualifier().isTypeAccess() && !qualifier().type().isUnknown())
-      error("*** The expression in a qualified class instance expr must not be a type name");
+  @Override
+public void typeCheck() {
+    if(isQualified() && qualifier().isTypeAccess() && !qualifier().type().isUnknown()) {
+		error("*** The expression in a qualified class instance expr must not be a type name");
+	}
     // 15.9
     if(isQualified() && !type().isInnerClass() && !((ClassDecl)type()).superclass().isInnerClass() && !type().isUnknown()) {
       error("*** Qualified class instance creation can only instantiate inner classes and their anonymous subclasses");
     }
     if(!type().isClassDecl()) {
-      error("*** Can only instantiate classes, which " + type().typeName() + " is not"); 
+      error(new StringBuilder().append("*** Can only instantiate classes, which ").append(type().typeName()).append(" is not").toString()); 
     }
     typeCheckEnclosingInstance();
     typeCheckAnonymousSuperclassEnclosingInstance();
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:448
    */
   public void typeCheckEnclosingInstance() {
     TypeDecl C = type();
-    if(!C.isInnerClass())
-      return;
+    if(!C.isInnerClass()) {
+		return;
+	}
 
     TypeDecl enclosing = null;
     if(C.isAnonymous()) {
@@ -259,22 +336,24 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       }
       else {
         TypeDecl nest = hostType();
-        while(nest != null && !nest.instanceOf(C.enclosingType()))
-          nest = nest.enclosingType();
+        while(nest != null && !nest.instanceOf(C.enclosingType())) {
+			nest = nest.enclosingType();
+		}
         enclosing = nest;
       }
     }
     else if(C.isMemberType()) {
       if(!isQualified()) {
         if(noEnclosingInstance()) {
-          error("No enclosing instance to initialize " + C.typeName() + " with");
+          error(new StringBuilder().append("No enclosing instance to initialize ").append(C.typeName()).append(" with").toString());
           //System.err.println("ClassInstanceExpr: Non qualified MemberType " + C.typeName() + " is in a static context when instantiated in " + this);
           enclosing = unknownType();
         }
         else {
           TypeDecl nest = hostType();
-          while(nest != null && !nest.instanceOf(C.enclosingType()))
-            nest = nest.enclosingType();
+          while(nest != null && !nest.instanceOf(C.enclosingType())) {
+			nest = nest.enclosingType();
+		}
           enclosing = nest == null ? unknownType() : nest;
         }
       }
@@ -284,78 +363,76 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     if(enclosing != null && !enclosing.instanceOf(type().enclosingType())) {
       String msg = enclosing == null ? "None" : enclosing.typeName();
-      error("*** Can not instantiate " + type().typeName() + " with the enclosing instance " + msg + " due to incorrect enclosing instance");
+      error(new StringBuilder().append("*** Can not instantiate ").append(type().typeName()).append(" with the enclosing instance ").append(msg).append(" due to incorrect enclosing instance").toString());
     }
     else if(!isQualified() && C.isMemberType() && inExplicitConstructorInvocation() && enclosing == hostType()) {
-      error("*** The innermost enclosing instance of type " + enclosing.typeName() + " is this which is not yet initialized here.");
+      error(new StringBuilder().append("*** The innermost enclosing instance of type ").append(enclosing.typeName()).append(" is this which is not yet initialized here.").toString());
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:521
    */
   public void typeCheckAnonymousSuperclassEnclosingInstance() {
-    if(type().isAnonymous() && ((ClassDecl)type()).superclass().isInnerType()) {
-      TypeDecl S = ((ClassDecl)type()).superclass();
-      if(S.isLocalClass()) {
+    if (!(type().isAnonymous() && ((ClassDecl)type()).superclass().isInnerType())) {
+		return;
+	}
+	TypeDecl S = ((ClassDecl)type()).superclass();
+	if(S.isLocalClass()) {
         if(S.inStaticContext()) {
         }
         else if(noEnclosingInstance()) {
-          error("*** No enclosing instance to class " + type().typeName() + " due to static context");
+          error(new StringBuilder().append("*** No enclosing instance to class ").append(type().typeName()).append(" due to static context").toString());
         }
-        else if(inExplicitConstructorInvocation())
-          error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName() + " since this is not initialized yet");
+        else if(inExplicitConstructorInvocation()) {
+			error(new StringBuilder().append("*** No enclosing instance to superclass ").append(S.typeName()).append(" of ").append(type().typeName()).append(" since this is not initialized yet").toString());
+		}
       }
       else if(S.isMemberType()) {
         if(!isQualified()) {
           // 15.9.2 2nd paragraph
           if(noEnclosingInstance()) {
-            error("*** No enclosing instance to class " + type().typeName() + " due to static context");
+            error(new StringBuilder().append("*** No enclosing instance to class ").append(type().typeName()).append(" due to static context").toString());
           }
           else {
             TypeDecl nest = hostType();
-            while(nest != null && !nest.instanceOf(S.enclosingType()))
-              nest = nest.enclosingType();
+            while(nest != null && !nest.instanceOf(S.enclosingType())) {
+				nest = nest.enclosingType();
+			}
             if(nest == null) {
-              error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName());
+              error(new StringBuilder().append("*** No enclosing instance to superclass ").append(S.typeName()).append(" of ").append(type().typeName()).toString());
             }
             else if(inExplicitConstructorInvocation()) {
-              error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName() + " since this is not initialized yet");
+              error(new StringBuilder().append("*** No enclosing instance to superclass ").append(S.typeName()).append(" of ").append(type().typeName()).append(" since this is not initialized yet").toString());
             }
           }
         }
       }
-    }
   }
-  /**
+/**
    * @ast method 
    * @aspect Annotations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:363
    */
-  public void checkModifiers() {
+  @Override
+public void checkModifiers() {
     if(decl().isDeprecated() &&
       !withinDeprecatedAnnotation() &&
       hostType().topLevelType() != decl().hostType().topLevelType() &&
-      !withinSuppressWarnings("deprecation"))
-        warning(decl().signature() + " in " + decl().hostType().typeName() + " has been deprecated");
+      !withinSuppressWarnings("deprecation")) {
+		warning(new StringBuilder().append(decl().signature()).append(" in ").append(decl().hostType().typeName()).append(" has been deprecated").toString());
+	}
   }
-  /**
-   * @ast method 
-   * @aspect InnerClasses
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:481
-   */
-  
-
-  // add val$name as arguments to the constructor
-  protected boolean addEnclosingVariables = true;
-  /**
+/**
    * @ast method 
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:482
    */
   public void addEnclosingVariables() {
-    if(!addEnclosingVariables) return;
+    if(!addEnclosingVariables) {
+		return;
+	}
     addEnclosingVariables = false;
     decl().addEnclosingVariables();
     for(Iterator iter = decl().hostType().enclosingVariables().iterator(); iter.hasNext(); ) {
@@ -363,7 +440,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       getArgList().add(new VarAccess(v.name()));
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect Transformations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/Transformations.jrag:127
@@ -377,7 +454,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     super.transformation();
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:550
@@ -388,7 +465,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     throw new Error("Not implemented");
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:557
@@ -409,17 +486,19 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     else {
       TypeDecl enclosing = hostType();
-      while(!enclosing.hasType(innerClass.name()))
-        enclosing = enclosing.enclosingType();
+      while(!enclosing.hasType(innerClass.name())) {
+		enclosing = enclosing.enclosingType();
+	}
       return emitThis(b, enclosing);
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:579
    */
-  public soot.Value eval(Body b) {
+  @Override
+public soot.Value eval(Body b) {
     Local local = asLocal(b, b.newNewExpr(type().sootRef(), this));
     ArrayList list = new ArrayList();
 
@@ -432,23 +511,27 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       ClassDecl C = (ClassDecl)type();
       TypeDecl S = C.superclass();
       if(S.isLocalClass()) {
-        if(!type().inStaticContext())
-          list.add(asImmediate(b, emitLocalEnclosing(b, S)));
+        if(!type().inStaticContext()) {
+			list.add(asImmediate(b, emitLocalEnclosing(b, S)));
+		}
       }
       else if(S.isInnerType()) {
         list.add(asImmediate(b, emitInnerMemberEnclosing(b, S)));
       }
     }
     else if(type().isLocalClass()) {
-      if(!type().inStaticContext())
-        list.add(asImmediate(b, emitLocalEnclosing(b, type())));
+      if(!type().inStaticContext()) {
+		list.add(asImmediate(b, emitLocalEnclosing(b, type())));
+	}
     }
     else if(type().isInnerType()) {
       list.add(asImmediate(b, emitInnerMemberEnclosing(b, type())));
     }
 
     for(int i = 0; i < getNumArg(); i++)
-      list.add(asImmediate(b, getArg(i).type().emitCastTo(b, getArg(i), decl().getParameter(i).type()))); // MethodInvocationConversion
+	 {
+		list.add(asImmediate(b, getArg(i).type().emitCastTo(b, getArg(i), decl().getParameter(i).type()))); // MethodInvocationConversion
+	}
   
     if(decl().isPrivate() && type() != hostType()) {
       list.add(asImmediate(b, soot.jimple.NullConstant.v()));
@@ -472,25 +555,17 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return local;
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect EmitJimpleRefinements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/SootJastAddJ/EmitJimpleRefinements.jrag:231
    */
-  public void collectTypesToSignatures(Collection<Type> set) {
+  @Override
+public void collectTypesToSignatures(Collection<Type> set) {
 	 super.collectTypesToSignatures(set);
    addDependencyIfNeeded(set, decl().erasedConstructor().hostType());
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public ClassInstanceExpr() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -498,37 +573,31 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[3];
     setChild(new List(), 1);
     setChild(new Opt(), 2);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public ClassInstanceExpr(Access p0, List<Expr> p1, Opt<TypeDecl> p2) {
-    setChild(p0, 0);
-    setChild(p1, 1);
-    setChild(p2, 2);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 3;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Access child.
    * @param node The new node to replace the Access child.
    * @apilevel high-level
@@ -538,7 +607,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public void setAccess(Access node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the Access child.
    * @return The current node used as the Access child.
    * @apilevel high-level
@@ -548,7 +617,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public Access getAccess() {
     return (Access)getChild(0);
   }
-  /**
+/**
    * Retrieves the Access child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Access child.
@@ -559,7 +628,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public Access getAccessNoTransform() {
     return (Access)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the Arg list.
    * @param list The new list node to be used as the Arg list.
    * @apilevel high-level
@@ -569,7 +638,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public void setArgList(List<Expr> list) {
     setChild(list, 1);
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * @return Number of children in the Arg list.
    * @apilevel high-level
@@ -579,7 +648,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public int getNumArg() {
     return getArgList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the Arg list.
@@ -590,7 +659,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public int getNumArgNoTransform() {
     return getArgListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the Arg list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the Arg list.
@@ -602,7 +671,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public Expr getArg(int i) {
     return (Expr)getArgList().getChild(i);
   }
-  /**
+/**
    * Append an element to the Arg list.
    * @param node The element to append to the Arg list.
    * @apilevel high-level
@@ -613,7 +682,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     List<Expr> list = (parent == null || state == null) ? getArgListNoTransform() : getArgList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -622,7 +691,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     List<Expr> list = getArgListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the Arg list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -634,7 +703,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     List<Expr> list = getArgList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -644,7 +713,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public List<Expr> getArgs() {
     return getArgList();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -655,7 +724,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public List<Expr> getArgsNoTransform() {
     return getArgListNoTransform();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -668,7 +737,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -680,7 +749,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public List<Expr> getArgListNoTransform() {
     return (List<Expr>)getChildNoTransform(1);
   }
-  /**
+/**
    * Replaces the optional node for the TypeDecl child. This is the {@code Opt} node containing the child TypeDecl, not the actual child!
    * @param opt The new node to be used as the optional node for the TypeDecl child.
    * @apilevel low-level
@@ -690,7 +759,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public void setTypeDeclOpt(Opt<TypeDecl> opt) {
     setChild(opt, 2);
   }
-  /**
+/**
    * Check whether the optional TypeDecl child exists.
    * @return {@code true} if the optional TypeDecl child exists, {@code false} if it does not.
    * @apilevel high-level
@@ -700,7 +769,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean hasTypeDecl() {
     return getTypeDeclOpt().getNumChild() != 0;
   }
-  /**
+/**
    * Retrieves the (optional) TypeDecl child.
    * @return The TypeDecl child, if it exists. Returns {@code null} otherwise.
    * @apilevel low-level
@@ -711,7 +780,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public TypeDecl getTypeDecl() {
     return (TypeDecl)getTypeDeclOpt().getChild(0);
   }
-  /**
+/**
    * Replaces the (optional) TypeDecl child.
    * @param node The new node to be used as the TypeDecl child.
    * @apilevel high-level
@@ -721,7 +790,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public void setTypeDecl(TypeDecl node) {
     getTypeDeclOpt().setChild(node, 0);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -730,7 +799,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public Opt<TypeDecl> getTypeDeclOpt() {
     return (Opt<TypeDecl>)getChild(2);
   }
-  /**
+/**
    * Retrieves the optional node for child TypeDecl. This is the {@code Opt} node containing the child TypeDecl, not the actual child!
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The optional node for child TypeDecl.
@@ -742,44 +811,49 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public Opt<TypeDecl> getTypeDeclOptNoTransform() {
     return (Opt<TypeDecl>)getChildNoTransform(2);
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:19
    */
-    public void nameCheck() {
-    if(getAccess().type().isEnumDecl() && !enclosingBodyDecl().isEnumConstant())
-      error("enum types may not be instantiated explicitly");
-    else
-      refined_NameCheck_ClassInstanceExpr_nameCheck();
+    @Override
+	public void nameCheck() {
+    if(getAccess().type().isEnumDecl() && !enclosingBodyDecl().isEnumConstant()) {
+		error("enum types may not be instantiated explicitly");
+	} else {
+		refined_NameCheck_ClassInstanceExpr_nameCheck();
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect VariableArityParametersCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/VariableArityParametersCodegen.jrag:36
    */
-    public void transformation() {
+    @Override
+	public void transformation() {
     if(decl().isVariableArity() && !invokesVariableArityAsArray()) {
       // arguments to normal parameters
       List list = new List();
-      for(int i = 0; i < decl().getNumParameter() - 1; i++)
-        list.add(getArg(i).fullCopy());
+      for(int i = 0; i < decl().getNumParameter() - 1; i++) {
+		list.add(getArg(i).fullCopy());
+	}
       // arguments to variable arity parameters
       List last = new List();
-      for(int i = decl().getNumParameter() - 1; i < getNumArg(); i++)
-        last.add(getArg(i).fullCopy());
+      for(int i = decl().getNumParameter() - 1; i < getNumArg(); i++) {
+		last.add(getArg(i).fullCopy());
+	}
       // build an array holding arguments
       Access typeAccess = decl().lastParameter().type().elementType().createQualifiedAccess();
-      for(int i = 0; i < decl().lastParameter().type().dimension(); i++)
-        typeAccess = new ArrayTypeAccess(typeAccess);
+      for(int i = 0; i < decl().lastParameter().type().dimension(); i++) {
+		typeAccess = new ArrayTypeAccess(typeAccess);
+	}
       list.add(new ArrayCreationExpr(typeAccess, new Opt(new ArrayInit(last))));
       // replace argument list with augemented argument list
       setArgList(list);
     }
     refined_Transformations_ClassInstanceExpr_transformation();
   }
-  protected java.util.Map isDAafterInstance_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:421
@@ -787,7 +861,9 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   @SuppressWarnings({"unchecked", "cast"})
   public boolean isDAafterInstance(Variable v) {
     Object _parameters = v;
-    if(isDAafterInstance_Variable_values == null) isDAafterInstance_Variable_values = new java.util.HashMap(4);
+    if(isDAafterInstance_Variable_values == null) {
+		isDAafterInstance_Variable_values = new java.util.HashMap(4);
+	}
     if(isDAafterInstance_Variable_values.containsKey(_parameters)) {
       return ((Boolean)isDAafterInstance_Variable_values.get(_parameters)).booleanValue();
     }
@@ -795,30 +871,33 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean isDAafterInstance_Variable_value = isDAafterInstance_compute(v);
-      if(isFinal && num == state().boundariesCrossed) isDAafterInstance_Variable_values.put(_parameters, Boolean.valueOf(isDAafterInstance_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		isDAafterInstance_Variable_values.put(_parameters, Boolean.valueOf(isDAafterInstance_Variable_value));
+	}
     return isDAafterInstance_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean isDAafterInstance_compute(Variable v) {
-    if(getNumArg() == 0)
-      return isDAbefore(v);
+    if(getNumArg() == 0) {
+		return isDAbefore(v);
+	}
     return getArg(getNumArg()-1).isDAafter(v);
   }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:235
    */
-  public boolean isDAafter(Variable v) {
+  @Override
+public boolean isDAafter(Variable v) {
     ASTNode$State state = state();
     try {  return isDAafterInstance(v);  }
     finally {
     }
   }
-  protected java.util.Map computeDAbefore_int_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:428
@@ -828,7 +907,9 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(Integer.valueOf(i));
     _parameters.add(v);
-    if(computeDAbefore_int_Variable_values == null) computeDAbefore_int_Variable_values = new java.util.HashMap(4);
+    if(computeDAbefore_int_Variable_values == null) {
+		computeDAbefore_int_Variable_values = new java.util.HashMap(4);
+	}
     if(computeDAbefore_int_Variable_values.containsKey(_parameters)) {
       return ((Boolean)computeDAbefore_int_Variable_values.get(_parameters)).booleanValue();
     }
@@ -836,14 +917,16 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean computeDAbefore_int_Variable_value = computeDAbefore_compute(i, v);
-      if(isFinal && num == state().boundariesCrossed) computeDAbefore_int_Variable_values.put(_parameters, Boolean.valueOf(computeDAbefore_int_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		computeDAbefore_int_Variable_values.put(_parameters, Boolean.valueOf(computeDAbefore_int_Variable_value));
+	}
     return computeDAbefore_int_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean computeDAbefore_compute(int i, Variable v) {  return i == 0 ? isDAbefore(v) : getArg(i-1).isDAafter(v);  }
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:850
@@ -851,26 +934,27 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean isDUafterInstance(Variable v) {
     ASTNode$State state = state();
     try {
-    if(getNumArg() == 0)
-      return isDUbefore(v);
+    if(getNumArg() == 0) {
+		return isDUbefore(v);
+	}
     return getArg(getNumArg()-1).isDUafter(v);
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:694
    */
-  public boolean isDUafter(Variable v) {
+  @Override
+public boolean isDUafter(Variable v) {
     ASTNode$State state = state();
     try {  return isDUafterInstance(v);  }
     finally {
     }
   }
-  protected java.util.Map computeDUbefore_int_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:857
@@ -880,7 +964,9 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(Integer.valueOf(i));
     _parameters.add(v);
-    if(computeDUbefore_int_Variable_values == null) computeDUbefore_int_Variable_values = new java.util.HashMap(4);
+    if(computeDUbefore_int_Variable_values == null) {
+		computeDUbefore_int_Variable_values = new java.util.HashMap(4);
+	}
     if(computeDUbefore_int_Variable_values.containsKey(_parameters)) {
       return ((Boolean)computeDUbefore_int_Variable_values.get(_parameters)).booleanValue();
     }
@@ -888,34 +974,29 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean computeDUbefore_int_Variable_value = computeDUbefore_compute(i, v);
-      if(isFinal && num == state().boundariesCrossed) computeDUbefore_int_Variable_values.put(_parameters, Boolean.valueOf(computeDUbefore_int_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		computeDUbefore_int_Variable_values.put(_parameters, Boolean.valueOf(computeDUbefore_int_Variable_value));
+	}
     return computeDUbefore_int_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean computeDUbefore_compute(int i, Variable v) {  return i == 0 ? isDUbefore(v) : getArg(i-1).isDUafter(v);  }
-  /**
+/**
    * @attribute syn
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:50
    */
-  public boolean applicableAndAccessible(ConstructorDecl decl) {
+  @Override
+public boolean applicableAndAccessible(ConstructorDecl decl) {
     ASTNode$State state = state();
     try {  return decl.applicable(getArgList()) && decl.accessibleFrom(hostType()) && 
     (!decl.isProtected() || hasTypeDecl() || decl.hostPackage().equals(hostPackage()));  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean decls_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected SimpleSet decls_value;
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:70
@@ -929,25 +1010,19 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     decls_value = decls_compute();
-      if(isFinal && num == state().boundariesCrossed) decls_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		decls_computed = true;
+	}
     return decls_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private SimpleSet decls_compute() {
     TypeDecl typeDecl = hasTypeDecl() ? getTypeDecl() : getAccess().type();
     return chooseConstructor(typeDecl.constructors(), getArgList());
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean decl_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected ConstructorDecl decl_value;
-  /**
+/**
    * @attribute syn
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:78
@@ -961,38 +1036,43 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     decl_value = decl_compute();
-      if(isFinal && num == state().boundariesCrossed) decl_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		decl_computed = true;
+	}
     return decl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private ConstructorDecl decl_compute() {
     SimpleSet decls = decls();
-    if(decls.size() == 1)
-      return (ConstructorDecl)decls.iterator().next();
+    if(decls.size() == 1) {
+		return (ConstructorDecl)decls.iterator().next();
+	}
     return unknownConstructor();
   }
-  /**
+/**
    * @attribute syn
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:430
    */
-  public SimpleSet qualifiedLookupType(String name) {
+  @Override
+public SimpleSet qualifiedLookupType(String name) {
     ASTNode$State state = state();
     try {
     SimpleSet c = keepAccessibleTypes(type().memberTypes(name));
-    if(!c.isEmpty())
-      return c;
-    if(type().name().equals(name))
-      return SimpleSet.emptySet.add(type());
+    if(!c.isEmpty()) {
+		return c;
+	}
+    if(type().name().equals(name)) {
+		return SimpleSet.emptySet.add(type());
+	}
     return SimpleSet.emptySet;
   }
     finally {
     }
   }
-  protected java.util.Map localLookupType_String_values;
-  /**
+/**
    * @attribute syn
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:472
@@ -1000,7 +1080,9 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   @SuppressWarnings({"unchecked", "cast"})
   public SimpleSet localLookupType(String name) {
     Object _parameters = name;
-    if(localLookupType_String_values == null) localLookupType_String_values = new java.util.HashMap(4);
+    if(localLookupType_String_values == null) {
+		localLookupType_String_values = new java.util.HashMap(4);
+	}
     if(localLookupType_String_values.containsKey(_parameters)) {
       return (SimpleSet)localLookupType_String_values.get(_parameters);
     }
@@ -1008,18 +1090,21 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     SimpleSet localLookupType_String_value = localLookupType_compute(name);
-      if(isFinal && num == state().boundariesCrossed) localLookupType_String_values.put(_parameters, localLookupType_String_value);
+      if(isFinal && num == state().boundariesCrossed) {
+		localLookupType_String_values.put(_parameters, localLookupType_String_value);
+	}
     return localLookupType_String_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private SimpleSet localLookupType_compute(String name) {
-    if(hasTypeDecl() && getTypeDecl().name().equals(name))
-      return SimpleSet.emptySet.add(getTypeDecl());
+    if(hasTypeDecl() && getTypeDecl().name().equals(name)) {
+		return SimpleSet.emptySet.add(getTypeDecl());
+	}
     return SimpleSet.emptySet;
   }
-  /**
+/**
    * @attribute syn
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:135
@@ -1027,39 +1112,35 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean validArgs() {
     ASTNode$State state = state();
     try {
-    for(int i = 0; i < getNumArg(); i++)
-      if(getArg(i).type().isUnknown())
-        return false;
+    for(int i = 0; i < getNumArg(); i++) {
+		if(getArg(i).type().isUnknown()) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect SyntacticClassification
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:56
    */
-  public NameType predNameType() {
+  @Override
+public NameType predNameType() {
     ASTNode$State state = state();
     try {  return NameType.EXPRESSION_NAME;  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
    * @attribute syn
    * @aspect TypeAnalysis
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:311
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -1068,14 +1149,16 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {  return hasTypeDecl() ? getTypeDecl() : getAccess().type();  }
-  /**
+/**
    * @attribute syn
    * @aspect TypeCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:519
@@ -1086,7 +1169,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:327
@@ -1097,7 +1180,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect VariableArityParameters
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/VariableArityParameters.jrag:54
@@ -1105,16 +1188,18 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean invokesVariableArityAsArray() {
     ASTNode$State state = state();
     try {
-    if(!decl().isVariableArity())
-      return false;
-    if(arity() != decl().arity())
-      return false;
+    if(!decl().isVariableArity()) {
+		return false;
+	}
+    if(arity() != decl().arity()) {
+		return false;
+	}
     return getArg(getNumArg()-1).type().methodInvocationConversionTo(decl().lastParameter().type());
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute inh
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:52
@@ -1125,7 +1210,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     boolean handlesException_TypeDecl_value = getParent().Define_boolean_handlesException(this, null, exceptionType);
     return handlesException_TypeDecl_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:27
@@ -1136,7 +1221,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     TypeDecl typeObject_value = getParent().Define_TypeDecl_typeObject(this, null);
     return typeObject_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:84
@@ -1147,7 +1232,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     ConstructorDecl unknownConstructor_value = getParent().Define_ConstructorDecl_unknownConstructor(this, null);
     return unknownConstructor_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:351
@@ -1158,7 +1243,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     String typeDeclIndent_value = getParent().Define_String_typeDeclIndent(this, null);
     return typeDeclIndent_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect TypeCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:504
@@ -1169,48 +1254,52 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     TypeDecl enclosingInstance_value = getParent().Define_TypeDecl_enclosingInstance(this, null);
     return enclosingInstance_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect TypeHierarchyCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:126
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean inExplicitConstructorInvocation() {
     ASTNode$State state = state();
     boolean inExplicitConstructorInvocation_value = getParent().Define_boolean_inExplicitConstructorInvocation(this, null);
     return inExplicitConstructorInvocation_value;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/AnonymousClasses.jrag:15
    * @apilevel internal
    */
-  public TypeDecl Define_TypeDecl_superType(ASTNode caller, ASTNode child) {
+  @Override
+public TypeDecl Define_TypeDecl_superType(ASTNode caller, ASTNode child) {
     if(caller == getTypeDeclOptNoTransform()) {
       return getAccess().type();
     }
     else {      return getParent().Define_TypeDecl_superType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:83
    * @apilevel internal
    */
-  public ConstructorDecl Define_ConstructorDecl_constructorDecl(ASTNode caller, ASTNode child) {
-    if(caller == getTypeDeclOptNoTransform()){
-    Collection c = getAccess().type().constructors();
-    SimpleSet maxSpecific = chooseConstructor(c, getArgList());
-    if(maxSpecific.size() == 1)
-      return (ConstructorDecl)maxSpecific.iterator().next();
-    return unknownConstructor();
+  @Override
+public ConstructorDecl Define_ConstructorDecl_constructorDecl(ASTNode caller, ASTNode child) {
+    if (caller != getTypeDeclOptNoTransform()) {
+		return getParent().Define_ConstructorDecl_constructorDecl(this, caller);
+	}
+	Collection c = getAccess().type().constructors();
+	SimpleSet maxSpecific = chooseConstructor(c, getArgList());
+	if(maxSpecific.size() == 1) {
+		return (ConstructorDecl)maxSpecific.iterator().next();
+	}
+	return unknownConstructor();
   }
-    else {      return getParent().Define_ConstructorDecl_constructorDecl(this, caller);
-    }
-  }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:430
    * @apilevel internal
    */
-  public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
+  @Override
+public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
     if(caller == getTypeDeclOptNoTransform()) {
       return isDAafterInstance(v);
     }
@@ -1221,11 +1310,12 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     else {      return getParent().Define_boolean_isDAbefore(this, caller, v);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:856
    * @apilevel internal
    */
-  public boolean Define_boolean_isDUbefore(ASTNode caller, ASTNode child, Variable v) {
+  @Override
+public boolean Define_boolean_isDUbefore(ASTNode caller, ASTNode child, Variable v) {
     if(caller == getArgListNoTransform())  {
     int i = caller.getIndexOfChild(child);
     return computeDUbefore(i, v);
@@ -1233,11 +1323,12 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     else {      return getParent().Define_boolean_isDUbefore(this, caller, v);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:92
    * @apilevel internal
    */
-  public boolean Define_boolean_hasPackage(ASTNode caller, ASTNode child, String packageName) {
+  @Override
+public boolean Define_boolean_hasPackage(ASTNode caller, ASTNode child, String packageName) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().hasPackage(packageName);
@@ -1245,26 +1336,29 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     else {      return getParent().Define_boolean_hasPackage(this, caller, packageName);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:404
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
     if(caller == getTypeDeclOptNoTransform()){
     SimpleSet c = localLookupType(name);
-    if(!c.isEmpty())
-      return c;
+    if(!c.isEmpty()) {
+		return c;
+	}
     c = lookupType(name);
-    if(!c.isEmpty())
-      return c;
+    if(!c.isEmpty()) {
+		return c;
+	}
     return unqualifiedScope().lookupType(name);
   }
     else if(caller == getAccessNoTransform()){
     SimpleSet c = lookupType(name);
-    if(c.size() == 1) {
-      if(isQualified())
-        c = keepInnerClasses(c);
-    }
+    boolean condition = c.size() == 1 && isQualified();
+	if(condition) {
+		c = keepInnerClasses(c);
+	}
     return c;
   }
     else if(caller == getArgListNoTransform())  {
@@ -1274,11 +1368,12 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     else {      return getParent().Define_SimpleSet_lookupType(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupVariable.jrag:137
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().lookupVariable(name);
@@ -1286,11 +1381,12 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     else {      return getParent().Define_SimpleSet_lookupVariable(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:127
    * @apilevel internal
    */
-  public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
+  @Override
+public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return NameType.EXPRESSION_NAME;
@@ -1304,44 +1400,48 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     else {      return getParent().Define_NameType_nameType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:217
    * @apilevel internal
    */
-  public boolean Define_boolean_isAnonymous(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isAnonymous(ASTNode caller, ASTNode child) {
     if(caller == getTypeDeclOptNoTransform()) {
       return true;
     }
     else {      return getParent().Define_boolean_isAnonymous(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:530
    * @apilevel internal
    */
-  public boolean Define_boolean_isMemberType(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isMemberType(ASTNode caller, ASTNode child) {
     if(caller == getTypeDeclOptNoTransform()) {
       return false;
     }
     else {      return getParent().Define_boolean_isMemberType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:576
    * @apilevel internal
    */
-  public TypeDecl Define_TypeDecl_hostType(ASTNode caller, ASTNode child) {
+  @Override
+public TypeDecl Define_TypeDecl_hostType(ASTNode caller, ASTNode child) {
     if(caller == getTypeDeclOptNoTransform()) {
       return hostType();
     }
     else {      return getParent().Define_TypeDecl_hostType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:147
    * @apilevel internal
    */
-  public boolean Define_boolean_inStaticContext(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_inStaticContext(ASTNode caller, ASTNode child) {
     if(caller == getTypeDeclOptNoTransform()) {
       return isQualified() ?
     qualifier().staticContextQualifier() : inStaticContext();
@@ -1349,32 +1449,35 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     else {      return getParent().Define_boolean_inStaticContext(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/TypeInference.jrag:69
    * @apilevel internal
    */
-  public ClassInstanceExpr Define_ClassInstanceExpr_getClassInstanceExpr(ASTNode caller, ASTNode child) {
+  @Override
+public ClassInstanceExpr Define_ClassInstanceExpr_getClassInstanceExpr(ASTNode caller, ASTNode child) {
     if(caller == getAccessNoTransform()) {
       return this;
     }
     else {      return getParent().Define_ClassInstanceExpr_getClassInstanceExpr(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/TypeInference.jrag:457
    * @apilevel internal
    */
-  public boolean Define_boolean_isAnonymousDecl(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isAnonymousDecl(ASTNode caller, ASTNode child) {
     if(caller == getAccessNoTransform()) {
       return hasTypeDecl();
     }
     else {      return getParent().Define_boolean_isAnonymousDecl(this, caller);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

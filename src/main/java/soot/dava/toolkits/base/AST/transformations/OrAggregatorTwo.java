@@ -83,10 +83,12 @@ public class OrAggregatorTwo extends DepthFirstAdapter {
     DEBUG = false;
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
-  public void outASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void outASTIfElseNode(ASTIfElseNode node) {
     // check whether the else body has another if and nothing else
 
     List<Object> ifBody = node.getIfBody();
@@ -127,7 +129,7 @@ public class OrAggregatorTwo extends DepthFirstAdapter {
     /*
      * Always have to follow with a parse to remove unwanted empty ElseBodies
      */
-    node.replaceElseBody(new ArrayList<Object>());
+    node.replaceElseBody(new ArrayList<>());
 
     G.v().ASTTransformations_modified = true;
   }

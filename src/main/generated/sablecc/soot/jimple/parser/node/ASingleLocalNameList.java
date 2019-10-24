@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ASingleLocalNameList extends PLocalNameList
 {
-    private PLocalName _localName_;
+    private PLocalName localName;
 
     public ASingleLocalNameList()
     {
@@ -26,7 +26,7 @@ public final class ASingleLocalNameList extends PLocalNameList
     public Object clone()
     {
         return new ASingleLocalNameList(
-            cloneNode(this._localName_));
+            cloneNode(this.localName));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ASingleLocalNameList extends PLocalNameList
 
     public PLocalName getLocalName()
     {
-        return this._localName_;
+        return this.localName;
     }
 
     public void setLocalName(PLocalName node)
     {
-        if(this._localName_ != null)
+        if(this.localName != null)
         {
-            this._localName_.parent(null);
+            this.localName.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ASingleLocalNameList extends PLocalNameList
             node.parent(this);
         }
 
-        this._localName_ = node;
+        this.localName = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._localName_);
+            + toString(this.localName);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._localName_ == child)
+        if(this.localName == child)
         {
-            this._localName_ = null;
+            this.localName = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ASingleLocalNameList extends PLocalNameList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._localName_ == oldChild)
+        if(this.localName == oldChild)
         {
             setLocalName((PLocalName) newChild);
             return;

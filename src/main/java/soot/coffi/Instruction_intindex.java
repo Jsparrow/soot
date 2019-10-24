@@ -60,28 +60,34 @@ class Instruction_intindex extends Instruction {
     super(c);
   }
 
-  public String toString(cp_info constant_pool[]) {
-    return super.toString(constant_pool) + argsep + "[" + constant_pool[arg_i].toString(constant_pool) + "]";
+  @Override
+public String toString(cp_info constant_pool[]) {
+    return new StringBuilder().append(super.toString(constant_pool)).append(argsep).append("[").append(constant_pool[arg_i].toString(constant_pool)).append("]").toString();
   }
 
-  public int nextOffset(int curr) {
+  @Override
+public int nextOffset(int curr) {
     return curr + 3;
   }
 
-  public void markCPRefs(boolean[] refs) {
+  @Override
+public void markCPRefs(boolean[] refs) {
     refs[arg_i] = true;
   }
 
-  public void redirectCPRefs(short redirect[]) {
+  @Override
+public void redirectCPRefs(short redirect[]) {
     arg_i = redirect[arg_i];
   }
 
-  public int parse(byte bc[], int index) {
+  @Override
+public int parse(byte bc[], int index) {
     arg_i = getShort(bc, index);
     return index + 2;
   }
 
-  public int compile(byte bc[], int index) {
+  @Override
+public int compile(byte bc[], int index) {
     bc[index++] = code;
     shortToBytes((short) arg_i, bc, index);
     return index + 2;

@@ -110,6 +110,6 @@ public class Insn3rc extends AbstractInsn {
 
   @Override
   public String toString() {
-    return super.toString() + " ref: " + referencedItem;
+    return new StringBuilder().append(super.toString()).append(" ref: ").append(referencedItem).toString();
   }
 }

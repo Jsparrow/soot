@@ -69,13 +69,15 @@ public class UselessLabeledBlockRemover extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void outASTMethodNode(ASTMethodNode node) {
+  @Override
+public void outASTMethodNode(ASTMethodNode node) {
     if (changed) {
       G.v().ASTTransformations_modified = true;
     }
   }
 
-  public void inASTMethodNode(ASTMethodNode node) {
+  @Override
+public void inASTMethodNode(ASTMethodNode node) {
     changed = UselessLabelFinder.v().findAndKill(node);
   }
 
@@ -92,70 +94,80 @@ public class UselessLabeledBlockRemover extends DepthFirstAdapter {
    * changed=UselessLabelFinder.v().findAndKill(node); } public void caseASTTryNode(ASTTryNode node){
    * changed=UselessLabelFinder.v().findAndKill(node); }
    */
-  public void outASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
+  @Override
+public void outASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
+  @Override
+public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
+  @Override
+public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void outASTSwitchNode(ASTSwitchNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTIfNode(ASTIfNode node) {
+  @Override
+public void outASTIfNode(ASTIfNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void outASTIfElseNode(ASTIfElseNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTWhileNode(ASTWhileNode node) {
+  @Override
+public void outASTWhileNode(ASTWhileNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void outASTForLoopNode(ASTForLoopNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void outASTDoWhileNode(ASTDoWhileNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
     }
   }
 
-  public void outASTTryNode(ASTTryNode node) {
+  @Override
+public void outASTTryNode(ASTTryNode node) {
     boolean modified = UselessLabelFinder.v().findAndKill(node);
     if (modified) {
       changed = true;
@@ -258,7 +270,7 @@ public class UselessLabeledBlockRemover extends DepthFirstAdapter {
 
   public static List<Object> createNewSubBody(List<Object> oldSubBody, int nodeNumber, ASTLabeledBlockNode labelBlock) {
     // create a new SubBody
-    List<Object> newSubBody = new ArrayList<Object>();
+    List<Object> newSubBody = new ArrayList<>();
 
     // this is an iterator of ASTNodes
     Iterator<Object> it = oldSubBody.iterator();

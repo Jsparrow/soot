@@ -378,7 +378,7 @@ public class InstructionFactory {
         return new BinopLitInstruction(instruction, codeAddress);
 
       default:
-        throw new IllegalArgumentException("Opcode: " + op + " @ 0x" + Integer.toHexString(codeAddress));
+        throw new IllegalArgumentException(new StringBuilder().append("Opcode: ").append(op).append(" @ 0x").append(Integer.toHexString(codeAddress)).toString());
     }
   }
 }

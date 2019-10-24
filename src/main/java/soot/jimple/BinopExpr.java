@@ -26,19 +26,19 @@ import soot.Value;
 import soot.ValueBox;
 
 public interface BinopExpr extends Expr {
-  public Value getOp1();
+  Value getOp1();
 
-  public Value getOp2();
+  Value getOp2();
 
-  public ValueBox getOp1Box();
+  ValueBox getOp1Box();
 
-  public ValueBox getOp2Box();
+  ValueBox getOp2Box();
 
-  public void setOp1(Value op1);
+  void setOp1(Value op1);
 
-  public void setOp2(Value op2);
+  void setOp2(Value op2);
 
-  public String getSymbol();
+  String getSymbol();
 
-  public String toString();
+  String toString();
 }

@@ -100,10 +100,12 @@ public class PushLabeledBlockIn extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
-  public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
+  @Override
+public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
     String label = node.get_Label().toString();
     List<Object> subBodies = node.get_SubBodies();
     if (subBodies.size() != 1) {
@@ -111,32 +113,31 @@ public class PushLabeledBlockIn extends DepthFirstAdapter {
     }
     List subBody = (List) subBodies.get(0);
     int nodeNumber = checkForBreak(subBody, label);
-    if (nodeNumber > -1) {
-      // found some break for this label
+    if (!(nodeNumber > -1)) {
+		return;
+	}
+	// found some break for this label
       // retrieve element at this nodeNumber
       if (subBody.size() < nodeNumber) {
         // something is wrong
         throw new RuntimeException("Please submit this benchmark as a bug");
       }
-
-      // check that this is the last node in the list
+	// check that this is the last node in the list
       // since otherwise we cant change anything
       if (nodeNumber + 1 != subBody.size()) {
         // it is not the last
         return;
       }
-
-      // safe to access the list
+	// safe to access the list
       ASTNode temp = (ASTNode) subBody.get(nodeNumber);
-      if (!(temp instanceof ASTLabeledNode)) {
+	if (!(temp instanceof ASTLabeledNode)) {
         // does not extend labeledNode hence cannot give it a label
         return;
       }
-
-      ASTLabeledNode tempNode = (ASTLabeledNode) temp;
-      // shouldnt already have a label
+	ASTLabeledNode tempNode = (ASTLabeledNode) temp;
+	// shouldnt already have a label
       String innerLabel = tempNode.get_Label().toString();
-      if (innerLabel != null) {
+	if (innerLabel != null) {
         // already has a label
         // we could still do something if this is the ONLY node in the
         // body
@@ -176,8 +177,6 @@ public class PushLabeledBlockIn extends DepthFirstAdapter {
         node.set_Label(new SETNodeLabel());
         G.v().ASTTransformations_modified = true;
       }
-
-    }
   }
 
   private boolean replaceBreakLabels(ASTNode node, String toReplace, String replaceWith) {
@@ -202,15 +201,14 @@ public class PushLabeledBlockIn extends DepthFirstAdapter {
           for (AugmentedStmt as : stmtSeq.getStatements()) {
             Stmt s = as.get_Stmt();
             String labelBroken = isAbrupt(s);
-            if (labelBroken != null) {
-              // stmt breaks some label
-              if (labelBroken.compareTo(toReplace) == 0) {
+            boolean condition = labelBroken != null && labelBroken.compareTo(toReplace) == 0;
+			// stmt breaks some label
+			if (condition) {
                 // we have found a break breaking this label
                 // replace the label with "replaceWith"
                 replaceLabel(s, replaceWith);
                 toReturn = true;
               }
-            }
           }
         } // if it was a StmtSeq node
         else {
@@ -236,16 +234,15 @@ public class PushLabeledBlockIn extends DepthFirstAdapter {
         for (AugmentedStmt as : stmtSeq.getStatements()) {
           Stmt s = as.get_Stmt();
           String labelBroken = breaksLabel(s);
-          if (labelBroken != null && outerLabel != null) {
-            // stmt
-            // breaks
-            // some
-            // label
-            if (labelBroken.compareTo(outerLabel) == 0) {
-              // we have found a break breaking this label
-              return nodeNumber;
-            }
-          }
+          boolean condition = labelBroken != null && outerLabel != null && labelBroken.compareTo(outerLabel) == 0;
+		// stmt
+		// breaks
+		// some
+		// label
+		if (condition) {
+		  // we have found a break breaking this label
+		  return nodeNumber;
+		}
         }
       } // if it was a StmtSeq node
       else {

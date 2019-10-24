@@ -65,25 +65,27 @@ import soot.util.Chain;
 public class IndirectIfJumpsToCaughtGotos extends BodyTransformer implements IJbcoTransform {
 
   private static final Logger logger = LoggerFactory.getLogger(IndirectIfJumpsToCaughtGotos.class);
-  int count = 0;
+public static String dependancies[] = new String[] { "bb.jbco_iii", "bb.jbco_ful", "bb.lp" };
+public static String name = "bb.jbco_iii";
+int count = 0;
 
-  public static String dependancies[] = new String[] { "bb.jbco_iii", "bb.jbco_ful", "bb.lp" };
-
-  public String[] getDependencies() {
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_iii";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
     out.println("Indirected Ifs through Traps: " + count);
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
 
     int weight = soot.jbco.Main.getWeight(phaseName, b.getMethod().getSignature());
     if (weight == 0) {
@@ -95,8 +97,8 @@ public class IndirectIfJumpsToCaughtGotos extends BodyTransformer implements IJb
     if (nonTrap == null) {
       Unit last = null;
       nonTrap = Baf.v().newNopInst();
-      for (Iterator<Unit> it = units.iterator(); it.hasNext();) {
-        Unit u = (Unit) it.next();
+      for (Unit unit : units) {
+        Unit u = (Unit) unit;
         if (u instanceof IdentityInst && ((IdentityInst) u).getLeftOp() instanceof Local) {
           last = u;
           continue;
@@ -113,7 +115,7 @@ public class IndirectIfJumpsToCaughtGotos extends BodyTransformer implements IJb
 
     Stack<Type> stack = StackTypeHeightCalculator.getAfterStack(b, nonTrap);
 
-    ArrayList<Unit> addedUnits = new ArrayList<Unit>();
+    ArrayList<Unit> addedUnits = new ArrayList<>();
     Iterator<Unit> it = units.snapshotIterator();
     while (it.hasNext()) {
       Unit u = (Unit) it.next();
@@ -133,7 +135,7 @@ public class IndirectIfJumpsToCaughtGotos extends BodyTransformer implements IJb
     Unit nop = Baf.v().newNopInst();
     units.add(nop);
 
-    ArrayList<Unit> toinsert = new ArrayList<Unit>();
+    ArrayList<Unit> toinsert = new ArrayList<>();
     SootField field = null;
     try {
       field = soot.jbco.jimpleTransformations.FieldRenamer.v().getRandomOpaques()[Rand.getInt(2)];
@@ -166,7 +168,7 @@ public class IndirectIfJumpsToCaughtGotos extends BodyTransformer implements IJb
       toinsert.add(Baf.v().newIfEqInst((Unit) units.getSuccOf(nonTrap)));
     }
 
-    ArrayList<Unit> toinserttry = new ArrayList<Unit>();
+    ArrayList<Unit> toinserttry = new ArrayList<>();
     while (stack.size() > 0) {
       toinserttry.add(Baf.v().newPopInst(stack.pop()));
     }
@@ -196,15 +198,13 @@ public class IndirectIfJumpsToCaughtGotos extends BodyTransformer implements IJb
     }
   }
 
-  private Unit findNonTrappedUnit(PatchingChain<Unit> units, Chain<Trap> traps) {
+private Unit findNonTrappedUnit(PatchingChain<Unit> units, Chain<Trap> traps) {
     int intrap = 0;
-    ArrayList<Unit> untrapped = new ArrayList<Unit>();
+    ArrayList<Unit> untrapped = new ArrayList<>();
     Iterator<Unit> it = units.snapshotIterator();
     while (it.hasNext()) {
       Unit u = it.next();
-      Iterator<Trap> tit = traps.iterator();
-      while (tit.hasNext()) {
-        Trap t = tit.next();
+      for (Trap t : traps) {
         if (u == t.getBeginUnit()) {
           intrap++;
         }
@@ -233,7 +233,7 @@ public class IndirectIfJumpsToCaughtGotos extends BodyTransformer implements IJb
     return result;
   }
 
-  private boolean isIf(Unit u) {
+private boolean isIf(Unit u) {
     // TODO: will a RET statement be a TargetArgInst?
     return (u instanceof TargetArgInst) && !(u instanceof GotoInst) && !(u instanceof JSRInst);
   }

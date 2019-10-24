@@ -46,17 +46,17 @@ import soot.toolkits.graph.UnitGraph;
 
 public class Region implements IRegion {
 
-  private SootClass m_class = null;
-  private SootMethod m_method = null;
-  private List<Block> m_blocks = null;
-  private List<Unit> m_units = null;
-  private int m_id = -1;
-  private UnitGraph m_unitGraph = null;
+  private SootClass mClass = null;
+  private SootMethod mMethod = null;
+  private List<Block> mBlocks = null;
+  private List<Unit> mUnits = null;
+  private int mId = -1;
+  private UnitGraph mUnitGraph = null;
 
   // The following are needed to create a tree of regions based on the containment (dependency)
   // relation between regions.
-  private IRegion m_parent = null;
-  private List<IRegion> m_children = new ArrayList<IRegion>();
+  private IRegion mParent = null;
+  private List<IRegion> mChildren = new ArrayList<>();
 
   public Region(int id, SootMethod m, SootClass c, UnitGraph ug) {
     this(id, new ArrayList<Block>(), m, c, ug);
@@ -65,108 +65,116 @@ public class Region implements IRegion {
 
   public Region(int id, List<Block> blocks, SootMethod m, SootClass c, UnitGraph ug) {
 
-    this.m_blocks = blocks;
-    this.m_id = id;
-    this.m_method = m;
-    this.m_class = c;
-    this.m_unitGraph = ug;
-    this.m_units = null;
+    this.mBlocks = blocks;
+    this.mId = id;
+    this.mMethod = m;
+    this.mClass = c;
+    this.mUnitGraph = ug;
+    this.mUnits = null;
 
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+@SuppressWarnings("unchecked")
   public Object clone() {
-    Region r = new Region(this.m_id, this.m_method, this.m_class, this.m_unitGraph);
-    r.m_blocks = (List<Block>) ((ArrayList<Block>) this.m_blocks).clone();
+    Region r = new Region(this.mId, this.mMethod, this.mClass, this.mUnitGraph);
+    r.mBlocks = (List<Block>) ((ArrayList<Block>) this.mBlocks).clone();
 
     return r;
 
   }
 
-  public SootMethod getSootMethod() {
-    return this.m_method;
+  @Override
+public SootMethod getSootMethod() {
+    return this.mMethod;
   }
 
-  public SootClass getSootClass() {
-    return this.m_class;
+  @Override
+public SootClass getSootClass() {
+    return this.mClass;
   }
 
-  public List<Block> getBlocks() {
-    return this.m_blocks;
+  @Override
+public List<Block> getBlocks() {
+    return this.mBlocks;
   }
 
-  public UnitGraph getUnitGraph() {
-    return this.m_unitGraph;
+  @Override
+public UnitGraph getUnitGraph() {
+    return this.mUnitGraph;
   }
 
-  public List<Unit> getUnits() {
-    if (this.m_units == null) {
-      this.m_units = new LinkedList<Unit>();
-      for (Iterator<Block> itr = this.m_blocks.iterator(); itr.hasNext();) {
+  @Override
+public List<Unit> getUnits() {
+    if (this.mUnits == null) {
+      this.mUnits = new LinkedList<>();
+      for (Iterator<Block> itr = this.mBlocks.iterator(); itr.hasNext();) {
         Block b = itr.next();
-        for (Iterator<Unit> itr1 = b.iterator(); itr1.hasNext();) {
-          Unit u = itr1.next();
-          ((LinkedList<Unit>) this.m_units).addLast(u);
+        for (Unit u : b) {
+          ((LinkedList<Unit>) this.mUnits).addLast(u);
 
         }
       }
 
     }
 
-    return this.m_units;
+    return this.mUnits;
   }
 
-  public List<Unit> getUnits(Unit from, Unit to) {
+  @Override
+public List<Unit> getUnits(Unit from, Unit to) {
 
-    return m_units.subList(m_units.indexOf(from), m_units.indexOf(to));
+    return mUnits.subList(mUnits.indexOf(from), mUnits.indexOf(to));
 
   }
 
-  public Unit getLast() {
-    if (this.m_units != null) {
-      if (this.m_units.size() > 0) {
-        return ((LinkedList<Unit>) this.m_units).getLast();
+  @Override
+public Unit getLast() {
+    boolean condition = this.mUnits != null && this.mUnits.size() > 0;
+	if (condition) {
+        return ((LinkedList<Unit>) this.mUnits).getLast();
       }
-    }
 
     return null;
   }
 
-  public Unit getFirst() {
-    if (this.m_units != null) {
-      if (this.m_units.size() > 0) {
-        return ((LinkedList<Unit>) this.m_units).getFirst();
+  @Override
+public Unit getFirst() {
+    boolean condition = this.mUnits != null && this.mUnits.size() > 0;
+	if (condition) {
+        return ((LinkedList<Unit>) this.mUnits).getFirst();
       }
-    }
 
     return null;
   }
 
   public void add(Block b) {
     // Add to the front
-    this.m_blocks.add(0, b);
+    this.mBlocks.add(0, b);
 
   }
 
   public void add2Back(Block b) {
     // Add to the last
-    this.m_blocks.add(this.m_blocks.size(), b);
+    this.mBlocks.add(this.mBlocks.size(), b);
 
   }
 
   public void remove(Block b) {
-    this.m_blocks.remove(b);
+    this.mBlocks.remove(b);
     // make the units be recalculated.
-    this.m_units = null;
+    this.mUnits = null;
   }
 
-  public int getID() {
-    return this.m_id;
+  @Override
+public int getID() {
+    return this.mId;
   }
 
-  public boolean occursBefore(Unit u1, Unit u2) {
-    int i = this.m_units.lastIndexOf(u1);
-    int j = this.m_units.lastIndexOf(u2);
+  @Override
+public boolean occursBefore(Unit u1, Unit u2) {
+    int i = this.mUnits.lastIndexOf(u1);
+    int j = this.mUnits.lastIndexOf(u2);
 
     if (i == -1 || j == -1) {
       throw new RuntimeException("These units don't exist in the region!");
@@ -175,35 +183,39 @@ public class Region implements IRegion {
     return i < j;
   }
 
-  public void setParent(IRegion pr) {
-    this.m_parent = pr;
+  @Override
+public void setParent(IRegion pr) {
+    this.mParent = pr;
   }
 
-  public IRegion getParent() {
-    return this.m_parent;
+  @Override
+public IRegion getParent() {
+    return this.mParent;
   }
 
-  public void addChildRegion(IRegion chr) {
-    if (!this.m_children.contains(chr)) {
-      this.m_children.add(chr);
+  @Override
+public void addChildRegion(IRegion chr) {
+    if (!this.mChildren.contains(chr)) {
+      this.mChildren.add(chr);
     }
   }
 
-  public List<IRegion> getChildRegions() {
-    return this.m_children;
+  @Override
+public List<IRegion> getChildRegions() {
+    return this.mChildren;
   }
 
-  public String toString() {
-    String str = new String();
-    str += "Begin-----------Region:  " + this.m_id + "-------------\n";
+  @Override
+public String toString() {
+    String str = "";
+    str += new StringBuilder().append("Begin-----------Region:  ").append(this.mId).append("-------------\n").toString();
 
     List<Unit> regionUnits = this.getUnits();
-    for (Iterator<Unit> itr = regionUnits.iterator(); itr.hasNext();) {
-      Unit u = itr.next();
+    for (Unit u : regionUnits) {
       str += u + "\n";
 
     }
-    str += "End Region " + this.m_id + " -----------------------------\n";
+    str += new StringBuilder().append("End Region ").append(this.mId).append(" -----------------------------\n").toString();
 
     return str;
 

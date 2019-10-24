@@ -33,11 +33,13 @@ public class GNewArrayExpr extends AbstractNewArrayExpr implements Precedence {
     super(type, Grimp.v().newExprBox(size));
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 850;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GNewArrayExpr(getBaseType(), Grimp.cloneIfNecessary(getSize()));
   }
 

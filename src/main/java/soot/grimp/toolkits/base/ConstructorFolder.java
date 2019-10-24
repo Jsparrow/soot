@@ -61,24 +61,23 @@ public class ConstructorFolder extends BodyTransformer {
   }
 
   /** This method change all new Obj/<init>(args) pairs to new Obj(args) idioms. */
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
     GrimpBody body = (GrimpBody) b;
 
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Folding constructors...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Folding constructors...").toString());
     }
 
     Chain units = body.getUnits();
-    List<Unit> stmtList = new ArrayList<Unit>();
+    List<Unit> stmtList = new ArrayList<>();
     stmtList.addAll(units);
-
-    Iterator<Unit> it = stmtList.iterator();
 
     LocalUses localUses = LocalUses.Factory.newLocalUses(b);
 
     /* fold in NewExpr's with specialinvoke's */
-    while (it.hasNext()) {
-      Stmt s = (Stmt) it.next();
+	for (Unit aStmtList : stmtList) {
+      Stmt s = (Stmt) aStmtList;
 
       if (!(s instanceof AssignStmt)) {
         continue;

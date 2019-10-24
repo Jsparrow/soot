@@ -33,15 +33,18 @@ import soot.dava.toolkits.base.AST.ASTAnalysis;
 import soot.dava.toolkits.base.AST.analysis.Analysis;
 
 public abstract class ASTNode extends AbstractUnit {
-  public static final String TAB = "    ", NEWLINE = "\n";
+  public static final String TAB = "    ";
+
+public static final String NEWLINE = "\n";
 
   protected List<Object> subBodies;
 
   public ASTNode() {
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
   }
 
-  public abstract void toString(UnitPrinter up);
+  @Override
+public abstract void toString(UnitPrinter up);
 
   protected void body_toString(UnitPrinter up, List<Object> body) {
     Iterator<Object> it = body.iterator();
@@ -55,7 +58,7 @@ public abstract class ASTNode extends AbstractUnit {
   }
 
   protected String body_toString(List<Object> body) {
-    StringBuffer b = new StringBuffer();
+    StringBuilder b = new StringBuilder();
 
     Iterator<Object> it = body.iterator();
     while (it.hasNext()) {
@@ -76,9 +79,7 @@ public abstract class ASTNode extends AbstractUnit {
   public abstract void perform_Analysis(ASTAnalysis a);
 
   protected void perform_AnalysisOnSubBodies(ASTAnalysis a) {
-    Iterator<Object> sbit = subBodies.iterator();
-    while (sbit.hasNext()) {
-      Object subBody = sbit.next();
+    subBodies.forEach(subBody -> {
       Iterator it = null;
 
       if (this instanceof ASTTryNode) {
@@ -90,16 +91,18 @@ public abstract class ASTNode extends AbstractUnit {
       while (it.hasNext()) {
         ((ASTNode) it.next()).perform_Analysis(a);
       }
-    }
+    });
 
     a.analyseASTNode(this);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

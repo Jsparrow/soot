@@ -56,7 +56,8 @@ public abstract class ASTControlFlowNode extends ASTLabeledNode {
     this.condition = condition;
   }
 
-  public void perform_Analysis(ASTAnalysis a) {
+  @Override
+public void perform_Analysis(ASTAnalysis a) {
     /*
      * Nomair A Naeem 17-FEB-05 Changed because the ASTControlFlowNode does not have a ConditionBox anymore
      *

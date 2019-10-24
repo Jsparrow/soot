@@ -46,11 +46,13 @@ public class MethodType extends Constant {
     return new MethodType(paramaterTypes, returnType);
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return RefType.v("java.lang.invoke.MethodType");
   }
   
-  public String toString() {
+  @Override
+public String toString() {
     return "methodtype: " + SootMethod.getSubSignature("__METHODTYPE__", parameterTypes, returnType);
   }
   
@@ -62,7 +64,8 @@ public class MethodType extends Constant {
     return returnType;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ConstantSwitch) sw).caseMethodType(this);
   }
 

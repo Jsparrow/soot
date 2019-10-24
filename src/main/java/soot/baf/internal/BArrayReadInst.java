@@ -32,31 +32,38 @@ public class BArrayReadInst extends AbstractOpTypeInst implements ArrayReadInst 
     super(opType);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 2;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BArrayReadInst(getOpType());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 2;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "arrayread";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseArrayReadInst(this);
   }
 
-  public boolean containsArrayRef() {
+  @Override
+public boolean containsArrayRef() {
     return true;
   }
 }

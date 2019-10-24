@@ -78,7 +78,7 @@ public class LatestComputation {
    */
   public LatestComputation(UnitGraph unitGraph, DelayabilityAnalysis delayed, Map<Unit, EquivalentValue> equivRhsMap,
       BoundedFlowSet<EquivalentValue> set) {
-    unitToLatest = new HashMap<Unit, FlowSet<EquivalentValue>>(unitGraph.size() + 1, 0.7f);
+    unitToLatest = new HashMap<>(unitGraph.size() + 1, 0.7f);
 
     for (Unit currentUnit : unitGraph) {
       /* create a new Earliest-list for each unit */
@@ -91,9 +91,7 @@ public class LatestComputation {
 
       /* Calculate (INTERSECTION_successors Delayed) */
       FlowSet<EquivalentValue> succCompSet = set.topSet();
-      for (Unit successor : unitGraph.getSuccsOf(currentUnit)) {
-        succCompSet.intersection(delayed.getFlowBefore(successor), succCompSet);
-      }
+      unitGraph.getSuccsOf(currentUnit).forEach(successor -> succCompSet.intersection(delayed.getFlowBefore(successor), succCompSet));
       /*
        * remove the computation of this set: succCompSet is then: ((INTERSECTION_successors Delayed) MINUS comp)
        */

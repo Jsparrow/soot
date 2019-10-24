@@ -38,19 +38,23 @@ public class GeneralConstObject extends ConstantObject {
     this.id = G.v().GeneralConstObject_counter++;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return type;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return name;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return this.id;
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     return this == other;
   }
 }

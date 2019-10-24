@@ -50,8 +50,9 @@ public class DArrayInitExpr implements Value {
   /*
    * go through the elements array return useBoxes of each value plus the valuebox itself
    */
-  public List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+  @Override
+public List<ValueBox> getUseBoxes() {
+    List<ValueBox> list = new ArrayList<>();
 
     for (ValueBox element : elements) {
       list.addAll(element.getValue().getUseBoxes());
@@ -63,15 +64,18 @@ public class DArrayInitExpr implements Value {
   /*
    * TODO: Does not work
    */
-  public Object clone() {
+  @Override
+public Object clone() {
     return this;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return type;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal("{");
     for (int i = 0; i < elements.length; i++) {
       elements[i].toString(up);
@@ -82,8 +86,9 @@ public class DArrayInitExpr implements Value {
     up.literal("}");
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     b.append("{");
     for (int i = 0; i < elements.length; i++) {
       b.append(elements[i].toString());
@@ -95,17 +100,20 @@ public class DArrayInitExpr implements Value {
     return b.toString();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     // TODO Auto-generated method stub
 
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     // TODO Auto-generated method stub
     return false;
   }
 
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     int toReturn = 0;
     for (ValueBox element : elements) {
       toReturn += element.getValue().equivHashCode();

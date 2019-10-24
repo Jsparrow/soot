@@ -26,7 +26,7 @@ import soot.SootMethod;
 import soot.SootMethodRef;
 
 public interface MethodArgInst extends Inst {
-  public SootMethodRef getMethodRef();
+  SootMethodRef getMethodRef();
 
-  public SootMethod getMethod();
+  SootMethod getMethod();
 }

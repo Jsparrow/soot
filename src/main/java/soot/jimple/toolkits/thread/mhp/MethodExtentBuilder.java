@@ -50,7 +50,7 @@ import soot.jimple.toolkits.thread.mhp.pegcallgraph.PegCallGraph;
 public class MethodExtentBuilder {
 
   // private List inlineSites = new ArrayList();
-  private final Set<Object> methodsNeedingInlining = new HashSet<Object>();
+  private final Set<Object> methodsNeedingInlining = new HashSet<>();
 
   public MethodExtentBuilder(Body unitBody, PegCallGraph pcg, CallGraph cg) {
     // testCallGraph(cg);
@@ -104,10 +104,10 @@ public class MethodExtentBuilder {
 
           String name = method.getName();
 
-          if (name.equals("wait") || name.equals("notify") || name.equals("notifyAll")
-              || ((name.equals("start") || name.equals("join") || name.equals("suspend") || name.equals("resume")
-                  || name.equals("destroy") || name.equals("stop"))
-                  && method.getDeclaringClass().getName().equals("java.lang.Thread"))) {
+          if ("wait".equals(name) || "notify".equals(name) || "notifyAll".equals(name)
+              || (("start".equals(name) || "join".equals(name) || "suspend".equals(name) || "resume".equals(name)
+                  || "destroy".equals(name) || "stop".equals(name))
+                  && "java.lang.Thread".equals(method.getDeclaringClass().getName()))) {
             methodsNeedingInlining.add(targetMethod);
             return;
           } else {
@@ -139,7 +139,7 @@ public class MethodExtentBuilder {
      * if a method is not in methodsNeedingInlining, use DFS to find out if it's parents need inlining. If so, add it to
      * methodsNeedingInlining
      */
-    Set<Object> gray = new HashSet<Object>();
+    Set<Object> gray = new HashSet<>();
     Iterator it = cg.iterator();
 
     while (it.hasNext()) {
@@ -171,15 +171,14 @@ public class MethodExtentBuilder {
         // System.out.println("return true for: "+child);
         return true;
       } else {
-        if (!gray.contains(child)) {
-          if (visitNode(child, gray, cg)) {
+        boolean condition = !gray.contains(child) && visitNode(child, gray, cg);
+		if (condition) {
 
             methodsNeedingInlining.add(child);
             // System.out.println("put: "+child+"in pro");
             // System.out.println("return true for: "+child);
             return true;
           }
-        }
 
       }
     }

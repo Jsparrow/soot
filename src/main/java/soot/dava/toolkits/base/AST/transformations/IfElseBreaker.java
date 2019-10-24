@@ -149,19 +149,15 @@ public class IfElseBreaker {
     // unliekly but good to check
     SETNodeLabel ifLabel = ((ASTLabeledNode) node).get_Label();
 
-    if (ifLabel != null) {
-      if (ifLabel.toString() != null) {
-        if (abStmt.is_Break()) {
-          String breakLabel = abStmt.getLabel().toString();
-          if (breakLabel != null) {
-            if (breakLabel.compareTo(ifLabel.toString()) == 0) {
-              // is a break of this label
-              return false;
-            }
-          }
-        }
-      }
-    }
+    boolean condition = ifLabel != null && ifLabel.toString() != null && abStmt.is_Break();
+	if (condition) {
+	  String breakLabel = abStmt.getLabel().toString();
+	  boolean condition2 = breakLabel != null && breakLabel.compareTo(ifLabel.toString()) == 0;
+	if (condition2) {
+	  // is a break of this label
+	  return false;
+	}
+	}
     return true;
   }
 
@@ -177,7 +173,7 @@ public class IfElseBreaker {
       return null;
     }
 
-    List<Object> newSubBody = new ArrayList<Object>();
+    List<Object> newSubBody = new ArrayList<>();
 
     if (oldSubBody.size() <= nodeNumber) {
       // something is wrong since the oldSubBody has lesser nodes than nodeNumber

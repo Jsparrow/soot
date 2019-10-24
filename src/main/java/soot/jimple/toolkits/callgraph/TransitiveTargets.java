@@ -49,7 +49,7 @@ public class TransitiveTargets {
   }
 
   public Iterator<MethodOrMethodContext> iterator(Unit u) {
-    ArrayList<MethodOrMethodContext> methods = new ArrayList<MethodOrMethodContext>();
+    ArrayList<MethodOrMethodContext> methods = new ArrayList<>();
     Iterator<Edge> it = cg.edgesOutOf(u);
     if (filter != null) {
       it = filter.wrap(it);
@@ -62,7 +62,7 @@ public class TransitiveTargets {
   }
 
   public Iterator<MethodOrMethodContext> iterator(MethodOrMethodContext momc) {
-    ArrayList<MethodOrMethodContext> methods = new ArrayList<MethodOrMethodContext>();
+    ArrayList<MethodOrMethodContext> methods = new ArrayList<>();
     Iterator<Edge> it = cg.edgesOutOf(momc);
     if (filter != null) {
       it = filter.wrap(it);
@@ -75,8 +75,8 @@ public class TransitiveTargets {
   }
 
   public Iterator<MethodOrMethodContext> iterator(Iterator<? extends MethodOrMethodContext> methods) {
-    Set<MethodOrMethodContext> s = new HashSet<MethodOrMethodContext>();
-    ArrayList<MethodOrMethodContext> worklist = new ArrayList<MethodOrMethodContext>();
+    Set<MethodOrMethodContext> s = new HashSet<>();
+    ArrayList<MethodOrMethodContext> worklist = new ArrayList<>();
     while (methods.hasNext()) {
       MethodOrMethodContext method = methods.next();
       if (s.add(method)) {
@@ -87,19 +87,17 @@ public class TransitiveTargets {
   }
 
   private Iterator<MethodOrMethodContext> iterator(Set<MethodOrMethodContext> s, ArrayList<MethodOrMethodContext> worklist) {
-    for (int i = 0; i < worklist.size(); i++) {
-      MethodOrMethodContext method = worklist.get(i);
-      Iterator<Edge> it = cg.edgesOutOf(method);
-      if (filter != null) {
-        it = filter.wrap(it);
-      }
-      while (it.hasNext()) {
-        Edge e = (Edge) it.next();
-        if (s.add(e.getTgt())) {
-          worklist.add(e.getTgt());
-        }
-      }
-    }
+    worklist.stream().map(cg::edgesOutOf).forEach(it -> {
+		if (filter != null) {
+		    it = filter.wrap(it);
+		  }
+		while (it.hasNext()) {
+		    Edge e = (Edge) it.next();
+		    if (s.add(e.getTgt())) {
+		      worklist.add(e.getTgt());
+		    }
+		  }
+	});
     return worklist.iterator();
   }
 }

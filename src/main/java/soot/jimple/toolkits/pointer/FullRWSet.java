@@ -29,32 +29,39 @@ import soot.SootField;
 
 public class FullRWSet extends RWSet {
 
-  public int size() {
+  @Override
+public int size() {
     throw new RuntimeException("Unsupported");
   }
 
-  public boolean getCallsNative() {
+  @Override
+public boolean getCallsNative() {
     return true;
   }
 
-  public boolean setCallsNative() {
+  @Override
+public boolean setCallsNative() {
     throw new RuntimeException("Unsupported");
   }
 
   /** Returns an iterator over any globals read/written. */
-  public Set getGlobals() {
+  @Override
+public Set getGlobals() {
     throw new RuntimeException("Unsupported");
   }
 
-  public Set getFields() {
+  @Override
+public Set getFields() {
     throw new RuntimeException("Unsupported");
   }
 
-  public PointsToSet getBaseForField(Object f) {
+  @Override
+public PointsToSet getBaseForField(Object f) {
     throw new RuntimeException("Unsupported");
   }
 
-  public boolean hasNonEmptyIntersection(RWSet other) {
+  @Override
+public boolean hasNonEmptyIntersection(RWSet other) {
     if (other == null) {
       return false;
     }
@@ -62,19 +69,23 @@ public class FullRWSet extends RWSet {
   }
 
   /** Adds the RWSet other into this set. */
-  public boolean union(RWSet other) {
+  @Override
+public boolean union(RWSet other) {
     throw new RuntimeException("Unsupported");
   }
 
-  public boolean addGlobal(SootField global) {
+  @Override
+public boolean addGlobal(SootField global) {
     throw new RuntimeException("Unsupported");
   }
 
-  public boolean addFieldRef(PointsToSet otherBase, Object field) {
+  @Override
+public boolean addFieldRef(PointsToSet otherBase, Object field) {
     throw new RuntimeException("Unsupported");
   }
 
-  public boolean isEquivTo(RWSet other) {
+  @Override
+public boolean isEquivTo(RWSet other) {
     if (other instanceof FullRWSet) {
       return true;
     }

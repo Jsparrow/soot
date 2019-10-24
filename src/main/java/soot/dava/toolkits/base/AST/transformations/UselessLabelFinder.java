@@ -35,9 +35,12 @@ import soot.dava.internal.SET.SETNodeLabel;
 import soot.dava.internal.asg.AugmentedStmt;
 import soot.dava.internal.javaRep.DAbruptStmt;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UselessLabelFinder {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(UselessLabelFinder.class);
+public static boolean DEBUG = false;
 
   public UselessLabelFinder(Singletons.Global g) {
   }
@@ -50,12 +53,12 @@ public class UselessLabelFinder {
   public boolean findAndKill(ASTNode node) {
     if (!(node instanceof ASTLabeledNode)) {
       if (DEBUG) {
-        System.out.println("Returning from findAndKill for node of type " + node.getClass());
+        logger.info("Returning from findAndKill for node of type " + node.getClass());
       }
       return false;
     } else {
       if (DEBUG) {
-        System.out.println("FindAndKill continuing for node fo type" + node.getClass());
+        logger.info("FindAndKill continuing for node fo type" + node.getClass());
       }
     }
 
@@ -64,7 +67,7 @@ public class UselessLabelFinder {
       return false;
     }
     if (DEBUG) {
-      System.out.println("dealing with labeled node" + label);
+      logger.info("dealing with labeled node" + label);
     }
 
     List<Object> subBodies = node.get_SubBodies();
@@ -94,7 +97,7 @@ public class UselessLabelFinder {
     // means break was not found so we can remove
     ((ASTLabeledNode) node).set_Label(new SETNodeLabel());
     if (DEBUG) {
-      System.out.println("USELESS LABEL DETECTED");
+      logger.info("USELESS LABEL DETECTED");
     }
     return true;
   }
@@ -115,13 +118,12 @@ public class UselessLabelFinder {
         for (AugmentedStmt as : stmtSeq.getStatements()) {
           Stmt s = as.get_Stmt();
           String labelBroken = breaksLabel(s);
-          if (labelBroken != null && outerLabel != null) {
-            // stmt breaks some label
-            if (labelBroken.compareTo(outerLabel) == 0) {
-              // we have found a break breaking this label
-              return true;
-            }
-          }
+          boolean condition = labelBroken != null && outerLabel != null && labelBroken.compareTo(outerLabel) == 0;
+		// stmt breaks some label
+		if (condition) {
+		  // we have found a break breaking this label
+		  return true;
+		}
         }
       } // if it was a StmtSeq node
       else {

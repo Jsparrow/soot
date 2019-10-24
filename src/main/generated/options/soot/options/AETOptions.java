@@ -30,34 +30,36 @@ import java.util.*;
 @javax.annotation.Generated(value = "Saxonica v3.0", comments = "from soot_options.xml")
 public class AETOptions {
 
-    private Map<String, String> options;
+    public static final int kind_optimistic = 1;
+	public static final int kind_pessimistic = 2;
+	private Map<String, String> options;
 
-    public AETOptions(Map<String, String> options) {
+	public AETOptions(Map<String, String> options) {
         this.options = options;
     }
 
-    /**
+	/**
      * Enabled
      */
     public boolean enabled() {
         return soot.PhaseOptions.getBoolean(options, "enabled");
     }
 
-    public static final int kind_optimistic = 1;
-    public static final int kind_pessimistic = 2;
-
-    /**
+	/**
      * Kind
      */
     public int kind() {
         String s = soot.PhaseOptions.getString(options, "kind");
-        if (s == null || s.isEmpty())
-        	return kind_optimistic;
+        if (s == null || s.isEmpty()) {
+			return kind_optimistic;
+		}
 	
-        if (s.equalsIgnoreCase("optimistic"))
-            return kind_optimistic;
-        if (s.equalsIgnoreCase("pessimistic"))
-            return kind_pessimistic;
+        if ("optimistic".equalsIgnoreCase(s)) {
+			return kind_optimistic;
+		}
+        if ("pessimistic".equalsIgnoreCase(s)) {
+			return kind_pessimistic;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option kind", s));
     }

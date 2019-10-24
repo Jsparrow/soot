@@ -97,7 +97,7 @@ public class DeadAssignmentEliminator extends BodyTransformer {
 
     final Options soptions = Options.v();
     if (soptions.verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "] Eliminating dead code...");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("] Eliminating dead code...").toString());
     }
 
     if (soptions.time()) {
@@ -105,7 +105,7 @@ public class DeadAssignmentEliminator extends BodyTransformer {
     }
 
     Chain<Unit> units = b.getUnits();
-    Deque<Unit> q = new ArrayDeque<Unit>(units.size());
+    Deque<Unit> q = new ArrayDeque<>(units.size());
 
     // Make a first pass through the statements, noting
     // the statements we must absolutely keep.
@@ -239,20 +239,19 @@ public class DeadAssignmentEliminator extends BodyTransformer {
       final LocalDefs localDefs = LocalDefs.Factory.newLocalDefs(b);
 
       if (!allEssential) {
-        Set<Unit> essential = new HashSet<Unit>(b.getUnits().size());
+        Set<Unit> essential = new HashSet<>(b.getUnits().size());
         while (!q.isEmpty()) {
           Unit s = q.removeFirst();
           if (essential.add(s)) {
-            for (ValueBox box : s.getUseBoxes()) {
-              Value v = box.getValue();
-              if (v instanceof Local) {
-                Local l = (Local) v;
-                List<Unit> defs = localDefs.getDefsOfAt(l, s);
-                if (defs != null) {
-                  q.addAll(defs);
-                }
-              }
-            }
+            s.getUseBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+				if (v instanceof Local) {
+				    Local l = (Local) v;
+				    List<Unit> defs = localDefs.getDefsOfAt(l, s);
+				    if (defs != null) {
+				      q.addAll(defs);
+				    }
+				  }
+			});
           }
         }
         // Remove the dead statements
@@ -264,7 +263,7 @@ public class DeadAssignmentEliminator extends BodyTransformer {
         // Eliminate dead assignments from invokes such as x = f(), where
         // x is no longer used
 
-        List<AssignStmt> postProcess = new ArrayList<AssignStmt>();
+        List<AssignStmt> postProcess = new ArrayList<>();
         for (Unit u : units) {
           if (u instanceof AssignStmt) {
             AssignStmt s = (AssignStmt) u;
@@ -285,7 +284,7 @@ public class DeadAssignmentEliminator extends BodyTransformer {
         }
 
         final Jimple jimple = Jimple.v();
-        for (AssignStmt s : postProcess) {
+        postProcess.forEach(s -> {
           // Transform it into a simple invoke.
           Stmt newInvoke = jimple.newInvokeStmt(s.getInvokeExpr());
           newInvoke.addAllTagsOf(s);
@@ -295,7 +294,7 @@ public class DeadAssignmentEliminator extends BodyTransformer {
           if (Scene.v().hasCallGraph()) {
             Scene.v().getCallGraph().swapEdgesOutOf(s, newInvoke);
           }
-        }
+        });
       }
     }
     if (soptions.time()) {

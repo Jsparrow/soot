@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AUnknownJimpleType extends PJimpleType
 {
-    private TUnknown _unknown_;
+    private TUnknown unknown;
 
     public AUnknownJimpleType()
     {
@@ -26,7 +26,7 @@ public final class AUnknownJimpleType extends PJimpleType
     public Object clone()
     {
         return new AUnknownJimpleType(
-            cloneNode(this._unknown_));
+            cloneNode(this.unknown));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AUnknownJimpleType extends PJimpleType
 
     public TUnknown getUnknown()
     {
-        return this._unknown_;
+        return this.unknown;
     }
 
     public void setUnknown(TUnknown node)
     {
-        if(this._unknown_ != null)
+        if(this.unknown != null)
         {
-            this._unknown_.parent(null);
+            this.unknown.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AUnknownJimpleType extends PJimpleType
             node.parent(this);
         }
 
-        this._unknown_ = node;
+        this.unknown = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._unknown_);
+            + toString(this.unknown);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._unknown_ == child)
+        if(this.unknown == child)
         {
-            this._unknown_ = null;
+            this.unknown = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AUnknownJimpleType extends PJimpleType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._unknown_ == oldChild)
+        if(this.unknown == oldChild)
         {
             setUnknown((TUnknown) newChild);
             return;

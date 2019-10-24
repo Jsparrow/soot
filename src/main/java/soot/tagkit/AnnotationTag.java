@@ -81,34 +81,34 @@ public class AnnotationTag implements Tag {
     } else if (elements instanceof List<?>) {
       this.elems = (List<AnnotationElem>) elements;
     } else {
-      this.elems = new ArrayList<AnnotationElem>(elements);
+      this.elems = new ArrayList<>(elements);
     }
   }
 
   @Deprecated
   public AnnotationTag(String type, int numElem) {
     this.type = type;
-    this.elems = new ArrayList<AnnotationElem>(numElem);
+    this.elems = new ArrayList<>(numElem);
   }
 
   // should also print here number of annotations and perhaps the annotations themselves
-  public String toString() {
-    if (elems != null) {
-      StringBuffer sb = new StringBuffer("Annotation: type: " + type + " num elems: " + elems.size() + " elems: ");
-      Iterator<AnnotationElem> it = elems.iterator();
-      while (it.hasNext()) {
+  @Override
+public String toString() {
+    if (elems == null) {
+		return new StringBuilder().append("Annotation type: ").append(type).append(" without elements").toString();
+	}
+	StringBuilder sb = new StringBuilder(new StringBuilder().append("Annotation: type: ").append(type).append(" num elems: ").append(elems.size()).append(" elems: ").toString());
+	elems.forEach(elem -> {
         sb.append("\n");
-        sb.append(it.next());
-      }
-      sb.append("\n");
-      return sb.toString();
-    } else {
-      return "Annotation type: " + type + " without elements";
-    }
+        sb.append(elem);
+      });
+	sb.append("\n");
+	return sb.toString();
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "AnnotationTag";
   }
 
@@ -121,7 +121,8 @@ public class AnnotationTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("AnnotationTag has no value for bytecode");
   }
 
@@ -133,7 +134,7 @@ public class AnnotationTag implements Tag {
    */
   public void addElem(AnnotationElem elem) {
     if (elems == null) {
-      elems = new ArrayList<AnnotationElem>();
+      elems = new ArrayList<>();
     }
     elems.add(elem);
   }

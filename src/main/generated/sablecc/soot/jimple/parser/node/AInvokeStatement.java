@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AInvokeStatement extends PStatement
 {
-    private PInvokeExpr _invokeExpr_;
-    private TSemicolon _semicolon_;
+    private PInvokeExpr invokeExpr;
+    private TSemicolon semicolon;
 
     public AInvokeStatement()
     {
@@ -30,8 +30,8 @@ public final class AInvokeStatement extends PStatement
     public Object clone()
     {
         return new AInvokeStatement(
-            cloneNode(this._invokeExpr_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.invokeExpr),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class AInvokeStatement extends PStatement
 
     public PInvokeExpr getInvokeExpr()
     {
-        return this._invokeExpr_;
+        return this.invokeExpr;
     }
 
     public void setInvokeExpr(PInvokeExpr node)
     {
-        if(this._invokeExpr_ != null)
+        if(this.invokeExpr != null)
         {
-            this._invokeExpr_.parent(null);
+            this.invokeExpr.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class AInvokeStatement extends PStatement
             node.parent(this);
         }
 
-        this._invokeExpr_ = node;
+        this.invokeExpr = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class AInvokeStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._invokeExpr_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.invokeExpr)).append(toString(this.semicolon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._invokeExpr_ == child)
+        if(this.invokeExpr == child)
         {
-            this._invokeExpr_ = null;
+            this.invokeExpr = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class AInvokeStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._invokeExpr_ == oldChild)
+        if(this.invokeExpr == oldChild)
         {
             setInvokeExpr((PInvokeExpr) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

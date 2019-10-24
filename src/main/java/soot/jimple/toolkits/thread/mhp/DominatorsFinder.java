@@ -32,6 +32,8 @@ import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -45,11 +47,12 @@ import soot.util.Chain;
 // -Richard L. Halpert, 2006-11-30
 
 public class DominatorsFinder {
-  private final Map<Object, FlowSet> unitToDominators;
+  private static final Logger logger = LoggerFactory.getLogger(DominatorsFinder.class);
+private final Map<Object, FlowSet> unitToDominators;
   private final DirectedGraph peg;
 
   DominatorsFinder(Chain chain, DirectedGraph pegGraph) {
-    unitToDominators = new HashMap<Object, FlowSet>();
+    unitToDominators = new HashMap<>();
     peg = pegGraph;
     find(chain);
     // testUnitToDominators();
@@ -93,8 +96,8 @@ public class DominatorsFinder {
         unitToDominators.put(n, domin);
       }
     }
-    System.out.println("===finish init unitToDominators===");
-    System.err.println("===finish init unitToDominators===");
+    logger.info("===finish init unitToDominators===");
+    logger.error("===finish init unitToDominators===");
 
     // testUnitToDominators();
 

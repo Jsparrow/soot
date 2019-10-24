@@ -25,9 +25,9 @@ package soot.jimple.toolkits.pointer.representations;
 import soot.Type;
 
 public interface AbstractObject {
-  public Type getType();
+  Type getType();
 
-  public String toString();
+  String toString();
 
-  public String shortString();
+  String shortString();
 }

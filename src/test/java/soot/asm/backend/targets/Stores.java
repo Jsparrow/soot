@@ -1,5 +1,8 @@
 package soot.asm.backend.targets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*-
  * #%L
  * Soot - a J*va Optimization Framework
@@ -23,6 +26,8 @@ package soot.asm.backend.targets;
  */
 
 public class Stores {
+
+	private static final Logger logger = LoggerFactory.getLogger(Stores.class);
 
 	public int doSth(){
 		int i;
@@ -50,7 +55,7 @@ public class Stores {
 
 		a[1] = 24355764;
 		
-		System.out.println(i + d + f + s + "" +b + bb + l + c + " " + o);
+		logger.info(d + f + s + Integer.toString(i) +b + bb + l + c + " " + o);
 		
 		return i;
 	}

@@ -41,13 +41,48 @@ import soot.jimple.toolkits.annotation.logic.LoopFinder;
 public class LoopNestTree extends TreeSet<Loop> {
 
   /**
+	   * Builds a loop nest tree from a method body using {@link LoopFinder}.
+	   */
+	  public LoopNestTree(Body b) {
+	    this(computeLoops(b));
+	  }
+
+	/**
+	   * Builds a loop nest tree from a mapping from loop headers to statements in the loop.
+	   */
+	  public LoopNestTree(Collection<Loop> loops) {
+	    super(new LoopNestTreeComparator());
+	
+	    addAll(loops);
+	  }
+
+	private static Collection<Loop> computeLoops(Body b) {
+	    return new LoopFinder().getLoops(b);
+	  }
+
+	public boolean hasNestedLoops() {
+	    // TODO could be speeded up by just comparing two consecutive
+	    // loops returned by the iterator
+	    LoopNestTreeComparator comp = new LoopNestTreeComparator();
+	    for (Loop loop1 : this) {
+	      for (Loop loop2 : this) {
+	        if (comp.compare(loop1, loop2) != 0) {
+	          return true;
+	        }
+	      }
+	    }
+	    return false;
+	  }
+
+/**
    * Comparator, stating that a loop l1 is smaller than a loop l2 if l2 contains all statements of l1.
    *
    * @author Eric Bodden
    */
   private static class LoopNestTreeComparator implements Comparator<Loop> {
 
-    public int compare(Loop loop1, Loop loop2) {
+    @Override
+	public int compare(Loop loop1, Loop loop2) {
       Collection<Stmt> stmts1 = loop1.getLoopStatements();
       Collection<Stmt> stmts2 = loop2.getLoopStatements();
       if (stmts1.equals(stmts2)) {
@@ -66,40 +101,6 @@ public class LoopNestTree extends TreeSet<Loop> {
       // hence, return 1
       return 1;
     }
-  }
-
-  /**
-   * Builds a loop nest tree from a method body using {@link LoopFinder}.
-   */
-  public LoopNestTree(Body b) {
-    this(computeLoops(b));
-  }
-
-  /**
-   * Builds a loop nest tree from a mapping from loop headers to statements in the loop.
-   */
-  public LoopNestTree(Collection<Loop> loops) {
-    super(new LoopNestTreeComparator());
-
-    addAll(loops);
-  }
-
-  private static Collection<Loop> computeLoops(Body b) {
-    return new LoopFinder().getLoops(b);
-  }
-
-  public boolean hasNestedLoops() {
-    // TODO could be speeded up by just comparing two consecutive
-    // loops returned by the iterator
-    LoopNestTreeComparator comp = new LoopNestTreeComparator();
-    for (Loop loop1 : this) {
-      for (Loop loop2 : this) {
-        if (comp.compare(loop1, loop2) != 0) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
 }

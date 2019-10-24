@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFieldReference extends PReference
 {
-    private PFieldRef _fieldRef_;
+    private PFieldRef fieldRef;
 
     public AFieldReference()
     {
@@ -26,7 +26,7 @@ public final class AFieldReference extends PReference
     public Object clone()
     {
         return new AFieldReference(
-            cloneNode(this._fieldRef_));
+            cloneNode(this.fieldRef));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AFieldReference extends PReference
 
     public PFieldRef getFieldRef()
     {
-        return this._fieldRef_;
+        return this.fieldRef;
     }
 
     public void setFieldRef(PFieldRef node)
     {
-        if(this._fieldRef_ != null)
+        if(this.fieldRef != null)
         {
-            this._fieldRef_.parent(null);
+            this.fieldRef.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AFieldReference extends PReference
             node.parent(this);
         }
 
-        this._fieldRef_ = node;
+        this.fieldRef = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._fieldRef_);
+            + toString(this.fieldRef);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._fieldRef_ == child)
+        if(this.fieldRef == child)
         {
-            this._fieldRef_ = null;
+            this.fieldRef = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AFieldReference extends PReference
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._fieldRef_ == oldChild)
+        if(this.fieldRef == oldChild)
         {
             setFieldRef((PFieldRef) newChild);
             return;

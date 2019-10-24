@@ -34,24 +34,25 @@ public class JavaLangReflectArrayNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.Object get(java.lang.Object,int)")) {
+    if ("java.lang.Object get(java.lang.Object,int)".equals(subSignature)) {
       java_lang_reflect_Array_get(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("void set(java.lang.Object,int,java.lang.Object)")) {
+    } else if ("void set(java.lang.Object,int,java.lang.Object)".equals(subSignature)) {
       java_lang_reflect_Array_set(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object newArray(java.lang.Class,int)")) {
+    } else if ("java.lang.Object newArray(java.lang.Class,int)".equals(subSignature)) {
       java_lang_reflect_Array_newArray(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object multiNewArray(java.lang.Class,int[])")) {
+    } else if ("java.lang.Object multiNewArray(java.lang.Class,int[])".equals(subSignature)) {
       java_lang_reflect_Array_multiNewArray(method, thisVar, returnVar, params);
       return;
 

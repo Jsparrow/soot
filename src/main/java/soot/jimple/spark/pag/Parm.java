@@ -37,15 +37,16 @@ import soot.toolkits.scalar.Pair;
 public class Parm implements SparkField {
   private final int index;
   private final SootMethod method;
+private int number = 0;
 
-  private Parm(SootMethod m, int i) {
+private Parm(SootMethod m, int i) {
     index = i;
     method = m;
     Scene.v().getFieldNumberer().add(this);
   }
 
-  public static Parm v(SootMethod m, int index) {
-    Pair<SootMethod, Integer> p = new Pair<SootMethod, Integer>(m, new Integer(index));
+public static Parm v(SootMethod m, int index) {
+    Pair<SootMethod, Integer> p = new Pair<>(m, Integer.valueOf(index));
     Parm ret = (Parm) G.v().Parm_pairToElement.get(p);
     if (ret == null) {
       G.v().Parm_pairToElement.put(p, ret = new Parm(m, index));
@@ -53,33 +54,35 @@ public class Parm implements SparkField {
     return ret;
   }
 
-  public static final void delete() {
+public static final void delete() {
     G.v().Parm_pairToElement = null;
   }
 
-  public String toString() {
-    return "Parm " + index + " to " + method;
+@Override
+public String toString() {
+    return new StringBuilder().append("Parm ").append(index).append(" to ").append(method).toString();
   }
 
-  public final int getNumber() {
+@Override
+public final int getNumber() {
     return number;
   }
 
-  public final void setNumber(int number) {
+@Override
+public final void setNumber(int number) {
     this.number = number;
   }
 
-  public int getIndex() {
+public int getIndex() {
     return index;
   }
 
-  public Type getType() {
+@Override
+public Type getType() {
     if (index == PointsToAnalysis.RETURN_NODE) {
       return method.getReturnType();
     }
 
     return method.getParameterType(index);
   }
-
-  private int number = 0;
 }

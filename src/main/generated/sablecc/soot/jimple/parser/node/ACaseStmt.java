@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ACaseStmt extends PCaseStmt
 {
-    private PCaseLabel _caseLabel_;
-    private TColon _colon_;
-    private PGotoStmt _gotoStmt_;
+    private PCaseLabel caseLabel;
+    private TColon colon;
+    private PGotoStmt gotoStmt;
 
     public ACaseStmt()
     {
@@ -34,9 +34,9 @@ public final class ACaseStmt extends PCaseStmt
     public Object clone()
     {
         return new ACaseStmt(
-            cloneNode(this._caseLabel_),
-            cloneNode(this._colon_),
-            cloneNode(this._gotoStmt_));
+            cloneNode(this.caseLabel),
+            cloneNode(this.colon),
+            cloneNode(this.gotoStmt));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class ACaseStmt extends PCaseStmt
 
     public PCaseLabel getCaseLabel()
     {
-        return this._caseLabel_;
+        return this.caseLabel;
     }
 
     public void setCaseLabel(PCaseLabel node)
     {
-        if(this._caseLabel_ != null)
+        if(this.caseLabel != null)
         {
-            this._caseLabel_.parent(null);
+            this.caseLabel.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class ACaseStmt extends PCaseStmt
             node.parent(this);
         }
 
-        this._caseLabel_ = node;
+        this.caseLabel = node;
     }
 
     public TColon getColon()
     {
-        return this._colon_;
+        return this.colon;
     }
 
     public void setColon(TColon node)
     {
-        if(this._colon_ != null)
+        if(this.colon != null)
         {
-            this._colon_.parent(null);
+            this.colon.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class ACaseStmt extends PCaseStmt
             node.parent(this);
         }
 
-        this._colon_ = node;
+        this.colon = node;
     }
 
     public PGotoStmt getGotoStmt()
     {
-        return this._gotoStmt_;
+        return this.gotoStmt;
     }
 
     public void setGotoStmt(PGotoStmt node)
     {
-        if(this._gotoStmt_ != null)
+        if(this.gotoStmt != null)
         {
-            this._gotoStmt_.parent(null);
+            this.gotoStmt.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class ACaseStmt extends PCaseStmt
             node.parent(this);
         }
 
-        this._gotoStmt_ = node;
+        this.gotoStmt = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._caseLabel_)
-            + toString(this._colon_)
-            + toString(this._gotoStmt_);
+        return new StringBuilder().append("").append(toString(this.caseLabel)).append(toString(this.colon)).append(toString(this.gotoStmt)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._caseLabel_ == child)
+        if(this.caseLabel == child)
         {
-            this._caseLabel_ = null;
+            this.caseLabel = null;
             return;
         }
 
-        if(this._colon_ == child)
+        if(this.colon == child)
         {
-            this._colon_ = null;
+            this.colon = null;
             return;
         }
 
-        if(this._gotoStmt_ == child)
+        if(this.gotoStmt == child)
         {
-            this._gotoStmt_ = null;
+            this.gotoStmt = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class ACaseStmt extends PCaseStmt
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._caseLabel_ == oldChild)
+        if(this.caseLabel == oldChild)
         {
             setCaseLabel((PCaseLabel) newChild);
             return;
         }
 
-        if(this._colon_ == oldChild)
+        if(this.colon == oldChild)
         {
             setColon((TColon) newChild);
             return;
         }
 
-        if(this._gotoStmt_ == oldChild)
+        if(this.gotoStmt == oldChild)
         {
             setGotoStmt((PGotoStmt) newChild);
             return;

@@ -31,32 +31,34 @@ import java.util.ArrayList;
 
 public class VisibilityParameterAnnotationTag implements Tag {
 
-  private int num_params;
+  private int numParams;
   private int kind;
   private ArrayList<VisibilityAnnotationTag> visibilityAnnotations;
 
   public VisibilityParameterAnnotationTag(int num, int kind) {
-    this.num_params = num;
+    this.numParams = num;
     this.kind = kind;
   }
 
   // should also print here number of annotations and perhaps the annotations themselves
-  public String toString() {
-    StringBuffer sb = new StringBuffer("Visibility Param Annotation: num params: " + num_params + " kind: " + kind);
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder(new StringBuilder().append("Visibility Param Annotation: num params: ").append(numParams).append(" kind: ").append(kind).toString());
     if (visibilityAnnotations != null) {
-      for (VisibilityAnnotationTag tag : visibilityAnnotations) {
+      visibilityAnnotations.forEach(tag -> {
         sb.append("\n");
         if (tag != null) {
           sb.append(tag.toString());
         }
-      }
+      });
     }
     sb.append("\n");
     return sb.toString();
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "VisibilityParameterAnnotationTag";
   }
 
@@ -65,13 +67,14 @@ public class VisibilityParameterAnnotationTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("VisibilityParameterAnnotationTag has no value for bytecode");
   }
 
   public void addVisibilityAnnotation(VisibilityAnnotationTag a) {
     if (visibilityAnnotations == null) {
-      visibilityAnnotations = new ArrayList<VisibilityAnnotationTag>();
+      visibilityAnnotations = new ArrayList<>();
     }
     visibilityAnnotations.add(a);
   }

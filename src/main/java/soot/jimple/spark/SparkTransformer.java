@@ -84,7 +84,8 @@ public class SparkTransformer extends SceneTransformer {
     return G.v().soot_jimple_spark_SparkTransformer();
   }
 
-  protected void internalTransform(String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(String phaseName, Map<String, String> options) {
     SparkOptions opts = new SparkOptions(options);
     final String output_dir = SourceLocator.v().getOutputDir();
 
@@ -200,14 +201,15 @@ public class SparkTransformer extends SceneTransformer {
       }
     }
 
-    if (opts.cs_demand()) {
-      // replace by demand-driven refinement-based context-sensitive analysis
+    if (!opts.cs_demand()) {
+		return;
+	}
+	// replace by demand-driven refinement-based context-sensitive analysis
       Date startOnDemand = new Date();
-      PointsToAnalysis onDemandAnalysis = DemandCSPointsTo.makeWithBudget(opts.traversal(), opts.passes(), opts.lazy_pts());
-      Date endOndemand = new Date();
-      reportTime("Initialized on-demand refinement-based context-sensitive analysis", startOnDemand, endOndemand);
-      Scene.v().setPointsToAnalysis(onDemandAnalysis);
-    }
+	PointsToAnalysis onDemandAnalysis = DemandCSPointsTo.makeWithBudget(opts.traversal(), opts.passes(), opts.lazy_pts());
+	Date endOndemand = new Date();
+	reportTime("Initialized on-demand refinement-based context-sensitive analysis", startOnDemand, endOndemand);
+	Scene.v().setPointsToAnalysis(onDemandAnalysis);
   }
 
   protected void propagatePAG(SparkOptions opts, final PAG pag) {
@@ -250,45 +252,46 @@ public class SparkTransformer extends SceneTransformer {
         if (!m.hasActiveBody()) {
           continue;
         }
-        for (final Unit u : m.getActiveBody().getUnits()) {
-          final Stmt s = (Stmt) u;
-          if (s instanceof DefinitionStmt) {
-            Value lhs = ((DefinitionStmt) s).getLeftOp();
-            VarNode v = null;
-            if (lhs instanceof Local) {
-              v = pag.findLocalVarNode(lhs);
-            } else if (lhs instanceof FieldRef) {
-              v = pag.findGlobalVarNode(((FieldRef) lhs).getField());
-            }
-            if (v != null) {
-              PointsToSetInternal p2set = v.getP2Set();
-              p2set.forall(new P2SetVisitor() {
-                public final void visit(Node n) {
-                  addTag(s, n, nodeToTag, unknown);
-                }
-              });
-              Node[] simpleSources = pag.simpleInvLookup(v);
-              for (Node element : simpleSources) {
-                addTag(s, element, nodeToTag, unknown);
-              }
-              simpleSources = pag.allocInvLookup(v);
-              for (Node element : simpleSources) {
-                addTag(s, element, nodeToTag, unknown);
-              }
-              simpleSources = pag.loadInvLookup(v);
-              for (Node element : simpleSources) {
-                addTag(s, element, nodeToTag, unknown);
-              }
-            }
-          }
-        }
+        m.getActiveBody().getUnits().stream().map((final Unit u) -> (Stmt) u).forEach((final final Stmt s) -> {
+			if (s instanceof DefinitionStmt) {
+			    Value lhs = ((DefinitionStmt) s).getLeftOp();
+			    VarNode v = null;
+			    if (lhs instanceof Local) {
+			      v = pag.findLocalVarNode(lhs);
+			    } else if (lhs instanceof FieldRef) {
+			      v = pag.findGlobalVarNode(((FieldRef) lhs).getField());
+			    }
+			    if (v != null) {
+			      PointsToSetInternal p2set = v.getP2Set();
+			      p2set.forall(new P2SetVisitor() {
+			        @Override
+					public final void visit(Node n) {
+			          addTag(s, n, nodeToTag, unknown);
+			        }
+			      });
+			      Node[] simpleSources = pag.simpleInvLookup(v);
+			      for (Node element : simpleSources) {
+			        addTag(s, element, nodeToTag, unknown);
+			      }
+			      simpleSources = pag.allocInvLookup(v);
+			      for (Node element : simpleSources) {
+			        addTag(s, element, nodeToTag, unknown);
+			      }
+			      simpleSources = pag.loadInvLookup(v);
+			      for (Node element : simpleSources) {
+			        addTag(s, element, nodeToTag, unknown);
+			      }
+			    }
+			  }
+		});
       }
     }
   }
 
   protected static void reportTime(String desc, Date start, Date end) {
     long time = end.getTime() - start.getTime();
-    logger.debug("[Spark] " + desc + " in " + time / 1000 + "." + (time / 100) % 10 + " seconds.");
+    logger.debug(new StringBuilder().append("[Spark] ").append(desc).append(" in ").append(time / 1000).append(".")
+			.append((time / 100) % 10).append(" seconds.").toString());
   }
 
   protected static void doGC() {
@@ -343,22 +346,22 @@ public class SparkTransformer extends SceneTransformer {
     // Compute points-to set sizes of dereference sites BEFORE
     // trimming sets by declared type
     int[] deRefCounts = new int[30001];
-    for (VarNode v : pag.getDereferences()) {
-      PointsToSetInternal set = v.getP2Set();
-      int size = 0;
-      if (set != null) {
-        size = set.size();
-      }
-      deRefCounts[size]++;
-    }
+    pag.getDereferences().stream().map(VarNode::getP2Set).forEach(set -> {
+		int size = 0;
+		if (set != null) {
+		    size = set.size();
+		  }
+		deRefCounts[size]++;
+	});
     int total = 0;
     for (int element : deRefCounts) {
       total += element;
     }
-    logger.debug("Dereference counts BEFORE trimming (total = " + total + "):");
+    logger.debug(new StringBuilder().append("Dereference counts BEFORE trimming (total = ").append(total).append("):").toString());
     for (int i = 0; i < deRefCounts.length; i++) {
       if (deRefCounts[i] > 0) {
-        logger.debug("" + i + " " + deRefCounts[i] + " " + (deRefCounts[i] * 100.0 / total) + "%");
+        logger.debug(new StringBuilder().append(Integer.toString(i)).append(" ").append(deRefCounts[i]).append(" ").append(deRefCounts[i] * 100.0 / total)
+				.append("%").toString());
       }
     }
   }

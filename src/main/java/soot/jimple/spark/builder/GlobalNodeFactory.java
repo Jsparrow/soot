@@ -49,8 +49,9 @@ public class GlobalNodeFactory {
   protected final RefType rtThread;
   protected final RefType rtThreadGroup;
   protected final RefType rtThrowable;
+protected PAG pag;
 
-  public GlobalNodeFactory(PAG pag) {
+public GlobalNodeFactory(PAG pag) {
     this.pag = pag;
 
     this.rtObject = RefType.v("java.lang.Object");
@@ -61,28 +62,28 @@ public class GlobalNodeFactory {
     this.rtThrowable = RefType.v("java.lang.Throwable");
   }
 
-  final public Node caseDefaultClassLoader() {
+public final Node caseDefaultClassLoader() {
     AllocNode a = pag.makeAllocNode(PointsToAnalysis.DEFAULT_CLASS_LOADER, AnySubType.v(rtClassLoader), null);
     VarNode v = pag.makeGlobalVarNode(PointsToAnalysis.DEFAULT_CLASS_LOADER_LOCAL, rtClassLoader);
     pag.addEdge(a, v);
     return v;
   }
 
-  final public Node caseMainClassNameString() {
+public final Node caseMainClassNameString() {
     AllocNode a = pag.makeAllocNode(PointsToAnalysis.MAIN_CLASS_NAME_STRING, rtString, null);
     VarNode v = pag.makeGlobalVarNode(PointsToAnalysis.MAIN_CLASS_NAME_STRING_LOCAL, rtString);
     pag.addEdge(a, v);
     return v;
   }
 
-  final public Node caseMainThreadGroup() {
+public final Node caseMainThreadGroup() {
     AllocNode threadGroupNode = pag.makeAllocNode(PointsToAnalysis.MAIN_THREAD_GROUP_NODE, rtThreadGroup, null);
     VarNode threadGroupNodeLocal = pag.makeGlobalVarNode(PointsToAnalysis.MAIN_THREAD_GROUP_NODE_LOCAL, rtThreadGroup);
     pag.addEdge(threadGroupNode, threadGroupNodeLocal);
     return threadGroupNodeLocal;
   }
 
-  final public Node casePrivilegedActionException() {
+public final Node casePrivilegedActionException() {
     AllocNode a = pag.makeAllocNode(PointsToAnalysis.PRIVILEGED_ACTION_EXCEPTION,
         AnySubType.v(RefType.v("java.security.PrivilegedActionException")), null);
     VarNode v = pag.makeGlobalVarNode(PointsToAnalysis.PRIVILEGED_ACTION_EXCEPTION_LOCAL,
@@ -91,25 +92,25 @@ public class GlobalNodeFactory {
     return v;
   }
 
-  final public Node caseCanonicalPath() {
+public final Node caseCanonicalPath() {
     AllocNode a = pag.makeAllocNode(PointsToAnalysis.CANONICAL_PATH, rtString, null);
     VarNode v = pag.makeGlobalVarNode(PointsToAnalysis.CANONICAL_PATH_LOCAL, rtString);
     pag.addEdge(a, v);
     return v;
   }
 
-  final public Node caseMainThread() {
+public final Node caseMainThread() {
     AllocNode threadNode = pag.makeAllocNode(PointsToAnalysis.MAIN_THREAD_NODE, rtThread, null);
     VarNode threadNodeLocal = pag.makeGlobalVarNode(PointsToAnalysis.MAIN_THREAD_NODE_LOCAL, rtThread);
     pag.addEdge(threadNode, threadNodeLocal);
     return threadNodeLocal;
   }
 
-  final public Node caseFinalizeQueue() {
+public final Node caseFinalizeQueue() {
     return pag.makeGlobalVarNode(PointsToAnalysis.FINALIZE_QUEUE, rtObject);
   }
 
-  final public Node caseArgv() {
+public final Node caseArgv() {
     ArrayType strArray = ArrayType.v(rtString, 1);
     AllocNode argv = pag.makeAllocNode(PointsToAnalysis.STRING_ARRAY_NODE, strArray, null);
     VarNode sanl = pag.makeGlobalVarNode(PointsToAnalysis.STRING_ARRAY_NODE_LOCAL, strArray);
@@ -121,7 +122,7 @@ public class GlobalNodeFactory {
     return sanl;
   }
 
-  final public Node caseNewInstance(VarNode cls) {
+public final Node caseNewInstance(VarNode cls) {
     if (cls instanceof ContextVarNode) {
       cls = pag.findLocalVarNode(cls.getVariable());
     }
@@ -133,7 +134,7 @@ public class GlobalNodeFactory {
     return local;
   }
 
-  public Node caseThrow() {
+public Node caseThrow() {
     VarNode ret = pag.makeGlobalVarNode(PointsToAnalysis.EXCEPTION_NODE, rtThrowable);
     ret.setInterProcTarget();
     ret.setInterProcSource();
@@ -141,6 +142,4 @@ public class GlobalNodeFactory {
   }
   /* End of public methods. */
   /* End of package methods. */
-
-  protected PAG pag;
 }

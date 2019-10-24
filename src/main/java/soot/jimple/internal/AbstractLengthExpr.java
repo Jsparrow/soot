@@ -37,7 +37,8 @@ public abstract class AbstractLengthExpr extends AbstractUnopExpr implements Len
     super(opBox);
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (o instanceof AbstractLengthExpr) {
       return opBox.getValue().equivTo(((AbstractLengthExpr) o).opBox.getValue());
     }
@@ -45,27 +46,33 @@ public abstract class AbstractLengthExpr extends AbstractUnopExpr implements Len
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return opBox.getValue().equivHashCode();
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public String toString() {
-    return Jimple.LENGTHOF + " " + opBox.getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(Jimple.LENGTHOF).append(" ").append(opBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.LENGTHOF);
     up.literal(" ");
     opBox.toString(up);
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return IntType.v();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseLengthExpr(this);
   }
 }

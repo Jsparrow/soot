@@ -53,7 +53,7 @@ public class SimpleMethodLocalObjectsAnalysis extends SimpleMethodInfoFlowAnalys
 
     SootMethod method = g.getBody().getMethod();
 
-    AbstractDataSource sharedDataSource = new AbstractDataSource(new String("SHARED"));
+    AbstractDataSource sharedDataSource = new AbstractDataSource("SHARED");
 
     // Add a source for every parameter that is shared
     for (int i = 0; i < method.getParameterCount(); i++) // no need to worry about return value...
@@ -65,18 +65,17 @@ public class SimpleMethodLocalObjectsAnalysis extends SimpleMethodInfoFlowAnalys
       }
     }
 
-    for (SootField sf : cloa.getSharedFields()) {
-      EquivalentValue fieldRefEqVal = InfoFlowAnalysis.getNodeForFieldRef(method, sf);
-      addToEntryInitialFlow(sharedDataSource, fieldRefEqVal.getValue());
-      addToNewInitialFlow(sharedDataSource, fieldRefEqVal.getValue());
-    }
+    cloa.getSharedFields().stream().map(sf -> InfoFlowAnalysis.getNodeForFieldRef(method, sf)).forEach(fieldRefEqVal -> {
+		addToEntryInitialFlow(sharedDataSource, fieldRefEqVal.getValue());
+		addToNewInitialFlow(sharedDataSource, fieldRefEqVal.getValue());
+	});
 
     if (printMessages) {
-      logger.debug("----- STARTING SHARED/LOCAL ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+      logger.debug(new StringBuilder().append("----- STARTING SHARED/LOCAL ANALYSIS FOR ").append(g.getBody().getMethod()).append(" -----").toString());
     }
     doFlowInsensitiveAnalysis();
     if (printMessages) {
-      logger.debug("----- ENDING   SHARED/LOCAL ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+      logger.debug(new StringBuilder().append("----- ENDING   SHARED/LOCAL ANALYSIS FOR ").append(g.getBody().getMethod()).append(" -----").toString());
     }
   }
 
@@ -89,53 +88,53 @@ public class SimpleMethodLocalObjectsAnalysis extends SimpleMethodInfoFlowAnalys
 
     SootMethod method = g.getBody().getMethod();
 
-    AbstractDataSource sharedDataSource = new AbstractDataSource(new String("SHARED"));
+    AbstractDataSource sharedDataSource = new AbstractDataSource("SHARED");
 
     List<Object> sharedRefs = context.getSharedRefs();
-    Iterator<Object> sharedRefEqValIt = sharedRefs.iterator(); // returns a list of (correctly structured) EquivalentValue
-                                                               // wrapped refs that should be
-                                                               // treated as shared
-    while (sharedRefEqValIt.hasNext()) {
-      EquivalentValue refEqVal = (EquivalentValue) sharedRefEqValIt.next();
-      addToEntryInitialFlow(sharedDataSource, refEqVal.getValue());
-      addToNewInitialFlow(sharedDataSource, refEqVal.getValue());
-    }
+    // wrapped refs that should be
+	// treated as shared
+	sharedRefs.stream().map(sharedRef -> (EquivalentValue) sharedRef).forEach(refEqVal -> {
+		addToEntryInitialFlow(sharedDataSource, refEqVal.getValue());
+		addToNewInitialFlow(sharedDataSource, refEqVal.getValue());
+	});
 
     if (printMessages) {
-      logger.debug("----- STARTING SHARED/LOCAL ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+      logger.debug(new StringBuilder().append("----- STARTING SHARED/LOCAL ANALYSIS FOR ").append(g.getBody().getMethod()).append(" -----").toString());
       logger.debug("      " + context.toString().replaceAll("\n", "\n      "));
-      logger.debug("found " + sharedRefs.size() + " shared refs in context.");
+      logger.debug(new StringBuilder().append("found ").append(sharedRefs.size()).append(" shared refs in context.").toString());
     }
     doFlowInsensitiveAnalysis();
     if (printMessages) {
-      logger.debug("----- ENDING   SHARED/LOCAL ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+      logger.debug(new StringBuilder().append("----- ENDING   SHARED/LOCAL ANALYSIS FOR ").append(g.getBody().getMethod()).append(" -----").toString());
     }
   }
 
   // Interesting sources are summarized (and possibly printed)
-  public boolean isInterestingSource(Value source) {
+  @Override
+public boolean isInterestingSource(Value source) {
     return (source instanceof AbstractDataSource);
   }
 
   // Interesting sinks are possibly printed
-  public boolean isInterestingSink(Value sink) {
+  @Override
+public boolean isInterestingSink(Value sink) {
     return true; // (sink instanceof Local); // we're interested in all values
   }
 
   //
   public boolean isObjectLocal(Value local) // to this analysis of this method (which depends on context)
   {
-    EquivalentValue source = new CachedEquivalentValue(new AbstractDataSource(new String("SHARED")));
+    EquivalentValue source = new CachedEquivalentValue(new AbstractDataSource("SHARED"));
     if (infoFlowGraph.containsNode(source)) {
       List sinks = infoFlowGraph.getSuccsOf(source);
       if (printMessages) {
-        logger.debug("      Requested value " + local + " is "
-            + (!sinks.contains(new CachedEquivalentValue(local)) ? "Local" : "Shared") + " in " + sm + " ");
+        logger.debug(new StringBuilder().append("      Requested value ").append(local).append(" is ").append(!sinks.contains(new CachedEquivalentValue(local)) ? "Local" : "Shared").append(" in ")
+				.append(sm).append(" ").toString());
       }
       return !sinks.contains(new CachedEquivalentValue(local));
     } else {
       if (printMessages) {
-        logger.debug("      Requested value " + local + " is Local (LIKE ALL VALUES) in " + sm + " ");
+        logger.debug(new StringBuilder().append("      Requested value ").append(local).append(" is Local (LIKE ALL VALUES) in ").append(sm).append(" ").toString());
       }
       return true; // no shared data in this method
     }

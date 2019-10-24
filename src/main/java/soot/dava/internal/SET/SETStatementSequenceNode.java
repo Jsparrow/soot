@@ -63,7 +63,8 @@ public class SETStatementSequenceNode extends SETNode {
     return hasContinue;
   }
 
-  public IterableSet get_NaturalExits() {
+  @Override
+public IterableSet get_NaturalExits() {
     IterableSet c = new IterableSet();
     AugmentedStmt last = (AugmentedStmt) get_Body().getLast();
 
@@ -74,8 +75,9 @@ public class SETStatementSequenceNode extends SETNode {
     return c;
   }
 
-  public ASTNode emit_AST() {
-    List<AugmentedStmt> l = new LinkedList<AugmentedStmt>();
+  @Override
+public ASTNode emit_AST() {
+    List<AugmentedStmt> l = new LinkedList<>();
 
     boolean isStaticInitializer = davaBody.getMethod().getName().equals(SootMethod.staticInitializerName);
 
@@ -109,7 +111,8 @@ public class SETStatementSequenceNode extends SETNode {
         if (s instanceof IdentityStmt) {
           IdentityStmt ids = (IdentityStmt) s;
 
-          Value rightOp = ids.getRightOp(), leftOp = ids.getLeftOp();
+          Value rightOp = ids.getRightOp();
+		Value leftOp = ids.getLeftOp();
 
           if (davaBody.get_ThisLocals().contains(leftOp)) {
             continue;
@@ -135,7 +138,8 @@ public class SETStatementSequenceNode extends SETNode {
     }
   }
 
-  public AugmentedStmt get_EntryStmt() {
+  @Override
+public AugmentedStmt get_EntryStmt() {
     return (AugmentedStmt) get_Body().getFirst();
   }
 
@@ -148,7 +152,8 @@ public class SETStatementSequenceNode extends SETNode {
     hasContinue = stmt.is_Continue();
   }
 
-  protected boolean resolve(SETNode parent) {
+  @Override
+protected boolean resolve(SETNode parent) {
     throw new RuntimeException("Attempting auto-nest a SETStatementSequenceNode.");
   }
 }

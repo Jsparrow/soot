@@ -66,9 +66,8 @@ public class JimpleIDESolver<D, V, I extends InterproceduralCFG<Unit, SootMethod
   }
 
   public void dumpResults() {
-    try {
-      PrintWriter out = new PrintWriter(new FileOutputStream("ideSolverDump" + System.currentTimeMillis() + ".csv"));
-      List<String> res = new ArrayList<String>();
+    try (PrintWriter out = new PrintWriter(new FileOutputStream(new StringBuilder().append("ideSolverDump").append(System.currentTimeMillis()).append(".csv").toString()))) {
+      List<String> res = new ArrayList<>();
       for (Cell<Unit, D, V> entry : val.cellSet()) {
         SootMethod methodOf = (SootMethod) icfg.getMethodOf(entry.getRowKey());
         PatchingChain<Unit> units = methodOf.getActiveBody().getUnits();
@@ -80,14 +79,12 @@ public class JimpleIDESolver<D, V, I extends InterproceduralCFG<Unit, SootMethod
           i++;
         }
 
-        res.add(methodOf + ";" + entry.getRowKey() + "@" + i + ";" + entry.getColumnKey() + ";" + entry.getValue());
+        res.add(new StringBuilder().append(methodOf).append(";").append(entry.getRowKey()).append("@").append(i).append(";")
+				.append(entry.getColumnKey()).append(";").append(entry.getValue()).toString());
       }
       Collections.sort(res);
-      for (String string : res) {
-        out.println(string);
-      }
+      res.forEach(out::println);
       out.flush();
-      out.close();
     } catch (FileNotFoundException e) {
       logger.error(e.getMessage(), e);
     }

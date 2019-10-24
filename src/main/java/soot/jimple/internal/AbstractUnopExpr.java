@@ -30,14 +30,15 @@ import soot.ValueBox;
 import soot.jimple.UnopExpr;
 
 @SuppressWarnings("serial")
-abstract public class AbstractUnopExpr implements UnopExpr {
+public abstract class AbstractUnopExpr implements UnopExpr {
   final ValueBox opBox;
 
   protected AbstractUnopExpr(ValueBox opBox) {
     this.opBox = opBox;
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
   @Override
   public Value getOp() {
@@ -56,7 +57,7 @@ abstract public class AbstractUnopExpr implements UnopExpr {
 
   @Override
   public final List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+    List<ValueBox> list = new ArrayList<>();
 
     list.addAll(opBox.getValue().getUseBoxes());
     list.add(opBox);

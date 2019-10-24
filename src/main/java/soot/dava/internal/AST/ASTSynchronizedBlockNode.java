@@ -51,7 +51,7 @@ public class ASTSynchronizedBlockNode extends ASTLabeledNode {
    */
   public void replaceBody(List<Object> body) {
     this.body = body;
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
     subBodies.add(body);
   }
 
@@ -67,11 +67,13 @@ public class ASTSynchronizedBlockNode extends ASTLabeledNode {
     this.localBox = Jimple.v().newLocalBox(local);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ASTSynchronizedBlockNode(get_Label(), body, getLocal());
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     label_toString(up);
 
     /*
@@ -93,8 +95,9 @@ public class ASTSynchronizedBlockNode extends ASTLabeledNode {
     up.newline();
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
     b.append(label_toString());
 
@@ -118,7 +121,8 @@ public class ASTSynchronizedBlockNode extends ASTLabeledNode {
    * Nomair A. Naeem, 7-FEB-05 Part of Visitor Design Implementation for AST See: soot.dava.toolkits.base.AST.analysis For
    * details
    */
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTSynchronizedBlockNode(this);
   }
 }

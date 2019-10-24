@@ -34,14 +34,16 @@ public class CONSTANT_String_Info extends CONSTANT_Info {
 
 
 
-    public Expr expr() {
+    @Override
+	public Expr expr() {
       CONSTANT_Utf8_Info i = (CONSTANT_Utf8_Info)p.constantPool[string_index];
       return Literal.buildStringLiteral(i.string);
     }
 
 
 
-    public String toString() {
+    @Override
+	public String toString() {
       return "StringInfo: " + p.constantPool[string_index];
     }
 

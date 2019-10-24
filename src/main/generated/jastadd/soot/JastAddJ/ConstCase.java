@@ -18,57 +18,82 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production ConstCase : {@link Case} ::= <span class="component">Value:{@link Expr}</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:204
  */
-public class ConstCase extends Case implements Cloneable {
-  /**
+public class ConstCase extends Case {
+  private static final Logger logger = LoggerFactory.getLogger(ConstCase.class);
+/**
+   * @ast method 
+   * 
+   */
+  public ConstCase() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public ConstCase(Expr p0) {
+    setChild(p0, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ConstCase clone() throws CloneNotSupportedException {
     ConstCase node = (ConstCase)super.clone();
     node.in$Circle(false);
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ConstCase copy() {
     try {
       ConstCase node = (ConstCase) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ConstCase fullCopy() {
     ConstCase tree = (ConstCase) copy();
     if (children != null) {
@@ -82,49 +107,43 @@ public class ConstCase extends Case implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:406
    */
-  public void nameCheck() {
+  @Override
+public void nameCheck() {
     if(getValue().isConstant() && bind(this) != this) {
-      error("constant expression " + getValue() + " is multiply declared in two case statements");
+      error(new StringBuilder().append("constant expression ").append(getValue()).append(" is multiply declared in two case statements").toString());
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:562
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     s.append(indent());
     s.append("case ");
     getValue().toString(s);
     s.append(":");
   }
-  /**
+/**
    * @ast method 
    * @aspect EnumsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/EnumsCodegen.jrag:32
    */
-  public void transformation() {
+  @Override
+public void transformation() {
     if(getValue() instanceof VarAccess && getValue().varDecl() instanceof EnumConstant) {
       int i = hostType().createEnumIndex((EnumConstant)getValue().varDecl());
-      setValue(new IntegerLiteral(new Integer(i).toString()));
+      setValue(new IntegerLiteral(Integer.toString(i)));
     }
     super.transformation();
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public ConstCase() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -132,33 +151,29 @@ public class ConstCase extends Case implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[1];
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public ConstCase(Expr p0) {
-    setChild(p0, 0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 1;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Value child.
    * @param node The new node to replace the Value child.
    * @apilevel high-level
@@ -168,7 +183,7 @@ public class ConstCase extends Case implements Cloneable {
   public void setValue(Expr node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the Value child.
    * @return The current node used as the Value child.
    * @apilevel high-level
@@ -178,7 +193,7 @@ public class ConstCase extends Case implements Cloneable {
   public Expr getValue() {
     return (Expr)getChild(0);
   }
-  /**
+/**
    * Retrieves the Value child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Value child.
@@ -189,7 +204,7 @@ public class ConstCase extends Case implements Cloneable {
   public Expr getValueNoTransform() {
     return (Expr)getChildNoTransform(0);
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:503
@@ -201,46 +216,53 @@ public class ConstCase extends Case implements Cloneable {
     } else {
       TypeDecl switchType = switchType();
       TypeDecl type = getValue().type();
-      if(!type.assignConversionTo(switchType, getValue()))
-        error("Constant expression must be assignable to Expression");
+      if(!type.assignConversionTo(switchType, getValue())) {
+		error("Constant expression must be assignable to Expression");
+	}
       if(!getValue().isConstant() && !getValue().type().isUnknown() &&
-          !isEnumConstant) 
-        error("Switch expression must be constant");
+          !isEnumConstant) {
+		error("Switch expression must be constant");
+	}
     }
   }
-  /**
+/**
 	 * <p>Improve the type checking error messages given for case labels.
 	 * @ast method 
    * @aspect StringsInSwitch
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/StringsInSwitch.jrag:68
    */
-    public void typeCheck() {
+    @Override
+	public void typeCheck() {
 		boolean isEnumConstant = getValue().isEnumConstant();
 		TypeDecl switchType = switchType();
 		TypeDecl type = getValue().type();
-		if (switchType.isEnumDecl() && !isEnumConstant)
+		if (switchType.isEnumDecl() && !isEnumConstant) {
 			error("Unqualified enumeration constant required");
-		if (!type.assignConversionTo(switchType, getValue()))
-			error("Case label has incompatible type "+switchType.name()+
-					", expected type compatible with "+type.name());
+		}
+		if (!type.assignConversionTo(switchType, getValue())) {
+			error(new StringBuilder().append("Case label has incompatible type ").append(switchType.name()).append(", expected type compatible with ").append(type.name()).toString());
+		}
 		if (!getValue().isConstant() && !getValue().type().isUnknown() &&
-				!isEnumConstant) 
+				!isEnumConstant) {
 			error("Case label must have constant expression");
+		}
 	}
-  /**
+/**
    * @ast method 
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:432
    */
   private boolean refined_NameCheck_ConstCase_constValue_Case(Case c)
 {
-    if(!(c instanceof ConstCase) || !getValue().isConstant())
-      return false;
-    if(!getValue().type().assignableToInt() || !((ConstCase)c).getValue().type().assignableToInt())
-      return false;
+    if(!(c instanceof ConstCase) || !getValue().isConstant()) {
+		return false;
+	}
+    if(!getValue().type().assignableToInt() || !((ConstCase)c).getValue().type().assignableToInt()) {
+		return false;
+	}
     return getValue().constant().intValue() == ((ConstCase)c).getValue().constant().intValue();
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:517
@@ -248,33 +270,38 @@ public class ConstCase extends Case implements Cloneable {
   private boolean refined_Enums_ConstCase_constValue_Case(Case c)
 {
     if(switchType().isEnumDecl()) {
-      if(!(c instanceof ConstCase) || !getValue().isConstant())
-        return false;
+      if(!(c instanceof ConstCase) || !getValue().isConstant()) {
+		return false;
+	}
       return getValue().varDecl() == ((ConstCase)c).getValue().varDecl();
-    }
-    else
-      return refined_NameCheck_ConstCase_constValue_Case(c);
+    } else {
+		return refined_NameCheck_ConstCase_constValue_Case(c);
+	}
   }
-  /**
+/**
    * @attribute syn
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:431
    */
-  public boolean constValue(Case c) {
+  @Override
+public boolean constValue(Case c) {
     ASTNode$State state = state();
     try {
-		if (isDefaultCase() || c.isDefaultCase())
+		if (isDefaultCase() || c.isDefaultCase()) {
 			return isDefaultCase() && c.isDefaultCase();
+		}
 
 		Expr myValue = getValue();
 		Expr otherValue = ((ConstCase) c).getValue();
 		TypeDecl myType = myValue.type();
 		TypeDecl otherType = otherValue.type();
 		if (myType.isString() || otherType.isString()) {
-			if (!myType.isString() || !otherType.isString())
+			if (!myType.isString() || !otherType.isString()) {
 				return false;
-			if (!myValue.isConstant() || !otherValue.isConstant())
+			}
+			if (!myValue.isConstant() || !otherValue.isConstant()) {
 				return false;
+			}
 			return myValue.constant().stringValue().equals(
 					otherValue.constant().stringValue());
 		}
@@ -284,21 +311,23 @@ public class ConstCase extends Case implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:497
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
     if(caller == getValueNoTransform()) {
       return switchType().isEnumDecl() ? switchType().memberFields(name) : lookupVariable(name);
     }
     else {      return getParent().Define_SimpleSet_lookupVariable(this, caller, name);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

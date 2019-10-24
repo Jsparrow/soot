@@ -150,9 +150,9 @@ public class TypeBasedReflectionModelTest {
         // prepare base object for reflective call
         String baseString = "Reflective call base ";
         Value base;
-        if (useConstantBase)
-            base = StringConstant.v(baseString);
-        else {
+        if (useConstantBase) {
+			base = StringConstant.v(baseString);
+		} else {
             Local l = Jimple.v().newLocal("base", Scene.v().getType("java.lang.String"));
             base = l;
             b.getLocals().add(l);

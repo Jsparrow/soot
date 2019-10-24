@@ -18,57 +18,82 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production Opt : {@link ASTNode};
  * @ast node
  * 
  */
-public class Opt<T extends ASTNode> extends ASTNode<T> implements Cloneable {
-  /**
+public class Opt<T extends ASTNode> extends ASTNode<T> {
+  private static final Logger logger = LoggerFactory.getLogger(Opt.class);
+/**
+   * @ast method 
+   * 
+   */
+  public Opt() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public Opt(T opt) {
+    setChild(opt, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Opt<T> clone() throws CloneNotSupportedException {
     Opt node = (Opt)super.clone();
     node.in$Circle(false);
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Opt<T> copy() {
     try {
       Opt node = (Opt) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public Opt<T> fullCopy() {
     Opt tree = (Opt) copy();
     if (children != null) {
@@ -82,16 +107,7 @@ public class Opt<T extends ASTNode> extends ASTNode<T> implements Cloneable {
     }
     return tree;
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public Opt() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -99,38 +115,35 @@ public class Opt<T extends ASTNode> extends ASTNode<T> implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public Opt(T opt) {
-    setChild(opt, 0);
-  }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * @attribute syn
    * @aspect BooleanExpressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/BooleanExpressions.jrag:21
    */
-  public boolean definesLabel() {
+  @Override
+public boolean definesLabel() {
     ASTNode$State state = state();
     try {  return getParent().definesLabel();  }
     finally {
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

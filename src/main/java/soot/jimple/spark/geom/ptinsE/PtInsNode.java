@@ -50,6 +50,8 @@ import soot.jimple.spark.pag.LocalVarNode;
 import soot.jimple.spark.pag.Node;
 import soot.jimple.spark.pag.StringConstantNode;
 import soot.jimple.spark.sets.P2SetVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class defines a pointer variable in the PtIns encoding based points-to solver. Also, it is NOT recommended to use.
@@ -59,30 +61,32 @@ import soot.jimple.spark.sets.P2SetVisitor;
  */
 @Deprecated
 public class PtInsNode extends IVarAbstraction {
-  // The targets of directed edges on the constraint graph
-  public Map<PtInsNode, PtInsIntervalManager> flowto;
+  private static final Logger logger = LoggerFactory.getLogger(PtInsNode.class);
 
-  // The objects this variable points to
-  public Map<AllocNode, PtInsIntervalManager> pt_objs;
-
-  // Newly added points-to tuple
-  public Map<AllocNode, PtInsIntervalManager> new_pts;
-
-  // store/load complex constraints
-  public Vector<PlainConstraint> complex_cons = null;
-
-  static {
+static {
     stubManager = new PtInsIntervalManager();
     pres = new RectangleNode(0, 0, Constants.MAX_CONTEXTS, Constants.MAX_CONTEXTS);
     stubManager.addNewFigure(PtInsIntervalManager.ALL_TO_ALL, pres);
     deadManager = new PtInsIntervalManager();
   }
 
-  public PtInsNode(Node thisVar) {
+// The targets of directed edges on the constraint graph
+  public Map<PtInsNode, PtInsIntervalManager> flowto;
+
+// The objects this variable points to
+  public Map<AllocNode, PtInsIntervalManager> pt_objs;
+
+// Newly added points-to tuple
+  public Map<AllocNode, PtInsIntervalManager> new_pts;
+
+// store/load complex constraints
+  public Vector<PlainConstraint> complex_cons = null;
+
+public PtInsNode(Node thisVar) {
     me = thisVar;
   }
 
-  @Override
+@Override
   public void deleteAll() {
     flowto = null;
     pt_objs = null;
@@ -90,16 +94,16 @@ public class PtInsNode extends IVarAbstraction {
     complex_cons = null;
   }
 
-  @Override
+@Override
   public void reconstruct() {
-    flowto = new HashMap<PtInsNode, PtInsIntervalManager>();
-    pt_objs = new HashMap<AllocNode, PtInsIntervalManager>();
-    new_pts = new HashMap<AllocNode, PtInsIntervalManager>();
+    flowto = new HashMap<>();
+    pt_objs = new HashMap<>();
+    new_pts = new HashMap<>();
     complex_cons = null;
     lrf_value = 0;
   }
 
-  @Override
+@Override
   public void do_before_propagation() {
     // if ( complex_cons == null )
     do_pts_interval_merge();
@@ -109,9 +113,11 @@ public class PtInsNode extends IVarAbstraction {
 
     // This pointer filter, please read the comments at this line in file FullSensitiveNode.java
     Node wrappedNode = getWrappedNode();
-    if (wrappedNode instanceof LocalVarNode && ((LocalVarNode) wrappedNode).isThisPtr()) {
-      SootMethod func = ((LocalVarNode) wrappedNode).getMethod();
-      if (!func.isConstructor()) {
+    if (!(wrappedNode instanceof LocalVarNode && ((LocalVarNode) wrappedNode).isThisPtr())) {
+		return;
+	}
+	SootMethod func = ((LocalVarNode) wrappedNode).getMethod();
+	if (!func.isConstructor()) {
         // We don't process the specialinvoke call edge
         SootClass defClass = func.getDeclaringClass();
         Hierarchy typeHierarchy = Scene.v().getActiveHierarchy();
@@ -129,6 +135,7 @@ public class PtInsNode extends IVarAbstraction {
                   pt_objs.put(obj, (PtInsIntervalManager) deadManager);
                 }
               } catch (RuntimeException e) {
+				logger.error(e.getMessage(), e);
                 // If the input program has a wrong type cast, resolveConcreteDispatch fails and it goes here
                 // We simply ignore this error
               }
@@ -136,22 +143,19 @@ public class PtInsNode extends IVarAbstraction {
           }
         }
       }
-    }
   }
 
-  /**
+/**
    * Remember to clean the is_new flag
    */
   @Override
   public void do_after_propagation() {
-    for (PtInsIntervalManager pim : pt_objs.values()) {
-      pim.flush();
-    }
+    pt_objs.values().forEach(PtInsIntervalManager::flush);
 
-    new_pts = new HashMap<AllocNode, PtInsIntervalManager>();
+    new_pts = new HashMap<>();
   }
 
-  @Override
+@Override
   public int num_of_diff_objs() {
     // If this pointer is not a representative pointer
     if (parent != this) {
@@ -165,7 +169,7 @@ public class PtInsNode extends IVarAbstraction {
     return pt_objs.size();
   }
 
-  @Override
+@Override
   public int num_of_diff_edges() {
     if (parent != this) {
       return getRepresentative().num_of_diff_objs();
@@ -178,7 +182,7 @@ public class PtInsNode extends IVarAbstraction {
     return flowto.size();
   }
 
-  @Override
+@Override
   public boolean add_points_to_3(AllocNode obj, long I1, long I2, long L) {
     int code = 0;
 
@@ -195,12 +199,12 @@ public class PtInsNode extends IVarAbstraction {
     return addPointsTo(code, obj);
   }
 
-  @Override
+@Override
   public boolean add_points_to_4(AllocNode obj, long I1, long I2, long L1, long L2) {
     return false;
   }
 
-  @Override
+@Override
   public boolean add_simple_constraint_3(IVarAbstraction qv, long I1, long I2, long L) {
     int code = 0;
 
@@ -217,20 +221,20 @@ public class PtInsNode extends IVarAbstraction {
     return addFlowsTo(code, (PtInsNode) qv);
   }
 
-  @Override
+@Override
   public boolean add_simple_constraint_4(IVarAbstraction qv, long I1, long I2, long L1, long L2) {
     return false;
   }
 
-  @Override
+@Override
   public void put_complex_constraint(PlainConstraint cons) {
     if (complex_cons == null) {
-      complex_cons = new Vector<PlainConstraint>();
+      complex_cons = new Vector<>();
     }
     complex_cons.add(cons);
   }
 
-  /**
+/**
    * Discard all context sensitive tuples which are covered by insensitive ones
    */
   @Override
@@ -241,17 +245,24 @@ public class PtInsNode extends IVarAbstraction {
     }
   }
 
-  /**
+/**
    * An efficient implementation of differential propagation.
    */
   @Override
   public void propagate(GeomPointsTo ptAnalyzer, IWorklist worklist) {
-    int i, j;
+    int i;
+	int j;
     AllocNode obj;
-    SegmentNode pts, pe, int_entry1[], int_entry2[];
-    PtInsIntervalManager pim1, pim2;
-    PtInsNode qn, objn;
-    boolean added, has_new_edges;
+    SegmentNode pts;
+	SegmentNode pe;
+	SegmentNode int_entry1[];
+	SegmentNode int_entry2[];
+    PtInsIntervalManager pim1;
+	PtInsIntervalManager pim2;
+    PtInsNode qn;
+	PtInsNode objn;
+    boolean added;
+	boolean has_new_edges;
 
     // We first build the new flow edges via the field dereferences
     if (complex_cons != null) {
@@ -372,7 +383,7 @@ public class PtInsNode extends IVarAbstraction {
     }
   }
 
-  @Override
+@Override
   public int count_pts_intervals(AllocNode obj) {
     int ret = 0;
     SegmentNode[] int_entry = find_points_to(obj);
@@ -388,7 +399,7 @@ public class PtInsNode extends IVarAbstraction {
     return ret;
   }
 
-  @Override
+@Override
   public int count_flow_intervals(IVarAbstraction qv) {
     int ret = 0;
     SegmentNode[] int_entry = find_flowto((PtInsNode) qv);
@@ -404,14 +415,18 @@ public class PtInsNode extends IVarAbstraction {
     return ret;
   }
 
-  /**
+/**
    * Query if this pointer and qv could point to the same object under any contexts
    */
   @Override
   public boolean heap_sensitive_intersection(IVarAbstraction qv) {
-    int i, j;
+    int i;
+	int j;
     PtInsNode qn;
-    SegmentNode p, q, pt[], qt[];
+    SegmentNode p;
+	SegmentNode q;
+	SegmentNode pt[];
+	SegmentNode qt[];
 
     qn = (PtInsNode) qv;
 
@@ -446,7 +461,7 @@ public class PtInsNode extends IVarAbstraction {
     return false;
   }
 
-  @Override
+@Override
   public Set<AllocNode> get_all_points_to_objects() {
     // If this pointer is not a representative pointer
     if (parent != this) {
@@ -456,7 +471,7 @@ public class PtInsNode extends IVarAbstraction {
     return pt_objs.keySet();
   }
 
-  @Override
+@Override
   public void print_context_sensitive_points_to(PrintStream outPrintStream) {
     for (Iterator<AllocNode> it = pt_objs.keySet().iterator(); it.hasNext();) {
       AllocNode obj = it.next();
@@ -465,7 +480,8 @@ public class PtInsNode extends IVarAbstraction {
         for (int j = 0; j < PtInsIntervalManager.Divisions; ++j) {
           SegmentNode p = int_entry[j];
           while (p != null) {
-            outPrintStream.println("(" + obj.toString() + ", " + p.I1 + ", " + p.I2 + ", " + p.L + ")");
+            outPrintStream.println(new StringBuilder().append("(").append(obj.toString()).append(", ").append(p.I1).append(", ")
+					.append(p.I2).append(", ").append(p.L).append(")").toString());
             p = p.next;
           }
         }
@@ -473,7 +489,7 @@ public class PtInsNode extends IVarAbstraction {
     }
   }
 
-  @Override
+@Override
   public boolean pointer_interval_points_to(long l, long r, AllocNode obj) {
     SegmentNode[] int_entry = find_points_to(obj);
 
@@ -496,19 +512,19 @@ public class PtInsNode extends IVarAbstraction {
     return false;
   }
 
-  @Override
+@Override
   public void remove_points_to(AllocNode obj) {
     pt_objs.remove(obj);
   }
 
-  @Override
+@Override
   public void keepPointsToOnly() {
     flowto = null;
     new_pts = null;
     complex_cons = null;
   }
 
-  @Override
+@Override
   public int count_new_pts_intervals() {
     int ans = 0;
 
@@ -526,7 +542,7 @@ public class PtInsNode extends IVarAbstraction {
     return ans;
   }
 
-  @Override
+@Override
   public void get_all_context_sensitive_objects(long l, long r, PtSensVisitor visitor) {
     if (parent != this) {
       getRepresentative().get_all_context_sensitive_objects(l, r, visitor);
@@ -535,7 +551,7 @@ public class PtInsNode extends IVarAbstraction {
 
     GeomPointsTo geomPTA = (GeomPointsTo) Scene.v().getPointsToAnalysis();
 
-    for (Map.Entry<AllocNode, PtInsIntervalManager> entry : pt_objs.entrySet()) {
+    pt_objs.entrySet().forEach(entry -> {
       AllocNode obj = entry.getKey();
       PtInsIntervalManager im = entry.getValue();
       SegmentNode[] int_entry = im.getFigures();
@@ -554,7 +570,8 @@ public class PtInsNode extends IVarAbstraction {
         SegmentNode p = int_entry[i];
         while (p != null) {
           long R = p.I1 + p.L;
-          long objL = -1, objR = -1;
+          long objL = -1;
+		long objR = -1;
 
           // Now we compute which context sensitive objects are pointed to by this pointer
           if (i == PtInsIntervalManager.ALL_TO_MANY) {
@@ -598,13 +615,13 @@ public class PtInsNode extends IVarAbstraction {
           p = p.next;
         }
       }
-    }
+    });
   }
 
-  @Override
+@Override
   public void injectPts() {
     final GeomPointsTo geomPTA = (GeomPointsTo) Scene.v().getPointsToAnalysis();
-    pt_objs = new HashMap<AllocNode, PtInsIntervalManager>();
+    pt_objs = new HashMap<>();
 
     me.getP2Set().forall(new P2SetVisitor() {
       @Override
@@ -618,12 +635,12 @@ public class PtInsNode extends IVarAbstraction {
     new_pts = null;
   }
 
-  @Override
+@Override
   public boolean isDeadObject(AllocNode obj) {
     return pt_objs.get(obj) == deadManager;
   }
 
-  // ---------------------------------Private Functions----------------------------------------
+// ---------------------------------Private Functions----------------------------------------
   private SegmentNode[] find_flowto(PtInsNode qv) {
     PtInsIntervalManager im = flowto.get(qv);
     if (im == null) {
@@ -632,7 +649,7 @@ public class PtInsNode extends IVarAbstraction {
     return im.getFigures();
   }
 
-  private SegmentNode[] find_points_to(AllocNode obj) {
+private SegmentNode[] find_points_to(AllocNode obj) {
     PtInsIntervalManager im = pt_objs.get(obj);
     if (im == null) {
       return null;
@@ -640,22 +657,18 @@ public class PtInsNode extends IVarAbstraction {
     return im.getFigures();
   }
 
-  /**
+/**
    * Merge the context sensitive tuples, and make a single insensitive tuple
    */
   private void do_pts_interval_merge() {
-    for (PtInsIntervalManager im : pt_objs.values()) {
-      im.mergeFigures(Parameters.max_pts_budget);
-    }
+    pt_objs.values().forEach(im -> im.mergeFigures(Parameters.max_pts_budget));
   }
 
-  private void do_flow_edge_interval_merge() {
-    for (PtInsIntervalManager im : flowto.values()) {
-      im.mergeFigures(Parameters.max_cons_budget);
-    }
+private void do_flow_edge_interval_merge() {
+    flowto.values().forEach(im -> im.mergeFigures(Parameters.max_cons_budget));
   }
 
-  private boolean addPointsTo(int code, AllocNode obj) {
+private boolean addPointsTo(int code, AllocNode obj) {
     PtInsIntervalManager im = pt_objs.get(obj);
 
     if (im == null) {
@@ -667,15 +680,14 @@ public class PtInsNode extends IVarAbstraction {
     }
 
     // pres has been filled properly before calling this method
-    if (im.addNewFigure(code, pres) != null) {
-      new_pts.put(obj, im);
-      return true;
-    }
-
-    return false;
+	if (im.addNewFigure(code, pres) == null) {
+		return false;
+	}
+	new_pts.put(obj, im);
+	return true;
   }
 
-  private boolean addFlowsTo(int code, PtInsNode qv) {
+private boolean addFlowsTo(int code, PtInsNode qv) {
     PtInsIntervalManager im = flowto.get(qv);
 
     if (im == null) {
@@ -687,9 +699,10 @@ public class PtInsNode extends IVarAbstraction {
     return im.addNewFigure(code, pres) != null;
   }
 
-  // Implement the pointer assignment inference rules
+// Implement the pointer assignment inference rules
   private static boolean add_new_points_to_tuple(SegmentNode pts, SegmentNode pe, AllocNode obj, PtInsNode qn) {
-    long interI, interJ;
+    long interI;
+	long interJ;
     int code = 0;
 
     // Special Cases
@@ -719,7 +732,7 @@ public class PtInsNode extends IVarAbstraction {
     return qn.addPointsTo(code, obj);
   }
 
-  // We only test if their points-to objects intersected under context
+// We only test if their points-to objects intersected under context
   // insensitive manner
   private static boolean quick_intersecting_test(SegmentNode p, SegmentNode q) {
     if (p.I2 >= q.I2) {

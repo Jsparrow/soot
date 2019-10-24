@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ASingleParameterList extends PParameterList
 {
-    private PParameter _parameter_;
+    private PParameter parameter;
 
     public ASingleParameterList()
     {
@@ -26,7 +26,7 @@ public final class ASingleParameterList extends PParameterList
     public Object clone()
     {
         return new ASingleParameterList(
-            cloneNode(this._parameter_));
+            cloneNode(this.parameter));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ASingleParameterList extends PParameterList
 
     public PParameter getParameter()
     {
-        return this._parameter_;
+        return this.parameter;
     }
 
     public void setParameter(PParameter node)
     {
-        if(this._parameter_ != null)
+        if(this.parameter != null)
         {
-            this._parameter_.parent(null);
+            this.parameter.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ASingleParameterList extends PParameterList
             node.parent(this);
         }
 
-        this._parameter_ = node;
+        this.parameter = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._parameter_);
+            + toString(this.parameter);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._parameter_ == child)
+        if(this.parameter == child)
         {
-            this._parameter_ = null;
+            this.parameter = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ASingleParameterList extends PParameterList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._parameter_ == oldChild)
+        if(this.parameter == oldChild)
         {
             setParameter((PParameter) newChild);
             return;

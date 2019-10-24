@@ -26,67 +26,83 @@ package soot;
 public class TypeSwitch implements ITypeSwitch {
   Object result;
 
-  public void caseArrayType(ArrayType t) {
+  @Override
+public void caseArrayType(ArrayType t) {
     defaultCase(t);
   }
 
-  public void caseBooleanType(BooleanType t) {
+  @Override
+public void caseBooleanType(BooleanType t) {
     defaultCase(t);
   }
 
-  public void caseByteType(ByteType t) {
+  @Override
+public void caseByteType(ByteType t) {
     defaultCase(t);
   }
 
-  public void caseCharType(CharType t) {
+  @Override
+public void caseCharType(CharType t) {
     defaultCase(t);
   }
 
-  public void caseDoubleType(DoubleType t) {
+  @Override
+public void caseDoubleType(DoubleType t) {
     defaultCase(t);
   }
 
-  public void caseFloatType(FloatType t) {
+  @Override
+public void caseFloatType(FloatType t) {
     defaultCase(t);
   }
 
-  public void caseIntType(IntType t) {
+  @Override
+public void caseIntType(IntType t) {
     defaultCase(t);
   }
 
-  public void caseLongType(LongType t) {
+  @Override
+public void caseLongType(LongType t) {
     defaultCase(t);
   }
 
-  public void caseRefType(RefType t) {
+  @Override
+public void caseRefType(RefType t) {
     defaultCase(t);
   }
 
-  public void caseShortType(ShortType t) {
+  @Override
+public void caseShortType(ShortType t) {
     defaultCase(t);
   }
 
-  public void caseStmtAddressType(StmtAddressType t) {
+  @Override
+public void caseStmtAddressType(StmtAddressType t) {
     defaultCase(t);
   }
 
-  public void caseUnknownType(UnknownType t) {
+  @Override
+public void caseUnknownType(UnknownType t) {
     defaultCase(t);
   }
 
-  public void caseVoidType(VoidType t) {
+  @Override
+public void caseVoidType(VoidType t) {
     defaultCase(t);
   }
 
-  public void caseAnySubType(AnySubType t) {
+  @Override
+public void caseAnySubType(AnySubType t) {
     defaultCase(t);
   }
 
-  public void caseNullType(NullType t) {
+  @Override
+public void caseNullType(NullType t) {
     defaultCase(t);
   }
 
-  public void caseErroneousType(ErroneousType t) {
+  @Override
+public void caseErroneousType(ErroneousType t) {
     defaultCase(t);
   }
 
@@ -98,7 +114,8 @@ public class TypeSwitch implements ITypeSwitch {
    * @deprecated Replaced by defaultCase(Type)
    * @see #defaultCase(Type)
    **/
-  @Deprecated
+  @Override
+@Deprecated
   public void caseDefault(Type t) {
   }
 

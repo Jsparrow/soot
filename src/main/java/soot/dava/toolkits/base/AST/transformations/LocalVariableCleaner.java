@@ -42,6 +42,8 @@ import soot.dava.toolkits.base.AST.traversals.ASTUsesAndDefs;
 import soot.jimple.Constant;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import soot.dava.internal.javaRep.*;
 //import soot.dava.toolkits.base.AST.structuredAnalysis.*;
@@ -55,7 +57,9 @@ import soot.jimple.Stmt;
  */
 
 public class LocalVariableCleaner extends DepthFirstAdapter {
-  public final boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(LocalVariableCleaner.class);
+
+public final boolean DEBUG = false;
 
   ASTNode AST;
 
@@ -64,7 +68,6 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
   ASTParentNodeFinder parentOf;
 
   public LocalVariableCleaner(ASTNode AST) {
-    super();
     this.AST = AST;
     parentOf = new ASTParentNodeFinder();
     AST.apply(parentOf);
@@ -82,7 +85,8 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
    * defined BUT never used then you may remove it IF AND ONLY IF The definition is either a copy stmt or an assignment of a
    * constant (i.e. no side effects)
    */
-  public void outASTMethodNode(ASTMethodNode node) {
+  @Override
+public void outASTMethodNode(ASTMethodNode node) {
     boolean redo = false;
 
     useDefs = new ASTUsesAndDefs(AST); // create the uD and dU chains
@@ -91,7 +95,7 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
     // get all local variables declared in this method
     Iterator decIt = node.getDeclaredLocals().iterator();
 
-    ArrayList<Local> removeList = new ArrayList<Local>();
+    ArrayList<Local> removeList = new ArrayList<>();
     while (decIt.hasNext()) {
       // going through each local declared
 
@@ -106,12 +110,7 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
       } else {
         // if a var is defined but not used then in some conditions we can remove it
 
-        // check that each def is removable
-        Iterator<DefinitionStmt> defIt = defs.iterator();
-
-        while (defIt.hasNext()) {
-          DefinitionStmt ds = defIt.next();
-
+        for (DefinitionStmt ds : defs) {
           if (canRemoveDef(ds)) {
             // if removeStmt is successful since something change we need to redo
             // everything hoping something else might be removed....
@@ -123,10 +122,7 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
       } // end else defs was not zero
     } // going through each stmt
 
-    // go through the removeList and remove all locals
-    Iterator<Local> remIt = removeList.iterator();
-    while (remIt.hasNext()) {
-      Local removeLocal = remIt.next();
+    for (Local removeLocal : removeList) {
       node.removeDeclaredLocal(removeLocal);
 
       /*
@@ -138,11 +134,11 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
         // this should always be true but whatever
         DavaBody body = ((ASTMethodNode) AST).getDavaBody();
         if (DEBUG) {
-          System.out.println("body information");
-          System.out.println("Control local is: " + body.get_ControlLocal());
-          System.out.println("his locals are: " + body.get_ThisLocals());
-          System.out.println("Param Map is: " + body.get_ParamMap());
-          System.out.println("Locals are:" + body.getLocals());
+          logger.info("body information");
+          logger.info("Control local is: " + body.get_ControlLocal());
+          logger.info("his locals are: " + body.get_ThisLocals());
+          logger.info("Param Map is: " + body.get_ParamMap());
+          logger.info("Locals are:" + body.getLocals());
         }
         Collection<Local> localChain = body.getLocals();
         if (removeLocal != null && localChain != null) {
@@ -153,7 +149,7 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
       }
 
       if (DEBUG) {
-        System.out.println("Removed" + removeLocal);
+        logger.info("Removed" + removeLocal);
       }
       redo = true;
     }
@@ -187,18 +183,17 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
    * This method looks up all defs and returns those of this local
    */
   public List<DefinitionStmt> getDefs(Local var) {
-    List<DefinitionStmt> toReturn = new ArrayList<DefinitionStmt>();
+    List<DefinitionStmt> toReturn = new ArrayList<>();
 
     HashMap<Object, List> dU = useDefs.getDUHashMap();
     Iterator<Object> it = dU.keySet().iterator();
     while (it.hasNext()) {
       DefinitionStmt s = (DefinitionStmt) it.next();
       Value left = s.getLeftOp();
-      if (left instanceof Local) {
-        if (((Local) left).getName().compareTo(var.getName()) == 0) {
-          toReturn.add(s);
-        }
-      }
+      boolean condition = left instanceof Local && ((Local) left).getName().compareTo(var.getName()) == 0;
+	if (condition) {
+	  toReturn.add(s);
+	}
     }
     return toReturn;
   }
@@ -220,15 +215,15 @@ public class LocalVariableCleaner extends DepthFirstAdapter {
     }
     ASTStatementSequenceNode parentNode = (ASTStatementSequenceNode) parent;
 
-    ArrayList<AugmentedStmt> newSequence = new ArrayList<AugmentedStmt>();
+    ArrayList<AugmentedStmt> newSequence = new ArrayList<>();
     int size = parentNode.getStatements().size();
-    for (AugmentedStmt as : parentNode.getStatements()) {
+    parentNode.getStatements().forEach(as -> {
       Stmt s = as.get_Stmt();
       if (s.toString().compareTo(stmt.toString()) != 0) {
         // this is not the stmt to be removed
         newSequence.add(as);
       }
-    }
+    });
     // System.out.println("STMT REMOVED---------------->"+stmt);
     parentNode.setStatements(newSequence);
     if (newSequence.size() < size) {

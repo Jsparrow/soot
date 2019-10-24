@@ -78,36 +78,28 @@ public enum UsesValidator implements BodyValidator {
     LocalDefs ld = LocalDefs.Factory.newLocalDefs(g, true);
 
     Collection<Local> locals = body.getLocals();
-    for (Unit u : body.getUnits()) {
-      for (ValueBox box : u.getUseBoxes()) {
-        Value v = box.getValue();
-        if (v instanceof Local) {
-          Local l = (Local) v;
-
-          if (!locals.contains(l)) {
-            String msg = "Local " + v + " is referenced here but not in body's local-chain. (" + body.getMethod() + ")";
-            exception.add(new ValidationException(u, msg, msg));
-          }
-
-          if (ld.getDefsOfAt(l, u).isEmpty()) {
-            // abroken graph is also a possible reason for undefined locals!
-            assert graphEdgesAreValid(g, u) : "broken graph found: " + u;
-
-            exception.add(new ValidationException(u, "There is no path from a definition of " + v + " to this statement.",
-                "(" + body.getMethod() + ") no defs for value: " + l + "!"));
-          }
-        }
-      }
-    }
+    // abroken graph is also a possible reason for undefined locals!
+	body.getUnits().forEach(u -> u.getUseBoxes().forEach(box -> {
+		Value v = box.getValue();
+		if (v instanceof Local) {
+			Local l = (Local) v;
+			if (!locals.contains(l)) {
+				String msg = new StringBuilder().append("Local ").append(v).append(" is referenced here but not in body's local-chain. (").append(body.getMethod()).append(")").toString();
+				exception.add(new ValidationException(u, msg, msg));
+			}
+			if (ld.getDefsOfAt(l, u).isEmpty()) {
+				assert graphEdgesAreValid(g, u) : "broken graph found: " + u;
+				exception.add(
+						new ValidationException(u, new StringBuilder().append("There is no path from a definition of ").append(v).append(" to this statement.").toString(),
+								new StringBuilder().append("(").append(body.getMethod()).append(") no defs for value: ").append(l).append("!")
+										.toString()));
+			}
+		}
+	}));
   }
 
   private boolean graphEdgesAreValid(UnitGraph g, Unit u) {
-    for (Unit p : g.getPredsOf(u)) {
-      if (!g.getSuccsOf(p).contains(u)) {
-        return false;
-      }
-    }
-    return true;
+    return g.getPredsOf(u).stream().allMatch(p -> g.getSuccsOf(p).contains(u));
   }
 
   @Override

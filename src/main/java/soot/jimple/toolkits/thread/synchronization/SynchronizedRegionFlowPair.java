@@ -46,11 +46,13 @@ class SynchronizedRegionFlowPair {
     tfp.inside = this.inside;
   }
 
-  public SynchronizedRegionFlowPair clone() {
+  @Override
+public SynchronizedRegionFlowPair clone() {
     return new SynchronizedRegionFlowPair(tn, inside);
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     // logger.debug(".");
     if (other instanceof SynchronizedRegionFlowPair) {
       SynchronizedRegionFlowPair tfp = (SynchronizedRegionFlowPair) other;
@@ -61,7 +63,8 @@ class SynchronizedRegionFlowPair {
     return false;
   }
 
-  public String toString() {
-    return "[" + (inside ? "in," : "out,") + tn.toString() + "]";
+  @Override
+public String toString() {
+    return new StringBuilder().append("[").append(inside ? "in," : "out,").append(tn.toString()).append("]").toString();
   }
 }

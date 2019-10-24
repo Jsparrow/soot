@@ -64,23 +64,10 @@ public class JimpleBasedInterproceduralCFG extends AbstractJimpleBasedICFG {
   protected boolean includeReflectiveCalls = false;
   protected boolean includePhantomCallees = false;
 
-  // retains only callers that are explicit call sites or Thread.start()
-  public class EdgeFilter extends Filter {
-    protected EdgeFilter() {
-      super(new EdgePredicate() {
-        @Override
-        public boolean want(Edge e) {
-          return e.kind().isExplicit() || e.kind().isThread() || e.kind().isExecutor() || e.kind().isAsyncTask()
-              || e.kind().isClinit() || e.kind().isPrivileged() || (includeReflectiveCalls && e.kind().isReflection());
-        }
-      });
-    }
-  }
-
-  @DontSynchronize("readonly")
+@DontSynchronize("readonly")
   protected final CallGraph cg;
 
-  protected CacheLoader<Unit, Collection<SootMethod>> loaderUnitToCallees = new CacheLoader<Unit, Collection<SootMethod>>() {
+protected CacheLoader<Unit, Collection<SootMethod>> loaderUnitToCallees = new CacheLoader<Unit, Collection<SootMethod>>() {
     @Override
     public Collection<SootMethod> load(Unit u) throws Exception {
       ArrayList<SootMethod> res = null;
@@ -92,7 +79,7 @@ public class JimpleBasedInterproceduralCFG extends AbstractJimpleBasedICFG {
         SootMethod m = edge.getTgt().method();
         if (includePhantomCallees || m.hasActiveBody()) {
           if (res == null) {
-            res = new ArrayList<SootMethod>();
+            res = new ArrayList<>();
           }
           res.add(m);
         } else if (IDESolver.DEBUG) {
@@ -109,15 +96,15 @@ public class JimpleBasedInterproceduralCFG extends AbstractJimpleBasedICFG {
     }
   };
 
-  @SynchronizedBy("by use of synchronized LoadingCache class")
+@SynchronizedBy("by use of synchronized LoadingCache class")
   protected final LoadingCache<Unit, Collection<SootMethod>> unitToCallees
       = IDESolver.DEFAULT_CACHE_BUILDER.build(loaderUnitToCallees);
 
-  protected CacheLoader<SootMethod, Collection<Unit>> loaderMethodToCallers
+protected CacheLoader<SootMethod, Collection<Unit>> loaderMethodToCallers
       = new CacheLoader<SootMethod, Collection<Unit>>() {
         @Override
         public Collection<Unit> load(SootMethod m) throws Exception {
-          ArrayList<Unit> res = new ArrayList<Unit>();
+          ArrayList<Unit> res = new ArrayList<>();
           // only retain callers that are explicit call sites or
           // Thread.start()
           Iterator<Edge> edgeIter = new EdgeFilter().wrap(cg.edgesInto(m));
@@ -129,19 +116,20 @@ public class JimpleBasedInterproceduralCFG extends AbstractJimpleBasedICFG {
           return res;
         }
       };
-  @SynchronizedBy("by use of synchronized LoadingCache class")
+
+@SynchronizedBy("by use of synchronized LoadingCache class")
   protected final LoadingCache<SootMethod, Collection<Unit>> methodToCallers
       = IDESolver.DEFAULT_CACHE_BUILDER.build(loaderMethodToCallers);
 
-  public JimpleBasedInterproceduralCFG() {
+public JimpleBasedInterproceduralCFG() {
     this(true);
   }
 
-  public JimpleBasedInterproceduralCFG(boolean enableExceptions) {
+public JimpleBasedInterproceduralCFG(boolean enableExceptions) {
     this(enableExceptions, false);
   }
 
-  public JimpleBasedInterproceduralCFG(boolean enableExceptions, boolean includeReflectiveCalls) {
+public JimpleBasedInterproceduralCFG(boolean enableExceptions, boolean includeReflectiveCalls) {
     super(enableExceptions);
     this.includeReflectiveCalls = includeReflectiveCalls;
 
@@ -149,34 +137,33 @@ public class JimpleBasedInterproceduralCFG extends AbstractJimpleBasedICFG {
     initializeUnitToOwner();
   }
 
-  protected void initializeUnitToOwner() {
+protected void initializeUnitToOwner() {
     for (Iterator<MethodOrMethodContext> iter = Scene.v().getReachableMethods().listener(); iter.hasNext();) {
       SootMethod m = iter.next().method();
       initializeUnitToOwner(m);
     }
   }
 
-  public void initializeUnitToOwner(SootMethod m) {
-    if (m.hasActiveBody()) {
-      Body b = m.getActiveBody();
-      PatchingChain<Unit> units = b.getUnits();
-      for (Unit unit : units) {
-        unitToOwner.put(unit, b);
-      }
-    }
+public void initializeUnitToOwner(SootMethod m) {
+    if (!m.hasActiveBody()) {
+		return;
+	}
+	Body b = m.getActiveBody();
+	PatchingChain<Unit> units = b.getUnits();
+	units.forEach(unit -> unitToOwner.put(unit, b));
   }
 
-  @Override
+@Override
   public Collection<SootMethod> getCalleesOfCallAt(Unit u) {
     return unitToCallees.getUnchecked(u);
   }
 
-  @Override
+@Override
   public Collection<Unit> getCallersOf(SootMethod m) {
     return methodToCallers.getUnchecked(m);
   }
 
-  /**
+/**
    * Sets whether methods that operate on the callgraph shall also return phantom methods as potential callees
    *
    * @param includePhantomCallees
@@ -184,6 +171,19 @@ public class JimpleBasedInterproceduralCFG extends AbstractJimpleBasedICFG {
    */
   public void setIncludePhantomCallees(boolean includePhantomCallees) {
     this.includePhantomCallees = includePhantomCallees;
+  }
+
+  // retains only callers that are explicit call sites or Thread.start()
+  public class EdgeFilter extends Filter {
+    protected EdgeFilter() {
+      super(new EdgePredicate() {
+        @Override
+        public boolean want(Edge e) {
+          return e.kind().isExplicit() || e.kind().isThread() || e.kind().isExecutor() || e.kind().isAsyncTask()
+              || e.kind().isClinit() || e.kind().isPrivileged() || (includeReflectiveCalls && e.kind().isReflection());
+        }
+      });
+    }
   }
 
 }

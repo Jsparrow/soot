@@ -36,7 +36,8 @@ import soot.Value;
 
 @SuppressWarnings("serial")
 public abstract class AbstractFloatBinopExpr extends AbstractBinopExpr {
-  public Type getType() {
+  @Override
+public Type getType() {
     Value op1 = op1Box.getValue();
     Value op2 = op2Box.getValue();
     Type op1t = op1.getType();

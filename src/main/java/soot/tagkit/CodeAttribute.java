@@ -67,22 +67,26 @@ public class CodeAttribute extends JasminAttribute {
   }
 
   /** Returns the name. */
-  public String toString() {
+  @Override
+public String toString() {
     return name;
   }
 
   /** Returns the attribute name. */
-  public String getName() {
+  @Override
+public String getName() {
     return name;
   }
 
   /** Only used by SOOT to read in an existing attribute without interpret it. */
-  public void setValue(byte[] v) {
+  @Override
+public void setValue(byte[] v) {
     this.value = v;
   }
 
   /** Also only used as setValue(). */
-  public byte[] getValue() throws AttributeValueException {
+  @Override
+public byte[] getValue() {
     if (value == null) {
       throw new AttributeValueException();
     } else {
@@ -94,35 +98,28 @@ public class CodeAttribute extends JasminAttribute {
   @Override
   public String getJasminValue(Map<Unit, String> instToLabel) {
     // some benchmarks fail because of the returned string larger than
-    // the possible buffer size.
-    StringBuffer buf = new StringBuffer();
+	// the possible buffer size.
+	StringBuilder buf = new StringBuilder();
 
     if (mTags.size() != mUnits.size()) {
       throw new RuntimeException("Sizes must match!");
     }
 
-    Iterator<Tag> tagIt = mTags.iterator();
     Iterator<Unit> unitIt = mUnits.iterator();
 
-    while (tagIt.hasNext()) {
+    mTags.forEach(tag -> {
       Unit unit = unitIt.next();
-      Tag tag = tagIt.next();
-
-      buf.append("%" + instToLabel.get(unit) + "%" + new String(Base64.encode((tag).getValue())));
-    }
+      buf.append(new StringBuilder().append("%").append(instToLabel.get(unit)).append("%").append(new String(Base64.encode((tag).getValue()))).toString());
+    });
 
     return buf.toString();
   }
 
   /** Returns a list of unit boxes that have tags attached. */
   public List<UnitBox> getUnitBoxes() {
-    List<UnitBox> unitBoxes = new ArrayList<UnitBox>(mUnits.size());
+    List<UnitBox> unitBoxes = new ArrayList<>(mUnits.size());
 
-    Iterator<Unit> it = mUnits.iterator();
-
-    while (it.hasNext()) {
-      unitBoxes.add(Baf.v().newInstBox(it.next()));
-    }
+    mUnits.forEach(mUnit -> unitBoxes.add(Baf.v().newInstBox(mUnit)));
 
     return unitBoxes;
   }
@@ -133,7 +130,7 @@ public class CodeAttribute extends JasminAttribute {
       logger.debug("[] JasminAttribute decode...");
     }
 
-    List<byte[]> attributeHunks = new LinkedList<byte[]>();
+    List<byte[]> attributeHunks = new LinkedList<>();
     int attributeSize = 0;
 
     StringTokenizer st = new StringTokenizer(attr, "%");
@@ -156,7 +153,7 @@ public class CodeAttribute extends JasminAttribute {
 
         int pcvalue = pc.intValue();
         if (pcvalue > 65535) {
-          throw new RuntimeException("PC great than 65535, the token is " + token + " : " + pcvalue);
+          throw new RuntimeException(new StringBuilder().append("PC great than 65535, the token is ").append(token).append(" : ").append(pcvalue).toString());
         }
 
         pcArray = new byte[2];
@@ -195,7 +192,7 @@ public class CodeAttribute extends JasminAttribute {
     }
 
     if (index != (attributeSize)) {
-      throw new RuntimeException("Index does not euqal to attrubute size :" + index + " -- " + attributeSize);
+      throw new RuntimeException(new StringBuilder().append("Index does not euqal to attrubute size :").append(index).append(" -- ").append(attributeSize).toString());
     }
 
     if (Options.v().verbose()) {

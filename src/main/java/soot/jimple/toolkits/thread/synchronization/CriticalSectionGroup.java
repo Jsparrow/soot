@@ -47,7 +47,7 @@ class CriticalSectionGroup implements Iterable<CriticalSection> {
 
   public CriticalSectionGroup(int groupNum) {
     this.groupNum = groupNum;
-    this.criticalSections = new ArrayList<CriticalSection>();
+    this.criticalSections = new ArrayList<>();
     this.rwSet = new CodeBlockRWSet();
 
     this.isDynamicLock = false;
@@ -76,7 +76,8 @@ class CriticalSectionGroup implements Iterable<CriticalSection> {
     return criticalSections.contains(tn);
   }
 
-  public Iterator<CriticalSection> iterator() {
+  @Override
+public Iterator<CriticalSection> iterator() {
     return criticalSections.iterator();
   }
 
@@ -85,11 +86,7 @@ class CriticalSectionGroup implements Iterable<CriticalSection> {
       return;
     }
 
-    Iterator<CriticalSection> tnIt = other.criticalSections.iterator();
-    while (tnIt.hasNext()) {
-      CriticalSection tn = tnIt.next();
-      add(tn);
-    }
+    other.criticalSections.forEach(this::add);
     other.criticalSections.clear();
   }
 }

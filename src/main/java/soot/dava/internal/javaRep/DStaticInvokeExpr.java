@@ -35,13 +35,15 @@ public class DStaticInvokeExpr extends GStaticInvokeExpr {
     super(methodRef, args);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.type(methodRef.declaringClass().getType());
     up.literal(".");
     super.toString(up);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     ArrayList clonedArgs = new ArrayList(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {

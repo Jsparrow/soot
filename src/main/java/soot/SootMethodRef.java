@@ -38,33 +38,33 @@ public interface SootMethodRef extends SootMethodInterface {
   /**
    * Use {@link #getDeclaringClass()} instead
    */
-  public @Deprecated SootClass declaringClass();
+  @Deprecated SootClass declaringClass();
 
   /**
    * Use {@link #getName()} instead
    */
-  public @Deprecated String name();
+  @Deprecated String name();
 
   /**
    * Use {@link #getParameterTypes()} instead
    */
-  public @Deprecated List<Type> parameterTypes();
+  @Deprecated List<Type> parameterTypes();
 
   /**
    * Use {@link #getReturnType()} instead
    */
-  public @Deprecated Type returnType();
+  @Deprecated Type returnType();
 
-  public boolean isStatic();
+  @Override boolean isStatic();
 
-  public NumberedString getSubSignature();
+  NumberedString getSubSignature();
 
-  public String getSignature();
+  @Override String getSignature();
 
   /**
    * Use {@link #getParameterType(int)} instead
    */
-  public @Deprecated Type parameterType(int i);
+  @Deprecated Type parameterType(int i);
 
   /**
    * Resolves this method call, i.e., finds the method to which this reference points. This method does not handle virtual
@@ -74,7 +74,7 @@ public interface SootMethodRef extends SootMethodInterface {
    * @throws ClassResolutionFailedException
    *           (can be suppressed by {@link Options#set_ignore_resolution_errors(boolean)})
    */
-  public SootMethod resolve();
+  SootMethod resolve();
 
   /**
    * Tries to resolve this method call, i.e., tries to finds the method to which this reference points. This method does not
@@ -87,6 +87,6 @@ public interface SootMethodRef extends SootMethodInterface {
    *
    * @return The immediate target if this method reference if available, <code>null</code> otherwise
    */
-  public SootMethod tryResolve();
+  SootMethod tryResolve();
 
 }

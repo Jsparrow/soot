@@ -38,14 +38,14 @@ public class SHashMultiMap<K, V> extends HashMultiMap<K, V> {
   private static final long serialVersionUID = -860669798578291979L;
 
   public SHashMultiMap() {
-    super();
   }
 
   public SHashMultiMap(MultiMap<K, V> m) {
     super(m);
   }
 
-  protected Set<V> newSet() {
-    return new LinkedHashSet<V>(4);
+  @Override
+protected Set<V> newSet() {
+    return new LinkedHashSet<>(4);
   }
 }

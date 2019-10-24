@@ -27,15 +27,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Collections;
 
 public class ReflectiveCalls {
 
-  private final static Set<String> classForName = new HashSet<String>();
-  private final static Set<String> classNewInstance = new HashSet<String>();
-  private final static Set<String> constructorNewInstance = new HashSet<String>();
-  private final static Set<String> methodInvoke = new HashSet<String>();
-  private final static Set<String> fieldSet = new HashSet<String>();
-  private final static Set<String> fieldGet = new HashSet<String>();
+  private static final Set<String> classForName = Collections.unmodifiableSet(new HashSet<String>());
+  private static final Set<String> classNewInstance = Collections.unmodifiableSet(new HashSet<String>());
+  private static final Set<String> constructorNewInstance = Collections.unmodifiableSet(new HashSet<String>());
+  private static final Set<String> methodInvoke = Collections.unmodifiableSet(new HashSet<String>());
+  private static final Set<String> fieldSet = Collections.unmodifiableSet(new HashSet<String>());
+  private static final Set<String> fieldGet = Collections.unmodifiableSet(new HashSet<String>());
 
   static {
     // soot will add initialization code here

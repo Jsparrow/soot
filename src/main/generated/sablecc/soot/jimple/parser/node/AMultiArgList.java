@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AMultiArgList extends PArgList
 {
-    private PImmediate _immediate_;
-    private TComma _comma_;
-    private PArgList _argList_;
+    private PImmediate immediate;
+    private TComma comma;
+    private PArgList argList;
 
     public AMultiArgList()
     {
@@ -34,9 +34,9 @@ public final class AMultiArgList extends PArgList
     public Object clone()
     {
         return new AMultiArgList(
-            cloneNode(this._immediate_),
-            cloneNode(this._comma_),
-            cloneNode(this._argList_));
+            cloneNode(this.immediate),
+            cloneNode(this.comma),
+            cloneNode(this.argList));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class AMultiArgList extends PArgList
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class AMultiArgList extends PArgList
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     public TComma getComma()
     {
-        return this._comma_;
+        return this.comma;
     }
 
     public void setComma(TComma node)
     {
-        if(this._comma_ != null)
+        if(this.comma != null)
         {
-            this._comma_.parent(null);
+            this.comma.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AMultiArgList extends PArgList
             node.parent(this);
         }
 
-        this._comma_ = node;
+        this.comma = node;
     }
 
     public PArgList getArgList()
     {
-        return this._argList_;
+        return this.argList;
     }
 
     public void setArgList(PArgList node)
     {
-        if(this._argList_ != null)
+        if(this.argList != null)
         {
-            this._argList_.parent(null);
+            this.argList.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class AMultiArgList extends PArgList
             node.parent(this);
         }
 
-        this._argList_ = node;
+        this.argList = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._immediate_)
-            + toString(this._comma_)
-            + toString(this._argList_);
+        return new StringBuilder().append("").append(toString(this.immediate)).append(toString(this.comma)).append(toString(this.argList)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
-        if(this._comma_ == child)
+        if(this.comma == child)
         {
-            this._comma_ = null;
+            this.comma = null;
             return;
         }
 
-        if(this._argList_ == child)
+        if(this.argList == child)
         {
-            this._argList_ = null;
+            this.argList = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class AMultiArgList extends PArgList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;
         }
 
-        if(this._comma_ == oldChild)
+        if(this.comma == oldChild)
         {
             setComma((TComma) newChild);
             return;
         }
 
-        if(this._argList_ == oldChild)
+        if(this.argList == oldChild)
         {
             setArgList((PArgList) newChild);
             return;

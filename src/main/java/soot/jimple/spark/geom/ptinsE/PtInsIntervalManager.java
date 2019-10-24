@@ -45,19 +45,23 @@ public class PtInsIntervalManager extends IFigureManager {
   SegmentNode header[] = { null, null, null };
   private boolean hasNewObject = false;
 
-  public SegmentNode[] getFigures() {
+  @Override
+public SegmentNode[] getFigures() {
     return header;
   }
 
-  public int[] getSizes() {
+  @Override
+public int[] getSizes() {
     return size;
   }
 
-  public boolean isThereUnprocessedFigures() {
+  @Override
+public boolean isThereUnprocessedFigures() {
     return hasNewObject;
   }
 
-  public void flush() {
+  @Override
+public void flush() {
     hasNewObject = false;
 
     for (int i = 0; i < Divisions; ++i) {
@@ -69,7 +73,8 @@ public class PtInsIntervalManager extends IFigureManager {
     }
   }
 
-  public SegmentNode addNewFigure(int code, RectangleNode pnew) {
+  @Override
+public SegmentNode addNewFigure(int code, RectangleNode pnew) {
     SegmentNode p;
 
     if (code == ALL_TO_ALL) {
@@ -113,12 +118,11 @@ public class PtInsIntervalManager extends IFigureManager {
       if (code == ONE_TO_ONE) {
         p = header[ONE_TO_ONE];
         while (p != null) {
-          if (p.I1 - p.I2 == pnew.I1 - pnew.I2) {
-            // On the same line
-            if (p.I1 <= pnew.I1 && p.I1 + p.L >= pnew.I1 + pnew.L) {
-              return null;
-            }
-          }
+          boolean condition = p.I1 - p.I2 == pnew.I1 - pnew.I2 && p.I1 <= pnew.I1 && p.I1 + p.L >= pnew.I1 + pnew.L;
+			// On the same line
+		if (condition) {
+		  return null;
+		}
 
           p = p.next;
         }
@@ -143,7 +147,8 @@ public class PtInsIntervalManager extends IFigureManager {
     return p;
   }
 
-  public void mergeFigures(int upperSize) {
+  @Override
+public void mergeFigures(int upperSize) {
     if (size[ONE_TO_ONE] > upperSize && header[ONE_TO_ONE].is_new == true) {
       // After the merging, we must propagate this interval, thus it has to be a new interval
 
@@ -162,16 +167,19 @@ public class PtInsIntervalManager extends IFigureManager {
       size[MANY_TO_ALL] = 1;
     }
 
-    if (size[ALL_TO_MANY] > upperSize && header[ALL_TO_MANY].is_new == true) {
-
-      header[0] = generate_all_to_many(header[ALL_TO_MANY]);
-      size[ALL_TO_MANY] = 1;
-    }
+    if (!(size[ALL_TO_MANY] > upperSize && header[ALL_TO_MANY].is_new == true)) {
+		return;
+	}
+	header[0] = generate_all_to_many(header[ALL_TO_MANY]);
+	size[ALL_TO_MANY] = 1;
   }
 
-  public void removeUselessSegments() {
+  @Override
+public void removeUselessSegments() {
     int i;
-    SegmentNode p, q, temp;
+    SegmentNode p;
+	SegmentNode q;
+	SegmentNode temp;
 
     p = header[ONE_TO_ONE];
     size[ONE_TO_ONE] = 0;
@@ -181,12 +189,11 @@ public class PtInsIntervalManager extends IFigureManager {
       for (i = 0; i < 2; ++i) {
         temp = header[i];
         while (temp != null) {
-          if (temp.I1 == 0 || ((temp.I1 <= p.I1) && (temp.I1 + temp.L >= p.I1 + p.L))) {
-            if (temp.I2 == 0 || ((temp.I2 <= p.I2) && (temp.I2 + temp.L >= p.I2 + p.L))) {
-              contained = true;
-              break;
-            }
-          }
+          boolean condition = (temp.I1 == 0 || ((temp.I1 <= p.I1) && (temp.I1 + temp.L >= p.I1 + p.L))) && (temp.I2 == 0 || ((temp.I2 <= p.I2) && (temp.I2 + temp.L >= p.I2 + p.L)));
+		if (condition) {
+		  contained = true;
+		  break;
+		}
 
           temp = temp.next;
         }
@@ -208,7 +215,9 @@ public class PtInsIntervalManager extends IFigureManager {
    * Merge all the context sensitive intervals. The result is in the form (p, q, 0, I, L).
    */
   private SegmentNode generate_all_to_many(SegmentNode mp) {
-    long left, right, t;
+    long left;
+	long right;
+	long t;
     SegmentNode p;
 
     left = mp.I2;
@@ -238,7 +247,9 @@ public class PtInsIntervalManager extends IFigureManager {
    * The result is in the form: (p, q, I, 0, L)
    */
   private SegmentNode generate_many_to_all(SegmentNode mp) {
-    long left, right, t;
+    long left;
+	long right;
+	long t;
     SegmentNode p;
 
     left = mp.I1;
@@ -268,9 +279,12 @@ public class PtInsIntervalManager extends IFigureManager {
   // Clean garbages in list that the information is already covered by mp
   // BTW, we do some simple concatenation
   private void clean_garbage_many_to_all(SegmentNode mp) {
-    SegmentNode p, q, list;
+    SegmentNode p;
+	SegmentNode q;
+	SegmentNode list;
     int num;
-    long right, left;
+    long right;
+	long left;
 
     list = header[1];
     p = q = null;
@@ -320,9 +334,12 @@ public class PtInsIntervalManager extends IFigureManager {
   }
 
   private void clean_garbage_all_to_many(SegmentNode mp) {
-    SegmentNode p, q, list;
+    SegmentNode p;
+	SegmentNode q;
+	SegmentNode list;
     int num;
-    long right, left;
+    long right;
+	long left;
 
     list = header[0];
     p = q = null;
@@ -375,7 +392,9 @@ public class PtInsIntervalManager extends IFigureManager {
    * Eliminate the redundant ONE_TO_ONE figures
    */
   private void clean_garbage_one_to_one(SegmentNode predator) {
-    SegmentNode p, q, list;
+    SegmentNode p;
+	SegmentNode q;
+	SegmentNode list;
     int num;
 
     list = header[ONE_TO_ONE];
@@ -387,8 +406,7 @@ public class PtInsIntervalManager extends IFigureManager {
       if ((predator.I2 - predator.I1 == list.I2 - list.I1) && predator.I1 <= list.I1
           && (predator.I1 + predator.L >= list.I2 + L)) {
         // The checked figure is completely contained in the predator
-        // So we ignore it
-        ;
+			// So we ignore it
       } else {
         if (q == null) {
           p = q = list;

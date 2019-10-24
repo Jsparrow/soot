@@ -77,7 +77,8 @@ public class StaticMethodBinder extends SceneTransformer {
     return G.v().soot_jimple_toolkits_invoke_StaticMethodBinder();
   }
 
-  protected void internalTransform(String phaseName, Map opts) {
+  @Override
+protected void internalTransform(String phaseName, Map opts) {
     Filter instanceInvokesFilter = new Filter(new InstanceInvokeEdgesPred());
     SMBOptions options = new SMBOptions(opts);
     String modifierOptions = PhaseOptions.getString(opts, "allowed-modifier-changes");
@@ -108,12 +109,10 @@ public class StaticMethodBinder extends SceneTransformer {
 
         JimpleBody b = (JimpleBody) container.getActiveBody();
 
-        List<Unit> unitList = new ArrayList<Unit>();
+        List<Unit> unitList = new ArrayList<>();
         unitList.addAll(b.getUnits());
-        Iterator<Unit> unitIt = unitList.iterator();
-
-        while (unitIt.hasNext()) {
-          Stmt s = (Stmt) unitIt.next();
+        for (Unit anUnitList : unitList) {
+          Stmt s = (Stmt) anUnitList;
           if (!s.containsInvokeExpr()) {
             continue;
           }
@@ -175,7 +174,8 @@ public class StaticMethodBinder extends SceneTransformer {
               Iterator newUnits = ct.getActiveBody().getUnits().iterator();
 
               while (newUnits.hasNext()) {
-                Stmt oldStmt, newStmt;
+                Stmt oldStmt;
+				Stmt newStmt;
                 oldStmt = (Stmt) oldUnits.next();
                 newStmt = (Stmt) newUnits.next();
 
@@ -230,7 +230,8 @@ public class StaticMethodBinder extends SceneTransformer {
             // type.
             // For instance, Bottle.price_static takes a cost.
             // Cost is an interface implemented by Bottle.
-            SootClass localType, parameterType;
+            SootClass localType;
+			SootClass parameterType;
             localType = ((RefType) ((InstanceInvokeExpr) ie).getBase().getType()).getSootClass();
             parameterType = target.getDeclaringClass();
 

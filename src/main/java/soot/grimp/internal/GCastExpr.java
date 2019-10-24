@@ -33,7 +33,8 @@ public class GCastExpr extends AbstractCastExpr implements Precedence {
     super(Grimp.v().newExprBox(op), type);
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 850;
   }
 
@@ -41,16 +42,18 @@ public class GCastExpr extends AbstractCastExpr implements Precedence {
     String rightOp = opString;
 
     if (op instanceof Precedence && ((Precedence) op).getPrecedence() < getPrecedence()) {
-      rightOp = "(" + rightOp + ")";
+      rightOp = new StringBuilder().append("(").append(rightOp).append(")").toString();
     }
     return leftString + rightOp;
   }
 
-  public String toString() {
-    return toString("(" + getCastType().toString() + ") ", getOp(), getOp().toString());
+  @Override
+public String toString() {
+    return toString(new StringBuilder().append("(").append(getCastType().toString()).append(") ").toString(), getOp(), getOp().toString());
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GCastExpr(Grimp.cloneIfNecessary(getOp()), getCastType());
   }
 

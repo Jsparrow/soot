@@ -42,7 +42,8 @@ public class BoundedPriorityList implements Collection {
     this.worklist = new ArrayList(list);
   }
 
-  public boolean isEmpty() {
+  @Override
+public boolean isEmpty() {
     return worklist.isEmpty();
   }
 
@@ -50,7 +51,8 @@ public class BoundedPriorityList implements Collection {
     return worklist.remove(0);
   }
 
-  public boolean add(Object toadd) {
+  @Override
+public boolean add(Object toadd) {
     if (contains(toadd)) {
       return false;
     }
@@ -75,7 +77,8 @@ public class BoundedPriorityList implements Collection {
   /**
    * {@inheritDoc}
    */
-  public boolean addAll(Collection c) {
+  @Override
+public boolean addAll(Collection c) {
     boolean addedSomething = false;
     for (Iterator iter = c.iterator(); iter.hasNext();) {
       Object o = iter.next();
@@ -94,91 +97,104 @@ public class BoundedPriorityList implements Collection {
   /**
    * {@inheritDoc}
    */
-  public void clear() {
+  @Override
+public void clear() {
     worklist.clear();
   }
 
   /**
    * {@inheritDoc}
    */
-  public boolean contains(Object o) {
+  @Override
+public boolean contains(Object o) {
     return worklist.contains(o);
   }
 
   /**
    * {@inheritDoc}
    */
-  public boolean containsAll(Collection c) {
+  @Override
+public boolean containsAll(Collection c) {
     return worklist.containsAll(c);
   }
 
   /**
    * {@inheritDoc}
    */
-  public Iterator iterator() {
+  @Override
+public Iterator iterator() {
     return worklist.iterator();
   }
 
   /**
    * {@inheritDoc}
    */
-  public boolean remove(Object o) {
+  @Override
+public boolean remove(Object o) {
     return worklist.remove(o);
   }
 
   /**
    * {@inheritDoc}
    */
-  public boolean removeAll(Collection c) {
+  @Override
+public boolean removeAll(Collection c) {
     return worklist.removeAll(c);
   }
 
   /**
    * {@inheritDoc}
    */
-  public boolean retainAll(Collection c) {
+  @Override
+public boolean retainAll(Collection c) {
     return worklist.retainAll(c);
   }
 
   /**
    * {@inheritDoc}
    */
-  public int size() {
+  @Override
+public int size() {
     return worklist.size();
   }
 
   /**
    * {@inheritDoc}
    */
-  public Object[] toArray() {
+  @Override
+public Object[] toArray() {
     return worklist.toArray();
   }
 
   /**
    * {@inheritDoc}
    */
-  public Object[] toArray(Object[] a) {
+  @Override
+public Object[] toArray(Object[] a) {
     return worklist.toArray(a);
   }
 
   /**
    * {@inheritDoc}
    */
-  public String toString() {
+  @Override
+public String toString() {
     return worklist.toString();
   }
 
   /**
    * {@inheritDoc}
    */
-  public boolean equals(Object obj) {
+  @Override
+public boolean equals(Object obj) {
     return worklist.equals(obj);
   }
 
   /**
    * {@inheritDoc}
    */
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return worklist.hashCode();
   }
 }

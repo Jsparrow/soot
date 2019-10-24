@@ -18,6 +18,8 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * A NumericLiteral is a raw literal, produced by the parser.
  * NumericLiterals are rewritten to the best matching concrete
@@ -26,70 +28,9 @@ import soot.coffi.CoffiMethodSource;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.ast:18
  */
-public class NumericLiteral extends Literal implements Cloneable {
-  /**
-   * @apilevel low-level
-   */
-  public void flushCache() {
-    super.flushCache();
-    type_computed = false;
-    type_value = null;
-  }
-  /**
-   * @apilevel internal
-   */
-  public void flushCollectionCache() {
-    super.flushCollectionCache();
-  }
-  /**
-   * @apilevel internal
-   */
-  @SuppressWarnings({"unchecked", "cast"})
-  public NumericLiteral clone() throws CloneNotSupportedException {
-    NumericLiteral node = (NumericLiteral)super.clone();
-    node.type_computed = false;
-    node.type_value = null;
-    node.in$Circle(false);
-    node.is$Final(false);
-    return node;
-  }
-  /**
-   * @apilevel internal
-   */
-  @SuppressWarnings({"unchecked", "cast"})
-  public NumericLiteral copy() {
-    try {
-      NumericLiteral node = (NumericLiteral) clone();
-      node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
-      return node;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
-        getClass().getName());
-    }
-  }
-  /**
-   * Create a deep copy of the AST subtree at this node.
-   * The copy is dangling, i.e. has no parent.
-   * @return dangling copy of the subtree at this node
-   * @apilevel low-level
-   */
-  @SuppressWarnings({"unchecked", "cast"})
-  public NumericLiteral fullCopy() {
-    NumericLiteral tree = (NumericLiteral) copy();
-    if (children != null) {
-      for (int i = 0; i < children.length; ++i) {
-        ASTNode child = (ASTNode) children[i];
-        if(child != null) {
-          child = child.fullCopy();
-          tree.setChild(child, i);
-        }
-      }
-    }
-    return tree;
-  }
-  /**
+public class NumericLiteral extends Literal {
+  private static final Logger logger = LoggerFactory.getLogger(NumericLiteral.class);
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:321
@@ -97,28 +38,28 @@ public class NumericLiteral extends Literal implements Cloneable {
   
 
 	public static final int DECIMAL = 0;
-  /**
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:322
    */
   
 	public static final int HEXADECIMAL = 1;
-  /**
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:323
    */
   
 	public static final int OCTAL = 2;
-  /**
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:324
    */
   
 	public static final int BINARY = 3;
-  /**
+/**
 	 * The trimmed digits.
 	 * @ast method 
    * @aspect Literals
@@ -130,16 +71,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 	 * The trimmed digits.
 	 */
 	protected String digits = "";
-  /**
-	 * Sets the trimmed digits of this literal.
-	 * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:387
-   */
-  public void setDigits(String digits) {
-		this.digits = digits;
-	}
-  /**
+/**
 	 * The literal kind tells which kind of literal it is;
 	 * it's either a DECIMAL, HEXADECIMAL, OCTAL or BINARY literal.
 	 * @ast method 
@@ -153,7 +85,171 @@ public class NumericLiteral extends Literal implements Cloneable {
 	 * it's either a DECIMAL, HEXADECIMAL, OCTAL or BINARY literal.
 	 */
 	protected int kind = NumericLiteral.DECIMAL;
-  /**
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:489
+   */
+  
+		private StringBuffer buf = new StringBuffer();
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:490
+   */
+  
+		private int idx = 0;
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:491
+   */
+  
+		private boolean whole;
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:492
+   */
+  // have whole part?
+		private boolean fraction;
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:493
+   */
+  // have fraction part?
+		private boolean exponent;
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:494
+   */
+  // have exponent part?
+		private boolean floating;
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:495
+   */
+  // is floating point?
+		private boolean isFloat;
+/**
+   * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:496
+   */
+  
+		private boolean isLong;
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+/**
+   * @ast method 
+   * 
+   */
+  public NumericLiteral() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public NumericLiteral(String p0) {
+    setLITERAL(p0);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public NumericLiteral(beaver.Symbol p0) {
+    setLITERAL(p0);
+  }
+/**
+   * @apilevel low-level
+   */
+  @Override
+public void flushCache() {
+    super.flushCache();
+    type_computed = false;
+    type_value = null;
+  }
+/**
+   * @apilevel internal
+   */
+  @Override
+public void flushCollectionCache() {
+    super.flushCollectionCache();
+  }
+/**
+   * @apilevel internal
+   */
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
+  public NumericLiteral clone() throws CloneNotSupportedException {
+    NumericLiteral node = (NumericLiteral)super.clone();
+    node.type_computed = false;
+    node.type_value = null;
+    node.in$Circle(false);
+    node.is$Final(false);
+    return node;
+  }
+/**
+   * @apilevel internal
+   */
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
+  public NumericLiteral copy() {
+    try {
+      NumericLiteral node = (NumericLiteral) clone();
+      node.parent = null;
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
+      return node;
+    } catch (CloneNotSupportedException e) {
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
+        getClass().getName());
+    }
+  }
+/**
+   * Create a deep copy of the AST subtree at this node.
+   * The copy is dangling, i.e. has no parent.
+   * @return dangling copy of the subtree at this node
+   * @apilevel low-level
+   */
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
+  public NumericLiteral fullCopy() {
+    NumericLiteral tree = (NumericLiteral) copy();
+    if (children != null) {
+      for (int i = 0; i < children.length; ++i) {
+        ASTNode child = (ASTNode) children[i];
+        if(child != null) {
+          child = child.fullCopy();
+          tree.setChild(child, i);
+        }
+      }
+    }
+    return tree;
+  }
+/**
+	 * Sets the trimmed digits of this literal.
+	 * @ast method 
+   * @aspect Literals
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:387
+   */
+  public void setDigits(String digits) {
+		this.digits = digits;
+	}
+/**
 	 * Sets the literal kind.
 	 * @ast method 
    * @aspect Literals
@@ -162,63 +258,7 @@ public class NumericLiteral extends Literal implements Cloneable {
   public void setKind(int kind) {
 		this.kind = kind;
 	}
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:489
-   */
-  
-		private StringBuffer buf = new StringBuffer();
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:490
-   */
-  
-		private int idx = 0;
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:491
-   */
-  
-		private boolean whole;
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:492
-   */
-  // have whole part?
-		private boolean fraction;
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:493
-   */
-  // have fraction part?
-		private boolean exponent;
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:494
-   */
-  // have exponent part?
-		private boolean floating;
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:495
-   */
-  // is floating point?
-		private boolean isFloat;
-  /**
-   * @ast method 
-   * @aspect Literals
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:496
-   */
-  
-		private boolean isLong;
-  /**
+/**
  		 * @return a readable name to describe this literal.
  		 * @ast method 
    * @aspect Literals
@@ -246,12 +286,13 @@ public class NumericLiteral extends Literal implements Cloneable {
 					name = "binary";
 					break;
 			}
-			if (floating)
+			if (floating) {
 				return name+" floating point";
-			else
+			} else {
 				return name;
+			}
 		}
-  /**
+/**
 		 * The next character in the literal is a significant character;
 		 * push it onto the buffer.
 		 * @ast method 
@@ -267,7 +308,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private void pushChar() {
 			buf.append(getLITERAL().charAt(idx++));
 		}
-  /**
+/**
 		 * Skip ahead n chracters in the literal.
 		 * @ast method 
    * @aspect Literals
@@ -281,7 +322,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private void skip(int n) {
 			idx += n;
 		}
-  /**
+/**
 		 * @return true if there exists at least n more characters
 		 * in the literal
 		 * @ast method 
@@ -297,7 +338,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private boolean have(int n) {
 			return getLITERAL().length() >= idx+n;
 		}
-  /**
+/**
 		 * Look at the n'th next character.
 		 * @ast method 
    * @aspect Literals
@@ -311,7 +352,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private char peek(int n) {
 			return getLITERAL().charAt(idx+n);
 		}
-  /**
+/**
 		 * @return true if the character c is a decimal digit
 		 * @ast method 
    * @aspect Literals
@@ -325,7 +366,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private static final boolean isDecimalDigit(char c) {
 			return c == '_' || c >= '0' && c <= '9';
 		}
-  /**
+/**
 		 * @return true if the character c is a hexadecimal digit
 		 * @ast method 
    * @aspect Literals
@@ -341,7 +382,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 				c >= 'a' && c <= 'f' ||
 				c >= 'A' && c <= 'F';
 		}
-  /**
+/**
 		 * @return true if the character c is a binary digit
 		 * @ast method 
    * @aspect Literals
@@ -355,7 +396,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private static final boolean isBinaryDigit(char c) {
 			return c == '_' || c == '0' || c == '1';
 		}
-  /**
+/**
 		 * @return true if the character c is an underscore
 		 * @ast method 
    * @aspect Literals
@@ -369,7 +410,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private static final boolean isUnderscore(char c) {
 			return c == '_';
 		}
-  /**
+/**
 		 * Parse a literal. If there is a syntax error in the literal,
 		 * an IllegalLiteral will be returned.
 		 * @ast method 
@@ -383,21 +424,23 @@ public class NumericLiteral extends Literal implements Cloneable {
 		 * an IllegalLiteral will be returned.
 		 */
 		public Literal parse() {
-			if (getLITERAL().length() == 0)
+			if (getLITERAL().isEmpty()) {
 				throw new IllegalStateException("Empty NumericLiteral");
+			}
 
 			kind = classifyLiteral();
 
 			Literal literal;
-			if (!floating)
+			if (!floating) {
 				literal = parseDigits();
-			else
+			} else {
 				literal = parseFractionPart();
+			}
 			literal.setStart(LITERALstart);
 			literal.setEnd(LITERALend);
 			return literal;
 		}
-  /**
+/**
 		 * Classify the literal.
 		 *
 		 * @return either DECIMAL, HEXADECIMAL or BINARY
@@ -433,7 +476,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 				return DECIMAL;
 			}
 		}
-  /**
+/**
 		 * If the current character is an underscore, the previous and next
 		 * characters need to be valid digits or underscores.
 		 *
@@ -452,8 +495,9 @@ public class NumericLiteral extends Literal implements Cloneable {
 		 */
 		private boolean misplacedUnderscore() {
 			// first and last characters are never allowed to be an underscore
-			if (idx == 0 || idx+1 == getLITERAL().length())
+			if (idx == 0 || idx+1 == getLITERAL().length()) {
 				return true;
+			}
 
 			switch (kind) {
 				case DECIMAL:
@@ -465,7 +509,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 			}
 			throw new IllegalStateException("Unexpected literal kind");
 		}
-  /**
+/**
 		 * Report an illegal digit.
 		 * @ast method 
    * @aspect Literals
@@ -477,11 +521,11 @@ public class NumericLiteral extends Literal implements Cloneable {
 		 * Report an illegal digit.
 		 */
 		private Literal syntaxError(String msg) {
-			String err = "in "+name()+" literal "+
-				"\""+getLITERAL()+"\""+": "+msg;
+			String err = new StringBuilder().append("in ").append(name()).append(" literal ").append("\"").append(getLITERAL()).append("\"")
+					.append(": ").append(msg).toString();
 			return new IllegalLiteral(err);
 		}
-  /**
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:662
@@ -489,9 +533,9 @@ public class NumericLiteral extends Literal implements Cloneable {
   
 
 		private Literal unexpectedCharacter(char c) {
-			return syntaxError("unexpected character '"+c+"'; not a valid digit");
+			return syntaxError(new StringBuilder().append("unexpected character '").append(c).append("'; not a valid digit").toString());
 		}
-  /**
+/**
 		 * Returns a string of only the lower case digits of the
 		 * parsed numeric literal.
 		 * @ast method 
@@ -507,7 +551,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 		private String getLiteralString() {
 			return buf.toString().toLowerCase();
 		}
-  /**
+/**
 		 * Parse and build an IntegerLiteral, LongLiteral,
 		 * FloatingPointLiteral or DoubleLiteral. Returns an
 		 * IllegalLiteral if the numeric literal can not be
@@ -537,47 +581,54 @@ public class NumericLiteral extends Literal implements Cloneable {
 			setDigits(buf.toString().toLowerCase());
 
 			if (!floating) {
-				if (!whole)
+				if (!whole) {
 					return syntaxError("at least one digit is required");
+				}
 
+				boolean condition = kind == DECIMAL && digits.charAt(0) == '0';
 				// check if the literal is octal, and if so report illegal digits
-				if (kind == DECIMAL) {
-					if (digits.charAt(0) == '0') {
-						kind = OCTAL;
-						for (int idx = 1; idx < digits.length(); ++idx) {
-							char c = digits.charAt(idx);
-							if (c < '0' || c > '7')
-								return unexpectedCharacter(c);
+				if (condition) {
+					kind = OCTAL;
+					for (int idx = 1; idx < digits.length(); ++idx) {
+						char c = digits.charAt(idx);
+						if (c < '0' || c > '7') {
+							return unexpectedCharacter(c);
 						}
 					}
 				}
 				
-				if (isLong)
+				if (isLong) {
 					literal = new LongLiteral(getLITERAL());
-				else
+				} else {
 					literal = new IntegerLiteral(getLITERAL());
+				}
 			} else {
-				if (kind == HEXADECIMAL && !exponent)
+				if (kind == HEXADECIMAL && !exponent) {
 					return syntaxError("exponent is required");
+				}
 
-				if (!(whole || fraction))
+				if (!(whole || fraction)) {
 					return syntaxError("at least one digit is required in "+
 							"either the whole or fraction part");
+				}
 
 				if (kind == HEXADECIMAL)
+				 {
 					digits = "0x"+digits;// digits parsed with Float or Double
+				}
 
-				if (isFloat)
+				if (isFloat) {
 					literal = new FloatingPointLiteral(getLITERAL());
-				else
+				} else {
 					literal = new DoubleLiteral(getLITERAL());
+				}
 			}
 
 			literal.setDigits(getDigits());
 			literal.setKind(getKind());
 			return literal;
 		}
-  /**
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:730
@@ -590,36 +641,40 @@ public class NumericLiteral extends Literal implements Cloneable {
 				char c = peek(0);
 				switch (c) {
 					case '_':
-						if (misplacedUnderscore())
+						if (misplacedUnderscore()) {
 							return syntaxError("misplaced underscore - underscores may only "+
 									"be used within sequences of digits");
+						}
 						skip(1);
 						continue;
 					case '.':
-						if (kind != DECIMAL && kind != HEXADECIMAL)
+						if (kind != DECIMAL && kind != HEXADECIMAL) {
 							return unexpectedCharacter(c);
+						}
 						return parseFractionPart();
 					case 'l':
 					case 'L':
-						if (have(2))
-							return syntaxError("extra digits/characters "+
-								"after suffix "+c);
+						if (have(2)) {
+							return syntaxError(new StringBuilder().append("extra digits/characters ").append("after suffix ").append(c).toString());
+						}
 						isLong = true;
 						skip(1);
 						continue;
 					case 'f':
 					case 'F':
-						if (kind == BINARY)
+						if (kind == BINARY) {
 							return unexpectedCharacter(c);
+						}
 						isFloat = true;
 					case 'd':
 					case 'D':
-						if (kind == BINARY)
+						if (kind == BINARY) {
 							return unexpectedCharacter(c);
+						}
 						if (kind != HEXADECIMAL) {
-							if (have(2))
-								return syntaxError("extra digits/characters "+
-										"after type suffix "+c);
+							if (have(2)) {
+								return syntaxError(new StringBuilder().append("extra digits/characters ").append("after type suffix ").append(c).toString());
+							}
 							floating = true;
 							skip(1);
 						} else {
@@ -635,37 +690,41 @@ public class NumericLiteral extends Literal implements Cloneable {
 							return parseExponentPart();
 
 						} else if (c == 'f' || c == 'F') {
-							if (have(2))
-								return syntaxError("extra digits/characters "+
-										"after type suffix "+c);
+							if (have(2)) {
+								return syntaxError(new StringBuilder().append("extra digits/characters ").append("after type suffix ").append(c).toString());
+							}
 							floating = true;
 							isFloat = true;
 							skip(1);
 						} else if (c == 'd' || c == 'D') {
-							if (have(2))
-								return syntaxError("extra digits/characters "+
-										"after type suffix "+c);
+							if (have(2)) {
+								return syntaxError(new StringBuilder().append("extra digits/characters ").append("after type suffix ").append(c).toString());
+							}
 							floating = true;
 							skip(1);
 						} else {
-							if (!isDecimalDigit(c))
+							if (!isDecimalDigit(c)) {
 								return unexpectedCharacter(c);
+							}
 							whole = true;
 							pushChar();
 						}
 						continue;
 					case HEXADECIMAL:
-						if (c == 'p' || c == 'P')
+						if (c == 'p' || c == 'P') {
 							return parseExponentPart();
+						}
 
-						if (!isHexadecimalDigit(c))
+						if (!isHexadecimalDigit(c)) {
 							return unexpectedCharacter(c);
+						}
 						whole = true;
 						pushChar();
 						continue;
 					case BINARY:
-						if (!isBinaryDigit(c))
+						if (!isBinaryDigit(c)) {
 							return unexpectedCharacter(c);
+						}
 						whole = true;
 						pushChar();
 						continue;
@@ -674,7 +733,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 
 			return buildLiteral();
 		}
-  /**
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:821
@@ -692,9 +751,10 @@ public class NumericLiteral extends Literal implements Cloneable {
 				char c = peek(0);
 				switch (c) {
 					case '_':
-						if (misplacedUnderscore())
+						if (misplacedUnderscore()) {
 							return syntaxError("misplaced underscore - underscores may only "+
 									"be used as separators within sequences of valid digits");
+						}
 						skip(1);
 						continue;
 					case '.':
@@ -706,30 +766,33 @@ public class NumericLiteral extends Literal implements Cloneable {
 						return parseExponentPart();
 
 					} else if (c == 'f' || c == 'F') {
-						if (have(2))
-							return syntaxError("extra digits/characters "+
-									"after type suffix "+c);
+						if (have(2)) {
+							return syntaxError(new StringBuilder().append("extra digits/characters ").append("after type suffix ").append(c).toString());
+						}
 						floating = true;
 						isFloat = true;
 						skip(1);
 					} else if (c == 'd' || c == 'D') {
-						if (have(2))
-							return syntaxError("extra digits/characters "+
-									"after type suffix "+c);
+						if (have(2)) {
+							return syntaxError(new StringBuilder().append("extra digits/characters ").append("after type suffix ").append(c).toString());
+						}
 						floating = true;
 						skip(1);
 					} else {
-						if (!isDecimalDigit(c))
+						if (!isDecimalDigit(c)) {
 							return unexpectedCharacter(c);
+						}
 						pushChar();
 						fraction = true;
 					}
 				} else { // kind == HEXADECIMAL
-					if (c == 'p' || c == 'P')
+					if (c == 'p' || c == 'P') {
 						return parseExponentPart();
+					}
 
-					if (!isHexadecimalDigit(c))
+					if (!isHexadecimalDigit(c)) {
 						return unexpectedCharacter(c);
+					}
 					fraction = true;
 					pushChar();
 				}
@@ -737,7 +800,7 @@ public class NumericLiteral extends Literal implements Cloneable {
 
 			return buildLiteral();
 		}
-  /**
+/**
    * @ast method 
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:878
@@ -751,24 +814,24 @@ public class NumericLiteral extends Literal implements Cloneable {
 			pushChar();
 
 			// exponent sign
-			if (have(1) && (peek(0) == '+' || peek(0) == '-'))
+			if (have(1) && (peek(0) == '+' || peek(0) == '-')) {
 				pushChar();
+			}
 
 			// while we have at least one more character/digit
 			while (have(1)) {
 				char c = peek(0);
 				switch (c) {
 					case '_':
-						if (misplacedUnderscore())
+						if (misplacedUnderscore()) {
 							return syntaxError("misplaced underscore - underscores may only "+
 									"be used as separators within sequences of valid digits");
+						}
 						skip(1);
 						continue;
 					case '-':
 					case '+':
-						return syntaxError("exponent sign character is only allowed as "+
-								"the first character of the exponent part of a "+
-								"floating point literal");
+						return syntaxError(new StringBuilder().append("exponent sign character is only allowed as ").append("the first character of the exponent part of a ").append("floating point literal").toString());
 					case '.':
 						return syntaxError("multiple decimal periods are not allowed");
 					case 'p':
@@ -779,32 +842,24 @@ public class NumericLiteral extends Literal implements Cloneable {
 						isFloat = true;
 					case 'd':
 					case 'D':
-						if (have(2))
-							return syntaxError("extra digits/characters "+
-									"after type suffix "+c);
+						if (have(2)) {
+							return syntaxError(new StringBuilder().append("extra digits/characters ").append("after type suffix ").append(c).toString());
+						}
 						skip(1);
 						continue;
 				}
 
 				// exponent is a signed integer
-				if (!isDecimalDigit(c))
+				if (!isDecimalDigit(c)) {
 					return unexpectedCharacter(c);
+				}
 				pushChar();
 				exponent = true;
 			}
 
 			return buildLiteral();
 		}
-  /**
-   * @ast method 
-   * 
-   */
-  public NumericLiteral() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -812,72 +867,65 @@ public class NumericLiteral extends Literal implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public NumericLiteral(String p0) {
-    setLITERAL(p0);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public NumericLiteral(beaver.Symbol p0) {
-    setLITERAL(p0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 0;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return true;
   }
-  /**
+/**
    * Replaces the lexeme LITERAL.
    * @param value The new value for the lexeme LITERAL.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setLITERAL(String value) {
+  @Override
+public void setLITERAL(String value) {
     tokenString_LITERAL = value;
   }
-  /**
+/**
    * JastAdd-internal setter for lexeme LITERAL using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
-  public void setLITERAL(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setLITERAL is only valid for String lexemes");
+  @Override
+public void setLITERAL(beaver.Symbol symbol) {
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setLITERAL is only valid for String lexemes");
+	}
     tokenString_LITERAL = (String)symbol.value;
     LITERALstart = symbol.getStart();
     LITERALend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme LITERAL.
    * @return The value for the lexeme LITERAL.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public String getLITERAL() {
+  @Override
+public String getLITERAL() {
     return tokenString_LITERAL != null ? tokenString_LITERAL : "";
   }
-  /**
+/**
 	 * This is a refactored version of Literal.parseLong which supports
 	 * binary literals. This version of parseLong is implemented as an
 	 * attribute rather than a static method. Perhaps some slight
@@ -909,7 +957,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * Parse a hexadecimal long literal.
 	 *
 	 * @throws NumberFormatException if the literal is too large.
@@ -922,16 +970,19 @@ public class NumericLiteral extends Literal implements Cloneable {
     try {
 		long val = 0;
 		if (digits.length() > 16) {
-			for (int i = 0; i < digits.length()-16; i++)
-				if (digits.charAt(i) != '0')
+			for (int i = 0; i < digits.length()-16; i++) {
+				if (digits.charAt(i) != '0') {
 					throw new NumberFormatException("");
+				}
+			}
 		}
 		for (int i = 0; i < digits.length(); i++) {
 			int c = digits.charAt(i);
-			if (c >= 'a' && c <= 'f')
+			if (c >= 'a' && c <= 'f') {
 				c = c - 'a' + 10;
-			else
-				c = c - '0';
+			} else {
+				c -= '0';
+			}
 			val = val * 16 + c;
 		}
 		return val;
@@ -939,7 +990,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * Parse an octal long literal.
 	 *
 	 * @throws NumberFormatException if the literal is too large.
@@ -952,14 +1003,17 @@ public class NumericLiteral extends Literal implements Cloneable {
     try {
 		long val = 0;
 		if (digits.length() > 21) {
-			for (int i = 0; i < digits.length() - 21; i++)
+			for (int i = 0; i < digits.length() - 21; i++) {
 				if (i == digits.length() - 21 - 1) {
-					if(digits.charAt(i) != '0' && digits.charAt(i) != '1')
+					if(digits.charAt(i) != '0' && digits.charAt(i) != '1') {
 						throw new NumberFormatException("");
+					}
 				} else {
-					if(digits.charAt(i) != '0')
+					if(digits.charAt(i) != '0') {
 						throw new NumberFormatException("");
+					}
 				}
+			}
 		}
 		for (int i = 0; i < digits.length(); i++) {
 			int c = digits.charAt(i) - '0';
@@ -970,7 +1024,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * Parse a binary long literal.
 	 *
 	 * @throws NumberFormatException if the literal is too large.
@@ -983,20 +1037,23 @@ public class NumericLiteral extends Literal implements Cloneable {
     try {
 		long val = 0;
 		if (digits.length() > 64) {
-			for (int i = 0; i < digits.length()-64; i++)
-				if (digits.charAt(i) != '0')
+			for (int i = 0; i < digits.length()-64; i++) {
+				if (digits.charAt(i) != '0') {
 					throw new NumberFormatException("");
+				}
+			}
 		}
 		for (int i = 0; i < digits.length(); ++i) {
-			if (digits.charAt(i) == '1')
+			if (digits.charAt(i) == '1') {
 				val |= 1L << (digits.length()-i-1);
+			}
 		}
 		return val;
 	}
     finally {
     }
   }
-  /**
+/**
 	 * Parse an octal long literal.
 	 * @throws NumberFormatException if the literal is too large.
 	 * @attribute syn
@@ -1011,28 +1068,32 @@ public class NumericLiteral extends Literal implements Cloneable {
 		for (int i = 0; i < digits.length(); i++) {
 			prev = val;
 			int c = digits.charAt(i);
-			if(c >= '0' && c <= '9')
-				c = c - '0';
-			else
+			if(c >= '0' && c <= '9') {
+				c -= '0';
+			} else {
 				throw new NumberFormatException("");
+			}
 			val = val * 10 + c;
 			if (val < prev) {
 				boolean negMinValue = i == (digits.length()-1) &&
 					isNegative() && val == Long.MIN_VALUE;
-				if (!negMinValue)
+				if (!negMinValue) {
 					throw new NumberFormatException("");
+				}
 			}
 		}
-		if (val == Long.MIN_VALUE)
+		if (val == Long.MIN_VALUE) {
 			return val;
-		if (val < 0)
+		}
+		if (val < 0) {
 			throw new NumberFormatException("");
+		}
 		return isNegative() ? -val : val;
 	}
     finally {
     }
   }
-  /**
+/**
 	 * Utility attribute for literal rewriting.
 	 * Any of the NumericLiteral subclasses have already
 	 * been rewritten and/or parsed, and should not be
@@ -1049,7 +1110,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:371
@@ -1060,7 +1121,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * Get the trimmed digits of this literal, excluding
 	 * underscore, prefix and suffix.
 	 * @attribute syn
@@ -1073,7 +1134,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * The literal kind tells which kind of literal it is;
 	 * it's either a DECIMAL, HEXADECIMAL, OCTAL or BINARY literal.
 	 * @attribute syn
@@ -1086,7 +1147,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * Get the radix of this literal.
 	 * @return 16 (hex), 10 (decimal), 8 (octal) or 2 (binary)
 	 * @attribute syn
@@ -1111,7 +1172,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * @return true if the literal is a decimal literal
 	 * @attribute syn
    * @aspect Literals
@@ -1123,7 +1184,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * @return true if the literal is a hexadecimal literal
 	 * @attribute syn
    * @aspect Literals
@@ -1135,7 +1196,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * @return true if the literal is an octal literal
 	 * @attribute syn
    * @aspect Literals
@@ -1147,7 +1208,7 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
+/**
 	 * @return true if the literal is a binary literal
 	 * @attribute syn
    * @aspect Literals
@@ -1159,22 +1220,15 @@ public class NumericLiteral extends Literal implements Cloneable {
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
 	 * The type of a NumericLiteral is undefined.
 	 * The literal must be parsed before it can have a type.
 	 * @attribute syn
    * @aspect Literals
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:463
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -1183,28 +1237,30 @@ public class NumericLiteral extends Literal implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {  return unknownType();  }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     // Declared in /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag at line 365
-    if(needsRewrite()) {
-      state().duringLiterals++;
-      ASTNode result = rewriteRule0();
-      state().duringLiterals--;
-      return result;
-    }
-
-    return super.rewriteTo();
+	if (!needsRewrite()) {
+		return super.rewriteTo();
+	}
+	state().duringLiterals++;
+	ASTNode result = rewriteRule0();
+	state().duringLiterals--;
+	return result;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/Literals.jrag:365
    * @apilevel internal
    */  private Literal rewriteRule0() {

@@ -43,27 +43,33 @@ public class DominatorTreeAdapter<N> implements DirectedGraph<DominatorNode<N>> 
     this.dt = dt;
   }
 
-  public List<DominatorNode<N>> getHeads() {
+  @Override
+public List<DominatorNode<N>> getHeads() {
     return dt.getHeads();
   }
 
-  public List<DominatorNode<N>> getTails() {
+  @Override
+public List<DominatorNode<N>> getTails() {
     return dt.getTails();
   }
 
-  public List<DominatorNode<N>> getPredsOf(DominatorNode<N> node) {
+  @Override
+public List<DominatorNode<N>> getPredsOf(DominatorNode<N> node) {
     return Collections.singletonList(dt.getParentOf(node));
   }
 
-  public List<DominatorNode<N>> getSuccsOf(DominatorNode<N> node) {
+  @Override
+public List<DominatorNode<N>> getSuccsOf(DominatorNode<N> node) {
     return dt.getChildrenOf(node);
   }
 
-  public Iterator<DominatorNode<N>> iterator() {
+  @Override
+public Iterator<DominatorNode<N>> iterator() {
     return dt.iterator();
   }
 
-  public int size() {
+  @Override
+public int size() {
     return dt.size();
   }
 }

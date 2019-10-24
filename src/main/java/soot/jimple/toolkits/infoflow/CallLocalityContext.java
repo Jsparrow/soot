@@ -44,10 +44,10 @@ public class CallLocalityContext {
   List<Boolean> isNodeLocal;
 
   public CallLocalityContext(List<EquivalentValue> nodes) {
-    this.nodes = new ArrayList<EquivalentValue>();
+    this.nodes = new ArrayList<>();
     this.nodes.addAll(nodes);
 
-    isNodeLocal = new ArrayList<Boolean>(nodes.size());
+    isNodeLocal = new ArrayList<>(nodes.size());
     for (int i = 0; i < nodes.size(); i++) {
       isNodeLocal.add(i, Boolean.FALSE);
     }
@@ -182,7 +182,7 @@ public class CallLocalityContext {
   }
 
   public List<Object> getLocalRefs() {
-    List<Object> ret = new ArrayList<Object>();
+    List<Object> ret = new ArrayList<>();
     for (int i = 0; i < nodes.size(); i++) {
       if (isNodeLocal.get(i).booleanValue()) {
         ret.add(nodes.get(i));
@@ -192,7 +192,7 @@ public class CallLocalityContext {
   }
 
   public List<Object> getSharedRefs() {
-    List<Object> ret = new ArrayList<Object>();
+    List<Object> ret = new ArrayList<>();
     for (int i = 0; i < nodes.size(); i++) {
       if (!isNodeLocal.get(i).booleanValue()) {
         ret.add(nodes.get(i));
@@ -213,12 +213,7 @@ public class CallLocalityContext {
   }
 
   public boolean containsField(EquivalentValue fieldRef) {
-    for (int i = 0; i < nodes.size(); i++) {
-      if (fieldRef.equals(nodes.get(i))) {
-        return true;
-      }
-    }
-    return false;
+    return nodes.stream().anyMatch(fieldRef::equals);
   }
 
   // merges two contexts into one... shared fields in either context are shared in the merged context
@@ -233,7 +228,7 @@ public class CallLocalityContext {
       }
     }
     for (int i = 0; i < other.nodes.size(); i++) {
-      Boolean temp = new Boolean(isNodeLocal.get(i).booleanValue() && other.isNodeLocal.get(i).booleanValue());
+      Boolean temp = Boolean.valueOf(isNodeLocal.get(i).booleanValue() && other.isNodeLocal.get(i).booleanValue());
       if (!temp.equals(isNodeLocal.get(i))) {
         isChanged = true;
       }
@@ -243,15 +238,17 @@ public class CallLocalityContext {
     return isChanged;
   }
 
-  public boolean equals(Object o) {
-    if (o instanceof CallLocalityContext) {
-      CallLocalityContext other = (CallLocalityContext) o;
-      return isNodeLocal.equals(other.isNodeLocal);// && nodes.equals(other.nodes);
-    }
-    return false;
+  @Override
+public boolean equals(Object o) {
+    if (!(o instanceof CallLocalityContext)) {
+		return false;
+	}
+	CallLocalityContext other = (CallLocalityContext) o;
+	return isNodeLocal.equals(other.isNodeLocal);// && nodes.equals(other.nodes);
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return isNodeLocal.hashCode();
   }
 
@@ -267,7 +264,8 @@ public class CallLocalityContext {
     return true;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     String fieldrefs = "";
     String staticrefs = "";
     String paramrefs = ""; // includes returnref
@@ -278,18 +276,22 @@ public class CallLocalityContext {
     for (int i = 0; i < nodes.size(); i++) {
       Ref r = (Ref) ((EquivalentValue) nodes.get(i)).getValue();
       if (r instanceof InstanceFieldRef) {
-        fieldrefs = fieldrefs + r + ": " + (isNodeLocal.get(i).booleanValue() ? "local" : "shared") + "\n";
+        fieldrefs = new StringBuilder().append(fieldrefs).append(r).append(": ").append(isNodeLocal.get(i).booleanValue() ? "local" : "shared").append("\n")
+				.toString();
       } else if (r instanceof StaticFieldRef) {
-        staticrefs = staticrefs + r + ": " + (isNodeLocal.get(i).booleanValue() ? "local" : "shared") + "\n";
+        staticrefs = new StringBuilder().append(staticrefs).append(r).append(": ").append(isNodeLocal.get(i).booleanValue() ? "local" : "shared").append("\n")
+				.toString();
       } else if (r instanceof ParameterRef) {
-        paramrefs = paramrefs + r + ": " + (isNodeLocal.get(i).booleanValue() ? "local" : "shared") + "\n";
+        paramrefs = new StringBuilder().append(paramrefs).append(r).append(": ").append(isNodeLocal.get(i).booleanValue() ? "local" : "shared").append("\n")
+				.toString();
       } else if (r instanceof ThisRef) {
-        thisref = thisref + r + ": " + (isNodeLocal.get(i).booleanValue() ? "local" : "shared") + "\n";
+        thisref = new StringBuilder().append(thisref).append(r).append(": ").append(isNodeLocal.get(i).booleanValue() ? "local" : "shared").append("\n")
+				.toString();
       } else {
-        return "Call Locality Context: HAS STRANGE NODE " + r + "\n";
+        return new StringBuilder().append("Call Locality Context: HAS STRANGE NODE ").append(r).append("\n").toString();
       }
     }
-    return "Call Locality Context: \n" + fieldrefs + paramrefs + thisref + staticrefs;
+    return new StringBuilder().append("Call Locality Context: \n").append(fieldrefs).append(paramrefs).append(thisref).append(staticrefs).toString();
   }
 
   public String toShortString() {

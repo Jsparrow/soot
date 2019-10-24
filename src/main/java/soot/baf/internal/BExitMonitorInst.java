@@ -30,31 +30,38 @@ public class BExitMonitorInst extends AbstractInst implements ExitMonitorInst {
   public BExitMonitorInst() {
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "exitmonitor";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseExitMonitorInst(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BExitMonitorInst();
   }
 

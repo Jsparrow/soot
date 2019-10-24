@@ -72,28 +72,30 @@ public class CollectConstants extends SceneTransformer implements IJbcoTransform
 
   public static final String name = "wjtp.jbco_cc";
 
-  private final Map<Type, List<Constant>> typeToConstants = new HashMap<>();
-  public static HashMap<Constant, SootField> constantsToFields = new HashMap<>();
+public static HashMap<Constant, SootField> constantsToFields = new HashMap<>();
 
-  private int constants = 0;
-  private int updatedConstants = 0;
+private final Map<Type, List<Constant>> typeToConstants = new HashMap<>();
 
-  @Override
+private int constants = 0;
+
+private int updatedConstants = 0;
+
+@Override
   public String getName() {
     return name;
   }
 
-  @Override
+@Override
   public String[] getDependencies() {
     return new String[] { name };
   }
 
-  @Override
+@Override
   public void outputSummary() {
     logger.info("Found {} constants, updated {} ones", constants, updatedConstants);
   }
 
-  @Override
+@Override
   protected void internalTransform(String phaseName, Map<String, String> options) {
     if (isVerbose()) {
       logger.info("Collecting Constant Data");
@@ -109,19 +111,18 @@ public class CollectConstants extends SceneTransformer implements IJbcoTransform
           continue;
         }
 
-        for (ValueBox useBox : method.getActiveBody().getUseBoxes()) {
-          final Value value = useBox.getValue();
-          if (value instanceof Constant) {
-            final Constant constant = (Constant) value;
-            Type type = constant.getType();
-            List<Constant> constants = typeToConstants.computeIfAbsent(type, t -> new ArrayList<>());
+        method.getActiveBody().getUseBoxes().stream().map(ValueBox::getValue).forEach(value -> {
+			if (value instanceof Constant) {
+			    final Constant constant = (Constant) value;
+			    Type type = constant.getType();
+			    List<Constant> constants = typeToConstants.computeIfAbsent(type, t -> new ArrayList<>());
 
-            if (!constants.contains(constant)) {
-              this.constants++;
-              constants.add(constant);
-            }
-          }
-        }
+			    if (!constants.contains(constant)) {
+			      this.constants++;
+			      constants.add(constant);
+			    }
+			  }
+		});
       }
     }
 
@@ -151,21 +152,21 @@ public class CollectConstants extends SceneTransformer implements IJbcoTransform
     updatedConstants += count;
   }
 
-  private boolean isSuitableClassToAddFieldConstant(SootClass sc, Constant constant) {
+private boolean isSuitableClassToAddFieldConstant(SootClass sc, Constant constant) {
     if (sc.isInterface()) {
       return false;
     }
-    if (constant instanceof ClassConstant) {
-      ClassConstant classConstant = (ClassConstant) constant;
-      RefType type = (RefType) classConstant.toSootType();
-      SootClass classFromConstant = type.getSootClass();
-      Hierarchy hierarchy = Scene.v().getActiveHierarchy();
-      return hierarchy.isVisible(sc, classFromConstant);
-    }
-    return true;
+    if (!(constant instanceof ClassConstant)) {
+		return true;
+	}
+	ClassConstant classConstant = (ClassConstant) constant;
+	RefType type = (RefType) classConstant.toSootType();
+	SootClass classFromConstant = type.getSootClass();
+	Hierarchy hierarchy = Scene.v().getActiveHierarchy();
+	return hierarchy.isVisible(sc, classFromConstant);
   }
 
-  private void addInitializingValue(SootClass sc, SootField f, Constant constant) {
+private void addInitializingValue(SootClass sc, SootField f, Constant constant) {
     if (constant instanceof NullConstant) {
       return;
     } else if (constant instanceof IntConstant) {

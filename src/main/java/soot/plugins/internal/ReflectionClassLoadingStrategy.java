@@ -1,5 +1,8 @@
 package soot.plugins.internal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*-
  * #%L
  * Soot - a J*va Optimization Framework
@@ -29,14 +32,17 @@ package soot.plugins.internal;
  */
 public class ReflectionClassLoadingStrategy implements ClassLoadingStrategy {
 
-  @Override
+  private static final Logger logger = LoggerFactory.getLogger(ReflectionClassLoadingStrategy.class);
+
+@Override
   public Object create(final String className) throws ClassNotFoundException, InstantiationException {
     final Class<?> clazz = Class.forName(className);
 
     try {
       return clazz.newInstance();
     } catch (final IllegalAccessException e) {
-      throw new InstantiationException("Failed to create instance of " + className + " due to access restrictions.");
+      logger.error(e.getMessage(), e);
+	throw new InstantiationException(new StringBuilder().append("Failed to create instance of ").append(className).append(" due to access restrictions.").toString());
     }
   }
 }

@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AConstantImmediate extends PImmediate
 {
-    private PConstant _constant_;
+    private PConstant constant;
 
     public AConstantImmediate()
     {
@@ -26,7 +26,7 @@ public final class AConstantImmediate extends PImmediate
     public Object clone()
     {
         return new AConstantImmediate(
-            cloneNode(this._constant_));
+            cloneNode(this.constant));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AConstantImmediate extends PImmediate
 
     public PConstant getConstant()
     {
-        return this._constant_;
+        return this.constant;
     }
 
     public void setConstant(PConstant node)
     {
-        if(this._constant_ != null)
+        if(this.constant != null)
         {
-            this._constant_.parent(null);
+            this.constant.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AConstantImmediate extends PImmediate
             node.parent(this);
         }
 
-        this._constant_ = node;
+        this.constant = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._constant_);
+            + toString(this.constant);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._constant_ == child)
+        if(this.constant == child)
         {
-            this._constant_ = null;
+            this.constant = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AConstantImmediate extends PImmediate
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._constant_ == oldChild)
+        if(this.constant == oldChild)
         {
             setConstant((PConstant) newChild);
             return;

@@ -35,28 +35,30 @@ import soot.Singletons;
  */
 public class Integer32767Type extends PrimType implements IntegerType {
 
-  public static Integer32767Type v() {
-    return G.v().soot_jimple_toolkits_typing_fast_Integer32767Type();
-  }
-
   public Integer32767Type(Singletons.Global g) {
-  }
+	  }
 
-  public String toString() {
-    return "[0..32767]";
-  }
+	public static Integer32767Type v() {
+	    return G.v().soot_jimple_toolkits_typing_fast_Integer32767Type();
+	  }
 
-  public boolean equals(Object t) {
-    return this == t;
-  }
+	@Override
+	public String toString() {
+	    return "[0..32767]";
+	  }
 
-  @Override
-  public RefType boxedType() {
-    return RefType.v("java.lang.Integer");
-  }
+	@Override
+	public boolean equals(Object t) {
+	    return this == t;
+	  }
 
-  @Override
-  public boolean isAllowedInFinalCode() {
-    return false;
-  }
+	@Override
+	  public RefType boxedType() {
+	    return RefType.v("java.lang.Integer");
+	  }
+
+	@Override
+	  public boolean isAllowedInFinalCode() {
+	    return false;
+	  }
 }

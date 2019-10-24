@@ -29,33 +29,38 @@ import soot.jimple.internal.AbstractStmt;
 public class PlaceholderStmt extends AbstractStmt {
   private Unit source;
 
-  public String toString() {
-    return "<placeholder: " + source.toString() + ">";
+  PlaceholderStmt(Unit source) {
+    this.source = source;
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public String toString() {
+    return new StringBuilder().append("<placeholder: ").append(source.toString()).append(">").toString();
+  }
+
+@Override
+public void toString(UnitPrinter up) {
     up.literal("<placeholder: ");
     source.toString(up);
     up.literal(">");
   }
 
-  PlaceholderStmt(Unit source) {
-    this.source = source;
-  }
-
-  public Unit getSource() {
+public Unit getSource() {
     return source;
   }
 
-  public boolean fallsThrough() {
+@Override
+public boolean fallsThrough() {
     throw new RuntimeException();
   }
 
-  public boolean branches() {
+@Override
+public boolean branches() {
     throw new RuntimeException();
   }
 
-  public Object clone() {
+@Override
+public Object clone() {
     throw new RuntimeException();
   }
 

@@ -36,19 +36,23 @@ public class LongType extends PrimType {
     return G.v().soot_LongType();
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x023DA077;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "long";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseLongType(this);
   }
 

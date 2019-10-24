@@ -25,7 +25,8 @@ package soot.dava.toolkits.base.finders;
 import java.util.Comparator;
 
 class IndexComparator implements Comparator {
-  public int compare(Object o1, Object o2) {
+  @Override
+public int compare(Object o1, Object o2) {
     if (o1 == o2) {
       return 0;
     }
@@ -41,7 +42,8 @@ class IndexComparator implements Comparator {
     return ((Integer) o1).intValue() - ((Integer) o2).intValue();
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     return (o instanceof IndexComparator);
   }
 }

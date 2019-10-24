@@ -35,16 +35,17 @@ public class JavaNetInetAddressImplNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.String getLocalHostName()")) {
+    if ("java.lang.String getLocalHostName()".equals(subSignature)) {
       java_net_InetAddressImpl_getLocalHostName(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.String getHostByAddress(int)")) {
+    } else if ("java.lang.String getHostByAddress(int)".equals(subSignature)) {
       java_net_InetAddressImpl_getHostByAddr(method, thisVar, returnVar, params);
       return;
 

@@ -117,8 +117,10 @@ public class AugEvalFunction implements IEvalFunction {
     } else if (expr instanceof BinopExpr) {
       BinopExpr be = (BinopExpr) expr;
 
-      Value opl = be.getOp1(), opr = be.getOp2();
-      Type tl = eval_(tg, opl, stmt, jb), tr = eval_(tg, opr, stmt, jb);
+      Value opl = be.getOp1();
+	Value opr = be.getOp2();
+      Type tl = eval_(tg, opl, stmt, jb);
+	Type tr = eval_(tg, opr, stmt, jb);
 
       if (expr instanceof CmpExpr || expr instanceof CmpgExpr || expr instanceof CmplExpr) {
         return ByteType.v();
@@ -219,9 +221,9 @@ public class AugEvalFunction implements IEvalFunction {
         return ((ArrayType) at).getElementType();
       } else if (at instanceof RefType) {
         RefType ref = (RefType) at;
-        if (ref.getSootClass().getName().equals("java.lang.Object")
-            || ref.getSootClass().getName().equals("java.io.Serializable")
-            || ref.getSootClass().getName().equals("java.lang.Cloneable")) {
+        if ("java.lang.Object".equals(ref.getSootClass().getName())
+            || "java.io.Serializable".equals(ref.getSootClass().getName())
+            || "java.lang.Cloneable".equals(ref.getSootClass().getName())) {
           return ref;
         } else {
           return BottomType.v();
@@ -284,7 +286,8 @@ public class AugEvalFunction implements IEvalFunction {
     }
   }
 
-  public Collection<Type> eval(Typing tg, Value expr, Stmt stmt) {
+  @Override
+public Collection<Type> eval(Typing tg, Value expr, Stmt stmt) {
     return Collections.<Type>singletonList(eval_(tg, expr, stmt, this.jb));
   }
 }

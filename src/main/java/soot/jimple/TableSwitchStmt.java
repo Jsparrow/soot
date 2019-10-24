@@ -27,13 +27,13 @@ import java.util.List;
 import soot.Unit;
 
 public interface TableSwitchStmt extends SwitchStmt {
-  public void setLowIndex(int lowIndex);
+  void setLowIndex(int lowIndex);
 
-  public void setHighIndex(int highIndex);
+  void setHighIndex(int highIndex);
 
-  public int getLowIndex();
+  int getLowIndex();
 
-  public int getHighIndex();
+  int getHighIndex();
 
-  public void setTargets(List<? extends Unit> targets);
+  void setTargets(List<? extends Unit> targets);
 }

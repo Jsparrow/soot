@@ -72,18 +72,19 @@ ArrayLength
 public class NullPointerChecker extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(NullPointerChecker.class);
 
-  public NullPointerChecker(Singletons.Global g) {
+private boolean isProfiling = false;
+
+private boolean enableOther = true;
+
+public NullPointerChecker(Singletons.Global g) {
   }
 
-  public static NullPointerChecker v() {
+public static NullPointerChecker v() {
     return G.v().soot_jimple_toolkits_annotation_nullcheck_NullPointerChecker();
   }
 
-  private boolean isProfiling = false;
-
-  private boolean enableOther = true;
-
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     isProfiling = PhaseOptions.getBoolean(options, "profiling");
     enableOther = !PhaseOptions.getBoolean(options, "onlyarrayref");
 
@@ -91,7 +92,7 @@ public class NullPointerChecker extends BodyTransformer {
       Date start = new Date();
 
       if (Options.v().verbose()) {
-        logger.debug("[npc] Null pointer check for " + body.getMethod().getName() + " started on " + start);
+        logger.debug(new StringBuilder().append("[npc] Null pointer check for ").append(body.getMethod().getName()).append(" started on ").append(start).toString());
       }
 
       BranchedRefVarsAnalysis analysis = new BranchedRefVarsAnalysis(new ExceptionalUnitGraph(body));
@@ -199,7 +200,7 @@ public class NullPointerChecker extends BodyTransformer {
         long runtime = finish.getTime() - start.getTime();
         long mins = runtime / 60000;
         long secs = (runtime % 60000) / 1000;
-        logger.debug("[npc] Null pointer checker finished. It took " + mins + " mins and " + secs + " secs.");
+        logger.debug(new StringBuilder().append("[npc] Null pointer checker finished. It took ").append(mins).append(" mins and ").append(secs).append(" secs.").toString());
       }
     }
   }

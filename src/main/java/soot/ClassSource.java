@@ -28,21 +28,21 @@ import soot.javaToJimple.IInitialResolver.Dependencies;
  * A class source is responsible for resolving a single class from a particular source format (.class, .jimple, .java, etc.)
  */
 public abstract class ClassSource {
-  public ClassSource(String className) {
-    if (className == null) {
-      throw new IllegalStateException("Error: The class name must not be null.");
-    }
-    this.className = className;
-  }
-
-  /**
-   * Resolve the class into the SootClass sc. Returns a list of Strings or Types referenced by the class.
-   */
-  public abstract Dependencies resolve(SootClass sc);
-
   protected String className;
 
-  public void close() {
+	public ClassSource(String className) {
+	    if (className == null) {
+	      throw new IllegalStateException("Error: The class name must not be null.");
+	    }
+	    this.className = className;
+	  }
 
-  }
+	/**
+	   * Resolve the class into the SootClass sc. Returns a list of Strings or Types referenced by the class.
+	   */
+	  public abstract Dependencies resolve(SootClass sc);
+
+	public void close() {
+	
+	  }
 }

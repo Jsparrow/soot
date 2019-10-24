@@ -31,29 +31,31 @@ import java.util.Set;
 import soot.Body;
 import soot.Unit;
 import soot.ValueBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum ValueBoxesValidator implements BodyValidator {
   INSTANCE;
 
-  public static ValueBoxesValidator v() {
+  private static final Logger logger = LoggerFactory.getLogger(ValueBoxesValidator.class);
+
+public static ValueBoxesValidator v() {
     return INSTANCE;
   }
 
   @Override
   /** Verifies that a ValueBox is not used in more than one place. */
   public void validate(Body body, List<ValidationException> exception) {
-    Set<ValueBox> set = newSetFromMap(new IdentityHashMap<ValueBox, Boolean>());
+    Set<ValueBox> set = newSetFromMap(new IdentityHashMap<>());
 
     for (ValueBox vb : body.getUseAndDefBoxes()) {
       if (set.add(vb)) {
         continue;
       }
 
-      exception.add(new ValidationException(vb, "Aliased value box : " + vb + " in " + body.getMethod()));
+      exception.add(new ValidationException(vb, new StringBuilder().append("Aliased value box : ").append(vb).append(" in ").append(body.getMethod()).toString()));
 
-      for (Unit u : body.getUnits()) {
-        System.err.println(u);
-      }
+      body.getUnits().forEach(u -> logger.error(String.valueOf(u)));
     }
   }
 

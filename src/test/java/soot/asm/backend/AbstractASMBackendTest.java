@@ -38,6 +38,8 @@ import org.objectweb.asm.util.TraceClassVisitor;
 
 import soot.G;
 import soot.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for tests for the ASM backend that work with compiled
@@ -49,6 +51,7 @@ import soot.Main;
 @Ignore("Abstract base class")
 public abstract class AbstractASMBackendTest implements Opcodes {
 
+	private static final Logger logger = LoggerFactory.getLogger(AbstractASMBackendTest.class);
 	private final StringWriter sw = new StringWriter();
 	private final PrintWriter pw = new PrintWriter(sw);
 
@@ -57,21 +60,15 @@ public abstract class AbstractASMBackendTest implements Opcodes {
 	protected TargetCompiler targetCompiler = TargetCompiler.javac;
 
 	/**
-	 * Enumeration containing the supported Java compilers
-	 */
-	enum TargetCompiler {
-		eclipse, javac
-	}
-
-	/**
 	 * Runs Soot with the arguments needed for running one test
 	 */
 	protected void runSoot() {
 		G.reset();
 		// Location of the rt.jar
-		String rtJar = System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar";
-		String classpath = getClassPathFolder() + File.pathSeparator + rtJar;
-		System.out.println("Class path: " + classpath);
+		String rtJar = new StringBuilder().append(System.getProperty("java.home")).append(File.separator).append("lib").append(File.separator).append("rt.jar")
+				.toString();
+		String classpath = new StringBuilder().append(getClassPathFolder()).append(File.pathSeparator).append(rtJar).toString();
+		logger.info("Class path: " + classpath);
 
 		// Run Soot and print output to .asm-files.
 		Main.main(new String[] { "-cp", classpath, "-src-prec", "only-class", "-output-format", "asm",
@@ -102,19 +99,19 @@ public abstract class AbstractASMBackendTest implements Opcodes {
 		/*
 		 * Print output for comparison to file for debugging purposes.
 		 */
-		File compareFile = new File("sootOutput/" + getTargetClass() + ".asm.compare");
+		File compareFile = new File(new StringBuilder().append("sootOutput/").append(getTargetClass()).append(".asm.compare").toString());
 		PrintWriter ow = new PrintWriter(compareFile);
 		ow.print(comparisonOutput);
 		ow.flush();
 		ow.close();
 
-		File targetFile = new File("sootOutput/" + getTargetClass() + ".asm");
+		File targetFile = new File(new StringBuilder().append("sootOutput/").append(getTargetClass()).append(".asm").toString());
 		assertTrue(String.format("Soot output file %s not found", targetFile.getAbsolutePath()), targetFile.exists());
 		Scanner sootOutput = new Scanner(targetFile);
 		Scanner compareOutput = new Scanner(comparisonOutput);
 
 		try {
-			System.out.println(String.format("Comparing files %s and %s...", compareFile.getAbsolutePath(),
+			logger.info(String.format("Comparing files %s and %s...", compareFile.getAbsolutePath(),
 					targetFile.getAbsolutePath()));
 			int line = 1;
 			while (compareOutput.hasNextLine()) {
@@ -135,7 +132,7 @@ public abstract class AbstractASMBackendTest implements Opcodes {
 
 			assertFalse(String.format("Too many lines in Soot-output for class %s!", getTargetClass()),
 					sootOutput.hasNextLine());
-			System.out.println("File comparison successful.");
+			logger.info("File comparison successful.");
 		} finally {
 			sootOutput.close();
 			compareOutput.close();
@@ -185,6 +182,13 @@ public abstract class AbstractASMBackendTest implements Opcodes {
 	 */
 	protected String getRequiredJavaVersion() {
 		return "default";
+	}
+
+	/**
+	 * Enumeration containing the supported Java compilers
+	 */
+	enum TargetCompiler {
+		eclipse, javac
 	}
 
 }

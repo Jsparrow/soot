@@ -7,11 +7,11 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AStaticInvokeExpr extends PInvokeExpr
 {
-    private TStaticinvoke _staticinvoke_;
-    private PMethodSignature _methodSignature_;
-    private TLParen _lParen_;
-    private PArgList _argList_;
-    private TRParen _rParen_;
+    private TStaticinvoke staticinvoke;
+    private PMethodSignature methodSignature;
+    private TLParen lParen;
+    private PArgList argList;
+    private TRParen rParen;
 
     public AStaticInvokeExpr()
     {
@@ -42,11 +42,11 @@ public final class AStaticInvokeExpr extends PInvokeExpr
     public Object clone()
     {
         return new AStaticInvokeExpr(
-            cloneNode(this._staticinvoke_),
-            cloneNode(this._methodSignature_),
-            cloneNode(this._lParen_),
-            cloneNode(this._argList_),
-            cloneNode(this._rParen_));
+            cloneNode(this.staticinvoke),
+            cloneNode(this.methodSignature),
+            cloneNode(this.lParen),
+            cloneNode(this.argList),
+            cloneNode(this.rParen));
     }
 
     @Override
@@ -57,14 +57,14 @@ public final class AStaticInvokeExpr extends PInvokeExpr
 
     public TStaticinvoke getStaticinvoke()
     {
-        return this._staticinvoke_;
+        return this.staticinvoke;
     }
 
     public void setStaticinvoke(TStaticinvoke node)
     {
-        if(this._staticinvoke_ != null)
+        if(this.staticinvoke != null)
         {
-            this._staticinvoke_.parent(null);
+            this.staticinvoke.parent(null);
         }
 
         if(node != null)
@@ -77,19 +77,19 @@ public final class AStaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._staticinvoke_ = node;
+        this.staticinvoke = node;
     }
 
     public PMethodSignature getMethodSignature()
     {
-        return this._methodSignature_;
+        return this.methodSignature;
     }
 
     public void setMethodSignature(PMethodSignature node)
     {
-        if(this._methodSignature_ != null)
+        if(this.methodSignature != null)
         {
-            this._methodSignature_.parent(null);
+            this.methodSignature.parent(null);
         }
 
         if(node != null)
@@ -102,19 +102,19 @@ public final class AStaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._methodSignature_ = node;
+        this.methodSignature = node;
     }
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -127,19 +127,19 @@ public final class AStaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PArgList getArgList()
     {
-        return this._argList_;
+        return this.argList;
     }
 
     public void setArgList(PArgList node)
     {
-        if(this._argList_ != null)
+        if(this.argList != null)
         {
-            this._argList_.parent(null);
+            this.argList.parent(null);
         }
 
         if(node != null)
@@ -152,19 +152,19 @@ public final class AStaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._argList_ = node;
+        this.argList = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -177,51 +177,47 @@ public final class AStaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._staticinvoke_)
-            + toString(this._methodSignature_)
-            + toString(this._lParen_)
-            + toString(this._argList_)
-            + toString(this._rParen_);
+        return new StringBuilder().append("").append(toString(this.staticinvoke)).append(toString(this.methodSignature)).append(toString(this.lParen)).append(toString(this.argList))
+				.append(toString(this.rParen)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._staticinvoke_ == child)
+        if(this.staticinvoke == child)
         {
-            this._staticinvoke_ = null;
+            this.staticinvoke = null;
             return;
         }
 
-        if(this._methodSignature_ == child)
+        if(this.methodSignature == child)
         {
-            this._methodSignature_ = null;
+            this.methodSignature = null;
             return;
         }
 
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._argList_ == child)
+        if(this.argList == child)
         {
-            this._argList_ = null;
+            this.argList = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
@@ -232,31 +228,31 @@ public final class AStaticInvokeExpr extends PInvokeExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._staticinvoke_ == oldChild)
+        if(this.staticinvoke == oldChild)
         {
             setStaticinvoke((TStaticinvoke) newChild);
             return;
         }
 
-        if(this._methodSignature_ == oldChild)
+        if(this.methodSignature == oldChild)
         {
             setMethodSignature((PMethodSignature) newChild);
             return;
         }
 
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._argList_ == oldChild)
+        if(this.argList == oldChild)
         {
             setArgList((PArgList) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;

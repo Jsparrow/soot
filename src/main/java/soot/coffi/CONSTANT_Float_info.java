@@ -41,7 +41,8 @@ class CONSTANT_Float_info extends cp_info {
    * @return number of bytes occupied by this object.
    * @see cp_info#size
    */
-  public int size() {
+  @Override
+public int size() {
     return 5;
   }
 
@@ -58,7 +59,8 @@ class CONSTANT_Float_info extends cp_info {
    * @return String representation of this entry.
    * @see cp_info#toString
    */
-  public String toString(cp_info constant_pool[]) {
+  @Override
+public String toString(cp_info constant_pool[]) {
     return Float.toString(bytes);
   }
 
@@ -68,7 +70,8 @@ class CONSTANT_Float_info extends cp_info {
    * @return the String "float".
    * @see cp_info#typeName
    */
-  public String typeName() {
+  @Override
+public String typeName() {
     return "float";
   }
 
@@ -84,7 +87,8 @@ class CONSTANT_Float_info extends cp_info {
    * @return a value <0, 0, or >0 indicating whether this is smaller, the same or larger than cp.
    * @see cp_info#compareTo
    */
-  public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
+  @Override
+public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
     float d;
     if (tag != cp.tag) {
       return tag - cp.tag;
@@ -94,7 +98,8 @@ class CONSTANT_Float_info extends cp_info {
     return ((d > 0.0) ? 1 : ((d < 0.0) ? -1 : 0));
   }
 
-  public Value createJimpleConstantValue(cp_info[] constant_pool) {
+  @Override
+public Value createJimpleConstantValue(cp_info[] constant_pool) {
     return FloatConstant.v(convert());
   }
 }

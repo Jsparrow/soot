@@ -41,52 +41,64 @@ public class BFieldPutInst extends AbstractInst implements FieldPutInst {
     this.fieldRef = fieldRef;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 2;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BFieldPutInst(fieldRef);
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return AbstractJasminClass.sizeOfType(fieldRef.type()) + 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "fieldput";
   }
 
-  final String getParameters() {
+  @Override
+final String getParameters() {
     return " " + fieldRef.getSignature();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     up.fieldRef(fieldRef);
   }
 
-  public SootFieldRef getFieldRef() {
+  @Override
+public SootFieldRef getFieldRef() {
     return fieldRef;
   }
 
-  public SootField getField() {
+  @Override
+public SootField getField() {
     return fieldRef.resolve();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseFieldPutInst(this);
   }
 
-  public boolean containsFieldRef() {
+  @Override
+public boolean containsFieldRef() {
     return true;
   }
 }

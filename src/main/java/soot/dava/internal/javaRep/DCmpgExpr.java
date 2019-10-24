@@ -36,23 +36,28 @@ public class DCmpgExpr extends AbstractGrimpIntBinopExpr implements CmpgExpr {
     super(op1, op2);
   }
 
-  public final String getSymbol() {
+  @Override
+public final String getSymbol() {
     return " - ";
   }
 
-  public final int getPrecedence() {
+  @Override
+public final int getPrecedence() {
     return 700;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseCmpgExpr(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new DCmpgExpr(Grimp.cloneIfNecessary(getOp1()), Grimp.cloneIfNecessary(getOp2()));
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     if (getOp1().getType().equals(getOp2().getType())) {
       return getOp1().getType();
     }

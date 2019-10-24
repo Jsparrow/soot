@@ -47,7 +47,24 @@ public class JLookupSwitchStmt extends AbstractSwitchStmt implements LookupSwitc
    */
   List<IntConstant> lookupValues;
 
-  // This method is necessary to deal with constructor-must-be-first-ism.
+  /** Constructs a new JLookupSwitchStmt. lookupValues should be a list of IntConst s. */
+  public JLookupSwitchStmt(Value key, List<IntConstant> lookupValues, List<? extends Unit> targets, Unit defaultTarget) {
+    this(Jimple.v().newImmediateBox(key), lookupValues, getTargetBoxesArray(targets), Jimple.v().newStmtBox(defaultTarget));
+  }
+
+/** Constructs a new JLookupSwitchStmt. lookupValues should be a list of IntConst s. */
+  public JLookupSwitchStmt(Value key, List<IntConstant> lookupValues, List<? extends UnitBox> targets,
+      UnitBox defaultTarget) {
+    this(Jimple.v().newImmediateBox(key), lookupValues, targets.toArray(new UnitBox[targets.size()]), defaultTarget);
+  }
+
+protected JLookupSwitchStmt(ValueBox keyBox, List<IntConstant> lookupValues, UnitBox[] targetBoxes,
+      UnitBox defaultTargetBox) {
+    super(keyBox, defaultTargetBox, targetBoxes);
+    setLookupValues(lookupValues);
+  }
+
+// This method is necessary to deal with constructor-must-be-first-ism.
   private static UnitBox[] getTargetBoxesArray(List<? extends Unit> targets) {
     UnitBox[] targetBoxes = new UnitBox[targets.size()];
     for (int i = 0; i < targetBoxes.length; i++) {
@@ -56,9 +73,10 @@ public class JLookupSwitchStmt extends AbstractSwitchStmt implements LookupSwitc
     return targetBoxes;
   }
 
-  public Object clone() {
+@Override
+public Object clone() {
     int lookupValueCount = lookupValues.size();
-    List<IntConstant> clonedLookupValues = new ArrayList<IntConstant>(lookupValueCount);
+    List<IntConstant> clonedLookupValues = new ArrayList<>(lookupValueCount);
 
     for (int i = 0; i < lookupValueCount; i++) {
       clonedLookupValues.add(i, IntConstant.v(getLookupValue(i)));
@@ -67,46 +85,33 @@ public class JLookupSwitchStmt extends AbstractSwitchStmt implements LookupSwitc
     return new JLookupSwitchStmt(getKey(), clonedLookupValues, getTargets(), getDefaultTarget());
   }
 
-  /** Constructs a new JLookupSwitchStmt. lookupValues should be a list of IntConst s. */
-  public JLookupSwitchStmt(Value key, List<IntConstant> lookupValues, List<? extends Unit> targets, Unit defaultTarget) {
-    this(Jimple.v().newImmediateBox(key), lookupValues, getTargetBoxesArray(targets), Jimple.v().newStmtBox(defaultTarget));
-  }
-
-  /** Constructs a new JLookupSwitchStmt. lookupValues should be a list of IntConst s. */
-  public JLookupSwitchStmt(Value key, List<IntConstant> lookupValues, List<? extends UnitBox> targets,
-      UnitBox defaultTarget) {
-    this(Jimple.v().newImmediateBox(key), lookupValues, targets.toArray(new UnitBox[targets.size()]), defaultTarget);
-  }
-
-  protected JLookupSwitchStmt(ValueBox keyBox, List<IntConstant> lookupValues, UnitBox[] targetBoxes,
-      UnitBox defaultTargetBox) {
-    super(keyBox, defaultTargetBox, targetBoxes);
-    setLookupValues(lookupValues);
-  }
-
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+@Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
     String endOfLine = " ";
 
-    buffer.append(Jimple.LOOKUPSWITCH + "(" + keyBox.getValue().toString() + ")" + endOfLine);
+    buffer.append(new StringBuilder().append(Jimple.LOOKUPSWITCH).append("(").append(keyBox.getValue().toString()).append(")").append(endOfLine).toString());
 
     buffer.append("{" + endOfLine);
 
     for (int i = 0; i < lookupValues.size(); i++) {
       Unit target = getTarget(i);
-      buffer.append("    " + Jimple.CASE + " " + lookupValues.get(i) + ": " + Jimple.GOTO + " "
-          + (target == this ? "self" : target) + ";" + endOfLine);
+      buffer.append(new StringBuilder().append("    ").append(Jimple.CASE).append(" ").append(lookupValues.get(i)).append(": ")
+			.append(Jimple.GOTO).append(" ").append(target == this ? "self" : target).append(";").append(endOfLine)
+			.toString());
     }
 
     Unit target = getDefaultTarget();
-    buffer.append("    " + Jimple.DEFAULT + ": " + Jimple.GOTO + " " + (target == this ? "self" : target) + ";" + endOfLine);
+    buffer.append(new StringBuilder().append("    ").append(Jimple.DEFAULT).append(": ").append(Jimple.GOTO).append(" ")
+			.append(target == this ? "self" : target).append(";").append(endOfLine).toString());
 
     buffer.append("}");
 
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.LOOKUPSWITCH);
     up.literal("(");
     keyBox.toString(up);
@@ -138,34 +143,38 @@ public class JLookupSwitchStmt extends AbstractSwitchStmt implements LookupSwitc
     up.literal("}");
   }
 
-  public void setLookupValues(List<IntConstant> lookupValues) {
-    this.lookupValues = new ArrayList<IntConstant>(lookupValues);
+@Override
+public void setLookupValues(List<IntConstant> lookupValues) {
+    this.lookupValues = new ArrayList<>(lookupValues);
   }
 
-  public void setLookupValue(int index, int value) {
+@Override
+public void setLookupValue(int index, int value) {
     lookupValues.set(index, IntConstant.v(value));
   }
 
-  public int getLookupValue(int index) {
+@Override
+public int getLookupValue(int index) {
     return lookupValues.get(index).value;
   }
 
-  public List<IntConstant> getLookupValues() {
+@Override
+public List<IntConstant> getLookupValues() {
     return Collections.unmodifiableList(lookupValues);
   }
 
-  public void apply(Switch sw) {
+@Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseLookupSwitchStmt(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
-    List<PlaceholderInst> targetPlaceholders = new ArrayList<PlaceholderInst>();
+@Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+    List<PlaceholderInst> targetPlaceholders = new ArrayList<>();
 
     ((ConvertToBaf) getKey()).convertToBaf(context, out);
 
-    for (Unit target : getTargets()) {
-      targetPlaceholders.add(Baf.v().newPlaceholderInst(target));
-    }
+    getTargets().forEach(target -> targetPlaceholders.add(Baf.v().newPlaceholderInst(target)));
 
     Unit u
         = Baf.v().newLookupSwitchInst(Baf.v().newPlaceholderInst(getDefaultTarget()), getLookupValues(), targetPlaceholders);

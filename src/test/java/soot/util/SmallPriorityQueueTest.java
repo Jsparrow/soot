@@ -84,8 +84,9 @@ public class SmallPriorityQueueTest {
 		assertTrue(q.isEmpty());
 		assertNull(q.peek());
 		assertNull(q.poll());
-		for (Integer i : universe1) 
+		for (Integer i : universe1) {
 			assertFalse(q.contains(i));
+		}
 	}	
 
 	@Test(expected=NoSuchElementException.class)
@@ -194,7 +195,9 @@ public class SmallPriorityQueueTest {
 		assertTrue(q.remove(universe1[hole]));
 		int j = 0;
 		for (Integer i : q) {
-			if (j==hole)j++;
+			if (j==hole) {
+				j++;
+			}
 			assertEquals(universe1[j++], i);
 		}
 	}

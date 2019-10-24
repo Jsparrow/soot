@@ -8,7 +8,7 @@ import soot.jimple.parser.analysis.*;
 public final class ASimpleNewExpr extends PNewExpr
 {
     private TNew _new_;
-    private PBaseType _baseType_;
+    private PBaseType baseType;
 
     public ASimpleNewExpr()
     {
@@ -31,7 +31,7 @@ public final class ASimpleNewExpr extends PNewExpr
     {
         return new ASimpleNewExpr(
             cloneNode(this._new_),
-            cloneNode(this._baseType_));
+            cloneNode(this.baseType));
     }
 
     @Override
@@ -67,14 +67,14 @@ public final class ASimpleNewExpr extends PNewExpr
 
     public PBaseType getBaseType()
     {
-        return this._baseType_;
+        return this.baseType;
     }
 
     public void setBaseType(PBaseType node)
     {
-        if(this._baseType_ != null)
+        if(this.baseType != null)
         {
-            this._baseType_.parent(null);
+            this.baseType.parent(null);
         }
 
         if(node != null)
@@ -87,15 +87,13 @@ public final class ASimpleNewExpr extends PNewExpr
             node.parent(this);
         }
 
-        this._baseType_ = node;
+        this.baseType = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._new_)
-            + toString(this._baseType_);
+        return new StringBuilder().append("").append(toString(this._new_)).append(toString(this.baseType)).toString();
     }
 
     @Override
@@ -108,9 +106,9 @@ public final class ASimpleNewExpr extends PNewExpr
             return;
         }
 
-        if(this._baseType_ == child)
+        if(this.baseType == child)
         {
-            this._baseType_ = null;
+            this.baseType = null;
             return;
         }
 
@@ -127,7 +125,7 @@ public final class ASimpleNewExpr extends PNewExpr
             return;
         }
 
-        if(this._baseType_ == oldChild)
+        if(this.baseType == oldChild)
         {
             setBaseType((PBaseType) newChild);
             return;

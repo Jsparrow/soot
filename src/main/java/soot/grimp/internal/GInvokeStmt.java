@@ -31,7 +31,8 @@ public class GInvokeStmt extends JInvokeStmt {
     super(Grimp.v().newInvokeExprBox(c));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GInvokeStmt(Grimp.cloneIfNecessary(getInvokeExpr()));
   }
 }

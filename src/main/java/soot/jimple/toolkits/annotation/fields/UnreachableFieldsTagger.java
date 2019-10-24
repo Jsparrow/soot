@@ -49,10 +49,11 @@ public class UnreachableFieldsTagger extends SceneTransformer {
     return G.v().soot_jimple_toolkits_annotation_fields_UnreachableFieldsTagger();
   }
 
-  protected void internalTransform(String phaseName, Map options) {
+  @Override
+protected void internalTransform(String phaseName, Map options) {
 
     // make list of all fields
-    ArrayList<SootField> fieldList = new ArrayList<SootField>();
+    ArrayList<SootField> fieldList = new ArrayList<>();
 
     Iterator getClassesIt = Scene.v().getApplicationClasses().iterator();
     while (getClassesIt.hasNext()) {
@@ -102,15 +103,12 @@ public class UnreachableFieldsTagger extends SceneTransformer {
       }
     }
 
-    // tag unused fields
-    Iterator<SootField> unusedIt = fieldList.iterator();
-    while (unusedIt.hasNext()) {
-      SootField unusedField = unusedIt.next();
-      unusedField.addTag(new StringTag("Field " + unusedField.getName() + " is not used!", "Unreachable Fields"));
+    fieldList.forEach(unusedField -> {
+      unusedField.addTag(new StringTag(new StringBuilder().append("Field ").append(unusedField.getName()).append(" is not used!").toString(), "Unreachable Fields"));
       unusedField.addTag(new ColorTag(ColorTag.RED, true, "Unreachable Fields"));
       // System.out.println("tagged field: "+unusedField);
 
-    }
+    });
   }
 
 }

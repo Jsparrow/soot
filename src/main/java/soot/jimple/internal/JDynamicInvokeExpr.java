@@ -52,9 +52,9 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
       int tag, List<? extends Value> methodArgs) {
     super(methodRef, new ValueBox[methodArgs.size()]);
 
-    if (!methodRef.getSignature().startsWith("<" + SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME + ": ")) {
+    if (!methodRef.getSignature().startsWith(new StringBuilder().append("<").append(SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME).append(": ").toString())) {
       throw new IllegalArgumentException(
-          "Receiver type of JDynamicInvokeExpr must be " + SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME + "!");
+          new StringBuilder().append("Receiver type of JDynamicInvokeExpr must be ").append(SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME).append("!").toString());
     }
 
     this.bsmRef = bootstrapMethodRef;
@@ -77,21 +77,24 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     this(bootstrapMethodRef, bootstrapArgs, methodRef, MethodHandle.Kind.REF_INVOKE_STATIC.getValue(), methodArgs);
   }
 
-  public int getBootstrapArgCount() {
+  @Override
+public int getBootstrapArgCount() {
     return bsmArgBoxes.length;
   }
 
-  public Value getBootstrapArg(int index) {
+  @Override
+public Value getBootstrapArg(int index) {
     return bsmArgBoxes[index].getValue();
   }
 
-  public Object clone() {
-    List<Value> clonedBsmArgs = new ArrayList<Value>(getBootstrapArgCount());
+  @Override
+public Object clone() {
+    List<Value> clonedBsmArgs = new ArrayList<>(getBootstrapArgCount());
     for (int i = 0; i < getBootstrapArgCount(); i++) {
       clonedBsmArgs.add(i, getBootstrapArg(i));
     }
 
-    List<Value> clonedArgs = new ArrayList<Value>(getArgCount());
+    List<Value> clonedArgs = new ArrayList<>(getArgCount());
     for (int i = 0; i < getArgCount(); i++) {
       clonedArgs.add(i, getArg(i));
     }
@@ -99,24 +102,27 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     return new JDynamicInvokeExpr(bsmRef, clonedBsmArgs, methodRef, tag, clonedArgs);
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof JDynamicInvokeExpr) {
-      JDynamicInvokeExpr ie = (JDynamicInvokeExpr) o;
-      if (!(getMethod().equals(ie.getMethod()) && bsmArgBoxes.length == ie.bsmArgBoxes.length)) {
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof JDynamicInvokeExpr)) {
+		return false;
+	}
+	JDynamicInvokeExpr ie = (JDynamicInvokeExpr) o;
+	if (!(getMethod().equals(ie.getMethod()) && bsmArgBoxes.length == ie.bsmArgBoxes.length)) {
         return false;
       }
-      int i = 0;
-      for (ValueBox element : bsmArgBoxes) {
+	int i = 0;
+	for (ValueBox element : bsmArgBoxes) {
         if (!(element.getValue().equivTo(ie.getBootstrapArg(i)))) {
           return false;
         }
         i++;
       }
-      if (!(getMethod().equals(ie.getMethod())
+	if (!(getMethod().equals(ie.getMethod())
           && (argBoxes == null ? 0 : argBoxes.length) == (ie.argBoxes == null ? 0 : ie.argBoxes.length))) {
         return false;
       }
-      if (argBoxes != null) {
+	if (argBoxes != null) {
         i = 0;
         for (ValueBox element : argBoxes) {
           if (!(element.getValue().equivTo(ie.getArg(i)))) {
@@ -125,15 +131,13 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
           i++;
         }
       }
-      if (!methodRef.equals(ie.methodRef)) {
+	if (!methodRef.equals(ie.methodRef)) {
         return false;
       }
-      if (!bsmRef.equals(ie.bsmRef)) {
+	if (!bsmRef.equals(ie.bsmRef)) {
         return false;
       }
-      return true;
-    }
-    return false;
+	return true;
   }
 
   public SootMethod getBootstrapMethod() {
@@ -143,12 +147,14 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
   /**
    * Returns a hash code for this object, consistent with structural equality.
    */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return getBootstrapMethod().equivHashCode() * getMethod().equivHashCode() * 17;
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
     buffer.append(Jimple.DYNAMICINVOKE);
     buffer.append(" \"");
@@ -185,11 +191,10 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.DYNAMICINVOKE);
-    up.literal(" \"" + methodRef.name() + "\" <"
-        + SootMethod.getSubSignature(""/* no method name here */, methodRef.parameterTypes(), methodRef.returnType())
-        + ">(");
+    up.literal(new StringBuilder().append(" \"").append(methodRef.name()).append("\" <").append(SootMethod.getSubSignature(""/* no method name here */, methodRef.parameterTypes(), methodRef.returnType())).append(">(").toString());
 
     if (argBoxes != null) {
       for (int i = 0; i < argBoxes.length; i++) {
@@ -216,18 +221,20 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     up.literal(")");
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseDynamicInvokeExpr(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     if (argBoxes != null) {
       for (ValueBox element : argBoxes) {
         ((ConvertToBaf) (element.getValue())).convertToBaf(context, out);
       }
     }
 
-    List<Value> bsmArgs = new ArrayList<Value>();
+    List<Value> bsmArgs = new ArrayList<>();
     for (ValueBox argBox : bsmArgBoxes) {
       bsmArgs.add(argBox.getValue());
     }
@@ -237,12 +244,14 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     out.add(u);
   }
 
-  public SootMethodRef getBootstrapMethodRef() {
+  @Override
+public SootMethodRef getBootstrapMethodRef() {
     return bsmRef;
   }
 
-  public List<Value> getBootstrapArgs() {
-    List<Value> l = new ArrayList<Value>();
+  @Override
+public List<Value> getBootstrapArgs() {
+    List<Value> l = new ArrayList<>();
     for (ValueBox element : bsmArgBoxes) {
       l.add(element.getValue());
     }

@@ -125,12 +125,14 @@ class LocalVariableTable_attribute extends attribute_info {
         throw new RuntimeException("name_index not addressing an UTF8 entry.");
       }
     } catch (ArrayIndexOutOfBoundsException x) {
-      return null;
+      logger.error(x.getMessage(), x);
+	return null;
     }
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
     for (int i = 0; i < local_variable_table_length; i++) {
       buffer.append(local_variable_table[i].toString() + "\n");

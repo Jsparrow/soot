@@ -36,7 +36,8 @@ class FlowGraphEdge {
     this.to = to;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return this.from.hashCode() ^ this.to.hashCode();
   }
 
@@ -53,18 +54,17 @@ class FlowGraphEdge {
     this.to = to;
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     if (other == null) {
       return false;
     }
 
-    if (other instanceof FlowGraphEdge) {
-      Object otherstart = ((FlowGraphEdge) other).getStartUnit();
-      Object othertarget = ((FlowGraphEdge) other).getTargetUnit();
-
-      return (this.from.equals(otherstart) && this.to.equals(othertarget));
-    } else {
-      return false;
-    }
+    if (!(other instanceof FlowGraphEdge)) {
+		return false;
+	}
+	Object otherstart = ((FlowGraphEdge) other).getStartUnit();
+	Object othertarget = ((FlowGraphEdge) other).getTargetUnit();
+	return (this.from.equals(otherstart) && this.to.equals(othertarget));
   }
 }

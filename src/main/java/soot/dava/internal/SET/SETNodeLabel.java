@@ -41,7 +41,8 @@ public class SETNodeLabel {
     this.name = name;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return name;
   }
 

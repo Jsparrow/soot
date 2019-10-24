@@ -38,41 +38,52 @@ import polyglot.visit.NodeVisitor;
  */
 public class ConstructNumbersMetric extends ASTMetric {
 
-  private int numIf, numIfElse;
+  private int numIf;
+
+private int numIfElse;
 
   private int numLabeledBlocks;
 
-  private int doLoop, forLoop, whileLoop, whileTrue;
+  private int doLoop;
+
+private int forLoop;
+
+private int whileLoop;
+
+private int whileTrue;
 
   public ConstructNumbersMetric(Node node) {
     super(node);
   }
 
-  public void reset() {
+  @Override
+public void reset() {
     numIf = numIfElse = 0;
     numLabeledBlocks = 0;
     doLoop = forLoop = whileLoop = whileTrue = 0;
   }
 
-  public void addMetrics(ClassData data) {
+  @Override
+public void addMetrics(ClassData data) {
     // TODO Auto-generated method stub
     // conditionals
-    data.addMetric(new MetricData("If", new Integer(numIf)));
-    data.addMetric(new MetricData("IfElse", new Integer(numIfElse)));
-    data.addMetric(new MetricData("Total-Conditionals", new Integer(numIf + numIfElse)));
+    data.addMetric(new MetricData("If", Integer.valueOf(numIf)));
+    data.addMetric(new MetricData("IfElse", Integer.valueOf(numIfElse)));
+    data.addMetric(new MetricData("Total-Conditionals", Integer.valueOf(numIf + numIfElse)));
 
     // labels
-    data.addMetric(new MetricData("LabelBlock", new Integer(numLabeledBlocks)));
+    data.addMetric(new MetricData("LabelBlock", Integer.valueOf(numLabeledBlocks)));
 
     // loops
-    data.addMetric(new MetricData("Do", new Integer(doLoop)));
-    data.addMetric(new MetricData("For", new Integer(forLoop)));
-    data.addMetric(new MetricData("While", new Integer(whileLoop)));
-    data.addMetric(new MetricData("UnConditional", new Integer(whileTrue)));
-    data.addMetric(new MetricData("Total Loops", new Integer(whileTrue + whileLoop + forLoop + doLoop)));
+    data.addMetric(new MetricData("Do", Integer.valueOf(doLoop)));
+    data.addMetric(new MetricData("For", Integer.valueOf(forLoop)));
+    data.addMetric(new MetricData("While", Integer.valueOf(whileLoop)));
+    data.addMetric(new MetricData("UnConditional", Integer.valueOf(whileTrue)));
+    data.addMetric(new MetricData("Total Loops", Integer.valueOf(whileTrue + whileLoop + forLoop + doLoop)));
   }
 
-  public NodeVisitor enter(Node parent, Node n) {
+  @Override
+public NodeVisitor enter(Node parent, Node n) {
 
     /*
      * Num if and ifelse

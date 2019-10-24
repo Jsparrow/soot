@@ -63,8 +63,8 @@ public class AbstractRuntimeThread {
   public AbstractRuntimeThread() {
     startStmt = null;
     startStmtMethod = null;
-    methods = new ArrayList<Object>();
-    runMethods = new ArrayList<Object>();
+    methods = new ArrayList<>();
+    runMethods = new ArrayList<>();
 
     // What kind of parallelism - this is set unsafely, so analysis MUST set it correctly
     runsMany = false;
@@ -161,9 +161,9 @@ public class AbstractRuntimeThread {
     isMainThread = true;
   }
 
-  public String toString() {
-    String ret = (isMainThread ? "Main Thread" : "User Thread") + " ("
-        + (runsMany ? "Multi,  " : (runsOnce ? "Single, " : (runsOneAtATime ? "At-Once," : "ERROR")));
+  @Override
+public String toString() {
+    String ret = new StringBuilder().append(isMainThread ? "Main Thread" : "User Thread").append(" (").append(runsMany ? "Multi,  " : (runsOnce ? "Single, " : (runsOneAtATime ? "At-Once," : "ERROR"))).toString();
     if (startStmtHasMultipleReachingObjects) {
       ret = ret + "MRO,"; // Multiple Reaching Objects
       if (startMethodIsReentrant) {
@@ -185,13 +185,14 @@ public class AbstractRuntimeThread {
     ret = ret + "): ";
 
     if (!isMainThread) {
-      ret = ret + "Started in " + startStmtMethod + " by " + startStmt + "\n";
+      ret = new StringBuilder().append(ret).append("Started in ").append(startStmtMethod).append(" by ").append(startStmt).append("\n").toString();
     } else {
       ret = ret + "\n";
     }
 
     if (joinStmt != null) {
-      ret = ret + "                               " + "Joined  in " + startStmtMethod + " by " + joinStmt + "\n";
+      ret = new StringBuilder().append(ret).append("                               ").append("Joined  in ").append(startStmtMethod).append(" by ").append(joinStmt).append("\n")
+			.toString();
     }
 
     ret = ret + methods.toString();

@@ -36,92 +36,93 @@ public class JavaLangClassNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.Class forName0(java.lang.String,boolean,java.lang.ClassLoader)")) {
+    if ("java.lang.Class forName0(java.lang.String,boolean,java.lang.ClassLoader)".equals(subSignature)) {
       java_lang_Class_forName0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object newInstance0()")) {
+    } else if ("java.lang.Object newInstance0()".equals(subSignature)) {
       java_lang_Class_newInstance0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.String getName()")) {
+    } else if ("java.lang.String getName()".equals(subSignature)) {
       java_lang_Class_getName(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.ClassLoader getClassLoader0()")) {
+    } else if ("java.lang.ClassLoader getClassLoader0()".equals(subSignature)) {
       java_lang_Class_getClassLoader0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class getSuperclass()")) {
+    } else if ("java.lang.Class getSuperclass()".equals(subSignature)) {
       java_lang_Class_getSuperclass(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class[] getInterfaces()")) {
+    } else if ("java.lang.Class[] getInterfaces()".equals(subSignature)) {
       java_lang_Class_getInterfaces(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class getComponentType()")) {
+    } else if ("java.lang.Class getComponentType()".equals(subSignature)) {
       java_lang_Class_getComponentType(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object[] getSigners()")) {
+    } else if ("java.lang.Object[] getSigners()".equals(subSignature)) {
       java_lang_Class_getSigners(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("void setSigners(java.lang.Object[])")) {
+    } else if ("void setSigners(java.lang.Object[])".equals(subSignature)) {
       java_lang_Class_setSigners(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class getDeclaringClass()")) {
+    } else if ("java.lang.Class getDeclaringClass()".equals(subSignature)) {
       java_lang_Class_getDeclaringClass(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("void setProtectionDomain0(java.security.ProtectionDomain)")) {
+    } else if ("void setProtectionDomain0(java.security.ProtectionDomain)".equals(subSignature)) {
       java_lang_Class_setProtectionDomain0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.security.ProtectionDomain getProtectionDomain0()")) {
+    } else if ("java.security.ProtectionDomain getProtectionDomain0()".equals(subSignature)) {
       java_lang_Class_getProtectionDomain0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class getPrimitiveClass(java.lang.String)")) {
+    } else if ("java.lang.Class getPrimitiveClass(java.lang.String)".equals(subSignature)) {
       java_lang_Class_getPrimitiveClass(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.reflect.Field[] getFields0(int)")) {
+    } else if ("java.lang.reflect.Field[] getFields0(int)".equals(subSignature)) {
       java_lang_Class_getFields0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.reflect.Method[] getMethods0(int)")) {
+    } else if ("java.lang.reflect.Method[] getMethods0(int)".equals(subSignature)) {
       java_lang_Class_getMethods0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.reflect.Constructor[] getConstructors0(int)")) {
+    } else if ("java.lang.reflect.Constructor[] getConstructors0(int)".equals(subSignature)) {
       java_lang_Class_getConstructors0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.reflect.Field getField0(java.lang.String,int)")) {
+    } else if ("java.lang.reflect.Field getField0(java.lang.String,int)".equals(subSignature)) {
       java_lang_Class_getField0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.reflect.Method getMethod0(java.lang.String,java.lang.Class[],int)")) {
+    } else if ("java.lang.reflect.Method getMethod0(java.lang.String,java.lang.Class[],int)".equals(subSignature)) {
       java_lang_Class_getMethod0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.reflect.Constructor getConstructor0(java.lang.Class[],int)")) {
+    } else if ("java.lang.reflect.Constructor getConstructor0(java.lang.Class[],int)".equals(subSignature)) {
       java_lang_Class_getConstructor0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class[] getDeclaredClasses0()")) {
+    } else if ("java.lang.Class[] getDeclaredClasses0()".equals(subSignature)) {
       java_lang_Class_getDeclaredClasses0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.reflect.Constructor[] getDeclaredConstructors0(boolean)")) {
+    } else if ("java.lang.reflect.Constructor[] getDeclaredConstructors0(boolean)".equals(subSignature)) {
       java_lang_Class_getDeclaredConstructors0(method, thisVar, returnVar, params);
       return;
 

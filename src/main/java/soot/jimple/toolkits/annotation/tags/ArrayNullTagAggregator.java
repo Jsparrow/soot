@@ -41,7 +41,8 @@ public class ArrayNullTagAggregator extends TagAggregator {
     return G.v().soot_jimple_toolkits_annotation_tags_ArrayNullTagAggregator();
   }
 
-  public boolean wantTag(Tag t) {
+  @Override
+public boolean wantTag(Tag t) {
     return (t instanceof OneByteCodeTag);
   }
 
@@ -62,7 +63,8 @@ public class ArrayNullTagAggregator extends TagAggregator {
     anct.accumulate(obct.getValue()[0]);
   }
 
-  public String aggregatedName() {
+  @Override
+public String aggregatedName() {
     return "ArrayNullCheckAttribute";
   }
 }

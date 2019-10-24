@@ -82,10 +82,12 @@ public class OrAggregatorFour extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
-  public void outASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void outASTForLoopNode(ASTForLoopNode node) {
     String label = node.get_Label().toString();
     if (label == null) {
       return;
@@ -105,7 +107,8 @@ public class OrAggregatorFour extends DepthFirstAdapter {
     UselessLabelFinder.v().findAndKill(node);
   }
 
-  public void outASTWhileNode(ASTWhileNode node) {
+  @Override
+public void outASTWhileNode(ASTWhileNode node) {
     String label = node.get_Label().toString();
     if (label == null) {
       return;
@@ -125,7 +128,8 @@ public class OrAggregatorFour extends DepthFirstAdapter {
     UselessLabelFinder.v().findAndKill(node);
   }
 
-  public void outASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void outASTDoWhileNode(ASTDoWhileNode node) {
     String label = node.get_Label().toString();
     if (label == null) {
       return;
@@ -144,7 +148,8 @@ public class OrAggregatorFour extends DepthFirstAdapter {
     UselessLabelFinder.v().findAndKill(node);
   }
 
-  public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
+  @Override
+public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
     String label = node.get_Label().toString();
     if (label == null) {
       return;
@@ -221,7 +226,7 @@ public class OrAggregatorFour extends DepthFirstAdapter {
 
   private List<Object> createWhileBody(List subBody, List labeledBlocksSubBody, int nodeNumber) {
     // create BodyA, Nodes from 0 to nodeNumber
-    List<Object> bodyA = new ArrayList<Object>();
+    List<Object> bodyA = new ArrayList<>();
 
     // this is an iterator of ASTNodes
     Iterator it = subBody.iterator();
@@ -241,12 +246,8 @@ public class OrAggregatorFour extends DepthFirstAdapter {
     // remembering that the last ones condition is to be flipped
     List<ASTCondition> conditions = getConditions(labeledBlocksSubBody.iterator());
 
-    // create an aggregated condition
-    Iterator<ASTCondition> condIt = conditions.iterator();
     ASTCondition newCond = null;
-    ;
-    while (condIt.hasNext()) {
-      ASTCondition next = condIt.next();
+    for (ASTCondition next : conditions) {
       if (newCond == null) {
         newCond = next;
       } else {
@@ -256,7 +257,7 @@ public class OrAggregatorFour extends DepthFirstAdapter {
 
     // create BodyB
     it.next();// this skips the LabeledBlockNode
-    List<Object> bodyB = new ArrayList<Object>();
+    List<Object> bodyB = new ArrayList<>();
     while (it.hasNext()) {
       bodyB.add(it.next());
     }
@@ -273,7 +274,7 @@ public class OrAggregatorFour extends DepthFirstAdapter {
    * it knows the following: All nodes are ASTIFNodes
    */
   private List<ASTCondition> getConditions(Iterator it) {
-    List<ASTCondition> toReturn = new ArrayList<ASTCondition>();
+    List<ASTCondition> toReturn = new ArrayList<>();
     while (it.hasNext()) {
       // safe cast since we know these are all ASTIfNodes
       ASTIfNode node = (ASTIfNode) it.next();

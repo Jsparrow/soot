@@ -39,8 +39,9 @@ public class RadioScenePack extends ScenePack {
     super(name);
   }
 
-  protected void internalApply() {
-    LinkedList<Transform> enableds = new LinkedList<Transform>();
+  @Override
+protected void internalApply() {
+    LinkedList<Transform> enableds = new LinkedList<>();
 
     for (Iterator<Transform> tIt = this.iterator(); tIt.hasNext();) {
 
@@ -53,33 +54,32 @@ public class RadioScenePack extends ScenePack {
     }
     if (enableds.size() == 0) {
       logger
-          .debug("" + "Exactly one phase in the pack " + getPhaseName() + " must be enabled. Currently, none of them are.");
+          .debug(new StringBuilder().append("").append("Exactly one phase in the pack ").append(getPhaseName()).append(" must be enabled. Currently, none of them are.").toString());
       throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED);
     }
     if (enableds.size() > 1) {
       logger.debug(
-          "" + "Only one phase in the pack " + getPhaseName() + " may be enabled. The following are enabled currently: ");
-      for (Transform t : enableds) {
-        logger.debug("" + "  " + t.getPhaseName());
-      }
+          new StringBuilder().append("").append("Only one phase in the pack ").append(getPhaseName()).append(" may be enabled. The following are enabled currently: ").toString());
+      enableds.forEach(t -> logger.debug(new StringBuilder().append("").append("  ").append(t.getPhaseName()).toString()));
       throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED);
     }
-    for (Transform t : enableds) {
-      t.apply();
-    }
+    enableds.forEach(Transform::apply);
   }
 
-  public void add(Transform t) {
+  @Override
+public void add(Transform t) {
     super.add(t);
     checkEnabled(t);
   }
 
-  public void insertAfter(Transform t, String phaseName) {
+  @Override
+public void insertAfter(Transform t, String phaseName) {
     super.insertAfter(t, phaseName);
     checkEnabled(t);
   }
 
-  public void insertBefore(Transform t, String phaseName) {
+  @Override
+public void insertBefore(Transform t, String phaseName) {
     super.insertBefore(t, phaseName);
     checkEnabled(t);
   }

@@ -34,7 +34,7 @@ import java.util.Set;
  * This is quite useful for maps of Locals, to avoid nondeterministic local-name drift.
  */
 public class DeterministicHashMap<K, V> extends HashMap<K, V> {
-  Set<K> keys = new TrustingMonotonicArraySet<K>();
+  Set<K> keys = new TrustingMonotonicArraySet<>();
 
   /** Constructs a DeterministicHashMap with the given initial capacity. */
   public DeterministicHashMap(int initialCapacity) {
@@ -99,11 +99,13 @@ class TrustingMonotonicArraySet<T> extends AbstractSet<T> {
     }
   }
 
-  public void clear() {
+  @Override
+public void clear() {
     numElements = 0;
   }
 
-  public boolean contains(Object obj) {
+  @Override
+public boolean contains(Object obj) {
     for (int i = 0; i < numElements; i++) {
       if (elements[i].equals(obj)) {
         return true;
@@ -135,38 +137,7 @@ class TrustingMonotonicArraySet<T> extends AbstractSet<T> {
     return new ArrayIterator();
   }
 
-  private class ArrayIterator implements Iterator<T> {
-    int nextIndex;
-
-    ArrayIterator() {
-      nextIndex = 0;
-    }
-
-    public boolean hasNext() {
-      return nextIndex < numElements;
-    }
-
-    @Override
-    public T next() throws NoSuchElementException {
-      if (!(nextIndex < numElements)) {
-        throw new NoSuchElementException();
-      }
-
-      return elements[nextIndex++];
-    }
-
-    @Override
-    public void remove() throws NoSuchElementException {
-      if (nextIndex == 0) {
-        throw new NoSuchElementException();
-      } else {
-        removeElementAt(nextIndex - 1);
-        nextIndex = nextIndex - 1;
-      }
-    }
-  }
-
-  private void removeElementAt(int index) {
+  private void removeElementAt() {
     throw new UnsupportedOperationException();
     /*
      * // Handle simple case if(index == numElements - 1) { numElements--; return; }
@@ -176,7 +147,7 @@ class TrustingMonotonicArraySet<T> extends AbstractSet<T> {
      */
   }
 
-  private void doubleCapacity() {
+private void doubleCapacity() {
     int newSize = maxElements * 2;
 
     @SuppressWarnings("unchecked")
@@ -187,12 +158,44 @@ class TrustingMonotonicArraySet<T> extends AbstractSet<T> {
     maxElements = newSize;
   }
 
-  @Override
+@Override
   public T[] toArray() {
     @SuppressWarnings("unchecked")
     T[] array = (T[]) new Object[numElements];
 
     System.arraycopy(elements, 0, array, 0, numElements);
     return array;
+  }
+
+private class ArrayIterator implements Iterator<T> {
+    int nextIndex;
+
+    ArrayIterator() {
+      nextIndex = 0;
+    }
+
+    @Override
+	public boolean hasNext() {
+      return nextIndex < numElements;
+    }
+
+    @Override
+    public T next() {
+      if (!(nextIndex < numElements)) {
+        throw new NoSuchElementException();
+      }
+
+      return elements[nextIndex++];
+    }
+
+    @Override
+    public void remove() {
+      if (nextIndex == 0) {
+        throw new NoSuchElementException();
+      } else {
+        removeElementAt();
+        nextIndex -= 1;
+      }
+    }
   }
 }

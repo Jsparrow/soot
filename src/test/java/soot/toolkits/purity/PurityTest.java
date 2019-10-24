@@ -23,6 +23,8 @@ package soot.toolkits.purity;
  */
 
 import org.junit.Ignore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This example is from the article "A Combined Pointer and Purity Analysis for
@@ -69,11 +71,13 @@ class ListItr implements Iterator {
 	cell = head;
     }
 
-    public boolean hasNext() {
+    @Override
+	public boolean hasNext() {
 	return cell != null;
     }
 
-    public Object next() {
+    @Override
+	public Object next() {
 	Object result = cell.data;
 	cell = cell.next;
 	return result;
@@ -82,7 +86,9 @@ class ListItr implements Iterator {
 
 class Point {
     
-    float x,y;
+    private static final Logger logger = LoggerFactory.getLogger(Point.class);
+	float x;
+	float y;
 
     Point(float x,float y) {
 	this.x = x;
@@ -96,14 +102,16 @@ class Point {
     }
 
     void print() {
-	System.out.print("("+x+","+y+")");
+	logger.info(new StringBuilder().append("(").append(x).append(",").append(y).append(")").toString());
     }
 }
 
 @Ignore("not a real test!")
 public class PurityTest {
 
-    static float sumX(List list) {
+    private static final Logger logger = LoggerFactory.getLogger(PurityTest.class);
+
+	static float sumX(List list) {
 	float s = 0;
 	Iterator it = list.iterator();
 	while (it.hasNext()) {
@@ -123,13 +131,15 @@ public class PurityTest {
 
     static void print(List list) {
 	Iterator it = list.iterator();
-	System.out.print("[");
+	logger.info("[");
 	while (it.hasNext()) {
 	    Point p = (Point) it.next();
 	    p.print();
-	    if (it.hasNext()) System.out.print(";");
+	    if (it.hasNext()) {
+			logger.info(";");
+		}
 	}
-	System.out.println("]");
+	logger.info("]");
     }
 
     public static void main(String args[]) {
@@ -138,7 +148,7 @@ public class PurityTest {
 	list.add(new Point(2,3));
 	list.add(new Point(3,4));
 	print(list);
-	System.out.println("sum="+sumX(list));
+	logger.info("sum="+sumX(list));
 	sumX(list);
 	print(list);
 	flipAll(list);

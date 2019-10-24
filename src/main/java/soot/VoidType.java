@@ -34,23 +34,28 @@ public class VoidType extends Type {
     return G.v().soot_VoidType();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x3A8C1035;
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "void";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseVoidType(this);
   }
 
-  public boolean isAllowedInFinalCode() {
+  @Override
+public boolean isAllowedInFinalCode() {
     return true;
   }
 

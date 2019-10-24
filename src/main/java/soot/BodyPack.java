@@ -40,7 +40,8 @@ public class BodyPack extends Pack {
     super(name);
   }
 
-  protected void internalApply(Body b) {
+  @Override
+protected void internalApply(Body b) {
     for (Iterator<Transform> tIt = this.iterator(); tIt.hasNext();) {
       final Transform t = tIt.next();
       if (Options.v().interactive_mode()) {

@@ -40,29 +40,7 @@ public class CPTuple {
   /*
    * false means not top true mean TOP
    */
-  private Boolean TOP = new Boolean(false);
-
-  /*
-   * Dont care about className and variable but the CONSTANT VALUE HAS TO BE A NEW ONE otherwise the clone of the flowset
-   * keeps pointing to the same bloody constant value
-   */
-  public CPTuple clone() {
-    if (isTop()) {
-      return new CPTuple(sootClass, variable, true);
-    } else if (isValueADouble()) {
-      return new CPTuple(sootClass, variable, new Double(((Double) constant).doubleValue()));
-    } else if (isValueAFloat()) {
-      return new CPTuple(sootClass, variable, new Float(((Float) constant).floatValue()));
-    } else if (isValueALong()) {
-      return new CPTuple(sootClass, variable, new Long(((Long) constant).longValue()));
-    } else if (isValueABoolean()) {
-      return new CPTuple(sootClass, variable, new Boolean(((Boolean) constant).booleanValue()));
-    } else if (isValueAInteger()) {
-      return new CPTuple(sootClass, variable, new Integer(((Integer) constant).intValue()));
-    } else {
-      throw new RuntimeException("illegal Constant Type...report to developer" + constant);
-    }
-  }
+  private Boolean TOP = Boolean.valueOf(false);
 
   public CPTuple(String sootClass, CPVariable variable, Object constant) {
 
@@ -75,10 +53,10 @@ public class CPTuple {
     this.sootClass = sootClass;
     this.variable = variable;
     this.constant = constant;
-    TOP = new Boolean(false);
+    TOP = Boolean.valueOf(false);
   }
 
-  public CPTuple(String sootClass, CPVariable variable, boolean top) {
+public CPTuple(String sootClass, CPVariable variable, boolean top) {
     this.sootClass = sootClass;
     this.variable = variable;
 
@@ -86,51 +64,74 @@ public class CPTuple {
     setTop();
   }
 
-  public boolean containsLocal() {
+/*
+   * Dont care about className and variable but the CONSTANT VALUE HAS TO BE A NEW ONE otherwise the clone of the flowset
+   * keeps pointing to the same bloody constant value
+   */
+  @Override
+public CPTuple clone() {
+    if (isTop()) {
+      return new CPTuple(sootClass, variable, true);
+    } else if (isValueADouble()) {
+      return new CPTuple(sootClass, variable, Double.valueOf(((Double) constant).doubleValue()));
+    } else if (isValueAFloat()) {
+      return new CPTuple(sootClass, variable, Float.valueOf(((Float) constant).floatValue()));
+    } else if (isValueALong()) {
+      return new CPTuple(sootClass, variable, Long.valueOf(((Long) constant).longValue()));
+    } else if (isValueABoolean()) {
+      return new CPTuple(sootClass, variable, Boolean.valueOf(((Boolean) constant).booleanValue()));
+    } else if (isValueAInteger()) {
+      return new CPTuple(sootClass, variable, Integer.valueOf(((Integer) constant).intValue()));
+    } else {
+      throw new RuntimeException("illegal Constant Type...report to developer" + constant);
+    }
+  }
+
+public boolean containsLocal() {
     return variable.containsLocal();
   }
 
-  public boolean containsField() {
+public boolean containsField() {
     return variable.containsSootField();
   }
 
-  /*
+/*
    * If TOP is non null then that means it is set to TOP
    */
   public boolean isTop() {
     return TOP.booleanValue();
   }
 
-  public void setTop() {
+public void setTop() {
     constant = null;
-    TOP = new Boolean(true);
+    TOP = Boolean.valueOf(true);
   }
 
-  public boolean isValueADouble() {
+public boolean isValueADouble() {
     return (constant instanceof Double);
   }
 
-  public boolean isValueAFloat() {
+public boolean isValueAFloat() {
     return (constant instanceof Float);
   }
 
-  public boolean isValueALong() {
+public boolean isValueALong() {
     return (constant instanceof Long);
   }
 
-  public boolean isValueABoolean() {
+public boolean isValueABoolean() {
     return (constant instanceof Boolean);
   }
 
-  public boolean isValueAInteger() {
+public boolean isValueAInteger() {
     return (constant instanceof Integer);
   }
 
-  public Object getValue() {
+public Object getValue() {
     return constant;
   }
 
-  public void setValue(Object constant) {
+public void setValue(Object constant) {
     // System.out.println("here currently valued as"+this.constant);
     if (!(constant instanceof Float || constant instanceof Double || constant instanceof Long || constant instanceof Boolean
         || constant instanceof Integer)) {
@@ -138,18 +139,19 @@ public class CPTuple {
     }
 
     this.constant = constant;
-    TOP = new Boolean(false);
+    TOP = Boolean.valueOf(false);
   }
 
-  public String getSootClassName() {
+public String getSootClassName() {
     return sootClass;
   }
 
-  public CPVariable getVariable() {
+public CPVariable getVariable() {
     return variable;
   }
 
-  public boolean equals(Object other) {
+@Override
+public boolean equals(Object other) {
     if (other instanceof CPTuple) {
       CPTuple var = (CPTuple) other;
 
@@ -172,12 +174,14 @@ public class CPTuple {
     return false;
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+@Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     if (isTop()) {
-      b.append("<" + sootClass + ", " + variable.toString() + ", TOP>");
+      b.append(new StringBuilder().append("<").append(sootClass).append(", ").append(variable.toString()).append(", TOP>").toString());
     } else {
-      b.append("<" + sootClass + ", " + variable.toString() + "," + constant.toString() + ">");
+      b.append(new StringBuilder().append("<").append(sootClass).append(", ").append(variable.toString()).append(",").append(constant.toString()).append(">")
+			.toString());
     }
     return b.toString();
   }

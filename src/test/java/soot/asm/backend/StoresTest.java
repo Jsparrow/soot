@@ -52,11 +52,11 @@ public class StoresTest extends AbstractASMBackendTest {
 		if (targetCompiler == TargetCompiler.eclipse) {
 		mv = visitor.visitMethod(ACC_PUBLIC, "doSth", "()I", null, null);
 		mv.visitCode();
-		mv.visitLdcInsn(new Integer(2343249));
+		mv.visitLdcInsn(Integer.valueOf(2343249));
 		mv.visitVarInsn(ISTORE, 0);
-		mv.visitLdcInsn(new Double("3.14324"));
+		mv.visitLdcInsn(Double.valueOf("3.14324"));
 		mv.visitVarInsn(DSTORE, 1);
-		mv.visitLdcInsn(new Float("3.143"));
+		mv.visitLdcInsn(Float.valueOf("3.143"));
 		mv.visitVarInsn(FSTORE, 3);
 		mv.visitIntInsn(SIPUSH, 4636);
 		mv.visitVarInsn(ISTORE, 4);
@@ -82,7 +82,7 @@ public class StoresTest extends AbstractASMBackendTest {
 		mv.visitInsn(ICONST_3);
 		mv.visitIntInsn(NEWARRAY, T_INT);
 		mv.visitInsn(ICONST_1);
-		mv.visitLdcInsn(new Integer(24355764));
+		mv.visitLdcInsn(Integer.valueOf(24355764));
 		mv.visitInsn(IASTORE);
 		mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
 		mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
@@ -145,17 +145,17 @@ public class StoresTest extends AbstractASMBackendTest {
 			mv.visitInsn(ICONST_3);
 			mv.visitIntInsn(NEWARRAY, T_INT);
 			mv.visitInsn(ICONST_1);
-			mv.visitLdcInsn(new Integer(24355764));
+			mv.visitLdcInsn(Integer.valueOf(24355764));
 			mv.visitInsn(IASTORE);
 			mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
 			mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
 			mv.visitInsn(DUP);
 			mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-			mv.visitLdcInsn(new Integer(2343249));
+			mv.visitLdcInsn(Integer.valueOf(2343249));
 			mv.visitInsn(I2D);
-			mv.visitLdcInsn(new Double("3.14324"));
+			mv.visitLdcInsn(Double.valueOf("3.14324"));
 			mv.visitInsn(DADD);
-			mv.visitLdcInsn(new Float("3.143"));
+			mv.visitLdcInsn(Float.valueOf("3.143"));
 			mv.visitInsn(F2D);
 			mv.visitInsn(DADD);
 			mv.visitIntInsn(SIPUSH, 4636);
@@ -166,10 +166,10 @@ public class StoresTest extends AbstractASMBackendTest {
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 			mv.visitVarInsn(ILOAD, 1);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;", false);
-			mv.visitLdcInsn(new Integer(2343249));
+			mv.visitLdcInsn(Integer.valueOf(2343249));
 			mv.visitInsn(I2B);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;", false);
-			mv.visitLdcInsn(new Long(314435665L));
+			mv.visitLdcInsn(Long.valueOf(314435665L));
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;", false);
 			mv.visitIntInsn(BIPUSH, 123);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;", false);
@@ -179,7 +179,7 @@ public class StoresTest extends AbstractASMBackendTest {
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;", false);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
-			mv.visitLdcInsn(new Integer(2343249));
+			mv.visitLdcInsn(Integer.valueOf(2343249));
 			mv.visitInsn(IRETURN);
 			mv.visitMaxs(0, 0);
 			mv.visitEnd();

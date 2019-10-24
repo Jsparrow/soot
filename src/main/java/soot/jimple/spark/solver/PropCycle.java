@@ -46,33 +46,38 @@ import soot.util.LargeNumberedMap;
 
 public class PropCycle extends Propagator {
   private static final Logger logger = LoggerFactory.getLogger(PropCycle.class);
+private PAG pag;
+private OnFlyCallGraph ofcg;
+private Integer currentIteration;
+private final LargeNumberedMap<VarNode, Integer> varNodeToIteration;
 
-  public PropCycle(PAG pag) {
+public PropCycle(PAG pag) {
     this.pag = pag;
-    varNodeToIteration = new LargeNumberedMap<VarNode, Integer>(pag.getVarNodeNumberer());
+    varNodeToIteration = new LargeNumberedMap<>(pag.getVarNodeNumberer());
   }
 
-  /** Actually does the propagation. */
-  public void propagate() {
+/** Actually does the propagation. */
+  @Override
+public void propagate() {
     ofcg = pag.getOnFlyCallGraph();
     boolean verbose = pag.getOpts().verbose();
-    Collection<VarNode> bases = new HashSet<VarNode>();
+    Collection<VarNode> bases = new HashSet<>();
     for (FieldRefNode frn : pag.getFieldRefNodeNumberer()) {
       bases.add(frn.getBase());
     }
-    bases = new ArrayList<VarNode>(bases);
+    bases = new ArrayList<>(bases);
     int iteration = 0;
     boolean changed;
     boolean finalIter = false;
     do {
       changed = false;
       iteration++;
-      currentIteration = new Integer(iteration);
+      currentIteration = Integer.valueOf(iteration);
       if (verbose) {
         logger.debug("Iteration: " + iteration);
       }
       for (VarNode v : bases) {
-        changed = computeP2Set((VarNode) v.getReplacement(), new ArrayList<VarNode>()) | changed;
+        changed = computeP2Set((VarNode) v.getReplacement(), new ArrayList<>()) | changed;
       }
       if (ofcg != null) {
         throw new RuntimeException("NYI");
@@ -86,7 +91,8 @@ public class PropCycle extends Propagator {
         for (Node element0 : targets) {
           final FieldRefNode target = (FieldRefNode) element0;
           changed = target.getBase().makeP2Set().forall(new P2SetVisitor() {
-            public final void visit(Node n) {
+            @Override
+			public final void visit(Node n) {
               AllocDotField nDotF = pag.makeAllocDotField((AllocNode) n, target.getField());
               nDotF.makeP2Set().addAll(src.getP2Set(), null);
             }
@@ -98,7 +104,7 @@ public class PropCycle extends Propagator {
         if (verbose) {
           logger.debug("Doing full graph");
         }
-        bases = new ArrayList<VarNode>(pag.getVarNodeNumberer().size());
+        bases = new ArrayList<>(pag.getVarNodeNumberer().size());
         for (VarNode v : pag.getVarNodeNumberer()) {
           bases.add(v);
         }
@@ -107,7 +113,7 @@ public class PropCycle extends Propagator {
     } while (changed);
   }
 
-  /* End of public methods. */
+/* End of public methods. */
   /* End of package methods. */
 
   private boolean computeP2Set(final VarNode v, ArrayList<VarNode> path) {
@@ -148,7 +154,8 @@ public class PropCycle extends Propagator {
       for (Node element : srcs) {
         final FieldRefNode src = (FieldRefNode) element;
         ret = src.getBase().getP2Set().forall(new P2SetVisitor() {
-          public final void visit(Node n) {
+          @Override
+		public final void visit(Node n) {
             AllocNode an = (AllocNode) n;
             AllocDotField adf = pag.makeAllocDotField(an, src.getField());
             returnValue = v.makeP2Set().addAll(adf.getP2Set(), null) | returnValue;
@@ -159,9 +166,4 @@ public class PropCycle extends Propagator {
     path.remove(path.size() - 1);
     return ret;
   }
-
-  private PAG pag;
-  private OnFlyCallGraph ofcg;
-  private Integer currentIteration;
-  private final LargeNumberedMap<VarNode, Integer> varNodeToIteration;
 }
