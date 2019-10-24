@@ -71,12 +71,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getFileType().apply(this);
         }
         {
-            List<PModifier> copy = new ArrayList<PModifier>(node.getModifier());
+            List<PModifier> copy = new ArrayList<>(node.getModifier());
             Collections.reverse(copy);
-            for(PModifier e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         outAFile(node);
     }
@@ -465,12 +462,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getRBrace().apply(this);
         }
         {
-            List<PMember> copy = new ArrayList<PMember>(node.getMember());
+            List<PMember> copy = new ArrayList<>(node.getMember());
             Collections.reverse(copy);
-            for(PMember e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getLBrace() != null)
         {
@@ -606,12 +600,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getType().apply(this);
         }
         {
-            List<PModifier> copy = new ArrayList<PModifier>(node.getModifier());
+            List<PModifier> copy = new ArrayList<>(node.getModifier());
             Collections.reverse(copy);
-            for(PModifier e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         outAFieldMember(node);
     }
@@ -659,12 +650,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getType().apply(this);
         }
         {
-            List<PModifier> copy = new ArrayList<PModifier>(node.getModifier());
+            List<PModifier> copy = new ArrayList<>(node.getModifier());
             Collections.reverse(copy);
-            for(PModifier e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         outAMethodMember(node);
     }
@@ -1221,12 +1209,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     {
         inABaseNonvoidType(node);
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
             Collections.reverse(copy);
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getBaseTypeNoName() != null)
         {
@@ -1250,12 +1235,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     {
         inAQuotedNonvoidType(node);
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
             Collections.reverse(copy);
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getQuotedName() != null)
         {
@@ -1279,12 +1261,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     {
         inAIdentNonvoidType(node);
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
             Collections.reverse(copy);
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getIdentifier() != null)
         {
@@ -1308,12 +1287,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     {
         inAFullIdentNonvoidType(node);
         {
-            List<PArrayBrackets> copy = new ArrayList<PArrayBrackets>(node.getArrayBrackets());
+            List<PArrayBrackets> copy = new ArrayList<>(node.getArrayBrackets());
             Collections.reverse(copy);
-            for(PArrayBrackets e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getFullIdentifier() != null)
         {
@@ -1387,28 +1363,19 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getRBrace().apply(this);
         }
         {
-            List<PCatchClause> copy = new ArrayList<PCatchClause>(node.getCatchClause());
+            List<PCatchClause> copy = new ArrayList<>(node.getCatchClause());
             Collections.reverse(copy);
-            for(PCatchClause e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         {
-            List<PStatement> copy = new ArrayList<PStatement>(node.getStatement());
+            List<PStatement> copy = new ArrayList<>(node.getStatement());
             Collections.reverse(copy);
-            for(PStatement e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         {
-            List<PDeclaration> copy = new ArrayList<PDeclaration>(node.getDeclaration());
+            List<PDeclaration> copy = new ArrayList<>(node.getDeclaration());
             Collections.reverse(copy);
-            for(PDeclaration e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getLBrace() != null)
         {
@@ -1690,12 +1657,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getRBrace().apply(this);
         }
         {
-            List<PCaseStmt> copy = new ArrayList<PCaseStmt>(node.getCaseStmt());
+            List<PCaseStmt> copy = new ArrayList<>(node.getCaseStmt());
             Collections.reverse(copy);
-            for(PCaseStmt e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getLBrace() != null)
         {
@@ -1743,12 +1707,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getRBrace().apply(this);
         }
         {
-            List<PCaseStmt> copy = new ArrayList<PCaseStmt>(node.getCaseStmt());
+            List<PCaseStmt> copy = new ArrayList<>(node.getCaseStmt());
             Collections.reverse(copy);
-            for(PCaseStmt e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getLBrace() != null)
         {
@@ -2510,12 +2471,9 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     {
         inAMultiNewExpr(node);
         {
-            List<PArrayDescriptor> copy = new ArrayList<PArrayDescriptor>(node.getArrayDescriptor());
+            List<PArrayDescriptor> copy = new ArrayList<>(node.getArrayDescriptor());
             Collections.reverse(copy);
-            for(PArrayDescriptor e : copy)
-            {
-                e.apply(this);
-            }
+            copy.forEach(e -> e.apply(this));
         }
         if(node.getRParen() != null)
         {

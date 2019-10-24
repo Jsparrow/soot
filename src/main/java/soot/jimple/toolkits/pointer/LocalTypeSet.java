@@ -54,7 +54,7 @@ class LocalTypeSet extends java.util.BitSet {
 
   /** Returns the number of the bit corresponding to the pair (l,t). */
   protected int indexOf(Local l, RefType t) {
-    if (locals.indexOf(l) == -1 || types.indexOf(t) == -1) {
+    if (!locals.contains(l) || !types.contains(t)) {
       throw new RuntimeException("Invalid local or type in LocalTypeSet");
     }
     return locals.indexOf(l) * types.size() + types.indexOf(t);
@@ -98,30 +98,24 @@ class LocalTypeSet extends java.util.BitSet {
   /** Adds to the set all pairs (l,type) where type is any supertype of t. */
   public void localMustBeSubtypeOf(Local l, RefType t) {
     FastHierarchy fh = Scene.v().getFastHierarchy();
-    for (Type type : types) {
-      RefType supertype = (RefType) type;
-      if (fh.canStoreType(t, supertype)) {
-        set(indexOf(l, supertype));
-      }
-    }
+    types.stream().map(type -> (RefType) type).forEach(supertype -> {
+		if (fh.canStoreType(t, supertype)) {
+		    set(indexOf(l, supertype));
+		  }
+	});
   }
 
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
-    Iterator<Local> localsIt = locals.iterator();
-    while (localsIt.hasNext()) {
-      Local l = localsIt.next();
-      Iterator<Type> typesIt = types.iterator();
-      while (typesIt.hasNext()) {
-        RefType t = (RefType) typesIt.next();
-        int index = indexOf(l, t);
-        // logger.debug("for: "+l+" and type: "+t+" at: "+index);
-        if (get(index)) {
-          sb.append("((" + l + "," + t + ") -> elim cast check) ");
-        }
-      }
-
-    }
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
+    // logger.debug("for: "+l+" and type: "+t+" at: "+index);
+	locals.forEach(l -> types.forEach(type -> {
+		RefType t = (RefType) type;
+		int index = indexOf(l, t);
+		if (get(index)) {
+			sb.append(new StringBuilder().append("((").append(l).append(",").append(t).append(") -> elim cast check) ").toString());
+		}
+	}));
     return sb.toString();
   }
 }

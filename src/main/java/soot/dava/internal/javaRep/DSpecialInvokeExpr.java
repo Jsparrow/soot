@@ -39,7 +39,8 @@ public class DSpecialInvokeExpr extends GSpecialInvokeExpr {
     super(base, methodRef, args);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (getBase().getType() instanceof NullType) {
       // OL: I don't know what this is for; I'm just refactoring the
       // original code. An explanation here would be welcome.
@@ -77,26 +78,24 @@ public class DSpecialInvokeExpr extends GSpecialInvokeExpr {
     }
   }
 
-  public String toString() {
-    if (getBase().getType() instanceof NullType) {
-      StringBuffer b = new StringBuffer();
-
-      b.append("((");
-      b.append(methodRef.declaringClass().getJavaStyleName());
-      b.append(") ");
-
-      String baseStr = (getBase()).toString();
-      if ((getBase() instanceof Precedence) && (((Precedence) getBase()).getPrecedence() < getPrecedence())) {
-        baseStr = "(" + baseStr + ")";
+  @Override
+public String toString() {
+    if (!(getBase().getType() instanceof NullType)) {
+		return super.toString();
+	}
+	StringBuilder b = new StringBuilder();
+	b.append("((");
+	b.append(methodRef.declaringClass().getJavaStyleName());
+	b.append(") ");
+	String baseStr = (getBase()).toString();
+	if ((getBase() instanceof Precedence) && (((Precedence) getBase()).getPrecedence() < getPrecedence())) {
+        baseStr = new StringBuilder().append("(").append(baseStr).append(")").toString();
       }
-
-      b.append(baseStr);
-      b.append(").");
-
-      b.append(methodRef.name());
-      b.append("(");
-
-      if (argBoxes != null) {
+	b.append(baseStr);
+	b.append(").");
+	b.append(methodRef.name());
+	b.append("(");
+	if (argBoxes != null) {
         for (int i = 0; i < argBoxes.length; i++) {
           if (i != 0) {
             b.append(", ");
@@ -105,16 +104,12 @@ public class DSpecialInvokeExpr extends GSpecialInvokeExpr {
           b.append((argBoxes[i].getValue()).toString());
         }
       }
-
-      b.append(")");
-
-      return b.toString();
-    }
-
-    return super.toString();
+	b.append(")");
+	return b.toString();
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     ArrayList clonedArgs = new ArrayList(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {

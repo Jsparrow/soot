@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AReferenceExpression extends PExpression
 {
-    private PReference _reference_;
+    private PReference reference;
 
     public AReferenceExpression()
     {
@@ -26,7 +26,7 @@ public final class AReferenceExpression extends PExpression
     public Object clone()
     {
         return new AReferenceExpression(
-            cloneNode(this._reference_));
+            cloneNode(this.reference));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AReferenceExpression extends PExpression
 
     public PReference getReference()
     {
-        return this._reference_;
+        return this.reference;
     }
 
     public void setReference(PReference node)
     {
-        if(this._reference_ != null)
+        if(this.reference != null)
         {
-            this._reference_.parent(null);
+            this.reference.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AReferenceExpression extends PExpression
             node.parent(this);
         }
 
-        this._reference_ = node;
+        this.reference = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._reference_);
+            + toString(this.reference);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._reference_ == child)
+        if(this.reference == child)
         {
-            this._reference_ = null;
+            this.reference = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AReferenceExpression extends PExpression
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._reference_ == oldChild)
+        if(this.reference == oldChild)
         {
             setReference((PReference) newChild);
             return;

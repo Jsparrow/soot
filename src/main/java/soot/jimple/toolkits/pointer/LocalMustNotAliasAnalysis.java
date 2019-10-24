@@ -56,7 +56,8 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
 public class LocalMustNotAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap<Local, Set<NewExpr>>> {
   @SuppressWarnings({ "serial", "unchecked" })
   protected static final NewExpr UNKNOWN = new AbstractNewExpr() {
-    public String toString() {
+    @Override
+	public String toString() {
       return "UNKNOWN";
     }
 
@@ -74,22 +75,20 @@ public class LocalMustNotAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap
 
   public LocalMustNotAliasAnalysis(DirectedGraph<Unit> directedGraph, Body b) {
     super(directedGraph);
-    locals = new HashSet<Local>();
+    locals = new HashSet<>();
     locals.addAll(b.getLocals());
 
-    for (Local l : b.getLocals()) {
-      if (l.getType() instanceof RefLikeType) {
-        locals.add(l);
-      }
-    }
+    b.getLocals().stream().filter(l -> l.getType() instanceof RefLikeType).forEach(locals::add);
 
     doAnalysis();
   }
 
-  protected void merge(HashMap<Local, Set<NewExpr>> in1, HashMap<Local, Set<NewExpr>> in2, HashMap<Local, Set<NewExpr>> o) {
+  @Override
+protected void merge(HashMap<Local, Set<NewExpr>> in1, HashMap<Local, Set<NewExpr>> in2, HashMap<Local, Set<NewExpr>> o) {
 
-    for (Local l : locals) {
-      Set<NewExpr> l1 = in1.get(l), l2 = in2.get(l);
+    locals.forEach(l -> {
+      Set<NewExpr> l1 = in1.get(l);
+	Set<NewExpr> l2 = in2.get(l);
       Set<NewExpr> out = o.get(l);
       out.clear();
       if (l1.contains(UNKNOWN) || l2.contains(UNKNOWN)) {
@@ -98,21 +97,24 @@ public class LocalMustNotAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap
         out.addAll(l1);
         out.addAll(l2);
       }
-    }
+    });
   }
 
-  protected void flowThrough(HashMap<Local, Set<NewExpr>> in, Unit unit, HashMap<Local, Set<NewExpr>> out) {
+  @Override
+protected void flowThrough(HashMap<Local, Set<NewExpr>> in, Unit unit, HashMap<Local, Set<NewExpr>> out) {
     Stmt s = (Stmt) unit;
 
     out.clear();
     out.putAll(in);
 
-    if (s instanceof DefinitionStmt) {
-      DefinitionStmt ds = (DefinitionStmt) s;
-      Value lhs = ds.getLeftOp();
-      Value rhs = ds.getRightOp();
-      if (lhs instanceof Local) {
-        HashSet<NewExpr> lv = new HashSet<NewExpr>();
+    if (!(s instanceof DefinitionStmt)) {
+		return;
+	}
+	DefinitionStmt ds = (DefinitionStmt) s;
+	Value lhs = ds.getLeftOp();
+	Value rhs = ds.getRightOp();
+	if (lhs instanceof Local) {
+        HashSet<NewExpr> lv = new HashSet<>();
         out.put((Local) lhs, lv);
         if (rhs instanceof NewExpr) {
           lv.add((NewExpr) rhs);
@@ -122,29 +124,31 @@ public class LocalMustNotAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap
           lv.add(UNKNOWN);
         }
       }
-    }
   }
 
-  protected void copy(HashMap<Local, Set<NewExpr>> source, HashMap<Local, Set<NewExpr>> dest) {
+  @Override
+protected void copy(HashMap<Local, Set<NewExpr>> source, HashMap<Local, Set<NewExpr>> dest) {
     dest.putAll(source);
   }
 
-  protected HashMap<Local, Set<NewExpr>> entryInitialFlow() {
-    HashMap<Local, Set<NewExpr>> m = new HashMap<Local, Set<NewExpr>>();
-    for (Local l : (Collection<Local>) locals) {
-      HashSet<NewExpr> s = new HashSet<NewExpr>();
+  @Override
+protected HashMap<Local, Set<NewExpr>> entryInitialFlow() {
+    HashMap<Local, Set<NewExpr>> m = new HashMap<>();
+    ((Collection<Local>) locals).forEach(l -> {
+      HashSet<NewExpr> s = new HashSet<>();
       s.add(UNKNOWN);
       m.put(l, s);
-    }
+    });
     return m;
   }
 
-  protected HashMap<Local, Set<NewExpr>> newInitialFlow() {
-    HashMap<Local, Set<NewExpr>> m = new HashMap<Local, Set<NewExpr>>();
-    for (Local l : (Collection<Local>) locals) {
-      HashSet<NewExpr> s = new HashSet<NewExpr>();
+  @Override
+protected HashMap<Local, Set<NewExpr>> newInitialFlow() {
+    HashMap<Local, Set<NewExpr>> m = new HashMap<>();
+    ((Collection<Local>) locals).forEach(l -> {
+      HashSet<NewExpr> s = new HashSet<>();
       m.put(l, s);
-    }
+    });
     return m;
   }
 
@@ -175,7 +179,7 @@ public class LocalMustNotAliasAnalysis extends ForwardFlowAnalysis<Unit, HashMap
       return false;
     }
 
-    Set<NewExpr> n = new HashSet<NewExpr>();
+    Set<NewExpr> n = new HashSet<>();
     n.addAll(l1n);
     n.retainAll(l2n);
     return n.isEmpty();

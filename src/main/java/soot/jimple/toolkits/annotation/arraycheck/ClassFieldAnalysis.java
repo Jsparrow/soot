@@ -59,27 +59,25 @@ import soot.toolkits.scalar.LocalDefs;
 
 public class ClassFieldAnalysis {
   private static final Logger logger = LoggerFactory.getLogger(ClassFieldAnalysis.class);
-
-  public ClassFieldAnalysis(Singletons.Global g) {
-  }
-
-  public static ClassFieldAnalysis v() {
-    return G.v().soot_jimple_toolkits_annotation_arraycheck_ClassFieldAnalysis();
-  }
-
-  private final boolean final_in = true;
-  private final boolean private_in = true;
-
-  /*
+private final boolean finalIn = true;
+private final boolean privateIn = true;
+/*
    * A map hold class object to other information
    *
    * SootClass --> FieldInfoTable
    */
 
   private final Map<SootClass, Hashtable<SootField, IntValueContainer>> classToFieldInfoMap
-      = new HashMap<SootClass, Hashtable<SootField, IntValueContainer>>();
+      = new HashMap<>();
 
-  protected void internalTransform(SootClass c) {
+public ClassFieldAnalysis(Singletons.Global g) {
+  }
+
+public static ClassFieldAnalysis v() {
+    return G.v().soot_jimple_toolkits_annotation_arraycheck_ClassFieldAnalysis();
+  }
+
+protected void internalTransform(SootClass c) {
     if (classToFieldInfoMap.containsKey(c)) {
       return;
     }
@@ -87,16 +85,16 @@ public class ClassFieldAnalysis {
     /* Summerize class information here. */
     Date start = new Date();
     if (Options.v().verbose()) {
-      logger.debug("[] ClassFieldAnalysis started on : " + start + " for " + c.getPackageName() + c.getName());
+      logger.debug(new StringBuilder().append("[] ClassFieldAnalysis started on : ").append(start).append(" for ").append(c.getPackageName()).append(c.getName()).toString());
     }
 
-    Hashtable<SootField, IntValueContainer> fieldInfoTable = new Hashtable<SootField, IntValueContainer>();
+    Hashtable<SootField, IntValueContainer> fieldInfoTable = new Hashtable<>();
     classToFieldInfoMap.put(c, fieldInfoTable);
 
     /*
      * Who is the candidate for analysis? Int, Array, field. Also it should be PRIVATE now.
      */
-    HashSet<SootField> candidSet = new HashSet<SootField>();
+    HashSet<SootField> candidSet = new HashSet<>();
 
     int arrayTypeFieldNum = 0;
 
@@ -106,12 +104,11 @@ public class ClassFieldAnalysis {
       int modifiers = field.getModifiers();
 
       Type type = field.getType();
-      if (type instanceof ArrayType) {
-        if ((final_in && ((modifiers & Modifier.FINAL) != 0)) || (private_in && ((modifiers & Modifier.PRIVATE) != 0))) {
-          candidSet.add(field);
-          arrayTypeFieldNum++;
-        }
-      }
+      boolean condition = type instanceof ArrayType && ((finalIn && ((modifiers & Modifier.FINAL) != 0)) || (privateIn && ((modifiers & Modifier.PRIVATE) != 0)));
+	if (condition) {
+	  candidSet.add(field);
+	  arrayTypeFieldNum++;
+	}
     }
 
     if (arrayTypeFieldNum == 0) {
@@ -140,15 +137,16 @@ public class ClassFieldAnalysis {
     }
 
     Date finish = new Date();
-    if (Options.v().verbose()) {
-      long runtime = finish.getTime() - start.getTime();
-      long mins = runtime / 60000;
-      long secs = (runtime % 60000) / 1000;
-      logger.debug("[] ClassFieldAnalysis finished normally. " + "It took " + mins + " mins and " + secs + " secs.");
-    }
+    if (!Options.v().verbose()) {
+		return;
+	}
+	long runtime = finish.getTime() - start.getTime();
+	long mins = runtime / 60000;
+	long secs = (runtime % 60000) / 1000;
+	logger.debug(new StringBuilder().append("[] ClassFieldAnalysis finished normally. ").append("It took ").append(mins).append(" mins and ").append(secs).append(" secs.").toString());
   }
 
-  public Object getFieldInfo(SootField field) {
+public Object getFieldInfo(SootField field) {
     SootClass c = field.getDeclaringClass();
 
     Map<SootField, IntValueContainer> fieldInfoTable = classToFieldInfoMap.get(c);
@@ -161,7 +159,7 @@ public class ClassFieldAnalysis {
     return fieldInfoTable.get(field);
   }
 
-  /*
+/*
    * method, to be scanned candidates, the candidate set of fields, fields with value TOP are moved out of the set.
    * fieldinfo, keep the field -> value.
    */
@@ -183,9 +181,7 @@ public class ClassFieldAnalysis {
 
       Collection<Local> locals = body.getLocals();
 
-      Iterator<Local> localIt = locals.iterator();
-      while (localIt.hasNext()) {
-        Local local = localIt.next();
+      for (Local local : locals) {
         Type type = local.getType();
 
         if (type instanceof ArrayType) {
@@ -208,7 +204,7 @@ public class ClassFieldAnalysis {
      * field.
      */
 
-    HashMap<Stmt, SootField> stmtfield = new HashMap<Stmt, SootField>();
+    HashMap<Stmt, SootField> stmtfield = new HashMap<>();
 
     {
       Iterator<Unit> unitIt = body.getUnits().iterator();

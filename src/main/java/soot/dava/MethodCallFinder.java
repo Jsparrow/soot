@@ -71,7 +71,8 @@ public class MethodCallFinder extends DepthFirstAdapter {
     underAnalysis = null;
   }
 
-  public void inASTMethodNode(ASTMethodNode node) {
+  @Override
+public void inASTMethodNode(ASTMethodNode node) {
     underAnalysis = node;
   }
 
@@ -85,7 +86,8 @@ public class MethodCallFinder extends DepthFirstAdapter {
    * Notice that since this class is only invoked for clinit methods this invoke statement is some invocation that occured
    * within the clinit method
    */
-  public void inInvokeStmt(InvokeStmt s) {
+  @Override
+public void inInvokeStmt(InvokeStmt s) {
     InvokeExpr invokeExpr = s.getInvokeExpr();
     SootMethod maybeInline = invokeExpr.getMethod();
 
@@ -139,10 +141,10 @@ public class MethodCallFinder extends DepthFirstAdapter {
             GThrowStmt throwStmt = new GThrowStmt(newInvokeExpr);
 
             AugmentedStmt augStmt = new AugmentedStmt(throwStmt);
-            List<AugmentedStmt> sequence = new ArrayList<AugmentedStmt>();
+            List<AugmentedStmt> sequence = new ArrayList<>();
             sequence.add(augStmt);
             ASTStatementSequenceNode seqNode = new ASTStatementSequenceNode(sequence);
-            List<Object> subBody = new ArrayList<Object>();
+            List<Object> subBody = new ArrayList<>();
             subBody.add(seqNode);
 
             toInlineASTMethod.replaceBody(subBody);
@@ -165,7 +167,7 @@ public class MethodCallFinder extends DepthFirstAdapter {
   public List<Object> createNewSubBody(List<Object> orignalBody, List<ASTStatementSequenceNode> partNewBody,
       Object stmtSeqNode) {
 
-    List<Object> newBody = new ArrayList<Object>();
+    List<Object> newBody = new ArrayList<>();
 
     Iterator<Object> it = orignalBody.iterator();
     while (it.hasNext()) {
@@ -312,12 +314,10 @@ public class MethodCallFinder extends DepthFirstAdapter {
 
       // get try body
       List<Object> tryBody = ((ASTTryNode) node).get_TryBody();
-      Iterator<Object> it = tryBody.iterator();
-
       // find whether stmtSeqNode is in the tryBody
       boolean inTryBody = false;
-      while (it.hasNext()) {
-        ASTNode temp = (ASTNode) it.next();
+      for (Object aTryBody : tryBody) {
+        ASTNode temp = (ASTNode) aTryBody;
         if (temp == stmtSeqNode) {
           inTryBody = true;
           break;
@@ -336,11 +336,7 @@ public class MethodCallFinder extends DepthFirstAdapter {
       List<Object> indexList = ((ASTSwitchNode) node).getIndexList();
       Map<Object, List<Object>> index2BodyList = ((ASTSwitchNode) node).getIndex2BodyList();
 
-      Iterator<Object> it = indexList.iterator();
-      while (it.hasNext()) {
-        // going through all the cases of the switch
-        // statement
-        Object currentIndex = it.next();
+      for (Object currentIndex : indexList) {
         List<Object> body = index2BodyList.get(currentIndex);
 
         if (body != null) {
@@ -348,9 +344,8 @@ public class MethodCallFinder extends DepthFirstAdapter {
 
           // see if it contains stmtSeqNode
           boolean found = false;
-          Iterator<Object> itBody = body.iterator();
-          while (itBody.hasNext()) {
-            ASTNode temp = (ASTNode) itBody.next();
+          for (Object aBody : body) {
+            ASTNode temp = (ASTNode) aBody;
             if (temp == stmtSeqNode) {
               found = true;
               break;
@@ -394,7 +389,7 @@ public class MethodCallFinder extends DepthFirstAdapter {
 
     // copying the stmts till above the inoke stmt into one stmt sequence
     // node
-    List<AugmentedStmt> newInitialNode = new ArrayList<AugmentedStmt>();
+    List<AugmentedStmt> newInitialNode = new ArrayList<>();
     Iterator<AugmentedStmt> it = orignal.getStatements().iterator();
     while (it.hasNext()) {
       AugmentedStmt as = it.next();
@@ -409,12 +404,12 @@ public class MethodCallFinder extends DepthFirstAdapter {
     }
 
     // copy remaining stmts into the AFTER stmt sequence node
-    List<AugmentedStmt> newSecondNode = new ArrayList<AugmentedStmt>();
+    List<AugmentedStmt> newSecondNode = new ArrayList<>();
     while (it.hasNext()) {
       newSecondNode.add(it.next());
     }
 
-    List<ASTStatementSequenceNode> toReturn = new ArrayList<ASTStatementSequenceNode>();
+    List<ASTStatementSequenceNode> toReturn = new ArrayList<>();
 
     if (newInitialNode.size() != 0) {
       toReturn.add(new ASTStatementSequenceNode(newInitialNode));

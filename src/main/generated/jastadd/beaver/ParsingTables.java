@@ -19,6 +19,8 @@ import java.util.zip.InflaterInputStream;
  */
 public final class ParsingTables
 {
+	static final int UNUSED_OFFSET = Integer.MIN_VALUE;
+
 	/** A table with all actions */
 	private final short[] actions;
 
@@ -38,10 +40,10 @@ public final class ParsingTables
 	 * For each state, the offset into "actions" table that is used to find a next parser's state
 	 * using a nonterminal that has been created by a reduced production.
 	 */
-	private final int[] goto_offsets;
+	private final int[] gotoOffsets;
 
 	/** Default action for each state */
-	private final short[] default_actions;
+	private final short[] defaultActions;
 
 	/**
 	 * A table with encoded production information.
@@ -60,7 +62,7 @@ public final class ParsingTables
 
 	/** Indicates whether action tables were compressed. */
 	final boolean compressed;
-	
+
 	/** Number of terminal symbols. */
 	final int n_term;
 
@@ -73,12 +75,12 @@ public final class ParsingTables
 	{
 		this(getSpecAsResourceStream(impl_class));
 	}
-	
+
 	public ParsingTables(String spec)
 	{
 		this(new ByteArrayInputStream(decode(spec)));
 	}
-	
+
 	private ParsingTables(InputStream in)
 	{
 		try
@@ -104,25 +106,25 @@ public final class ParsingTables
 				{
 					actn_offsets[i] = data.readInt();
 				}
-				goto_offsets = new int[len];
+				gotoOffsets = new int[len];
 				for (int i = 0; i < len; i++)
 				{
-					goto_offsets[i] = data.readInt();
+					gotoOffsets[i] = data.readInt();
 				}
 				
 				len = data.readInt();
 				compressed = len != 0;
 				if (compressed)
 				{
-					default_actions = new short[len];
+					defaultActions = new short[len];
 					for (int i = 0; i < len; i++)
 					{
-						default_actions[i] = data.readShort();
+						defaultActions[i] = data.readShort();
 					}
 				}
 				else
 				{
-					default_actions = null;
+					defaultActions = null;
 				}
 				
 				int min_nt_id = Integer.MAX_VALUE;
@@ -147,7 +149,7 @@ public final class ParsingTables
 			throw new IllegalStateException("cannot initialize parser tables: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Scans lookaheads expected in a given state for a terminal symbol.
 	 * Used in error recovery when an unexpected terminal is replaced with one that is expected.
@@ -161,10 +163,12 @@ public final class ParsingTables
 		for (short term_id = offset < 0 ? (short) -offset : 0; term_id < n_term; term_id++)
 		{
 			int index = offset + term_id;
-			if (index >= lookaheads.length)
+			if (index >= lookaheads.length) {
 				break;
-			if (lookaheads[index] == term_id)
+			}
+			if (lookaheads[index] == term_id) {
 				return term_id;
+			}
 		}
 		return -1;
 	}
@@ -187,7 +191,7 @@ public final class ParsingTables
 				return actions[index];
 			}
 		}
-		return compressed ? default_actions[state] : 0;
+		return compressed ? defaultActions[state] : 0;
 	}
 
 	/**
@@ -200,7 +204,7 @@ public final class ParsingTables
 	 */
 	final short findNextState(int state, short lookahead)
 	{
-		int index = goto_offsets[state];
+		int index = gotoOffsets[state];
 		if (index != UNUSED_OFFSET)
 		{
 			index += lookahead;
@@ -209,21 +213,21 @@ public final class ParsingTables
 				return actions[index];
 			}
 		}
-		return compressed ? default_actions[state] : 0;
+		return compressed ? defaultActions[state] : 0;
 	}
 
-	static final int UNUSED_OFFSET = Integer.MIN_VALUE;
-	
 	static byte[] decode(String spec)
 	{
 		char[] chars = spec.toCharArray();
-		if (chars.length % 4 != 0)
+		if (chars.length % 4 != 0) {
 			throw new IllegalArgumentException("corrupted encoding");
+		}
 		int len = chars.length / 4 * 3;
 		byte[] bytes = new byte[chars[chars.length - 1] == '=' ? chars[chars.length - 2] == '=' ? len - 2 : len - 1 : len];
 		
 		len -= 3;
-		int ci = 0, bi = 0;
+		int ci = 0;
+		int bi = 0;
 		while (bi < len)
 		{
 			int acc = decode(chars[ci++]) << 18 | decode(chars[ci++]) << 12 | decode(chars[ci++]) << 6 | decode(chars[ci++]);
@@ -243,37 +247,44 @@ public final class ParsingTables
 		}
 		return bytes;
 	}
-	
+
 	static int decode(char c)
 	{
 		if (c <= '9')
 		{
-			if (c >= '0')
+			if (c >= '0') {
 				return c - '0';
-			if (c == '#')
+			}
+			if (c == '#') {
 				return 62;
-			if (c == '$')
+			}
+			if (c == '$') {
 				return 63;
+			}
 		}
 		else if (c <= 'Z')
 		{
-			if (c >= 'A')
+			if (c >= 'A') {
 				return c - 'A' + 10;
-			if (c == '=')
+			}
+			if (c == '=') {
 				return 0;
+			}
 		}
-		else if ('a' <= c && c <= 'z')
+		else if ('a' <= c && c <= 'z') {
 			return c - 'a' + 36;
-		throw new IllegalStateException("illegal encoding character '" + c + "'");
+		}
+		throw new IllegalStateException(new StringBuilder().append("illegal encoding character '").append(c).append("'").toString());
 	}
-	
+
 	static InputStream getSpecAsResourceStream(Class impl_class)
 	{
 		String name = impl_class.getName();
 		name = name.substring(name.lastIndexOf('.') + 1) + ".spec";
 		InputStream spec_stream = impl_class.getResourceAsStream(name);
-		if (spec_stream == null)
+		if (spec_stream == null) {
 			throw new IllegalStateException("parser specification not found");
+		}
 		return spec_stream;
 	}
 }

@@ -75,13 +75,13 @@ public class ClassRenamerTest {
     final String newName = ClassRenamer.v().getOrAddNewName(null, "ClassName");
     assertThat(newName, not(containsString(".")));
 
-    Map<String, String> mapping = ClassRenamer.v().getClassNameMapping((pOldName, pNewName) -> pOldName.equals("ClassName"));
+    Map<String, String> mapping = ClassRenamer.v().getClassNameMapping((pOldName, pNewName) -> "ClassName".equals(pOldName));
     assertThat(mapping, hasEntry("ClassName", newName));
     assertThat(mapping.size(), equalTo(1));
 
     assertThat(ClassRenamer.v().getOrAddNewName(null, "ClassName"), equalTo(newName));
 
-    mapping = ClassRenamer.v().getClassNameMapping((pOldName, pNewName) -> pOldName.equals("ClassName"));
+    mapping = ClassRenamer.v().getClassNameMapping((pOldName, pNewName) -> "ClassName".equals(pOldName));
     assertThat(mapping, hasEntry("ClassName", newName));
     assertThat(mapping.size(), equalTo(1));
   }
@@ -148,7 +148,7 @@ public class ClassRenamerTest {
 
     String packageName = "a.b.c";
     for (int i = 0; i < 100; i++) {
-      packageName = packageName + ".p" + i;
+      packageName = new StringBuilder().append(packageName).append(".p").append(i).toString();
       newName = ClassRenamer.v().getOrAddNewName(packageName, "ClassName");
       assertThat(newName, allOf(not(endsWith("ClassName")), not(containsString("."))));
     }

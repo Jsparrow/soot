@@ -63,56 +63,60 @@ import soot.jimple.NeExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.internal.AbstractInstanceFieldRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import soot.util.*;
 
 public class infoGatheringAnalysis extends DepthFirstAdapter {
 
-  public boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(infoGatheringAnalysis.class);
 
-  public final static int CLASSNAME = 0; // used by renamer
+public static final int CLASSNAME = 0; // used by renamer
 
-  public final static int METHODNAME = 1;
+public static final int METHODNAME = 1;
 
-  public final static int GETSET = 2;
+public static final int GETSET = 2;
 
-  public final static int IF = 3;
+public static final int IF = 3;
 
-  public final static int WHILE = 4;
+public static final int WHILE = 4;
 
-  public final static int SWITCH = 5;
+public static final int SWITCH = 5;
 
-  public final static int ARRAYINDEX = 6;
+public static final int ARRAYINDEX = 6;
 
-  public final static int MAINARG = 7; // used by renamer
+public static final int MAINARG = 7; // used by renamer
 
-  public final static int FIELDASSIGN = 8; // used by renamer
+public static final int FIELDASSIGN = 8; // used by renamer
 
-  public final static int FORLOOPUPDATE = 9; // used by renamer
+public static final int FORLOOPUPDATE = 9; // used by renamer
 
-  public final static int CAST = 10;
+public static final int CAST = 10;
 
-  public final static int NUMBITS = 11;
+public static final int NUMBITS = 11;
 
-  // dataset to store all information gathered
+public boolean DEBUG = false;
+
+// dataset to store all information gathered
   heuristicSet info;
 
-  // if we are within a subtree rooted at a definitionStmt this boolean is true
+// if we are within a subtree rooted at a definitionStmt this boolean is true
   boolean inDefinitionStmt = false;
 
-  // whenever there is a definition to a local definedLocal will contain a ref to the local
+// whenever there is a definition to a local definedLocal will contain a ref to the local
   Local definedLocal = null;
 
-  // if we are within a subtree rooted at a ifNode or IfElseNode this boolean is true
+// if we are within a subtree rooted at a ifNode or IfElseNode this boolean is true
   boolean inIf = false;
 
-  // if we are within a subtree rooted at a WhileNode or DoWhileNode this boolean is true
+// if we are within a subtree rooted at a WhileNode or DoWhileNode this boolean is true
   boolean inWhile = false;
 
-  // if we are within a subtree rooted at a ForLoop this boolean is true
+// if we are within a subtree rooted at a ForLoop this boolean is true
   boolean inFor = false;
 
-  public infoGatheringAnalysis(DavaBody davaBody) {
+public infoGatheringAnalysis(DavaBody davaBody) {
     info = new heuristicSet();
 
     List localList = new ArrayList();
@@ -143,7 +147,7 @@ public class infoGatheringAnalysis extends DepthFirstAdapter {
     while (it.hasNext()) {
       Local local = (Local) it.next();
       info.add(local, NUMBITS);
-      debug("infoGatheringAnalysis", "added " + local.getName() + " to the heuristicset");
+      debug("infoGatheringAnalysis", new StringBuilder().append("added ").append(local.getName()).append(" to the heuristicset").toString());
     }
 
     /*
@@ -169,14 +173,15 @@ public class infoGatheringAnalysis extends DepthFirstAdapter {
     }
   }
 
-  /*
+/*
    * This can be either an assignment or an identity statement. We are however only concerned with stmts which assign values
    * to locals
    *
    * The method sets the inDefinitionStmt flag to true and if this is a local assignment The ref to the local is stored in
    * definedLocal
    */
-  public void inDefinitionStmt(DefinitionStmt s) {
+  @Override
+public void inDefinitionStmt(DefinitionStmt s) {
     inDefinitionStmt = true;
     // System.out.println(s);
     Value v = s.getLeftOp();
@@ -198,7 +203,8 @@ public class infoGatheringAnalysis extends DepthFirstAdapter {
     }
   }
 
-  public void outDefinitionStmt(DefinitionStmt s) {
+@Override
+public void outDefinitionStmt(DefinitionStmt s) {
     // checking casting here because we want to see if the expr
     // on the right of def stmt is a cast expr not whether it contains a cast expr
     if (definedLocal != null && s.getRightOp() instanceof CastExpr) {
@@ -209,37 +215,40 @@ public class infoGatheringAnalysis extends DepthFirstAdapter {
     definedLocal = null;
   }
 
-  /*
+/*
    * Deals with cases in which a local is assigned a value from a static field int local = field int local = class.field
    */
-  public void inStaticFieldRef(StaticFieldRef sfr) {
-    if (inDefinitionStmt && (definedLocal != null)) {
-      SootField field = sfr.getField();
-      info.setFieldName(definedLocal, field.getName());
-    }
+  @Override
+public void inStaticFieldRef(StaticFieldRef sfr) {
+    if (!(inDefinitionStmt && (definedLocal != null))) {
+		return;
+	}
+	SootField field = sfr.getField();
+	info.setFieldName(definedLocal, field.getName());
   }
 
-  /*
+/*
    * Deals with cases in which a local is assigned a value from a field int local = field or int local = obj.field
    */
 
-  public void inInstanceFieldRef(InstanceFieldRef ifr) {
-    if (ifr instanceof AbstractInstanceFieldRef) {
-      if (inDefinitionStmt && (definedLocal != null)) {
+  @Override
+public void inInstanceFieldRef(InstanceFieldRef ifr) {
+    boolean condition = ifr instanceof AbstractInstanceFieldRef && inDefinitionStmt && (definedLocal != null);
+	if (condition) {
         SootField field = ((AbstractInstanceFieldRef) ifr).getField();
         // System.out.println(definedLocal+" is being assigned field:"+field.getName());
         info.setFieldName(definedLocal, field.getName());
       }
-    }
   }
 
-  /*
+/*
    * (non-Javadoc)
    *
    * @see soot.dava.toolkits.base.AST.analysis.DepthFirstAdapter#outInvokeExpr(soot.jimple.InvokeExpr) If it is a newInvoke
    * expr we know that the name of the class can come in handy while renaming because this could be a subtype
    */
-  public void outInvokeExpr(InvokeExpr ie) {
+  @Override
+public void outInvokeExpr(InvokeExpr ie) {
     // If this is within a definitionStmt of a local
     if (inDefinitionStmt && (definedLocal != null)) {
       // if its a new object being created
@@ -259,148 +268,166 @@ public class infoGatheringAnalysis extends DepthFirstAdapter {
     }
   }
 
-  /*
+/*
    * This is the object for a flag use in a conditional If the value is a local set the appropriate heuristic
    */
-  public void inASTUnaryCondition(ASTUnaryCondition uc) {
+  @Override
+public void inASTUnaryCondition(ASTUnaryCondition uc) {
     Value val = uc.getValue();
-    if (val instanceof Local) {
-      if (inIf) {
+    if (!(val instanceof Local)) {
+		return;
+	}
+	if (inIf) {
         info.setHeuristic((Local) val, infoGatheringAnalysis.IF);
       }
-      if (inWhile) {
+	if (inWhile) {
         info.setHeuristic((Local) val, infoGatheringAnalysis.WHILE);
       }
-    }
   }
 
-  public void inASTBinaryCondition(ASTBinaryCondition bc) {
+@Override
+public void inASTBinaryCondition(ASTBinaryCondition bc) {
     ConditionExpr condition = bc.getConditionExpr();
 
     Local local = checkBooleanUse(condition);
-    if (local != null) {
-      if (inIf) {
+    if (local == null) {
+		return;
+	}
+	if (inIf) {
         info.setHeuristic(local, infoGatheringAnalysis.IF);
       }
-      if (inWhile) {
+	if (inWhile) {
         info.setHeuristic(local, infoGatheringAnalysis.WHILE);
       }
-    }
   }
 
-  /*
+/*
    * Setting if to true in inASTIfNode so that later we know whether this is a flag use in an if
    */
-  public void inASTIfNode(ASTIfNode node) {
+  @Override
+public void inASTIfNode(ASTIfNode node) {
     inIf = true;
   }
 
-  /*
+/*
    * Going out of if set flag to false
    */
-  public void outASTIfNode(ASTIfNode node) {
+  @Override
+public void outASTIfNode(ASTIfNode node) {
     inIf = false;
   }
 
-  /*
+/*
    * Setting if to true in inASTIfElseNode so that later we know whether this is a flag use in an ifElse
    */
-  public void inASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void inASTIfElseNode(ASTIfElseNode node) {
     inIf = true;
   }
 
-  /*
+/*
    * Going out of ifElse set flag to false
    */
-  public void outASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void outASTIfElseNode(ASTIfElseNode node) {
     inIf = false;
   }
 
-  /*
+/*
    * Setting if to true in inASTWhileNode so that later we know whether this is a flag use in a WhileNode
    */
-  public void inASTWhileNode(ASTWhileNode node) {
+  @Override
+public void inASTWhileNode(ASTWhileNode node) {
     inWhile = true;
   }
 
-  /*
+/*
    * setting flag to false
    */
-  public void outASTWhileNode(ASTWhileNode node) {
+  @Override
+public void outASTWhileNode(ASTWhileNode node) {
     inWhile = false;
   }
 
-  /*
+/*
    * Setting if to true in inASTDoWhileNode so that later we know whether this is a flag use in a WhileNode
    */
-  public void inASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void inASTDoWhileNode(ASTDoWhileNode node) {
     inWhile = true;
   }
 
-  /*
+/*
    * setting flag to false
    */
-  public void outASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void outASTDoWhileNode(ASTDoWhileNode node) {
     inWhile = false;
   }
 
-  /*
+/*
    * Check the key of the switch statement to see if its a local
    */
-  public void inASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void inASTSwitchNode(ASTSwitchNode node) {
     Value key = node.get_Key();
     if (key instanceof Local) {
       info.setHeuristic((Local) key, infoGatheringAnalysis.SWITCH);
     }
   }
 
-  public void inArrayRef(ArrayRef ar) {
+@Override
+public void inArrayRef(ArrayRef ar) {
     Value index = ar.getIndex();
     if (index instanceof Local) {
       info.setHeuristic((Local) index, infoGatheringAnalysis.ARRAYINDEX);
     }
   }
 
-  public void inASTTryNode(ASTTryNode node) {
+@Override
+public void inASTTryNode(ASTTryNode node) {
 
   }
 
-  /*
+/*
    * setting flag to true
    */
-  public void inASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void inASTForLoopNode(ASTForLoopNode node) {
     inFor = true;
-    for (AugmentedStmt as : node.getUpdate()) {
-      Stmt s = as.get_Stmt();
-      if (s instanceof GAssignStmt) {
-        Value leftOp = ((GAssignStmt) s).getLeftOp();
-        if (leftOp instanceof Local) {
-          info.setHeuristic((Local) leftOp, infoGatheringAnalysis.FORLOOPUPDATE);
-        }
-      }
-    }
+    node.getUpdate().stream().map(AugmentedStmt::get_Stmt).forEach(s -> {
+		if (s instanceof GAssignStmt) {
+		    Value leftOp = ((GAssignStmt) s).getLeftOp();
+		    if (leftOp instanceof Local) {
+		      info.setHeuristic((Local) leftOp, infoGatheringAnalysis.FORLOOPUPDATE);
+		    }
+		  }
+	});
   }
 
-  /*
+/*
    * setting flag to false
    */
-  public void outASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void outASTForLoopNode(ASTForLoopNode node) {
     inFor = false;
   }
 
-  /*
+/*
    * If there are any locals at this point who do not have any className set it might be a good idea to store that
    * information
    */
-  public void outASTMethodNode(ASTMethodNode node) {
-    if (DEBUG) {
-      System.out.println("SET START");
-      info.print();
-      System.out.println("SET END");
-    }
+  @Override
+public void outASTMethodNode(ASTMethodNode node) {
+    if (!DEBUG) {
+		return;
+	}
+	logger.info("SET START");
+	info.print();
+	logger.info("SET END");
   }
 
-  /*
+/*
    * The method checks whether a particular ConditionExpr is a comparison of a local with a boolean If so the local is
    * returned
    */
@@ -437,14 +464,14 @@ public class infoGatheringAnalysis extends DepthFirstAdapter {
     return null; // meaning no local used as boolean found
   }
 
-  public heuristicSet getHeuristicSet() {
+public heuristicSet getHeuristicSet() {
     return info;
   }
 
-  public void debug(String methodName, String debug) {
+public void debug(String methodName, String debug) {
 
     if (DEBUG) {
-      System.out.println(methodName + "    DEBUG: " + debug);
+      logger.info(new StringBuilder().append(methodName).append("    DEBUG: ").append(debug).toString());
     }
   }
 

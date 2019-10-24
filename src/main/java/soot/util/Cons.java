@@ -24,8 +24,8 @@ package soot.util;
 
 /** A Lisp-style cons cell. */
 public final class Cons<U, V> {
-  final private U car;
-  final private V cdr;
+  private final U car;
+  private final V cdr;
 
   public Cons(U car, V cdr) {
     this.car = car;
@@ -81,6 +81,6 @@ public final class Cons<U, V> {
 
   @Override
   public String toString() {
-    return car.toString() + "," + cdr.toString();
+    return new StringBuilder().append(car.toString()).append(",").append(cdr.toString()).toString();
   }
 }

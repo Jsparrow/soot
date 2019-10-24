@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 
 public class UnexpectedReflectiveCall {
 
-  private final static IUnexpectedReflectiveCallHandler handler;
+  private static final IUnexpectedReflectiveCallHandler handler;
 
   static {
     String listenerClassName = System.getProperty("BOOSTER_LISTENER", "soot.rtlib.tamiflex.DefaultHandler");

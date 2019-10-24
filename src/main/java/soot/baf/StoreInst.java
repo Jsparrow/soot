@@ -26,11 +26,11 @@ import soot.Local;
 import soot.Type;
 
 public interface StoreInst extends Inst {
-  public Type getOpType();
+  Type getOpType();
 
-  public void setOpType(Type opType);
+  void setOpType(Type opType);
 
-  public Local getLocal();
+  Local getLocal();
 
-  public void setLocal(Local l);
+  void setLocal(Local l);
 }

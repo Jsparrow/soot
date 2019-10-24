@@ -39,8 +39,9 @@ public class AnnotationArrayElem extends AnnotationElem {
     this.values = t;
   }
 
-  public String toString() {
-    return super.toString() + " values: " + values.toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(super.toString()).append(" values: ").append(values.toString()).toString();
   }
 
   public ArrayList<AnnotationElem> getValues() {

@@ -33,19 +33,23 @@ public class GCmplExpr extends AbstractGrimpIntBinopExpr implements CmplExpr {
     super(op1, op2);
   }
 
-  public final String getSymbol() {
+  @Override
+public final String getSymbol() {
     return " cmpl ";
   }
 
-  public final int getPrecedence() {
+  @Override
+public final int getPrecedence() {
     return 600;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseCmplExpr(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GCmplExpr(Grimp.cloneIfNecessary(getOp1()), Grimp.cloneIfNecessary(getOp2()));
   }
 

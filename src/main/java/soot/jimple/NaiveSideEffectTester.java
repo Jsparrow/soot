@@ -50,13 +50,15 @@ import soot.ValueBox;
 // StaticFieldRef
 
 public class NaiveSideEffectTester implements SideEffectTester {
-  public void newMethod(SootMethod m) {
+  @Override
+public void newMethod(SootMethod m) {
   }
 
   /**
    * Returns true if the unit can read from v. Does not deal with expressions; deals with Refs.
    */
-  public boolean unitCanReadFrom(Unit u, Value v) {
+  @Override
+public boolean unitCanReadFrom(Unit u, Value v) {
     Stmt s = (Stmt) u;
 
     // This doesn't really make any sense, but we need to return something.
@@ -68,12 +70,11 @@ public class NaiveSideEffectTester implements SideEffectTester {
       throw new RuntimeException("can't deal with expr");
     }
 
-    // If it's an invoke, then only locals are safe.
-    if (s.containsInvokeExpr()) {
-      if (!(v instanceof Local)) {
+    boolean condition = s.containsInvokeExpr() && !(v instanceof Local);
+	// If it's an invoke, then only locals are safe.
+    if (condition) {
         return true;
       }
-    }
 
     // otherwise, use boxes tell all.
     Iterator useIt = u.getUseBoxes().iterator();
@@ -94,7 +95,8 @@ public class NaiveSideEffectTester implements SideEffectTester {
     return false;
   }
 
-  public boolean unitCanWriteTo(Unit u, Value v) {
+  @Override
+public boolean unitCanWriteTo(Unit u, Value v) {
     Stmt s = (Stmt) u;
 
     if (v instanceof Constant) {
@@ -105,12 +107,11 @@ public class NaiveSideEffectTester implements SideEffectTester {
       throw new RuntimeException("can't deal with expr");
     }
 
-    // If it's an invoke, then only locals are safe.
-    if (s.containsInvokeExpr()) {
-      if (!(v instanceof Local)) {
+    boolean condition = s.containsInvokeExpr() && !(v instanceof Local);
+	// If it's an invoke, then only locals are safe.
+    if (condition) {
         return true;
       }
-    }
 
     // otherwise, def boxes tell all.
     Iterator defIt = u.getDefBoxes().iterator();
@@ -128,14 +129,13 @@ public class NaiveSideEffectTester implements SideEffectTester {
         return true;
       }
 
-      // deal with aliasing - handle case where they
+      boolean condition1 = v instanceof InstanceFieldRef && def instanceof InstanceFieldRef && ((InstanceFieldRef) v).getField() == ((InstanceFieldRef) def).getField();
+	// deal with aliasing - handle case where they
       // are a read to the same field, regardless of
       // base object.
-      if (v instanceof InstanceFieldRef && def instanceof InstanceFieldRef) {
-        if (((InstanceFieldRef) v).getField() == ((InstanceFieldRef) def).getField()) {
-          return true;
-        }
-      }
+      if (condition1) {
+	  return true;
+	}
     }
     return false;
   }

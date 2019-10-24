@@ -27,7 +27,8 @@ public class SourcePositionTag extends PositionTag {
     super(i, j);
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "SourcePositionTag";
   }
 }

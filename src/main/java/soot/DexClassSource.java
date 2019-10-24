@@ -56,9 +56,10 @@ public class DexClassSource extends ClassSource {
    *          The SootClass to resolve into.
    * @return Dependencies of class (Strings or Types referenced).
    */
-  public Dependencies resolve(SootClass sc) {
+  @Override
+public Dependencies resolve(SootClass sc) {
     if (Options.v().verbose()) {
-      logger.debug("resolving " + className + " from file " + path.getPath());
+      logger.debug(new StringBuilder().append("resolving ").append(className).append(" from file ").append(path.getPath()).toString());
     }
     return DexResolver.v().resolveFromFile(path, className, sc);
   }

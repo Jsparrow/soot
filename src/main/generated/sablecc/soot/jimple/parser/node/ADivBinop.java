@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ADivBinop extends PBinop
 {
-    private TDiv _div_;
+    private TDiv div;
 
     public ADivBinop()
     {
@@ -26,7 +26,7 @@ public final class ADivBinop extends PBinop
     public Object clone()
     {
         return new ADivBinop(
-            cloneNode(this._div_));
+            cloneNode(this.div));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ADivBinop extends PBinop
 
     public TDiv getDiv()
     {
-        return this._div_;
+        return this.div;
     }
 
     public void setDiv(TDiv node)
     {
-        if(this._div_ != null)
+        if(this.div != null)
         {
-            this._div_.parent(null);
+            this.div.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ADivBinop extends PBinop
             node.parent(this);
         }
 
-        this._div_ = node;
+        this.div = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._div_);
+            + toString(this.div);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._div_ == child)
+        if(this.div == child)
         {
-            this._div_ = null;
+            this.div = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ADivBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._div_ == oldChild)
+        if(this.div == oldChild)
         {
             setDiv((TDiv) newChild);
             return;

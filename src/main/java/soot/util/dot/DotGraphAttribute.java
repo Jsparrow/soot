@@ -36,8 +36,9 @@ public class DotGraphAttribute {
     this.value = v;
   }
 
-  public String toString() {
-    StringBuffer line = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder line = new StringBuilder();
     line.append(this.id);
     line.append("=");
     line.append(this.value);

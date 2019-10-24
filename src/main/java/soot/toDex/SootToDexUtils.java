@@ -58,7 +58,7 @@ public class SootToDexUtils {
   private static final Map<Class<? extends Type>, String> sootToDexTypeDescriptor;
 
   static {
-    sootToDexTypeDescriptor = new HashMap<Class<? extends Type>, String>();
+    sootToDexTypeDescriptor = new HashMap<>();
     sootToDexTypeDescriptor.put(BooleanType.class, "Z");
     sootToDexTypeDescriptor.put(ByteType.class, "B");
     sootToDexTypeDescriptor.put(CharType.class, "C");
@@ -99,7 +99,7 @@ public class SootToDexUtils {
     if (slashedName.startsWith("L") && slashedName.endsWith(";")) {
       return slashedName;
     }
-    return "L" + slashedName + ";";
+    return new StringBuilder().append("L").append(slashedName).append(";").toString();
   }
 
   public static int getDexAccessFlags(SootMethod m) {
@@ -133,7 +133,7 @@ public class SootToDexUtils {
   private static String getDexArrayTypeDescriptor(ArrayType sootArray) {
     if (sootArray.numDimensions > 255) {
       throw new RuntimeException(
-          "dex does not support more than 255 dimensions! " + sootArray + " has " + sootArray.numDimensions);
+          new StringBuilder().append("dex does not support more than 255 dimensions! ").append(sootArray).append(" has ").append(sootArray.numDimensions).toString());
     }
     String baseTypeDescriptor = getDexTypeDescriptor(sootArray.baseType);
     StringBuilder sb = new StringBuilder(sootArray.numDimensions + baseTypeDescriptor.length());
@@ -157,7 +157,7 @@ public class SootToDexUtils {
   }
 
   public static boolean isWide(String typeDescriptor) {
-    return typeDescriptor.equals("J") || typeDescriptor.equals("D");
+    return "J".equals(typeDescriptor) || "D".equals(typeDescriptor);
   }
 
   public static boolean isWide(Type sootType) {
@@ -239,7 +239,7 @@ public class SootToDexUtils {
    * @return
    */
   public static List<String> splitSignature(String sig) {
-    List<String> split = new ArrayList<String>();
+    List<String> split = new ArrayList<>();
     int len = sig.length();
     int i = 0;
     int j = 0;

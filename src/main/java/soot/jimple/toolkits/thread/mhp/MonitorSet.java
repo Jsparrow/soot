@@ -26,6 +26,8 @@ package soot.jimple.toolkits.thread.mhp;
 import java.util.Iterator;
 
 import soot.toolkits.scalar.ArraySparseSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -42,8 +44,9 @@ public class MonitorSet extends ArraySparseSet {
 
   // int size = 0;
 
-  MonitorSet() {
-    super();
+  private static final Logger logger = LoggerFactory.getLogger(MonitorSet.class);
+
+MonitorSet() {
   }
 
   public Object getMonitorDepth(String objName) {
@@ -60,7 +63,8 @@ public class MonitorSet extends ArraySparseSet {
     return null;
   }
 
-  public MonitorSet clone() {
+  @Override
+public MonitorSet clone() {
     MonitorSet newSet = new MonitorSet();
     newSet.union(this);
     return newSet;
@@ -134,20 +138,19 @@ public class MonitorSet extends ArraySparseSet {
   }
 
   public void test() {
-    System.out.println("====MonitorSet===");
+    logger.info("====MonitorSet===");
     Iterator<?> it = iterator();
     while (it.hasNext()) {
       Object obj = it.next();
       if (obj instanceof MonitorDepth) {
         MonitorDepth md = (MonitorDepth) obj;
-        ;
-        System.out.println("obj: " + md.getObjName());
-        System.out.println("depth: " + md.getDepth());
+        logger.info("obj: " + md.getObjName());
+        logger.info("depth: " + md.getDepth());
       } else {
-        System.out.println(obj);
+        logger.info(String.valueOf(obj));
       }
     }
-    System.out.println("====MonitorSet end====");
+    logger.info("====MonitorSet end====");
   }
 
 }

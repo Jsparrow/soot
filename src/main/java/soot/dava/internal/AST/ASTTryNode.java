@@ -40,21 +40,11 @@ import soot.dava.toolkits.base.AST.TryContentsFinder;
 import soot.dava.toolkits.base.AST.analysis.Analysis;
 
 public class ASTTryNode extends ASTLabeledNode {
-  private List<Object> tryBody, catchList;
-  private Map<Object, Object> exceptionMap, paramMap;
+  private List<Object> tryBody;
+private List<Object> catchList;
+  private Map<Object, Object> exceptionMap;
+private Map<Object, Object> paramMap;
   private container tryBodyContainer;
-
-  public class container {
-    public Object o;
-
-    public container(Object o) {
-      this.o = o;
-    }
-
-    public void replaceBody(Object newBody) {
-      this.o = newBody;
-    }
-  }
 
   public ASTTryNode(SETNodeLabel label, List<Object> tryBody, List<Object> catchList, Map<Object, Object> exceptionMap,
       Map<Object, Object> paramMap) {
@@ -63,20 +53,20 @@ public class ASTTryNode extends ASTLabeledNode {
     this.tryBody = tryBody;
     tryBodyContainer = new container(tryBody);
 
-    this.catchList = new ArrayList<Object>();
+    this.catchList = new ArrayList<>();
     Iterator<Object> cit = catchList.iterator();
     while (cit.hasNext()) {
       this.catchList.add(new container(cit.next()));
     }
 
-    this.exceptionMap = new HashMap<Object, Object>();
+    this.exceptionMap = new HashMap<>();
     cit = this.catchList.iterator();
     while (cit.hasNext()) {
       container c = (container) cit.next();
       this.exceptionMap.put(c, exceptionMap.get(c.o));
     }
 
-    this.paramMap = new HashMap<Object, Object>();
+    this.paramMap = new HashMap<>();
     cit = this.catchList.iterator();
     while (cit.hasNext()) {
       container c = (container) cit.next();
@@ -90,7 +80,7 @@ public class ASTTryNode extends ASTLabeledNode {
     }
   }
 
-  /*
+/*
    * Nomair A Naeem 21-FEB-2005 used to support UselessLabeledBlockRemover
    */
   public void replaceTryBody(List<Object> tryBody) {
@@ -98,7 +88,7 @@ public class ASTTryNode extends ASTLabeledNode {
     tryBodyContainer = new container(tryBody);
 
     List<Object> oldSubBodies = subBodies;
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
 
     subBodies.add(tryBodyContainer);
 
@@ -112,20 +102,18 @@ public class ASTTryNode extends ASTLabeledNode {
 
   }
 
-  protected void perform_AnalysisOnSubBodies(ASTAnalysis a) {
+@Override
+protected void perform_AnalysisOnSubBodies(ASTAnalysis a) {
     if (a instanceof TryContentsFinder) {
-      Iterator<Object> sbit = subBodies.iterator();
-      while (sbit.hasNext()) {
-        container subBody = (container) sbit.next();
-
-        Iterator it = ((List) subBody.o).iterator();
-        while (it.hasNext()) {
+      subBodies.stream().map(subBodie -> (container) subBodie).forEach(subBody -> {
+		Iterator it = ((List) subBody.o).iterator();
+		while (it.hasNext()) {
           ASTNode n = (ASTNode) it.next();
 
           n.perform_Analysis(a);
           TryContentsFinder.v().add_ExceptionSet(subBody, TryContentsFinder.v().get_ExceptionSet(n));
         }
-      }
+	});
 
       a.analyseASTNode(this);
     } else {
@@ -133,55 +121,51 @@ public class ASTTryNode extends ASTLabeledNode {
     }
   }
 
-  public boolean isEmpty() {
+public boolean isEmpty() {
     return tryBody.isEmpty();
   }
 
-  public List<Object> get_TryBody() {
+public List<Object> get_TryBody() {
     return tryBody;
   }
 
-  public container get_TryBodyContainer() {
+public container get_TryBodyContainer() {
     return tryBodyContainer;
   }
 
-  public List<Object> get_CatchList() {
+public List<Object> get_CatchList() {
     return catchList;
   }
 
-  public Map<Object, Object> get_ExceptionMap() {
+public Map<Object, Object> get_ExceptionMap() {
     return exceptionMap;
   }
 
-  /*
+/*
    * Nomair A. Naeem 08-FEB-2005 Needed for call from DepthFirstAdapter
    */
   public Map<Object, Object> get_ParamMap() {
     return paramMap;
   }
 
-  public Set<Object> get_ExceptionSet() {
-    HashSet<Object> s = new HashSet<Object>();
+public Set<Object> get_ExceptionSet() {
+    HashSet<Object> s = new HashSet<>();
 
-    Iterator<Object> it = catchList.iterator();
-    while (it.hasNext()) {
-      s.add(exceptionMap.get(it.next()));
-    }
+    catchList.forEach(aCatchList -> s.add(exceptionMap.get(aCatchList)));
 
     return s;
   }
 
-  public Object clone() {
-    ArrayList<Object> newCatchList = new ArrayList<Object>();
-    Iterator<Object> it = catchList.iterator();
-    while (it.hasNext()) {
-      newCatchList.add(((container) it.next()).o);
-    }
+@Override
+public Object clone() {
+    ArrayList<Object> newCatchList = new ArrayList<>();
+    catchList.forEach(aCatchList -> newCatchList.add(((container) aCatchList).o));
 
     return new ASTTryNode(get_Label(), tryBody, newCatchList, exceptionMap, paramMap);
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public void toString(UnitPrinter up) {
     label_toString(up);
 
     up.literal("try");
@@ -197,33 +181,28 @@ public class ASTTryNode extends ASTLabeledNode {
     up.literal("}");
     up.newline();
 
-    Iterator<Object> cit = catchList.iterator();
-    while (cit.hasNext()) {
-      container catchBody = (container) cit.next();
-
-      up.literal("catch");
-      up.literal(" ");
-      up.literal("(");
-      up.type(((SootClass) exceptionMap.get(catchBody)).getType());
-      up.literal(" ");
-      up.local((Local) paramMap.get(catchBody));
-      up.literal(")");
-      up.newline();
-
-      up.literal("{");
-      up.newline();
-
-      up.incIndent();
-      body_toString(up, (List<Object>) catchBody.o);
-      up.decIndent();
-
-      up.literal("}");
-      up.newline();
-    }
+    catchList.stream().map(aCatchList -> (container) aCatchList).forEach(catchBody -> {
+		up.literal("catch");
+		up.literal(" ");
+		up.literal("(");
+		up.type(((SootClass) exceptionMap.get(catchBody)).getType());
+		up.literal(" ");
+		up.local((Local) paramMap.get(catchBody));
+		up.literal(")");
+		up.newline();
+		up.literal("{");
+		up.newline();
+		up.incIndent();
+		body_toString(up, (List<Object>) catchBody.o);
+		up.decIndent();
+		up.literal("}");
+		up.newline();
+	});
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+@Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
     b.append(label_toString());
 
@@ -238,34 +217,41 @@ public class ASTTryNode extends ASTLabeledNode {
     b.append("}");
     b.append(NEWLINE);
 
-    Iterator<Object> cit = catchList.iterator();
-    while (cit.hasNext()) {
-      container catchBody = (container) cit.next();
-
-      b.append("catch (");
-      b.append(((SootClass) exceptionMap.get(catchBody)).getName());
-      b.append(" ");
-      b.append(((Local) paramMap.get(catchBody)).getName());
-      b.append(")");
-      b.append(NEWLINE);
-
-      b.append("{");
-      b.append(NEWLINE);
-
-      b.append(body_toString((List<Object>) catchBody.o));
-
-      b.append("}");
-      b.append(NEWLINE);
-    }
+    catchList.stream().map(aCatchList -> (container) aCatchList).forEach(catchBody -> {
+		b.append("catch (");
+		b.append(((SootClass) exceptionMap.get(catchBody)).getName());
+		b.append(" ");
+		b.append(((Local) paramMap.get(catchBody)).getName());
+		b.append(")");
+		b.append(NEWLINE);
+		b.append("{");
+		b.append(NEWLINE);
+		b.append(body_toString((List<Object>) catchBody.o));
+		b.append("}");
+		b.append(NEWLINE);
+	});
 
     return b.toString();
   }
 
-  /*
+/*
    * Nomair A. Naeem, 7-FEB-05 Part of Visitor Design Implementation for AST See: soot.dava.toolkits.base.AST.analysis For
    * details
    */
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTTryNode(this);
+  }
+
+public class container {
+    public Object o;
+
+    public container(Object o) {
+      this.o = o;
+    }
+
+    public void replaceBody(Object newBody) {
+      this.o = newBody;
+    }
   }
 }

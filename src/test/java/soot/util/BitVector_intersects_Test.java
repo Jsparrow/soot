@@ -73,10 +73,11 @@ public class BitVector_intersects_Test extends TestCase {
     BitVector b = new BitVector();
     int i;
     for(i = 0; i < 512; i++) {
-      if(i % 2 == 0)
-        a.set(i);
-      else
-        b.set(i);
+      if(i % 2 == 0) {
+		a.set(i);
+	} else {
+		b.set(i);
+	}
     }
     assertFalse(a.intersects(b));
     assertFalse(b.intersects(a));

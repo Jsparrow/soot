@@ -36,19 +36,23 @@ public class BooleanType extends PrimType implements IntegerType {
     return G.v().soot_BooleanType();
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x1C4585DA;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "boolean";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseBooleanType(this);
   }
 

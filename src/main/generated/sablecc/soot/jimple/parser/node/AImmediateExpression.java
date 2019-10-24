@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AImmediateExpression extends PExpression
 {
-    private PImmediate _immediate_;
+    private PImmediate immediate;
 
     public AImmediateExpression()
     {
@@ -26,7 +26,7 @@ public final class AImmediateExpression extends PExpression
     public Object clone()
     {
         return new AImmediateExpression(
-            cloneNode(this._immediate_));
+            cloneNode(this.immediate));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AImmediateExpression extends PExpression
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AImmediateExpression extends PExpression
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._immediate_);
+            + toString(this.immediate);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AImmediateExpression extends PExpression
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;

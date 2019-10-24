@@ -29,15 +29,15 @@ package soot;
  */
 
 public interface SootFieldRef {
-  public SootClass declaringClass();
+  SootClass declaringClass();
 
-  public String name();
+  String name();
 
-  public Type type();
+  Type type();
 
-  public boolean isStatic();
+  boolean isStatic();
 
-  public String getSignature();
+  String getSignature();
 
-  public SootField resolve();
+  SootField resolve();
 }

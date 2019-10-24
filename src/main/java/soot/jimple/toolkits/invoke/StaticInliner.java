@@ -55,15 +55,17 @@ import soot.tagkit.Host;
 /** Uses the Scene's currently-active InvokeGraph to inline monomorphic call sites. */
 public class StaticInliner extends SceneTransformer {
   private static final Logger logger = LoggerFactory.getLogger(StaticInliner.class);
+private final HashMap<SootMethod, Integer> methodToOriginalSize = new HashMap<>();
 
-  public StaticInliner(Singletons.Global g) {
+public StaticInliner(Singletons.Global g) {
   }
 
-  public static StaticInliner v() {
+public static StaticInliner v() {
     return G.v().soot_jimple_toolkits_invoke_StaticInliner();
   }
 
-  protected void internalTransform(String phaseName, Map options) {
+@Override
+protected void internalTransform(String phaseName, Map options) {
     Filter explicitInvokesFilter = new Filter(new ExplicitEdgesPred());
     if (Options.v().verbose()) {
       logger.debug("[] Inlining methods...");
@@ -82,7 +84,7 @@ public class StaticInliner extends SceneTransformer {
     CallGraph cg = Scene.v().getCallGraph();
     Hierarchy hierarchy = Scene.v().getActiveHierarchy();
 
-    ArrayList<List<Host>> sitesToInline = new ArrayList<List<Host>>();
+    ArrayList<List<Host>> sitesToInline = new ArrayList<>();
 
     computeAverageMethodSizeAndSaveOriginalSizes();
     // Visit each potential site in reverse pseudo topological order.
@@ -108,12 +110,10 @@ public class StaticInliner extends SceneTransformer {
 
         JimpleBody b = (JimpleBody) container.retrieveActiveBody();
 
-        List<Unit> unitList = new ArrayList<Unit>();
+        List<Unit> unitList = new ArrayList<>();
         unitList.addAll(b.getUnits());
-        Iterator<Unit> unitIt = unitList.iterator();
-
-        while (unitIt.hasNext()) {
-          Stmt s = (Stmt) unitIt.next();
+        for (Unit anUnitList : unitList) {
+          Stmt s = (Stmt) anUnitList;
           if (!s.containsInvokeExpr()) {
             continue;
           }
@@ -135,7 +135,7 @@ public class StaticInliner extends SceneTransformer {
             continue;
           }
 
-          List<Host> l = new ArrayList<Host>();
+          List<Host> l = new ArrayList<>();
           l.add(target);
           l.add(s);
           l.add(container);
@@ -184,10 +184,9 @@ public class StaticInliner extends SceneTransformer {
     }
   }
 
-  private final HashMap<SootMethod, Integer> methodToOriginalSize = new HashMap<SootMethod, Integer>();
-
-  private void computeAverageMethodSizeAndSaveOriginalSizes() {
-    long sum = 0, count = 0;
+private void computeAverageMethodSizeAndSaveOriginalSizes() {
+    long sum = 0;
+	long count = 0;
     Iterator classesIt = Scene.v().getApplicationClasses().iterator();
 
     while (classesIt.hasNext()) {
@@ -199,7 +198,7 @@ public class StaticInliner extends SceneTransformer {
         if (m.isConcrete()) {
           int size = ((JimpleBody) m.retrieveActiveBody()).getUnits().size();
           sum += size;
-          methodToOriginalSize.put(m, new Integer(size));
+          methodToOriginalSize.put(m, Integer.valueOf(size));
           count++;
         }
       }

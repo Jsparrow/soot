@@ -66,7 +66,7 @@ import soot.toolkits.scalar.BackwardFlowAnalysis;
 
 class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
   private static final Logger logger = LoggerFactory.getLogger(ArrayIndexLivenessAnalysis.class);
-  HashSet<Local> fullSet = new HashSet<Local>();
+  HashSet<Local> fullSet = new HashSet<>();
   ExceptionalUnitGraph eug;
 
   /*
@@ -86,7 +86,8 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
   IntContainer zero = new IntContainer(0);
 
   private final boolean fieldin;
-  HashMap<Object, HashSet<Value>> localToFieldRef, fieldToFieldRef;
+  HashMap<Object, HashSet<Value>> localToFieldRef;
+HashMap<Object, HashSet<Value>> fieldToFieldRef;
   HashSet<Value> allFieldRefs;
 
   private final boolean arrayin;
@@ -116,32 +117,32 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
     retrieveAllArrayLocals(eug.getBody(), fullSet);
 
     /* compute gen set, kill set, and condition set */
-    genOfUnit = new HashMap<Stmt, HashSet<Object>>(eug.size() * 2 + 1);
-    absGenOfUnit = new HashMap<Stmt, HashSet<Value>>(eug.size() * 2 + 1);
-    killOfUnit = new HashMap<Stmt, HashSet<Value>>(eug.size() * 2 + 1);
-    conditionOfGen = new HashMap<Stmt, HashSet<Value>>(eug.size() * 2 + 1);
+    genOfUnit = new HashMap<>(eug.size() * 2 + 1);
+    absGenOfUnit = new HashMap<>(eug.size() * 2 + 1);
+    killOfUnit = new HashMap<>(eug.size() * 2 + 1);
+    conditionOfGen = new HashMap<>(eug.size() * 2 + 1);
 
     if (fieldin) {
-      localToFieldRef = new HashMap<Object, HashSet<Value>>();
-      fieldToFieldRef = new HashMap<Object, HashSet<Value>>();
-      allFieldRefs = new HashSet<Value>();
+      localToFieldRef = new HashMap<>();
+      fieldToFieldRef = new HashMap<>();
+      allFieldRefs = new HashSet<>();
     }
 
     if (arrayin) {
       localToArrayRef = new HashMap();
       allArrayRefs = new HashSet();
 
-      killArrayRelated = new HashMap<DefinitionStmt, Value>();
-      killAllArrayRef = new HashMap<DefinitionStmt, Boolean>();
+      killArrayRelated = new HashMap<>();
+      killAllArrayRef = new HashMap<>();
 
       if (rectarray) {
-        multiarraylocals = new HashSet<Local>();
-        retrieveMultiArrayLocals(eug.getBody(), multiarraylocals);
+        multiarraylocals = new HashSet<>();
+        retrieveMultiArrayLocals(eug.getBody());
       }
     }
 
     if (csin) {
-      localToExpr = new HashMap<Value, HashSet<Value>>();
+      localToExpr = new HashMap<>();
     }
 
     getAllRelatedMaps(eug.getBody());
@@ -188,81 +189,75 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
     while (unitIt.hasNext()) {
       Stmt stmt = (Stmt) unitIt.next();
 
-      if (csin) {
-        if (stmt instanceof DefinitionStmt) {
-          Value rhs = ((DefinitionStmt) stmt).getRightOp();
+      if (csin && stmt instanceof DefinitionStmt) {
+	  Value rhs = ((DefinitionStmt) stmt).getRightOp();
 
-          if (rhs instanceof BinopExpr) {
-            Value op1 = ((BinopExpr) rhs).getOp1();
-            Value op2 = ((BinopExpr) rhs).getOp2();
+	  if (rhs instanceof BinopExpr) {
+	    Value op1 = ((BinopExpr) rhs).getOp1();
+	    Value op2 = ((BinopExpr) rhs).getOp2();
 
-            if (rhs instanceof AddExpr) {
-              // op1 + op2 --> a + b
-              if ((op1 instanceof Local) && (op2 instanceof Local)) {
-                HashSet<Value> refs = localToExpr.get(op1);
-                if (refs == null) {
-                  refs = new HashSet<Value>();
-                  localToExpr.put(op1, refs);
-                }
-                refs.add(rhs);
+	    if (rhs instanceof AddExpr) {
+	      // op1 + op2 --> a + b
+	      if ((op1 instanceof Local) && (op2 instanceof Local)) {
+	        HashSet<Value> refs = localToExpr.get(op1);
+	        if (refs == null) {
+	          refs = new HashSet<>();
+	          localToExpr.put(op1, refs);
+	        }
+	        refs.add(rhs);
 
-                refs = localToExpr.get(op2);
-                if (refs == null) {
-                  refs = new HashSet<Value>();
-                  localToExpr.put(op2, refs);
-                }
-                refs.add(rhs);
-              }
-            }
-            // a * b, a * c, c * a
-            else if (rhs instanceof MulExpr) {
-              HashSet<Value> refs = localToExpr.get(op1);
-              if (refs == null) {
-                refs = new HashSet<Value>();
-                localToExpr.put(op1, refs);
-              }
-              refs.add(rhs);
+	        refs = localToExpr.get(op2);
+	        if (refs == null) {
+	          refs = new HashSet<>();
+	          localToExpr.put(op2, refs);
+	        }
+	        refs.add(rhs);
+	      }
+	    }
+	    // a * b, a * c, c * a
+	    else if (rhs instanceof MulExpr) {
+	      HashSet<Value> refs = localToExpr.get(op1);
+	      if (refs == null) {
+	        refs = new HashSet<>();
+	        localToExpr.put(op1, refs);
+	      }
+	      refs.add(rhs);
 
-              refs = localToExpr.get(op2);
-              if (refs == null) {
-                refs = new HashSet<Value>();
-                localToExpr.put(op2, refs);
-              }
-              refs.add(rhs);
-            } else if (rhs instanceof SubExpr) {
-              if (op2 instanceof Local) {
-                HashSet<Value> refs = localToExpr.get(op2);
-                if (refs == null) {
-                  refs = new HashSet<Value>();
-                  localToExpr.put(op2, refs);
-                }
-                refs.add(rhs);
+	      refs = localToExpr.get(op2);
+	      if (refs == null) {
+	        refs = new HashSet<>();
+	        localToExpr.put(op2, refs);
+	      }
+	      refs.add(rhs);
+	    } else if (rhs instanceof SubExpr && op2 instanceof Local) {
+	        HashSet<Value> refs = localToExpr.get(op2);
+	        if (refs == null) {
+	          refs = new HashSet<>();
+	          localToExpr.put(op2, refs);
+	        }
+	        refs.add(rhs);
 
-                if (op1 instanceof Local) {
-                  refs = localToExpr.get(op1);
-                  if (refs == null) {
-                    refs = new HashSet<Value>();
-                    localToExpr.put(op1, refs);
-                  }
-                  refs.add(rhs);
-                }
-              }
-            }
-          }
-        }
-      }
+	        if (op1 instanceof Local) {
+	          refs = localToExpr.get(op1);
+	          if (refs == null) {
+	            refs = new HashSet<>();
+	            localToExpr.put(op1, refs);
+	          }
+	          refs.add(rhs);
+	        }
+	      }
+	  }
+	}
 
-      for (ValueBox vbox : stmt.getUseAndDefBoxes()) {
-        Value v = vbox.getValue();
-
-        if (fieldin) {
+      stmt.getUseAndDefBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+		if (fieldin) {
           if (v instanceof InstanceFieldRef) {
             Value base = ((InstanceFieldRef) v).getBase();
             SootField field = ((InstanceFieldRef) v).getField();
 
             HashSet<Value> baseset = localToFieldRef.get(base);
             if (baseset == null) {
-              baseset = new HashSet<Value>();
+              baseset = new HashSet<>();
               localToFieldRef.put(base, baseset);
             }
 
@@ -270,7 +265,7 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
 
             HashSet<Value> fieldset = fieldToFieldRef.get(field);
             if (fieldset == null) {
-              fieldset = new HashSet<Value>();
+              fieldset = new HashSet<>();
               fieldToFieldRef.put(field, fieldset);
             }
 
@@ -281,8 +276,7 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
             allFieldRefs.add(v);
           }
         }
-
-        if (arrayin) {
+		if (arrayin) {
           // a = ... --> kill all a[x] nodes.
           // a[i] = .. --> kill all array references.
           // m(a) --> kill all array references
@@ -299,34 +293,32 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
            * refset.add(v); } allArrayRefs.add(v); }
            */
         }
-      }
+	});
     }
   }
 
   private void retrieveAllArrayLocals(Body body, Set<Local> container) {
-    for (Local local : body.getLocals()) {
+    body.getLocals().forEach(local -> {
       Type type = local.getType();
 
       if (type instanceof IntType || type instanceof ArrayType) {
         container.add(local);
       }
-    }
+    });
   }
 
-  private void retrieveMultiArrayLocals(Body body, Set<Local> container) {
-    for (Local local : body.getLocals()) {
+  private void retrieveMultiArrayLocals(Body body) {
+    body.getLocals().forEach(local -> {
       Type type = local.getType();
 
-      if (type instanceof ArrayType) {
-        if (((ArrayType) type).numDimensions > 1) {
-          this.multiarraylocals.add(local);
-        }
-      }
-    }
+      boolean condition = type instanceof ArrayType && ((ArrayType) type).numDimensions > 1;
+	if (condition) {
+	  this.multiarraylocals.add(local);
+	}
+    });
   }
 
-  private void getGenAndKillSetForDefnStmt(DefinitionStmt asstmt, HashMap<Stmt, HashSet<Value>> absgen,
-      HashSet<Object> genset, HashSet<Value> absgenset, HashSet<Value> killset, HashSet<Value> condset) {
+  private void getGenAndKillSetForDefnStmt(DefinitionStmt asstmt, HashSet<Object> genset, HashSet<Value> absgenset, HashSet<Value> killset, HashSet<Value> condset) {
     /* kill left hand side */
     Value lhs = asstmt.getLeftOp();
     Value rhs = asstmt.getRightOp();
@@ -401,11 +393,9 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
           if ((op1 instanceof Local) || (op2 instanceof Local)) {
             genset.add(rhs);
           }
-        } else if (rhs instanceof SubExpr) {
-          if (op2 instanceof Local) {
+        } else if (rhs instanceof SubExpr && op2 instanceof Local) {
             genset.add(rhs);
           }
-        }
       }
     }
 
@@ -502,77 +492,76 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
       }
     }
 
-    if (arrayin) {
-      if (killarrayrelated) {
+    if (!arrayin) {
+		return;
+	}
+	if (killarrayrelated) {
         killArrayRelated.put(asstmt, lhs);
       }
-
-      if (killallarrayref) {
-        killAllArrayRef.put(asstmt, new Boolean(true));
+	if (killallarrayref) {
+        killAllArrayRef.put(asstmt, Boolean.valueOf(true));
       }
-    }
   }
 
   private void getGenAndKillSet(Body body, HashMap<Stmt, HashSet<Value>> absgen, HashMap<Stmt, HashSet<Object>> gen,
       HashMap<Stmt, HashSet<Value>> kill, HashMap<Stmt, HashSet<Value>> condition) {
-    for (Unit u : body.getUnits()) {
-      Stmt stmt = (Stmt) u;
+    body.getUnits().stream().map(u -> (Stmt) u).forEach(stmt -> {
+		HashSet<Object> genset = new HashSet<>();
+		HashSet<Value> absgenset = new HashSet<>();
+		HashSet<Value> killset = new HashSet<>();
+		HashSet<Value> condset = new HashSet<>();
+		if (stmt instanceof DefinitionStmt) {
+		    getGenAndKillSetForDefnStmt((DefinitionStmt) stmt, genset, absgenset, killset, condset);
 
-      HashSet<Object> genset = new HashSet<Object>();
-      HashSet<Value> absgenset = new HashSet<Value>();
-      HashSet<Value> killset = new HashSet<Value>();
-      HashSet<Value> condset = new HashSet<Value>();
+		  } else if (stmt instanceof IfStmt) {
+		    /* if one of condition is living, than other one is live. */
+		    Value cmpcond = ((IfStmt) stmt).getCondition();
 
-      if (stmt instanceof DefinitionStmt) {
-        getGenAndKillSetForDefnStmt((DefinitionStmt) stmt, absgen, genset, absgenset, killset, condset);
+		    if (cmpcond instanceof ConditionExpr) {
+		      Value op1 = ((ConditionExpr) cmpcond).getOp1();
+		      Value op2 = ((ConditionExpr) cmpcond).getOp2();
 
-      } else if (stmt instanceof IfStmt) {
-        /* if one of condition is living, than other one is live. */
-        Value cmpcond = ((IfStmt) stmt).getCondition();
+		      if (fullSet.contains(op1) && fullSet.contains(op2)) {
+		        condset.add(op1);
+		        condset.add(op2);
 
-        if (cmpcond instanceof ConditionExpr) {
-          Value op1 = ((ConditionExpr) cmpcond).getOp1();
-          Value op2 = ((ConditionExpr) cmpcond).getOp2();
-
-          if (fullSet.contains(op1) && fullSet.contains(op2)) {
-            condset.add(op1);
-            condset.add(op2);
-
-            genset.add(op1);
-            genset.add(op2);
-          }
-        }
-      }
-
-      if (genset.size() != 0) {
-        gen.put(stmt, genset);
-      }
-      if (absgenset.size() != 0) {
-        absgen.put(stmt, absgenset);
-      }
-      if (killset.size() != 0) {
-        kill.put(stmt, killset);
-      }
-      if (condset.size() != 0) {
-        condition.put(stmt, condset);
-      }
-    }
+		        genset.add(op1);
+		        genset.add(op2);
+		      }
+		    }
+		  }
+		if (genset.size() != 0) {
+		    gen.put(stmt, genset);
+		  }
+		if (absgenset.size() != 0) {
+		    absgen.put(stmt, absgenset);
+		  }
+		if (killset.size() != 0) {
+		    kill.put(stmt, killset);
+		  }
+		if (condset.size() != 0) {
+		    condition.put(stmt, condset);
+		  }
+	});
   }
 
   /* It is unsafe for normal units. */
   /*
    * Since the initial value is safe, empty set. we do not need to do it again.
    */
-  protected Object newInitialFlow() {
+  @Override
+protected Object newInitialFlow() {
     return new HashSet();
   }
 
   /* It is safe for end units. */
-  protected Object entryInitialFlow() {
+  @Override
+protected Object entryInitialFlow() {
     return new HashSet();
   }
 
-  protected void flowThrough(Object inValue, Object unit, Object outValue) {
+  @Override
+protected void flowThrough(Object inValue, Object unit, Object outValue) {
     HashSet inset = (HashSet) inValue;
     HashSet outset = (HashSet) outValue;
     Stmt stmt = (Stmt) unit;
@@ -618,14 +607,12 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
               }
             }
 
-            if (rectarray) {
-              if (key instanceof Array2ndDimensionSymbol) {
+            if (rectarray && key instanceof Array2ndDimensionSymbol) {
                 Object base = ((Array2ndDimensionSymbol) key).getVar();
                 if (base.equals(local)) {
                   outset.remove(key);
                 }
               }
-            }
           }
         }
       }
@@ -650,7 +637,8 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
     }
   }
 
-  protected void merge(Object in1, Object in2, Object out) {
+  @Override
+protected void merge(Object in1, Object in2, Object out) {
     HashSet inset1 = (HashSet) in1;
     HashSet inset2 = (HashSet) in2;
     HashSet outset = (HashSet) out;
@@ -669,7 +657,8 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis {
     outset.addAll(src);
   }
 
-  protected void copy(Object source, Object dest) {
+  @Override
+protected void copy(Object source, Object dest) {
     if (source == dest) {
       return;
     }

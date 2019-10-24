@@ -40,7 +40,8 @@ public class DIntConstant extends IntConstant {
     return new DIntConstant(value, type);
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (type != null) {
       if (type instanceof BooleanType) {
         if (value == 0) {
@@ -82,7 +83,7 @@ public class DIntConstant extends IntConstant {
 
           default:
             if ((value > 31) && (value < 127)) {
-              ch = new Character((char) value).toString();
+              ch = Character.valueOf((char) value).toString();
             } else {
               ch = Integer.toHexString(value);
 
@@ -98,14 +99,14 @@ public class DIntConstant extends IntConstant {
             }
         }
 
-        return "'" + ch + "'";
+        return new StringBuilder().append("'").append(ch).append("'").toString();
       }
 
       else if (type instanceof ByteType) {
-        return "(byte) " + new Integer(value).toString();
+        return "(byte) " + Integer.toString(value);
       }
     }
 
-    return new Integer(value).toString();
+    return Integer.toString(value);
   }
 }

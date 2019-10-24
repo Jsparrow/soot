@@ -142,8 +142,10 @@ public class UseChecker extends AbstractStmtSwitch {
   }
 
   private void handleBinopExpr(BinopExpr be, Stmt stmt, Type tlhs) {
-    Value opl = be.getOp1(), opr = be.getOp2();
-    Type tl = AugEvalFunction.eval_(this.tg, opl, stmt, this.jb), tr = AugEvalFunction.eval_(this.tg, opr, stmt, this.jb);
+    Value opl = be.getOp1();
+	Value opr = be.getOp2();
+    Type tl = AugEvalFunction.eval_(this.tg, opl, stmt, this.jb);
+	Type tr = AugEvalFunction.eval_(this.tg, opr, stmt, this.jb);
 
     if (be instanceof AddExpr || be instanceof SubExpr || be instanceof MulExpr || be instanceof DivExpr
         || be instanceof RemExpr || be instanceof GeExpr || be instanceof GtExpr || be instanceof LeExpr
@@ -175,14 +177,17 @@ public class UseChecker extends AbstractStmtSwitch {
     ifr.setBase(this.uv.visit(ifr.getBase(), ifr.getFieldRef().declaringClass().getType(), stmt));
   }
 
-  public void caseBreakpointStmt(BreakpointStmt stmt) {
+  @Override
+public void caseBreakpointStmt(BreakpointStmt stmt) {
   }
 
-  public void caseInvokeStmt(InvokeStmt stmt) {
+  @Override
+public void caseInvokeStmt(InvokeStmt stmt) {
     this.handleInvokeExpr(stmt.getInvokeExpr(), stmt);
   }
 
-  public void caseAssignStmt(AssignStmt stmt) {
+  @Override
+public void caseAssignStmt(AssignStmt stmt) {
     Value lhs = stmt.getLeftOp();
     Value rhs = stmt.getRightOp();
     Type tlhs = null;
@@ -267,9 +272,9 @@ public class UseChecker extends AbstractStmtSwitch {
         // For some fixed type T, we assume that we can fix the array to T[].
         if (bt instanceof RefType || bt instanceof NullType) {
           RefType rt = bt instanceof NullType ? null : (RefType) bt;
-          if (rt == null || rt.getSootClass().getName().equals("java.lang.Object")
-              || rt.getSootClass().getName().equals("java.io.Serializable")
-              || rt.getSootClass().getName().equals("java.lang.Cloneable")) {
+          if (rt == null || "java.lang.Object".equals(rt.getSootClass().getName())
+              || "java.io.Serializable".equals(rt.getSootClass().getName())
+              || "java.lang.Cloneable".equals(rt.getSootClass().getName())) {
             if (defs == null) {
               defs = LocalDefs.Factory.newLocalDefs(jb);
               uses = LocalUses.Factory.newLocalUses(jb, defs);
@@ -391,43 +396,54 @@ public class UseChecker extends AbstractStmtSwitch {
     return null;
   }
 
-  public void caseIdentityStmt(IdentityStmt stmt) {
+  @Override
+public void caseIdentityStmt(IdentityStmt stmt) {
   }
 
-  public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
+  @Override
+public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
     stmt.setOp(this.uv.visit(stmt.getOp(), RefType.v("java.lang.Object"), stmt));
   }
 
-  public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
+  @Override
+public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
     stmt.setOp(this.uv.visit(stmt.getOp(), RefType.v("java.lang.Object"), stmt));
   }
 
-  public void caseGotoStmt(GotoStmt stmt) {
+  @Override
+public void caseGotoStmt(GotoStmt stmt) {
   }
 
-  public void caseIfStmt(IfStmt stmt) {
+  @Override
+public void caseIfStmt(IfStmt stmt) {
     this.handleBinopExpr((BinopExpr) stmt.getCondition(), stmt, BooleanType.v());
   }
 
-  public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
+  @Override
+public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
     stmt.setKey(this.uv.visit(stmt.getKey(), IntType.v(), stmt));
   }
 
-  public void caseNopStmt(NopStmt stmt) {
+  @Override
+public void caseNopStmt(NopStmt stmt) {
   }
 
-  public void caseReturnStmt(ReturnStmt stmt) {
+  @Override
+public void caseReturnStmt(ReturnStmt stmt) {
     stmt.setOp(this.uv.visit(stmt.getOp(), this.jb.getMethod().getReturnType(), stmt));
   }
 
-  public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
+  @Override
+public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
   }
 
-  public void caseTableSwitchStmt(TableSwitchStmt stmt) {
+  @Override
+public void caseTableSwitchStmt(TableSwitchStmt stmt) {
     stmt.setKey(this.uv.visit(stmt.getKey(), IntType.v(), stmt));
   }
 
-  public void caseThrowStmt(ThrowStmt stmt) {
+  @Override
+public void caseThrowStmt(ThrowStmt stmt) {
     stmt.setOp(this.uv.visit(stmt.getOp(), RefType.v("java.lang.Throwable"), stmt));
   }
 

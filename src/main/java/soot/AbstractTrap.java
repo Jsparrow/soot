@@ -50,16 +50,6 @@ public class AbstractTrap implements Trap, Serializable {
   /** The list of unitBoxes referred to in this Trap (begin, end and handler. */
   protected List<UnitBox> unitBoxes;
 
-  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    in.defaultReadObject();
-    exception = Scene.v().getSootClass((String) in.readObject());
-  }
-
-  private void writeObject(ObjectOutputStream out) throws IOException {
-    out.defaultWriteObject();
-    out.writeObject(exception.getName());
-  }
-
   /** Creates an AbstractTrap with the given exception, handler, begin and end units. */
   protected AbstractTrap(SootClass exception, UnitBox beginUnitBox, UnitBox endUnitBox, UnitBox handlerUnitBox) {
     this.exception = exception;
@@ -69,61 +59,83 @@ public class AbstractTrap implements Trap, Serializable {
     this.unitBoxes = Collections.unmodifiableList(Arrays.asList(beginUnitBox, endUnitBox, handlerUnitBox));
   }
 
-  public Unit getBeginUnit() {
+private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    exception = Scene.v().getSootClass((String) in.readObject());
+  }
+
+private void writeObject(ObjectOutputStream out) throws IOException {
+    out.defaultWriteObject();
+    out.writeObject(exception.getName());
+  }
+
+@Override
+public Unit getBeginUnit() {
     return beginUnitBox.getUnit();
   }
 
-  public Unit getEndUnit() {
+@Override
+public Unit getEndUnit() {
     return endUnitBox.getUnit();
   }
 
-  public Unit getHandlerUnit() {
+@Override
+public Unit getHandlerUnit() {
     return handlerUnitBox.getUnit();
   }
 
-  public UnitBox getHandlerUnitBox() {
+@Override
+public UnitBox getHandlerUnitBox() {
     return handlerUnitBox;
   }
 
-  public UnitBox getBeginUnitBox() {
+@Override
+public UnitBox getBeginUnitBox() {
     return beginUnitBox;
   }
 
-  public UnitBox getEndUnitBox() {
+@Override
+public UnitBox getEndUnitBox() {
     return endUnitBox;
   }
 
-  public List<UnitBox> getUnitBoxes() {
+@Override
+public List<UnitBox> getUnitBoxes() {
     return unitBoxes;
   }
 
-  public void clearUnitBoxes() {
-    for (UnitBox box : getUnitBoxes()) {
-      box.setUnit(null);
-    }
+@Override
+public void clearUnitBoxes() {
+    getUnitBoxes().forEach(box -> box.setUnit(null));
   }
 
-  public SootClass getException() {
+@Override
+public SootClass getException() {
     return exception;
   }
 
-  public void setBeginUnit(Unit beginUnit) {
+@Override
+public void setBeginUnit(Unit beginUnit) {
     beginUnitBox.setUnit(beginUnit);
   }
 
-  public void setEndUnit(Unit endUnit) {
+@Override
+public void setEndUnit(Unit endUnit) {
     endUnitBox.setUnit(endUnit);
   }
 
-  public void setHandlerUnit(Unit handlerUnit) {
+@Override
+public void setHandlerUnit(Unit handlerUnit) {
     handlerUnitBox.setUnit(handlerUnit);
   }
 
-  public void setException(SootClass exception) {
+@Override
+public void setException(SootClass exception) {
     this.exception = exception;
   }
 
-  public Object clone() {
+@Override
+public Object clone() {
     throw new RuntimeException();
   }
 }

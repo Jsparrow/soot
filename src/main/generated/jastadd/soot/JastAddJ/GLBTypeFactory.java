@@ -96,7 +96,7 @@ public class GLBTypeFactory extends java.lang.Object {
          * @return the most specific class that all elements in <i>types</i> are a
          *         subtype of. Or null if no such class exists.
          */
-        public final static TypeDecl mostSpecificSuperClass(final ArrayList types) {
+        public static final TypeDecl mostSpecificSuperClass(final ArrayList types) {
             ArrayList csList = new ArrayList();
             for(Iterator iter = types.iterator(); iter.hasNext(); ) {
               csList.add(mostSpecificSuperClass((TypeDecl)iter.next()));
@@ -122,21 +122,23 @@ public class GLBTypeFactory extends java.lang.Object {
          * @param t
          * @return most specific superclass of t
          */
-        private final static TypeDecl mostSpecificSuperClass(final TypeDecl t) {
+        private static final TypeDecl mostSpecificSuperClass(final TypeDecl t) {
             HashSet superTypes = new HashSet();
             addSuperClasses(t, superTypes);
 
-            if (superTypes.isEmpty())
-                return t.typeObject();
+            if (superTypes.isEmpty()) {
+				return t.typeObject();
+			}
 
             ArrayList result = new ArrayList(superTypes.size());
             result.addAll(superTypes);
             greatestLowerBounds(result);
 
-            if (result.size() == 1)
-                return (TypeDecl) result.get(0);
-            else
-                return (TypeDecl) t.typeObject();
+            if (result.size() == 1) {
+				return (TypeDecl) result.get(0);
+			} else {
+				return (TypeDecl) t.typeObject();
+			}
         }
 
 
@@ -156,8 +158,9 @@ public class GLBTypeFactory extends java.lang.Object {
          * @param result
          */
         private static final void addSuperClasses(final TypeDecl t, final HashSet result) {
-            if (t == null)
-                return;
+            if (t == null) {
+				return;
+			}
 
             // class
             if (t.isClassDecl() && !result.contains(t)) {
@@ -166,16 +169,18 @@ public class GLBTypeFactory extends java.lang.Object {
             // type variable, probably called from from 1st if case.
             else if (t.isTypeVariable()) {
                 TypeVariable var = (TypeVariable) t;
-                for (int i = 0; i < var.getNumTypeBound(); i++)
-                    addSuperClasses(var.getTypeBound(i).type(), result);
+                for (int i = 0; i < var.getNumTypeBound(); i++) {
+					addSuperClasses(var.getTypeBound(i).type(), result);
+				}
             }
             // intersection type
             else if (t instanceof LUBType || t instanceof GLBType) {
                 result.add(t);
             }
             // interface
-            else if (t.isInterfaceDecl())
-                result.add((ClassDecl) t.typeObject());
+            else if (t.isInterfaceDecl()) {
+				result.add((ClassDecl) t.typeObject());
+			}
 
         }
 
@@ -263,12 +268,14 @@ public class GLBTypeFactory extends java.lang.Object {
                 TypeDecl U = (TypeDecl) types.get(i);
                 for (int j = i + 1; j < types.size(); j++) {
                     TypeDecl V = (TypeDecl) types.get(j);
-                    if (U == null || V == null)
-                        continue;
-                    if (U.instanceOf(V))
-                        types.set(j, null);
-                    else if (V.instanceOf(U))
-                        types.set(i, null);
+                    if (U == null || V == null) {
+						continue;
+					}
+                    if (U.instanceOf(V)) {
+						types.set(j, null);
+					} else if (V.instanceOf(U)) {
+						types.set(i, null);
+					}
                 }
             }
             // filter null's

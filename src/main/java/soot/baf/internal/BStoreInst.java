@@ -45,52 +45,64 @@ public class BStoreInst extends AbstractOpTypeInst implements StoreInst {
     defBoxes = Collections.singletonList(localBox);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BStoreInst(getOpType(), getLocal());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "store";
   }
 
-  final String getParameters() {
+  @Override
+final String getParameters() {
     return " " + localBox.getValue().toString();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     localBox.toString(up);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseStoreInst(this);
   }
 
-  public void setLocal(Local l) {
+  @Override
+public void setLocal(Local l) {
     localBox.setValue(l);
   }
 
-  public Local getLocal() {
+  @Override
+public Local getLocal() {
     return (Local) localBox.getValue();
   }
 
-  public List getDefBoxes() {
+  @Override
+public List getDefBoxes() {
     return defBoxes;
   }
 

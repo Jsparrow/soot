@@ -36,7 +36,8 @@ class CONSTANT_MethodHandle_info extends cp_info {
 
   public int target_index;
 
-  public int size() {
+  @Override
+public int size() {
     return 4;
   }
 
@@ -48,7 +49,8 @@ class CONSTANT_MethodHandle_info extends cp_info {
    * @return String representation of this entry.
    * @see cp_info#toString
    */
-  public String toString(cp_info constant_pool[]) {
+  @Override
+public String toString(cp_info constant_pool[]) {
     // currently neglects field "kind"
     cp_info target = constant_pool[target_index];
     return target.toString(constant_pool);
@@ -60,7 +62,8 @@ class CONSTANT_MethodHandle_info extends cp_info {
    * @return the String "methodhandle".
    * @see cp_info#typeName
    */
-  public String typeName() {
+  @Override
+public String typeName() {
     return "methodhandle";
   }
 
@@ -76,7 +79,8 @@ class CONSTANT_MethodHandle_info extends cp_info {
    * @return a value <0, 0, or >0 indicating whether this is smaller, the same or larger than cp.
    * @see cp_info#compareTo
    */
-  public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
+  @Override
+public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
     int i;
     if (tag != cp.tag) {
       return tag - cp.tag;
@@ -89,7 +93,8 @@ class CONSTANT_MethodHandle_info extends cp_info {
     return kind - cu.kind;
   }
 
-  public Value createJimpleConstantValue(cp_info[] constant_pool) {
+  @Override
+public Value createJimpleConstantValue(cp_info[] constant_pool) {
     // FIXME may need to determine static-ness based on "kind" field
     return constant_pool[target_index].createJimpleConstantValue(constant_pool);
   }

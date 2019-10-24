@@ -34,11 +34,13 @@ public class GRValueBox extends AbstractValueBox {
     setValue(value);
   }
 
-  public boolean canContainValue(Value value) {
+  @Override
+public boolean canContainValue(Value value) {
     return value instanceof Local || value instanceof Constant || value instanceof ConcreteRef || value instanceof Expr;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     throw new RuntimeException();
   }
 }

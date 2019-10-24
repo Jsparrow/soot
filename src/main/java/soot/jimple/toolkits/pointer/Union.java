@@ -47,11 +47,13 @@ public abstract class Union implements PointsToSet {
     return s2.hasNonEmptyIntersection(s1);
   }
 
-  public Set<String> possibleStringConstants() {
+  @Override
+public Set<String> possibleStringConstants() {
     return null;
   }
 
-  public Set<ClassConstant> possibleClassConstants() {
+  @Override
+public Set<ClassConstant> possibleClassConstants() {
     return null;
   }
 

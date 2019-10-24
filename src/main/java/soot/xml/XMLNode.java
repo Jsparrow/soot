@@ -57,7 +57,8 @@ public class XMLNode extends XMLRoot {
     }
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new XMLNode(this);
   }
 
@@ -106,14 +107,15 @@ public class XMLNode extends XMLRoot {
 
   // XML Printing and formatting
   //
-  public String toString() {
+  @Override
+public String toString() {
     return toString("");
   }
 
   public String toString(String indent) {
     // <tag
-    StringBuffer beginTag = new StringBuffer(TAG_STRING_BUFFER);
-    StringBuffer endTag = new StringBuffer(TAG_STRING_BUFFER);
+	StringBuilder beginTag = new StringBuilder(TAG_STRING_BUFFER);
+    StringBuilder endTag = new StringBuilder(TAG_STRING_BUFFER);
     String xmlName = eliminateSpaces(name);
 
     beginTag.append("<" + xmlName);
@@ -122,9 +124,9 @@ public class XMLNode extends XMLRoot {
       for (int i = 0; i < attributes.length; i++) {
         if (attributes[i].length() > 0) {
           // <tag attr="
-          String attributeName = eliminateSpaces(attributes[i].toString().trim());
+          String attributeName = eliminateSpaces(attributes[i].trim());
           // TODO: attribute name should be one word! squish it?
-          beginTag.append(" " + attributeName + "=\"");
+          beginTag.append(new StringBuilder().append(" ").append(attributeName).append("=\"").toString());
 
           // <tag attr="val"
           // if there is no value associated with this attribute,
@@ -132,7 +134,7 @@ public class XMLNode extends XMLRoot {
           // use the default: <hr NOSHADE="NOSHADE">
           if (values != null) {
             if (i < values.length) {
-              beginTag.append(values[i].toString().trim() + "\"");
+              beginTag.append(values[i].trim() + "\"");
             } else {
               beginTag.append(attributeName.trim() + "\"");
             }
@@ -148,14 +150,14 @@ public class XMLNode extends XMLRoot {
       endTag.setLength(0);
     } else {
       beginTag.append(">");
-      endTag.append("</" + xmlName + ">\n");
+      endTag.append(new StringBuilder().append("</").append(xmlName).append(">\n").toString());
     }
 
     // return ( prev.toString() + beginTag.toString() + value.toString() + child.toString() + endTag.toString() +
     // next.toString() );
     String returnStr = indent + beginTag.toString();
     if (value.length() > 0) {
-      returnStr += value.toString();
+      returnStr += value;
     }
     if (child != null) {
       returnStr += "\n" + child.toPostString(indent + "  ");
@@ -222,27 +224,33 @@ public class XMLNode extends XMLRoot {
   }
 
   // add element to end of tree
-  public XMLNode addElement(String name) {
+  @Override
+public XMLNode addElement(String name) {
     return addElement(name, "", "", "");
   }
 
-  public XMLNode addElement(String name, String value) {
+  @Override
+public XMLNode addElement(String name, String value) {
     return addElement(name, value, "", "");
   }
 
-  public XMLNode addElement(String name, String value, String[] attributes) {
+  @Override
+public XMLNode addElement(String name, String value, String[] attributes) {
     return addElement(name, value, attributes, null);
   }
 
-  public XMLNode addElement(String name, String[] attributes, String[] values) {
+  @Override
+public XMLNode addElement(String name, String[] attributes, String[] values) {
     return addElement(name, "", attributes, values);
   }
 
-  public XMLNode addElement(String name, String value, String attribute, String attributeValue) {
+  @Override
+public XMLNode addElement(String name, String value, String attribute, String attributeValue) {
     return addElement(name, value, new String[] { attribute }, new String[] { attributeValue });
   }
 
-  public XMLNode addElement(String name, String value, String[] attributes, String[] values) {
+  @Override
+public XMLNode addElement(String name, String value, String[] attributes, String[] values) {
     XMLNode newnode = new XMLNode(name, value, attributes, values);
     return addElement(newnode);
   }

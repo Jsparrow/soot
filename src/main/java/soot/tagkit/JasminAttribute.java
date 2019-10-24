@@ -55,7 +55,7 @@ import soot.Unit;
  */
 
 public abstract class JasminAttribute implements Attribute {
-  abstract public byte[] decode(String attr, Hashtable<String, Integer> labelToPc);
+  public abstract byte[] decode(String attr, Hashtable<String, Integer> labelToPc);
 
-  abstract public String getJasminValue(Map<Unit, String> instToLabel);
+  public abstract String getJasminValue(Map<Unit, String> instToLabel);
 }

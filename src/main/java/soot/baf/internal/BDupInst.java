@@ -31,11 +31,13 @@ import soot.util.Switch;
 
 public abstract class BDupInst extends AbstractInst implements DupInst {
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return getUnderTypes().size() + getOpTypes().size();
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     int count = 0;
 
     Iterator<Type> underTypesIt = getUnderTypes().iterator();
@@ -51,11 +53,13 @@ public abstract class BDupInst extends AbstractInst implements DupInst {
     return count;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return getUnderTypes().size() + 2 * getOpTypes().size();
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     int count = 0;
 
     Iterator<Type> underTypesIt = getUnderTypes().iterator();
@@ -70,7 +74,8 @@ public abstract class BDupInst extends AbstractInst implements DupInst {
     return count;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     throw new RuntimeException();
   }
 

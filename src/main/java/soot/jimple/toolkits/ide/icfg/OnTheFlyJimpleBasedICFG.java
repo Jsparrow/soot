@@ -60,6 +60,8 @@ import soot.jimple.Stmt;
 import soot.jimple.VirtualInvokeExpr;
 import soot.jimple.toolkits.pointer.LocalMustNotAliasAnalysis;
 import soot.options.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is an implementation of AbstractJimpleBasedICFG that computes the ICFG on-the-fly. In other words, it can be used
@@ -78,7 +80,9 @@ import soot.options.Options;
  */
 public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
 
-  @SynchronizedBy("by use of synchronized LoadingCache class")
+  private static final Logger logger = LoggerFactory.getLogger(OnTheFlyJimpleBasedICFG.class);
+
+@SynchronizedBy("by use of synchronized LoadingCache class")
   protected final LoadingCache<Body, LocalMustNotAliasAnalysis> bodyToLMNAA
       = IDESolver.DEFAULT_CACHE_BUILDER.build(new CacheLoader<Body, LocalMustNotAliasAnalysis>() {
         @Override
@@ -134,16 +138,14 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
       });
 
   @SynchronizedBy("explicit lock on data structure")
-  protected Map<SootMethod, Set<Unit>> methodToCallers = new HashMap<SootMethod, Set<Unit>>();
+  protected Map<SootMethod, Set<Unit>> methodToCallers = new HashMap<>();
 
   public OnTheFlyJimpleBasedICFG(SootMethod... entryPoints) {
     this(Arrays.asList(entryPoints));
   }
 
   public OnTheFlyJimpleBasedICFG(Collection<SootMethod> entryPoints) {
-    for (SootMethod m : entryPoints) {
-      initForMethod(m);
-    }
+    entryPoints.forEach(this::initForMethod);
   }
 
   protected Body initForMethod(SootMethod m) {
@@ -181,10 +183,10 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
   @Override
   public Set<SootMethod> getCalleesOfCallAt(Unit u) {
     Set<SootMethod> targets = unitToCallees.getUnchecked(u);
-    for (SootMethod m : targets) {
+    targets.forEach(m -> {
       addCallerForMethod(u, m);
       initForMethod(m);
-    }
+    });
     return targets;
   }
 
@@ -192,7 +194,7 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
     synchronized (methodToCallers) {
       Set<Unit> callers = methodToCallers.get(target);
       if (callers == null) {
-        callers = new HashSet<Unit>();
+        callers = new HashSet<>();
         methodToCallers.put(target, callers);
       }
       callers.add(callSite);
@@ -208,11 +210,7 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
   }
 
   public static void loadAllClassesOnClassPathToSignatures() {
-    for (String path : SourceLocator.explodeClassPath(Scene.v().getSootClassPath())) {
-      for (String cl : SourceLocator.v().getClassesUnder(path)) {
-        Scene.v().forceResolve(cl, SootClass.SIGNATURES);
-      }
-    }
+    SourceLocator.explodeClassPath(Scene.v().getSootClassPath()).forEach(path -> SourceLocator.v().getClassesUnder(path).forEach(cl -> Scene.v().forceResolve(cl, SootClass.SIGNATURES)));
   }
 
   public static void main(String[] args) {
@@ -228,16 +226,17 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
 
         SootMethod mainMethod = Scene.v().getMainMethod();
         OnTheFlyJimpleBasedICFG icfg = new OnTheFlyJimpleBasedICFG(mainMethod);
-        Set<SootMethod> worklist = new LinkedHashSet<SootMethod>();
-        Set<SootMethod> visited = new HashSet<SootMethod>();
+        Set<SootMethod> worklist = new LinkedHashSet<>();
+        Set<SootMethod> visited = new HashSet<>();
         worklist.add(mainMethod);
-        int monomorphic = 0, polymorphic = 0;
+        int monomorphic = 0;
+		int polymorphic = 0;
         while (!worklist.isEmpty()) {
           Iterator<SootMethod> iter = worklist.iterator();
           SootMethod currMethod = iter.next();
           iter.remove();
           visited.add(currMethod);
-          System.err.println(currMethod);
+          logger.error(String.valueOf(currMethod));
           // MUST call this method to initialize ICFG for every method
           Body body = currMethod.getActiveBody();
           if (body == null) {
@@ -253,14 +252,10 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
                 } else {
                   polymorphic++;
                 }
-                System.err.println("mono: " + monomorphic + "   poly: " + polymorphic);
+                logger.error(new StringBuilder().append("mono: ").append(monomorphic).append("   poly: ").append(polymorphic).toString());
               }
-              for (SootMethod callee : calleesOfCallAt) {
-                if (!visited.contains(callee)) {
-                  System.err.println(callee);
-                  // worklist.add(callee);
-                }
-              }
+              // worklist.add(callee);
+			calleesOfCallAt.stream().filter(callee -> !visited.contains(callee)).forEach(callee -> logger.error(String.valueOf(callee)));
             }
           }
         }

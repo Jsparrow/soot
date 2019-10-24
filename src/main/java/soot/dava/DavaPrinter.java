@@ -59,9 +59,13 @@ import soot.tagkit.StringConstantValueTag;
 import soot.tagkit.Tag;
 import soot.util.Chain;
 import soot.util.IterableSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DavaPrinter {
-  public DavaPrinter(Singletons.Global g) {
+  private static final Logger logger = LoggerFactory.getLogger(DavaPrinter.class);
+
+public DavaPrinter(Singletons.Global g) {
   }
 
   public static DavaPrinter v() {
@@ -71,7 +75,7 @@ public class DavaPrinter {
   private void printStatementsInBody(Body body, java.io.PrintWriter out) {
 
     if (Options.v().verbose()) {
-      System.out.println("Printing " + body.getMethod().getName());
+      logger.info("Printing " + body.getMethod().getName());
     }
 
     Chain<Unit> units = ((DavaBody) body).getUnits();
@@ -92,8 +96,8 @@ public class DavaPrinter {
     {
       String curPackage = cl.getJavaPackageName();
 
-      if (!curPackage.equals("")) {
-        out.println("package " + curPackage + ";");
+      if (!"".equals(curPackage)) {
+        out.println(new StringBuilder().append("package ").append(curPackage).append(";").toString());
         out.println();
       }
 
@@ -184,14 +188,14 @@ public class DavaPrinter {
       }
 
       Iterator<String> pit = importList.iterator();
-      List<String> toImport = new ArrayList<String>();
+      List<String> toImport = new ArrayList<>();
       while (pit.hasNext()) {
         /*
          * dont import any file which has currentPackage.className dont import any file which starts with java.lang
          */
         String temp = (String) pit.next();
         // System.out.println("temp is "+temp);
-        if (temp.indexOf("java.lang") > -1) {
+        if (temp.contains("java.lang")) {
           // problem is that we need to import sub packages java.lang.ref
           // for instance if the type is java.lang.ref.WeakReference
           String tempClassName = RemoveFullyQualifiedName.getClassName(temp);
@@ -201,7 +205,7 @@ public class DavaPrinter {
           }
         }
 
-        if (curPackage.length() > 0 && temp.indexOf(curPackage) > -1) {
+        if (curPackage.length() > 0 && temp.contains(curPackage)) {
           // System.out.println("here "+temp);
           continue;
         }
@@ -227,7 +231,7 @@ public class DavaPrinter {
           // import package add *
           if (temp.lastIndexOf('.') > -1) {
             temp = temp.substring(0, temp.lastIndexOf('.'));
-            out.println("import " + temp + ".*;");
+            out.println(new StringBuilder().append("import ").append(temp).append(".*;").toString());
           } else {
             throw new DecompilationException("Cant find the DOT . for fullyqualified name");
           }
@@ -235,7 +239,7 @@ public class DavaPrinter {
           if (temp.lastIndexOf('.') == -1) {
             // dot not found this is a class belonging to this package so dont add
           } else {
-            out.println("import " + temp + ";");
+            out.println(new StringBuilder().append("import ").append(temp).append(";").toString());
           }
         }
       }
@@ -262,7 +266,7 @@ public class DavaPrinter {
     {
       String classPrefix = "";
 
-      classPrefix = classPrefix + " " + Modifier.toString(cl.getModifiers());
+      classPrefix = new StringBuilder().append(classPrefix).append(" ").append(Modifier.toString(cl.getModifiers())).toString();
       classPrefix = classPrefix.trim();
 
       if (!cl.isInterface()) {
@@ -270,11 +274,11 @@ public class DavaPrinter {
         classPrefix = classPrefix.trim();
       }
 
-      out.print(classPrefix + " " + cl.getShortJavaStyleName());
+      out.print(new StringBuilder().append(classPrefix).append(" ").append(cl.getShortJavaStyleName()).toString());
     }
 
     // Print extension
-    if (cl.hasSuperclass() && !(cl.getSuperclass().getName().equals("java.lang.Object"))) {
+    if (cl.hasSuperclass() && !("java.lang.Object".equals(cl.getSuperclass().getName()))) {
 
       String superClassName = cl.getSuperclass().getName();
 
@@ -284,7 +288,7 @@ public class DavaPrinter {
       // the long name
 
       superClassName = RemoveFullyQualifiedName.getReducedName(importList, superClassName, cl.getType());
-      out.print(" extends " + superClassName + "");
+      out.print(new StringBuilder().append(" extends ").append(superClassName).append("").toString());
     }
 
     // Print interfaces
@@ -298,10 +302,10 @@ public class DavaPrinter {
           out.print(" implements ");
         }
 
-        out.print("" + (interfaceIt.next()).getName() + "");
+        out.print(new StringBuilder().append("").append((interfaceIt.next()).getName()).append("").toString());
 
         while (interfaceIt.hasNext()) {
-          out.print(", " + (interfaceIt.next()).getName() + "");
+          out.print(new StringBuilder().append(", ").append((interfaceIt.next()).getName()).append("").toString());
         }
       }
     }
@@ -330,10 +334,10 @@ public class DavaPrinter {
 
           qualifiers = qualifiers.trim();
 
-          if (qualifiers.equals("")) {
+          if ("".equals(qualifiers)) {
             declaration = Scene.v().quotedNameOf(f.getName());
           } else {
-            declaration = qualifiers + " " + Scene.v().quotedNameOf(f.getName()) + "";
+            declaration = new StringBuilder().append(qualifiers).append(" ").append(Scene.v().quotedNameOf(f.getName())).append("").toString();
           }
 
           if (f.isFinal() && f.isStatic()) {
@@ -341,52 +345,52 @@ public class DavaPrinter {
             if (fieldType instanceof DoubleType && f.hasTag("DoubleConstantValueTag")) {
 
               double val = ((DoubleConstantValueTag) f.getTag("DoubleConstantValueTag")).getDoubleValue();
-              out.println("    " + declaration + " = " + val + ";");
+              out.println(new StringBuilder().append("    ").append(declaration).append(" = ").append(val).append(";").toString());
 
             } else if (fieldType instanceof FloatType && f.hasTag("FloatConstantValueTag")) {
 
               float val = ((FloatConstantValueTag) f.getTag("FloatConstantValueTag")).getFloatValue();
-              out.println("    " + declaration + " = " + val + "f;");
+              out.println(new StringBuilder().append("    ").append(declaration).append(" = ").append(val).append("f;").toString());
 
             } else if (fieldType instanceof LongType && f.hasTag("LongConstantValueTag")) {
 
               long val = ((LongConstantValueTag) f.getTag("LongConstantValueTag")).getLongValue();
-              out.println("    " + declaration + " = " + val + "l;");
+              out.println(new StringBuilder().append("    ").append(declaration).append(" = ").append(val).append("l;").toString());
 
             } else if (fieldType instanceof CharType && f.hasTag("IntegerConstantValueTag")) {
 
               int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
-              out.println("    " + declaration + " = '" + ((char) val) + "';");
+              out.println(new StringBuilder().append("    ").append(declaration).append(" = '").append((char) val).append("';").toString());
 
             } else if (fieldType instanceof BooleanType && f.hasTag("IntegerConstantValueTag")) {
 
               int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
 
               if (val == 0) {
-                out.println("    " + declaration + " = false;");
+                out.println(new StringBuilder().append("    ").append(declaration).append(" = false;").toString());
               } else {
-                out.println("    " + declaration + " = true;");
+                out.println(new StringBuilder().append("    ").append(declaration).append(" = true;").toString());
               }
 
             } else if ((fieldType instanceof IntType || fieldType instanceof ByteType || fieldType instanceof ShortType)
                 && f.hasTag("IntegerConstantValueTag")) {
 
               int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
-              out.println("    " + declaration + " = " + val + ";");
+              out.println(new StringBuilder().append("    ").append(declaration).append(" = ").append(val).append(";").toString());
 
             } else if (f.hasTag("StringConstantValueTag")) {
 
               String val = ((StringConstantValueTag) f.getTag("StringConstantValueTag")).getStringValue();
-              out.println("    " + declaration + " = \"" + val + "\";");
+              out.println(new StringBuilder().append("    ").append(declaration).append(" = \"").append(val).append("\";").toString());
 
             } else {
               // System.out.println("Couldnt find type of
               // field"+f.getDeclaration());
-              out.println("    " + declaration + ";");
+              out.println(new StringBuilder().append("    ").append(declaration).append(";").toString());
             }
           } // field is static final
           else {
-            out.println("    " + declaration + ";");
+            out.println(new StringBuilder().append("    ").append(declaration).append(";").toString());
           }
         }
       }
@@ -410,7 +414,7 @@ public class DavaPrinter {
 
           if (!Modifier.isAbstract(method.getModifiers()) && !Modifier.isNative(method.getModifiers())) {
             if (!method.hasActiveBody()) {
-              throw new RuntimeException("method " + method.getName() + " has no active body!");
+              throw new RuntimeException(new StringBuilder().append("method ").append(method.getName()).append(" has no active body!").toString());
             } else {
               printTo(method.getActiveBody(), out);
             }

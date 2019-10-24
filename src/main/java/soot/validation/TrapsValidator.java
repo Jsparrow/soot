@@ -41,19 +41,19 @@ public enum TrapsValidator implements BodyValidator {
   public void validate(Body body, List<ValidationException> exception) {
     PatchingChain<Unit> units = body.getUnits();
 
-    for (Trap t : body.getTraps()) {
+    body.getTraps().forEach(t -> {
       if (!units.contains(t.getBeginUnit())) {
-        exception.add(new ValidationException(t.getBeginUnit(), "begin not in chain" + " in " + body.getMethod()));
+        exception.add(new ValidationException(t.getBeginUnit(), new StringBuilder().append("begin not in chain").append(" in ").append(body.getMethod()).toString()));
       }
 
       if (!units.contains(t.getEndUnit())) {
-        exception.add(new ValidationException(t.getEndUnit(), "end not in chain" + " in " + body.getMethod()));
+        exception.add(new ValidationException(t.getEndUnit(), new StringBuilder().append("end not in chain").append(" in ").append(body.getMethod()).toString()));
       }
 
       if (!units.contains(t.getHandlerUnit())) {
-        exception.add(new ValidationException(t.getHandlerUnit(), "handler not in chain" + " in " + body.getMethod()));
+        exception.add(new ValidationException(t.getHandlerUnit(), new StringBuilder().append("handler not in chain").append(" in ").append(body.getMethod()).toString()));
       }
-    }
+    });
   }
 
   @Override

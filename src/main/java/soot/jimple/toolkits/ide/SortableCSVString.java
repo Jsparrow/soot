@@ -31,23 +31,23 @@ public class SortableCSVString implements Comparable<SortableCSVString> {
     position = pos;
   }
 
-  public int compareTo(SortableCSVString anotherString) {
+  @Override
+public int compareTo(SortableCSVString anotherString) {
     // "@"+i+";
     int result;
     String subString = value.substring(0, value.indexOf(';'));
     String anotherSubString = anotherString.value.substring(0, anotherString.value.indexOf(';'));
 
     result = subString.compareTo(anotherSubString);
-    if (result == 0) {
-      if (position < anotherString.position) {
+    if (result != 0) {
+		return result;
+	}
+	if (position < anotherString.position) {
         return -1;
       }
-      if (position > anotherString.position) {
+	if (position > anotherString.position) {
         return 1;
       }
-      return 0;
-    } else {
-      return result;
-    }
+	return 0;
   }
 }

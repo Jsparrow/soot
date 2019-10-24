@@ -45,25 +45,27 @@ import soot.jbco.util.Rand;
 public class UpdateConstantsToFields extends BodyTransformer implements IJbcoTransform {
 
   public static String dependancies[] = new String[] { "wjtp.jbco_cc", "bb.jbco_ecvf", "bb.jbco_ful", "bb.lp" };
+public static String name = "bb.jbco_ecvf";
+static int updated = 0;
 
-  public String[] getDependencies() {
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_ecvf";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  static int updated = 0;
-
-  public void outputSummary() {
+@Override
+public void outputSummary() {
     out.println("Updated constant references: " + updated);
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
-    if (b.getMethod().getName().indexOf("<clinit>") >= 0) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+    if (b.getMethod().getName().contains("<clinit>")) {
       return;
     }
 

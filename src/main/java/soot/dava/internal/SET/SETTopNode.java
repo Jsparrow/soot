@@ -33,15 +33,18 @@ public class SETTopNode extends SETNode {
     add_SubBody(body);
   }
 
-  public IterableSet get_NaturalExits() {
+  @Override
+public IterableSet get_NaturalExits() {
     return new IterableSet();
   }
 
-  public ASTNode emit_AST() {
+  @Override
+public ASTNode emit_AST() {
     return new ASTMethodNode(emit_ASTBody(body2childChain.get(subBodies.get(0))));
   }
 
-  public AugmentedStmt get_EntryStmt() {
+  @Override
+public AugmentedStmt get_EntryStmt() {
     throw new RuntimeException("Not implemented.");
     // FIXME the following turned out to be ill-typed after applying type
     // inference for generics
@@ -50,7 +53,8 @@ public class SETTopNode extends SETNode {
     // subBodies.get(0))).get_EntryStmt();
   }
 
-  protected boolean resolve(SETNode parent) {
+  @Override
+protected boolean resolve(SETNode parent) {
     throw new RuntimeException("Attempting auto-nest a SETTopNode.");
   }
 }

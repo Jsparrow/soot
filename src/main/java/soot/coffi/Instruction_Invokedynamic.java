@@ -61,21 +61,23 @@ import org.slf4j.LoggerFactory;
 class Instruction_Invokedynamic extends Instruction_intindex {
   private static final Logger logger = LoggerFactory.getLogger(Instruction_Invokedynamic.class);
 
-  public Instruction_Invokedynamic() {
-    super((byte) ByteCode.INVOKEDYNAMIC);
-    name = "invokedynamic";
-    // branches = true;
-    calls = true;
-  }
-  /*
+/*
    * Instruction[] branchpoints(Instruction next) { public Instruction i[] = new Instruction[1]; i[0] = null; return i; }
    */
 
   public short invoke_dynamic_index;
 
-  public short reserved;
+public short reserved;
 
-  public int parse(byte bc[], int index) {
+public Instruction_Invokedynamic() {
+    super((byte) ByteCode.INVOKEDYNAMIC);
+    name = "invokedynamic";
+    // branches = true;
+    calls = true;
+  }
+
+@Override
+public int parse(byte bc[], int index) {
     invoke_dynamic_index = getShort(bc, index);
     index += 2;
     reserved = getShort(bc, index);
@@ -86,7 +88,8 @@ class Instruction_Invokedynamic extends Instruction_intindex {
     return index;
   }
 
-  public int compile(byte bc[], int index) {
+@Override
+public int compile(byte bc[], int index) {
     bc[index++] = code;
     shortToBytes(invoke_dynamic_index, bc, index);
     index += 2;

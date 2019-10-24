@@ -56,6 +56,8 @@ import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.FieldRef;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CP extends StructuredAnalysis {
   /*
@@ -90,7 +92,8 @@ public class CP extends StructuredAnalysis {
    * input) public Object processASTSwitchNode(ASTSwitchNode node,Object input)
    */
 
-  ArrayList<CPTuple> constantFieldTuples = null; // VariableTuples of
+  private static final Logger logger = LoggerFactory.getLogger(CP.class);
+ArrayList<CPTuple> constantFieldTuples = null; // VariableTuples of
   // constantFields
   ArrayList<CPTuple> formals = null; // VariableTuples for formals initially
   // set to T
@@ -109,7 +112,6 @@ public class CP extends StructuredAnalysis {
    */
   public CP(ASTMethodNode analyze, HashMap<String, Object> constantFields,
       HashMap<String, SootField> classNameFieldNameToSootFieldMapping) {
-    super();
     /*
      * DEBUG = true; DEBUG_IF = true; DEBUG_WHILE = true; DEBUG_STATEMENTS = true;
      */
@@ -126,10 +128,7 @@ public class CP extends StructuredAnalysis {
     // the set of all constant fields, locals assigned 0 and formals
     // assigned T
     CPFlowSet initialSet = new CPFlowSet();
-    Iterator<CPTuple> it = initialInput.iterator();
-    while (it.hasNext()) {
-      initialSet.add(it.next());
-    }
+    initialInput.forEach(initialSet::add);
 
     // System.out.println("Initial set"+initialSet.toString());
     CPFlowSet result = (CPFlowSet) process(analyze, initialSet);
@@ -140,7 +139,7 @@ public class CP extends StructuredAnalysis {
    * constant fields added with KNOWN CONSTANT VALUE formals added with TOP locals added with 0 other fields IGNORED
    */
   public void createInitialInput() {
-    initialInput = new ArrayList<CPTuple>();
+    initialInput = new ArrayList<>();
 
     // adding constant fields
     initialInput.addAll(constantFieldTuples);
@@ -149,7 +148,7 @@ public class CP extends StructuredAnalysis {
     // analyze.getDavaBody().getMethod().getDeclaringClass().getName();
 
     // adding formals
-    formals = new ArrayList<CPTuple>();
+    formals = new ArrayList<>();
     // System.out.println("Adding following formals: with TOP");
     Collection col = methodNode.getDavaBody().get_ParamMap().values();
     Iterator it = col.iterator();
@@ -176,7 +175,7 @@ public class CP extends StructuredAnalysis {
     // adding locals
     List decLocals = methodNode.getDeclaredLocals();
     it = decLocals.iterator();
-    locals = new ArrayList<CPTuple>();
+    locals = new ArrayList<>();
     // System.out.println("Adding following locals with default values:");
     while (it.hasNext()) {
       Object temp = it.next();
@@ -196,21 +195,21 @@ public class CP extends StructuredAnalysis {
         // locals value is set to the default value that it can have
         // depending on its type
         if (localType instanceof BooleanType) {
-          value = new Boolean(false);
+          value = Boolean.valueOf(false);
         } else if (localType instanceof ByteType) {
-          value = new Integer(0);
+          value = Integer.valueOf(0);
         } else if (localType instanceof CharType) {
-          value = new Integer(0);
+          value = Integer.valueOf(0);
         } else if (localType instanceof DoubleType) {
-          value = new Double(0);
+          value = Double.valueOf(0);
         } else if (localType instanceof FloatType) {
-          value = new Float(0);
+          value = Float.valueOf(0);
         } else if (localType instanceof IntType) {
-          value = new Integer(0);
+          value = Integer.valueOf(0);
         } else if (localType instanceof LongType) {
-          value = new Long(0);
+          value = Long.valueOf(0);
         } else if (localType instanceof ShortType) {
-          value = new Integer(0);
+          value = Integer.valueOf(0);
         } else {
           throw new DavaFlowAnalysisException("Unknown PrimType");
         }
@@ -235,7 +234,7 @@ public class CP extends StructuredAnalysis {
    */
   private void createConstantFieldsList(HashMap<String, Object> constantFields,
       HashMap<String, SootField> classNameFieldNameToSootFieldMapping) {
-    constantFieldTuples = new ArrayList<CPTuple>();
+    constantFieldTuples = new ArrayList<>();
 
     Iterator<String> it = constantFields.keySet().iterator();
     // System.out.println("Adding constant fields to initial set: ");
@@ -283,7 +282,8 @@ public class CP extends StructuredAnalysis {
    * method for this flow set will be invoked which defines the correct semantics of intersection for the case of constant
    * propagation
    */
-  public void setMergeType() {
+  @Override
+public void setMergeType() {
     MERGETYPE = INTERSECTION;
   }
 
@@ -300,7 +300,7 @@ public class CP extends StructuredAnalysis {
 
     // formals and locals should be both initialized to top since we dont
     // know what has happened so far in the body
-    ArrayList<CPTuple> localsAndFormals = new ArrayList<CPTuple>();
+    ArrayList<CPTuple> localsAndFormals = new ArrayList<>();
     localsAndFormals.addAll(formals);
     localsAndFormals.addAll(locals);
 
@@ -428,9 +428,9 @@ public class CP extends StructuredAnalysis {
       if (left.getType() instanceof BooleanType) {
         Integer tempValue = (Integer) value;
         if (tempValue.intValue() == 0) {
-          value = new Boolean(false);
+          value = Boolean.valueOf(false);
         } else {
-          value = new Boolean(true);
+          value = Boolean.valueOf(true);
         }
       }
       addOrUpdate(toReturn, (Local) left, value);
@@ -518,33 +518,30 @@ public class CP extends StructuredAnalysis {
     }
 
     // if we get here we know that right is not a local or field whose value
-    // we could find in the set
-    if (right instanceof BinopExpr) {
-      Value op1 = ((BinopExpr) right).getOp1();
-      Value op2 = ((BinopExpr) right).getOp2();
-
-      Object op1Val = CPHelper.isAConstantValue(op1);
-      Object op2Val = CPHelper.isAConstantValue(op2);
-
-      if (op1Val == null) {
+	// we could find in the set
+	// System.out.println("DefinitionStmt checked right expr for mathematical stuff"+toReturn.toString());
+	if (!(right instanceof BinopExpr)) {
+		return;
+	}
+	Value op1 = ((BinopExpr) right).getOp1();
+	Value op2 = ((BinopExpr) right).getOp2();
+	Object op1Val = CPHelper.isAConstantValue(op1);
+	Object op2Val = CPHelper.isAConstantValue(op2);
+	if (op1Val == null) {
         op1Val = isANotTopConstantInInputSet(toReturn, op1);
       }
-
-      if (op2Val == null) {
+	if (op2Val == null) {
         op2Val = isANotTopConstantInInputSet(toReturn, op2);
       }
-
-      if (op1 == left) {
+	if (op1 == left) {
         // System.out.println("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>OP1 is the same as LHS");
         op1Val = killedValue;
       }
-
-      if (op2 == left) {
+	if (op2 == left) {
         // System.out.println("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>OP2 is the same as LHS");
         op2Val = killedValue;
       }
-
-      if (op1Val != null && op2Val != null) {
+	if (op1Val != null && op2Val != null) {
         // System.out.println("found constant values for both operands of binary expression");
         if (left.getType() instanceof IntType && op1Val instanceof Integer && op2Val instanceof Integer) {
           // only caring about operations on two integers and result
@@ -582,7 +579,7 @@ public class CP extends StructuredAnalysis {
 
             if (set) {
               // we have our new value
-              Integer newValueObject = new Integer(newValue);
+              Integer newValueObject = Integer.valueOf(newValue);
               addOrUpdate(toReturn, left, newValueObject);
               return;
             }
@@ -591,8 +588,6 @@ public class CP extends StructuredAnalysis {
       } else {
         // System.out.println("atleast one value is not constant so cant simplify expression");
       }
-    }
-    // System.out.println("DefinitionStmt checked right expr for mathematical stuff"+toReturn.toString());
   }
 
   /*
@@ -655,10 +650,8 @@ public class CP extends StructuredAnalysis {
   @Override
   public DavaFlowSet processASTIfNode(ASTIfNode node, DavaFlowSet input) {
     if (DEBUG_IF) {
-      System.out.println("Processing if node using over-ridden process if method" + input.toString());
+      logger.info("Processing if node using over-ridden process if method" + input.toString());
     }
-    ;
-
     input = processCondition(node.get_Condition(), input);
 
     if (!(input instanceof CPFlowSet)) {
@@ -679,8 +672,7 @@ public class CP extends StructuredAnalysis {
     DavaFlowSet output1 = processSingleSubBodyNode(node, inputToBody);
 
     if (DEBUG_IF) {
-      System.out.println("\n\nINPUTS TO MERGE ARE input (original):" + input.toString() + "processingBody output:"
-          + output1.toString() + "\n\n\n");
+      logger.info(new StringBuilder().append("\n\nINPUTS TO MERGE ARE input (original):").append(input.toString()).append("processingBody output:").append(output1.toString()).append("\n\n\n").toString());
     }
 
     // merge with input which tells if the cond did not evaluate to true
@@ -692,20 +684,16 @@ public class CP extends StructuredAnalysis {
     DavaFlowSet temp = handleBreak(label, output2, node);
 
     if (DEBUG_IF) {
-      System.out.println("Exiting if node" + temp.toString());
+      logger.info("Exiting if node" + temp.toString());
     }
-    ;
-
     return temp;
   }
 
   @Override
   public DavaFlowSet processASTIfElseNode(ASTIfElseNode node, DavaFlowSet input) {
     if (DEBUG_IF) {
-      System.out.println("Processing IF-ELSE node using over-ridden process if method" + input.toString());
+      logger.info("Processing IF-ELSE node using over-ridden process if method" + input.toString());
     }
-    ;
-
     if (!(input instanceof CPFlowSet)) {
       throw new DavaFlowAnalysisException("not a flow set");
     }
@@ -747,8 +735,8 @@ public class CP extends StructuredAnalysis {
 
     if (DEBUG_IF) {
 
-      System.out.println(
-          "\n\n  IF-ELSE   INPUTS TO MERGE ARE input (if):" + output1.toString() + " else:" + output2.toString() + "\n\n\n");
+      logger.info(
+          new StringBuilder().append("\n\n  IF-ELSE   INPUTS TO MERGE ARE input (if):").append(output1.toString()).append(" else:").append(output2.toString()).append("\n\n\n").toString());
     }
     DavaFlowSet temp = merge(output1, output2);
 
@@ -757,8 +745,7 @@ public class CP extends StructuredAnalysis {
     String label = getLabel(node);
     output1 = handleBreak(label, temp, node);
     if (DEBUG_IF) {
-      System.out.println("Exiting ifelse node" + output1.toString());
-      ;
+      logger.info("Exiting ifelse node" + output1.toString());
     }
 
     return output1;
@@ -797,11 +784,11 @@ public class CP extends StructuredAnalysis {
       if (!isElseBranch) {
         // we are in the if branch hence notted true would mean the
         // variable is actually false here
-        Boolean boolVal = new Boolean(!NOTTED);
+        Boolean boolVal = Boolean.valueOf(!NOTTED);
         return new CPTuple(localClassName, variable, boolVal);
       } else {
         // in the else branch NOTTED true means the variable is true
-        Boolean boolVal = new Boolean(NOTTED);
+        Boolean boolVal = Boolean.valueOf(NOTTED);
         return new CPTuple(localClassName, variable, boolVal);
       }
     } else if (cond instanceof ASTBinaryCondition) {
@@ -811,11 +798,11 @@ public class CP extends StructuredAnalysis {
       Boolean equal = null;
 
       String symbol = expr.getSymbol();
-      if (symbol.indexOf("==") > -1) {
+      if (symbol.contains("==")) {
         // System.out.println("!!!!!!!!!1 FOUND == in binary comparison operaiton");
-        equal = new Boolean(true);
-      } else if (symbol.indexOf("!=") > -1) {
-        equal = new Boolean(false);
+        equal = Boolean.valueOf(true);
+      } else if (symbol.contains("!=")) {
+        equal = Boolean.valueOf(false);
         // System.out.println("!!!!!!!!!!!!!! FOUND != in binary comparison operaiton");
       } else {
         // a symbol we are not interested in
@@ -940,13 +927,15 @@ public class CP extends StructuredAnalysis {
     }
 
     // if cpVar is not null and constantToUse is not null thats good
-    if (cpVar != null && constantToUse != null) {
-      // create a CPTuple which contains the belief for cpVar with
-      // constantToUse we will for sure have going into the if branch
-      // we know cpVar is always a local since we create it only for
-      // locals
-
-      // need to see if constant is supposed to be a boolean
+	// create a CPTuple which contains the belief for cpVar with
+	// constantToUse we will for sure have going into the if branch
+	// we know cpVar is always a local since we create it only for
+	// locals
+	// ready to create the CPTuple
+	if (!(cpVar != null && constantToUse != null)) {
+		return null;
+	}
+	// need to see if constant is supposed to be a boolean
       // (isAConstantValue returns an Integer for a boolean)
       if (cpVar.getLocal().getType() instanceof BooleanType) {
         if (!(constantToUse instanceof Integer)) {
@@ -957,17 +946,12 @@ public class CP extends StructuredAnalysis {
 
         Integer tempValue = (Integer) constantToUse;
         if (tempValue.intValue() == 0) {
-          constantToUse = new Boolean(false);
+          constantToUse = Boolean.valueOf(false);
         } else {
-          constantToUse = new Boolean(true);
+          constantToUse = Boolean.valueOf(true);
         }
       }
-
-      // ready to create the CPTuple
-
-      return new CPTuple(localClassName, cpVar, constantToUse);
-    }
-    return null;
+	return new CPTuple(localClassName, cpVar, constantToUse);
   }
 
   /*

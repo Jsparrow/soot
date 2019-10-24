@@ -134,18 +134,11 @@ class ConstraintChecker extends AbstractStmtSwitch {
     }
   }
 
-  @SuppressWarnings("serial")
-  private static class RuntimeTypeException extends RuntimeException {
-    RuntimeTypeException(String message) {
-      super(message);
-    }
-  }
-
   static void error(String message) {
     throw new RuntimeTypeException(message);
   }
 
-  private void handleInvokeExpr(InvokeExpr ie, Stmt invokestmt) {
+private void handleInvokeExpr(InvokeExpr ie, Stmt invokestmt) {
     // Handle the parameters
     SootMethodRef method = ie.getMethodRef();
     for (int i = 0; i < ie.getArgCount(); i++) {
@@ -170,7 +163,7 @@ class ConstraintChecker extends AbstractStmtSwitch {
           if (fix) {
             invoke.setBase(insertCast(local, method.declaringClass().getType(), invokestmt));
           } else {
-            error("Type Error(7): local " + local + " is of incompatible type " + local.getType());
+            error(new StringBuilder().append("Type Error(7): local ").append(local).append(" is of incompatible type ").append(local.getType()).toString());
           }
         }
       }
@@ -222,15 +215,18 @@ class ConstraintChecker extends AbstractStmtSwitch {
     }
   }
 
-  public void caseBreakpointStmt(BreakpointStmt stmt) {
+@Override
+public void caseBreakpointStmt(BreakpointStmt stmt) {
     // Do nothing
   }
 
-  public void caseInvokeStmt(InvokeStmt stmt) {
+@Override
+public void caseInvokeStmt(InvokeStmt stmt) {
     handleInvokeExpr(stmt.getInvokeExpr(), stmt);
   }
 
-  public void caseAssignStmt(AssignStmt stmt) {
+@Override
+public void caseAssignStmt(AssignStmt stmt) {
     Value l = stmt.getLeftOp();
     Value r = stmt.getRightOp();
 
@@ -250,11 +246,10 @@ class ConstraintChecker extends AbstractStmtSwitch {
 
       Value index = ref.getIndex();
 
-      if (index instanceof Local) {
-        if (!hierarchy.typeNode(((Local) index).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()))) {
-          error("Type Error(17)");
-        }
-      }
+      boolean condition = index instanceof Local && !hierarchy.typeNode(((Local) index).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()));
+	if (condition) {
+	  error("Type Error(17)");
+	}
     } else if (l instanceof Local) {
       try {
         left = hierarchy.typeNode(((Local) l).getType());
@@ -290,7 +285,7 @@ class ConstraintChecker extends AbstractStmtSwitch {
       TypeNode base = hierarchy.typeNode(((Local) ref.getBase()).getType());
 
       if (!base.isArray()) {
-        error("Type Error(19): " + base + " is not an array type");
+        error(new StringBuilder().append("Type Error(19): ").append(base).append(" is not an array type").toString());
       }
 
       if (base == hierarchy.NULL) {
@@ -313,11 +308,10 @@ class ConstraintChecker extends AbstractStmtSwitch {
 
       Value index = ref.getIndex();
 
-      if (index instanceof Local) {
-        if (!hierarchy.typeNode(((Local) index).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()))) {
-          error("Type Error(21)");
-        }
-      }
+      boolean condition1 = index instanceof Local && !hierarchy.typeNode(((Local) index).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()));
+	if (condition1) {
+	  error("Type Error(21)");
+	}
     } else if (r instanceof DoubleConstant) {
       if (!left.hasDescendantOrSelf(hierarchy.typeNode(DoubleType.v()))) {
         error("Type Error(22)");
@@ -436,7 +430,8 @@ class ConstraintChecker extends AbstractStmtSwitch {
             cast.lca(op);
           }
         } catch (TypeException e) {
-          logger.debug("" + r + "[" + op + "<->" + cast + "]");
+          logger.debug(new StringBuilder().append("").append(r).append("[").append(op).append("<->").append(cast).append("]")
+				.toString());
           error(e.getMessage());
         }
       }
@@ -452,7 +447,8 @@ class ConstraintChecker extends AbstractStmtSwitch {
       try {
         op.lca(type);
       } catch (TypeException e) {
-        logger.debug("" + r + "[" + op + "<->" + type + "]");
+        logger.debug(new StringBuilder().append("").append(r).append("[").append(op).append("<->").append(type).append("]")
+				.toString());
         error(e.getMessage());
       }
 
@@ -521,11 +517,10 @@ class ConstraintChecker extends AbstractStmtSwitch {
         error("Type Error(38)");
       }
 
-      if (le.getOp() instanceof Local) {
-        if (!hierarchy.typeNode(((Local) le.getOp()).getType()).isArray()) {
-          error("Type Error(39)");
-        }
-      }
+      boolean condition2 = le.getOp() instanceof Local && !hierarchy.typeNode(((Local) le.getOp()).getType()).isArray();
+	if (condition2) {
+	  error("Type Error(39)");
+	}
     } else if (r instanceof NegExpr) {
       NegExpr ne = (NegExpr) r;
       TypeNode right;
@@ -581,7 +576,8 @@ class ConstraintChecker extends AbstractStmtSwitch {
     }
   }
 
-  public void caseIdentityStmt(IdentityStmt stmt) {
+@Override
+public void caseIdentityStmt(IdentityStmt stmt) {
     TypeNode left = hierarchy.typeNode(((Local) stmt.getLeftOp()).getType());
 
     Value r = stmt.getRightOp();
@@ -589,19 +585,11 @@ class ConstraintChecker extends AbstractStmtSwitch {
     if (!(r instanceof CaughtExceptionRef)) {
       TypeNode right = hierarchy.typeNode(r.getType());
       if (!left.hasDescendantOrSelf(right)) {
-        error("Type Error(46) [" + left + " <- " + right + "]");
+        error(new StringBuilder().append("Type Error(46) [").append(left).append(" <- ").append(right).append("]").toString());
       }
     } else {
       List<RefType> exceptionTypes = TrapManager.getExceptionTypesOf(stmt, stmtBody);
-      Iterator<RefType> typeIt = exceptionTypes.iterator();
-
-      while (typeIt.hasNext()) {
-        Type t = typeIt.next();
-
-        if (!left.hasDescendantOrSelf(hierarchy.typeNode(t))) {
-          error("Type Error(47)");
-        }
-      }
+      exceptionTypes.stream().filter(t -> !left.hasDescendantOrSelf(hierarchy.typeNode(t))).forEach(t -> error("Type Error(47)"));
 
       if (!left.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Throwable")))) {
         error("Type Error(48)");
@@ -609,30 +597,34 @@ class ConstraintChecker extends AbstractStmtSwitch {
     }
   }
 
-  public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
-    if (stmt.getOp() instanceof Local) {
-      TypeNode op = hierarchy.typeNode(((Local) stmt.getOp()).getType());
-
-      if (!op.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Object")))) {
+@Override
+public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
+    if (!(stmt.getOp() instanceof Local)) {
+		return;
+	}
+	TypeNode op = hierarchy.typeNode(((Local) stmt.getOp()).getType());
+	if (!op.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Object")))) {
         error("Type Error(49)");
       }
-    }
   }
 
-  public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
-    if (stmt.getOp() instanceof Local) {
-      TypeNode op = hierarchy.typeNode(((Local) stmt.getOp()).getType());
-
-      if (!op.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Object")))) {
+@Override
+public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
+    if (!(stmt.getOp() instanceof Local)) {
+		return;
+	}
+	TypeNode op = hierarchy.typeNode(((Local) stmt.getOp()).getType());
+	if (!op.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Object")))) {
         error("Type Error(49)");
       }
-    }
   }
 
-  public void caseGotoStmt(GotoStmt stmt) {
+@Override
+public void caseGotoStmt(GotoStmt stmt) {
   }
 
-  public void caseIfStmt(IfStmt stmt) {
+@Override
+public void caseIfStmt(IfStmt stmt) {
     ConditionExpr cond = (ConditionExpr) stmt.getCondition();
 
     BinopExpr expr = cond;
@@ -691,69 +683,79 @@ class ConstraintChecker extends AbstractStmtSwitch {
     }
   }
 
-  public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
+@Override
+public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
     Value key = stmt.getKey();
 
-    if (key instanceof Local) {
-      if (!hierarchy.typeNode(((Local) key).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()))) {
+    boolean condition = key instanceof Local && !hierarchy.typeNode(((Local) key).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()));
+	if (condition) {
         error("Type Error(50)");
       }
-    }
   }
 
-  public void caseNopStmt(NopStmt stmt) {
+@Override
+public void caseNopStmt(NopStmt stmt) {
   }
 
-  public void caseReturnStmt(ReturnStmt stmt) {
-    if (stmt.getOp() instanceof Local) {
-      if (!hierarchy.typeNode(((Local) stmt.getOp()).getType())
-          .hasAncestorOrSelf(hierarchy.typeNode(stmtBody.getMethod().getReturnType()))) {
-        if (fix) {
-          stmt.setOp(insertCast((Local) stmt.getOp(), stmtBody.getMethod().getReturnType(), stmt));
-        } else {
-          error("Type Error(51)");
-        }
-      }
-    }
+@Override
+public void caseReturnStmt(ReturnStmt stmt) {
+    boolean condition = stmt.getOp() instanceof Local && !hierarchy.typeNode(((Local) stmt.getOp()).getType())
+          .hasAncestorOrSelf(hierarchy.typeNode(stmtBody.getMethod().getReturnType()));
+	if (condition) {
+	if (fix) {
+	  stmt.setOp(insertCast((Local) stmt.getOp(), stmtBody.getMethod().getReturnType(), stmt));
+	} else {
+	  error("Type Error(51)");
+	}
+     }
   }
 
-  public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
+@Override
+public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
   }
 
-  public void caseTableSwitchStmt(TableSwitchStmt stmt) {
+@Override
+public void caseTableSwitchStmt(TableSwitchStmt stmt) {
     Value key = stmt.getKey();
 
-    if (key instanceof Local) {
-      if (!hierarchy.typeNode(((Local) key).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()))) {
+    boolean condition = key instanceof Local && !hierarchy.typeNode(((Local) key).getType()).hasAncestorOrSelf(hierarchy.typeNode(IntType.v()));
+	if (condition) {
         error("Type Error(52)");
       }
-    }
   }
 
-  public void caseThrowStmt(ThrowStmt stmt) {
-    if (stmt.getOp() instanceof Local) {
-      TypeNode op = hierarchy.typeNode(((Local) stmt.getOp()).getType());
-
-      if (!op.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Throwable")))) {
+@Override
+public void caseThrowStmt(ThrowStmt stmt) {
+    if (!(stmt.getOp() instanceof Local)) {
+		return;
+	}
+	TypeNode op = hierarchy.typeNode(((Local) stmt.getOp()).getType());
+	if (!op.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Throwable")))) {
         if (fix) {
           stmt.setOp(insertCast((Local) stmt.getOp(), RefType.v("java.lang.Throwable"), stmt));
         } else {
           error("Type Error(53)");
         }
       }
-    }
   }
 
-  public void defaultCase(Stmt stmt) {
+public void defaultCase(Stmt stmt) {
     throw new RuntimeException("Unhandled statement type: " + stmt.getClass());
   }
 
-  private Local insertCast(Local oldlocal, Type type, Stmt stmt) {
+private Local insertCast(Local oldlocal, Type type, Stmt stmt) {
     Local newlocal = Jimple.v().newLocal("tmp", type);
     stmtBody.getLocals().add(newlocal);
 
     Unit u = Util.findFirstNonIdentityUnit(stmtBody, stmt);
     stmtBody.getUnits().insertBefore(Jimple.v().newAssignStmt(newlocal, Jimple.v().newCastExpr(oldlocal, type)), u);
     return newlocal;
+  }
+
+@SuppressWarnings("serial")
+  private static class RuntimeTypeException extends RuntimeException {
+    RuntimeTypeException(String message) {
+      super(message);
+    }
   }
 }

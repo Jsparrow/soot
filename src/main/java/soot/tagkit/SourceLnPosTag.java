@@ -52,19 +52,22 @@ public class SourceLnPosTag implements Tag {
     return endPos;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "SourceLnPosTag";
   }
 
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     byte[] v = new byte[2];
     v[0] = (byte) (startLn / 256);
     v[1] = (byte) (startLn % 256);
     return v;
   }
 
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
     sb.append("Source Line Pos Tag: ");
     sb.append("sline: ");
     sb.append(startLn);

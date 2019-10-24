@@ -40,12 +40,13 @@ import java.util.Stack;
  */
 
 public class StronglyConnectedComponentsFast<N> {
-  protected final List<List<N>> componentList = new ArrayList<List<N>>();
-  protected final List<List<N>> trueComponentList = new ArrayList<List<N>>();
+  protected final List<List<N>> componentList = new ArrayList<>();
+  protected final List<List<N>> trueComponentList = new ArrayList<>();
 
   protected int index = 0;
 
-  protected Map<N, Integer> indexForNode, lowlinkForNode;
+  protected Map<N, Integer> indexForNode;
+protected Map<N, Integer> lowlinkForNode;
 
   protected Stack<N> s;
 
@@ -58,10 +59,10 @@ public class StronglyConnectedComponentsFast<N> {
    */
   public StronglyConnectedComponentsFast(DirectedGraph<N> g) {
     this.g = g;
-    s = new Stack<N>();
+    s = new Stack<>();
 
-    indexForNode = new HashMap<N, Integer>();
-    lowlinkForNode = new HashMap<N, Integer>();
+    indexForNode = new HashMap<>();
+    lowlinkForNode = new HashMap<>();
 
     for (N node : g) {
       if (!indexForNode.containsKey(node)) {
@@ -99,15 +100,17 @@ public class StronglyConnectedComponentsFast<N> {
         lowlinkForNode.put(v, lowLinkForNodeV = Math.min(lowLinkForNodeV, indexForNodeSucc));
       }
     }
-    if (lowLinkForNodeV == indexForNode.get(v).intValue()) {
-      List<N> scc = new ArrayList<N>();
-      N v2;
-      do {
+    if (lowLinkForNodeV != indexForNode.get(v).intValue()) {
+		return;
+	}
+	List<N> scc = new ArrayList<>();
+	N v2;
+	do {
         v2 = s.pop();
         scc.add(v2);
       } while (v != v2);
-      componentList.add(scc);
-      if (scc.size() > 1) {
+	componentList.add(scc);
+	if (scc.size() > 1) {
         trueComponentList.add(scc);
       } else {
         N n = scc.get(0);
@@ -115,12 +118,11 @@ public class StronglyConnectedComponentsFast<N> {
           trueComponentList.add(scc);
         }
       }
-    }
   }
 
   protected void iterate(N x) {
-    List<N> workList = new ArrayList<N>();
-    List<N> backtrackList = new ArrayList<N>();
+    List<N> workList = new ArrayList<>();
+    List<N> backtrackList = new ArrayList<>();
     workList.add(x);
     while (!workList.isEmpty()) {
       N v = workList.remove(0);
@@ -161,7 +163,7 @@ public class StronglyConnectedComponentsFast<N> {
 
         int lowLinkForNodeV = lowlinkForNode.get(v);
         if (lowLinkForNodeV == indexForNode.get(v).intValue()) {
-          List<N> scc = new ArrayList<N>();
+          List<N> scc = new ArrayList<>();
           N v2;
           do {
             v2 = s.pop();

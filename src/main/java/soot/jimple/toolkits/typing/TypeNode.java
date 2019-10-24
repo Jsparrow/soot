@@ -87,12 +87,12 @@ class TypeNode {
         throw new RuntimeException("Oops, forgot to load " + type);
       }
       if (sClass.isPhantomClass()) {
-        throw new RuntimeException("Jimplification requires " + sClass + ", but it is a phantom ref.");
+        throw new RuntimeException(new StringBuilder().append("Jimplification requires ").append(sClass).append(", but it is a phantom ref.").toString());
       }
-      List<TypeNode> plist = new LinkedList<TypeNode>();
+      List<TypeNode> plist = new LinkedList<>();
 
       SootClass superclass = sClass.getSuperclassUnsafe();
-      if (superclass != null && !sClass.getName().equals("java.lang.Object")) {
+      if (superclass != null && !"java.lang.Object".equals(sClass.getName())) {
         TypeNode parent = hierarchy.typeNode(RefType.v(sClass.getSuperclass().getName()));
         plist.add(parent);
         parentClass = parent;
@@ -109,13 +109,12 @@ class TypeNode {
     descendants.set(hierarchy.NULL.id);
     hierarchy.NULL.ancestors.set(id);
 
-    for (Iterator<TypeNode> parentIt = parents.iterator(); parentIt.hasNext();) {
+    parents.forEach(parent -> {
 
-      final TypeNode parent = parentIt.next();
       ancestors.set(parent.id);
       ancestors.or(parent.ancestors);
       parent.fixDescendants(id);
-    }
+    });
   }
 
   public TypeNode(int id, ArrayType type, ClassHierarchy hierarchy) {
@@ -140,12 +139,12 @@ class TypeNode {
     }
 
     {
-      List<TypeNode> plist = new LinkedList<TypeNode>();
+      List<TypeNode> plist = new LinkedList<>();
       if (type.baseType instanceof RefType) {
         RefType baseType = (RefType) type.baseType;
         SootClass sClass = baseType.getSootClass();
         SootClass superClass = sClass.getSuperclassUnsafe();
-        if (superClass != null && !superClass.getName().equals("java.lang.Object")) {
+        if (superClass != null && !"java.lang.Object".equals(superClass.getName())) {
           TypeNode parent = hierarchy.typeNode(ArrayType.v(RefType.v(sClass.getSuperclass().getName()), type.numDimensions));
           plist.add(parent);
           parentClass = parent;
@@ -202,13 +201,12 @@ class TypeNode {
     descendants.set(hierarchy.NULL.id);
     hierarchy.NULL.ancestors.set(id);
 
-    for (Iterator<TypeNode> parentIt = parents.iterator(); parentIt.hasNext();) {
+    parents.forEach(parent -> {
 
-      final TypeNode parent = parentIt.next();
       ancestors.set(parent.id);
       ancestors.or(parent.ancestors);
       parent.fixDescendants(id);
-    }
+    });
   }
 
   /** Adds the given node to the list of descendants of this node and its ancestors. **/
@@ -217,11 +215,7 @@ class TypeNode {
       return;
     }
 
-    for (Iterator<TypeNode> parentIt = parents.iterator(); parentIt.hasNext();) {
-
-      final TypeNode parent = parentIt.next();
-      parent.fixDescendants(id);
-    }
+    parents.forEach(parent -> parent.fixDescendants(id));
 
     descendants.set(id);
   }
@@ -270,7 +264,7 @@ class TypeNode {
 
   @Override
   public String toString() {
-    return type.toString() + "(" + id + ")";
+    return new StringBuilder().append(type.toString()).append("(").append(id).append(")").toString();
   }
 
   public TypeNode lca(TypeNode type) throws TypeException {
@@ -332,10 +326,9 @@ class TypeNode {
         type = type.parents.get(0);
       } else {
         if (DEBUG) {
-          logger.debug("lca " + initial + " (" + type + ") & " + this + " =");
-          for (Iterator<TypeNode> i = type.parents.iterator(); i.hasNext();) {
-            logger.debug("  " + i.next());
-          }
+          logger.debug(new StringBuilder().append("lca ").append(initial).append(" (").append(type).append(") & ").append(this).append(" =")
+				.toString());
+          type.parents.forEach(parent -> logger.debug("  " + parent));
         }
         return null;
       }

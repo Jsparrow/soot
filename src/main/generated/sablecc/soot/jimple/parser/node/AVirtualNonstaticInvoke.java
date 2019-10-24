@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AVirtualNonstaticInvoke extends PNonstaticInvoke
 {
-    private TVirtualinvoke _virtualinvoke_;
+    private TVirtualinvoke virtualinvoke;
 
     public AVirtualNonstaticInvoke()
     {
@@ -26,7 +26,7 @@ public final class AVirtualNonstaticInvoke extends PNonstaticInvoke
     public Object clone()
     {
         return new AVirtualNonstaticInvoke(
-            cloneNode(this._virtualinvoke_));
+            cloneNode(this.virtualinvoke));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AVirtualNonstaticInvoke extends PNonstaticInvoke
 
     public TVirtualinvoke getVirtualinvoke()
     {
-        return this._virtualinvoke_;
+        return this.virtualinvoke;
     }
 
     public void setVirtualinvoke(TVirtualinvoke node)
     {
-        if(this._virtualinvoke_ != null)
+        if(this.virtualinvoke != null)
         {
-            this._virtualinvoke_.parent(null);
+            this.virtualinvoke.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AVirtualNonstaticInvoke extends PNonstaticInvoke
             node.parent(this);
         }
 
-        this._virtualinvoke_ = node;
+        this.virtualinvoke = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._virtualinvoke_);
+            + toString(this.virtualinvoke);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._virtualinvoke_ == child)
+        if(this.virtualinvoke == child)
         {
-            this._virtualinvoke_ = null;
+            this.virtualinvoke = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AVirtualNonstaticInvoke extends PNonstaticInvoke
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._virtualinvoke_ == oldChild)
+        if(this.virtualinvoke == oldChild)
         {
             setVirtualinvoke((TVirtualinvoke) newChild);
             return;

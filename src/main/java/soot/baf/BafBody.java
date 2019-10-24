@@ -52,26 +52,11 @@ public class BafBody extends Body {
   private static final Logger logger = LoggerFactory.getLogger(BafBody.class);
   private JimpleToBafContext jimpleToBafContext;
 
-  public JimpleToBafContext getContext() {
-    return jimpleToBafContext;
-  }
-
-  @Override
-  public Object clone() {
-    Body b = new BafBody(getMethod());
-    b.importBodyContentsFrom(this);
-    return b;
-  }
-
-  BafBody(SootMethod m) {
-    super(m);
-  }
-
   public BafBody(JimpleBody body, Map<String, String> options) {
     super(body.getMethod());
 
     if (Options.v().verbose()) {
-      logger.debug("[" + getMethod().getName() + "] Constructing BafBody...");
+      logger.debug(new StringBuilder().append("[").append(getMethod().getName()).append("] Constructing BafBody...").toString());
     }
 
     JimpleBody jimpleBody = (JimpleBody) body;
@@ -80,7 +65,7 @@ public class BafBody extends Body {
     this.jimpleToBafContext = context;
     // Convert all locals
     {
-      for (Local l : jimpleBody.getLocals()) {
+      jimpleBody.getLocals().forEach(l -> {
         Type t = l.getType();
         Local newLocal = Baf.v().newLocal(l.getName(), UnknownType.v());
 
@@ -97,43 +82,51 @@ public class BafBody extends Body {
         // copy the locals, thus invalidating the information in a map.
         ((BafLocal) newLocal).setOriginalLocal(l);
         getLocals().add(newLocal);
-      }
+      });
     }
 
-    Map<Stmt, Unit> stmtToFirstInstruction = new HashMap<Stmt, Unit>();
+    Map<Stmt, Unit> stmtToFirstInstruction = new HashMap<>();
 
     // Convert all jimple instructions
     {
-      for (Unit u : jimpleBody.getUnits()) {
-        Stmt s = (Stmt) u;
-        List<Unit> conversionList = new ArrayList<Unit>();
-
-        context.setCurrentUnit(s);
-        ((ConvertToBaf) s).convertToBaf(context, conversionList);
-
-        stmtToFirstInstruction.put(s, conversionList.get(0));
-        getUnits().addAll(conversionList);
-      }
+      jimpleBody.getUnits().stream().map(u -> (Stmt) u).forEach(s -> {
+		List<Unit> conversionList = new ArrayList<>();
+		context.setCurrentUnit(s);
+		((ConvertToBaf) s).convertToBaf(context, conversionList);
+		stmtToFirstInstruction.put(s, conversionList.get(0));
+		getUnits().addAll(conversionList);
+	});
     }
 
     // Change all place holders
     {
-      for (UnitBox box : getAllUnitBoxes()) {
-        if (box.getUnit() instanceof PlaceholderInst) {
-          Unit source = ((PlaceholderInst) box.getUnit()).getSource();
-          box.setUnit(stmtToFirstInstruction.get(source));
-        }
-      }
+      getAllUnitBoxes().stream().filter(box -> box.getUnit() instanceof PlaceholderInst).forEach(box -> {
+	  Unit source = ((PlaceholderInst) box.getUnit()).getSource();
+	  box.setUnit(stmtToFirstInstruction.get(source));
+	});
     }
 
     // Convert all traps
     {
-      for (Trap trap : jimpleBody.getTraps()) {
-        getTraps().add(Baf.v().newTrap(trap.getException(), stmtToFirstInstruction.get(trap.getBeginUnit()),
-            stmtToFirstInstruction.get(trap.getEndUnit()), stmtToFirstInstruction.get(trap.getHandlerUnit())));
-      }
+      jimpleBody.getTraps().forEach(trap -> getTraps().add(Baf.v().newTrap(trap.getException(), stmtToFirstInstruction.get(trap.getBeginUnit()),
+			stmtToFirstInstruction.get(trap.getEndUnit()), stmtToFirstInstruction.get(trap.getHandlerUnit()))));
     }
 
     PackManager.v().getPack("bb").apply(this);
+  }
+
+BafBody(SootMethod m) {
+    super(m);
+  }
+
+public JimpleToBafContext getContext() {
+    return jimpleToBafContext;
+  }
+
+@Override
+  public Object clone() {
+    Body b = new BafBody(getMethod());
+    b.importBodyContentsFrom(this);
+    return b;
   }
 }

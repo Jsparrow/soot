@@ -70,6 +70,8 @@ import soot.tagkit.IntegerConstantValueTag;
 import soot.tagkit.LongConstantValueTag;
 import soot.tagkit.StringConstantValueTag;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import soot.jimple.internal.*;
 //import soot.grimp.internal.*;
@@ -107,7 +109,8 @@ import soot.util.Chain;
  */
 
 public class DeInliningFinalFields extends DepthFirstAdapter {
-  SootClass sootClass = null;
+  private static final Logger logger = LoggerFactory.getLogger(DeInliningFinalFields.class);
+SootClass sootClass = null;
   SootMethod sootMethod = null;
   DavaBody davaBody = null;
 
@@ -122,13 +125,14 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void inASTMethodNode(ASTMethodNode node) {
+  @Override
+public void inASTMethodNode(ASTMethodNode node) {
     DavaBody davaBody = node.getDavaBody();
     sootMethod = davaBody.getMethod();
     // System.out.println("Deiniling method: "+sootMethod.getName());
     sootClass = sootMethod.getDeclaringClass();
 
-    finalFields = new HashMap<Comparable, SootField>();
+    finalFields = new HashMap<>();
 
     ArrayList fieldChain = new ArrayList();
 
@@ -155,27 +159,27 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
         Type fieldType = f.getType();
         if (fieldType instanceof DoubleType && f.hasTag("DoubleConstantValueTag")) {
           double val = ((DoubleConstantValueTag) f.getTag("DoubleConstantValueTag")).getDoubleValue();
-          finalFields.put(new Double(val), f);
+          finalFields.put(Double.valueOf(val), f);
         } else if (fieldType instanceof FloatType && f.hasTag("FloatConstantValueTag")) {
           float val = ((FloatConstantValueTag) f.getTag("FloatConstantValueTag")).getFloatValue();
-          finalFields.put(new Float(val), f);
+          finalFields.put(Float.valueOf(val), f);
         } else if (fieldType instanceof LongType && f.hasTag("LongConstantValueTag")) {
           long val = ((LongConstantValueTag) f.getTag("LongConstantValueTag")).getLongValue();
-          finalFields.put(new Long(val), f);
+          finalFields.put(Long.valueOf(val), f);
         } else if (fieldType instanceof CharType && f.hasTag("IntegerConstantValueTag")) {
           int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
-          finalFields.put(new Integer(val), f);
+          finalFields.put(Integer.valueOf(val), f);
         } else if (fieldType instanceof BooleanType && f.hasTag("IntegerConstantValueTag")) {
           int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
           if (val == 0) {
-            finalFields.put(new Boolean(false), f);
+            finalFields.put(Boolean.valueOf(false), f);
           } else {
-            finalFields.put(new Boolean(true), f);
+            finalFields.put(Boolean.valueOf(true), f);
           }
         } else if ((fieldType instanceof IntType || fieldType instanceof ByteType || fieldType instanceof ShortType)
             && f.hasTag("IntegerConstantValueTag")) {
           int val = ((IntegerConstantValueTag) f.getTag("IntegerConstantValueTag")).getIntValue();
-          finalFields.put(new Integer(val), f);
+          finalFields.put(Integer.valueOf(val), f);
         } else if (f.hasTag("StringConstantValueTag")) {
           String val = ((StringConstantValueTag) f.getTag("StringConstantValueTag")).getStringValue();
           // System.out.println("adding string constant"+val);
@@ -199,7 +203,8 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
   /*
    * Notice as things stand synchblocks cant have the use of a SootField
    */
-  public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
+  @Override
+public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
     // hence nothing is implemented here
   }
 
@@ -207,15 +212,17 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
     Value val = valBox.getValue();
 
     Object finalField = check(val);
-    if (finalField != null) {
-      // System.out.println("Final field with this value exists"+finalField);
-
-      /*
+    // System.out.println("Final field with this value exists"+finalField);
+	// System.out.println("Final field not found");
+	// else
+	if (finalField == null) {
+		return;
+	}
+	/*
        * If the final field belongs to the same class then we should supress declaring class
        */
       SootField field = (SootField) finalField;
-
-      if (sootClass.declaresField(field.getName(), field.getType())) {
+	if (sootClass.declaresField(field.getName(), field.getType())) {
         // this field is of this class so supress the declaring class
         if (valBox.canContainValue(new DStaticFieldRef(field.makeRef(), true))) {
           valBox.setValue(new DStaticFieldRef(field.makeRef(), true));
@@ -225,10 +232,6 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
           valBox.setValue(new DStaticFieldRef(field.makeRef(), false));
         }
       }
-
-    }
-    // else
-    // System.out.println("Final field not found");
   }
 
   public Object check(Value val) {
@@ -246,18 +249,18 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
       } else if (val instanceof DoubleConstant) {
         String myString = ((DoubleConstant) val).toString();
 
-        finalField = finalFields.get(new Double(myString));
+        finalField = finalFields.get(Double.valueOf(myString));
       } else if (val instanceof FloatConstant) {
         String myString = ((FloatConstant) val).toString();
 
-        finalField = finalFields.get(new Float(myString));
+        finalField = finalFields.get(Float.valueOf(myString));
       } else if (val instanceof LongConstant) {
         String myString = ((LongConstant) val).toString();
 
-        finalField = finalFields.get(new Long(myString.substring(0, myString.length() - 1)));
+        finalField = finalFields.get(Long.valueOf(myString.substring(0, myString.length() - 1)));
       } else if (val instanceof IntConstant) {
         String myString = ((IntConstant) val).toString();
-        if (myString.length() == 0) {
+        if (myString.isEmpty()) {
           return null;
         }
 
@@ -271,22 +274,23 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
               return null;
             }
 
-            myInt = new Integer(myString.charAt(1));
+            myInt = Integer.valueOf(myString.charAt(1));
           } else {
-            myInt = new Integer(myString);
+            myInt = Integer.valueOf(myString);
           }
         } catch (Exception e) {
-          // System.out.println("exception occured...gracefully exitting method..string was"+myString);
+          logger.error(e.getMessage(), e);
+		// System.out.println("exception occured...gracefully exitting method..string was"+myString);
           return finalField;
         }
 
         if (valType instanceof ByteType) {
           finalField = finalFields.get(myInt);
         } else if (valType instanceof IntType) {
-          if (myString.equals("false")) {
-            finalField = finalFields.get(new Boolean(false));
-          } else if (myString.equals("true")) {
-            finalField = finalFields.get(new Boolean(true));
+          if ("false".equals(myString)) {
+            finalField = finalFields.get(Boolean.valueOf(false));
+          } else if ("true".equals(myString)) {
+            finalField = finalFields.get(Boolean.valueOf(true));
           } else {
             finalField = finalFields.get(myInt);
           }
@@ -304,7 +308,8 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
    * Hence the some what indirect approach........notice we will work with valueBoxes so that by changing the value in the
    * value box we can deInline any field
    */
-  public void inASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void inASTSwitchNode(ASTSwitchNode node) {
     Value val = node.get_Key();
 
     if (isConstant(val)) {
@@ -324,45 +329,44 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
     }
   }
 
-  public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
-    for (AugmentedStmt as : node.getStatements()) {
-      Stmt s = as.get_Stmt();
-      Iterator tempIt = s.getUseBoxes().iterator();
-      while (tempIt.hasNext()) {
-        ValueBox tempBox = (ValueBox) tempIt.next();
-        // System.out.println("Checking useBox of stmt");
-        checkAndSwitch(tempBox);
-      }
-    }
+  @Override
+public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
+    node.getStatements().stream().map(AugmentedStmt::get_Stmt).forEach(s -> {
+		Iterator tempIt = s.getUseBoxes().iterator();
+		while (tempIt.hasNext()) {
+		    ValueBox tempBox = (ValueBox) tempIt.next();
+		    // System.out.println("Checking useBox of stmt");
+		    checkAndSwitch(tempBox);
+		  }
+	});
   }
 
-  public void inASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void inASTForLoopNode(ASTForLoopNode node) {
 
     // checking uses in init
-    for (AugmentedStmt as : node.getInit()) {
-      Stmt s = as.get_Stmt();
-      Iterator tempIt = s.getUseBoxes().iterator();
-      while (tempIt.hasNext()) {
-        ValueBox tempBox = (ValueBox) tempIt.next();
-        // System.out.println("Checking useBox of init stmt");
-        checkAndSwitch(tempBox);
-      }
-    }
+	node.getInit().stream().map(AugmentedStmt::get_Stmt).forEach(s -> {
+		Iterator tempIt = s.getUseBoxes().iterator();
+		while (tempIt.hasNext()) {
+		    ValueBox tempBox = (ValueBox) tempIt.next();
+		    // System.out.println("Checking useBox of init stmt");
+		    checkAndSwitch(tempBox);
+		  }
+	});
 
     // checking uses in condition
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
 
     // checking uses in update
-    for (AugmentedStmt as : node.getUpdate()) {
-      Stmt s = as.get_Stmt();
-      Iterator tempIt = s.getUseBoxes().iterator();
-      while (tempIt.hasNext()) {
-        ValueBox tempBox = (ValueBox) tempIt.next();
-        // System.out.println("Checking useBox of update stmt");
-        checkAndSwitch(tempBox);
-      }
-    }
+	node.getUpdate().stream().map(AugmentedStmt::get_Stmt).forEach(s -> {
+		Iterator tempIt = s.getUseBoxes().iterator();
+		while (tempIt.hasNext()) {
+		    ValueBox tempBox = (ValueBox) tempIt.next();
+		    // System.out.println("Checking useBox of update stmt");
+		    checkAndSwitch(tempBox);
+		  }
+	});
   }
 
   /*
@@ -388,7 +392,8 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
   /*
    * The condition of an if node can use a local
    */
-  public void inASTIfNode(ASTIfNode node) {
+  @Override
+public void inASTIfNode(ASTIfNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }
@@ -396,7 +401,8 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
   /*
    * The condition of an ifElse node can use a local
    */
-  public void inASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void inASTIfElseNode(ASTIfElseNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }
@@ -404,7 +410,8 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
   /*
    * The condition of a while node can use a local
    */
-  public void inASTWhileNode(ASTWhileNode node) {
+  @Override
+public void inASTWhileNode(ASTWhileNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }
@@ -412,7 +419,8 @@ public class DeInliningFinalFields extends DepthFirstAdapter {
   /*
    * The condition of a doWhile node can use a local
    */
-  public void inASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void inASTDoWhileNode(ASTDoWhileNode node) {
     ASTCondition cond = node.get_Condition();
     checkConditionalUses(cond, node);
   }

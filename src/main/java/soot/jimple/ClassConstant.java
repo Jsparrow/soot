@@ -57,7 +57,7 @@ public class ClassConstant extends Constant {
 
   private static String sootTypeToString(Type tp) {
     if (tp instanceof RefType) {
-      return "L" + ((RefType) tp).getClassName().replaceAll("\\.", "/") + ";";
+      return new StringBuilder().append("L").append(((RefType) tp).getClassName().replaceAll("\\.", "/")).append(";").toString();
     } else if (tp instanceof ArrayType) {
       ArrayType at = (ArrayType) tp;
       return "[" + sootTypeToString(at.getElementType());
@@ -111,21 +111,21 @@ public class ClassConstant extends Constant {
       }
       tmp = tmp.replace("/", ".");
       baseType = RefType.v(tmp);
-    } else if (tmp.equals("I")) {
+    } else if ("I".equals(tmp)) {
       baseType = IntType.v();
-    } else if (tmp.equals("B")) {
+    } else if ("B".equals(tmp)) {
       baseType = ByteType.v();
-    } else if (tmp.equals("C")) {
+    } else if ("C".equals(tmp)) {
       baseType = CharType.v();
-    } else if (tmp.equals("D")) {
+    } else if ("D".equals(tmp)) {
       baseType = DoubleType.v();
-    } else if (tmp.equals("F")) {
+    } else if ("F".equals(tmp)) {
       baseType = FloatType.v();
-    } else if (tmp.equals("L")) {
+    } else if ("L".equals(tmp)) {
       baseType = LongType.v();
-    } else if (tmp.equals("S")) {
+    } else if ("S".equals(tmp)) {
       baseType = ShortType.v();
-    } else if (tmp.equals("Z")) {
+    } else if ("Z".equals(tmp)) {
       baseType = BooleanType.v();
     } else {
       throw new RuntimeException("Unsupported class constant: " + value);
@@ -155,11 +155,13 @@ public class ClassConstant extends Constant {
     return value;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return RefType.v("java.lang.Class");
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ConstantSwitch) sw).caseClassConstant(this);
   }
 }

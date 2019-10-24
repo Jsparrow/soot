@@ -27,7 +27,6 @@ package soot.dexpler.instructions;
  * #L%
  */
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.jf.dexlib2.iface.instruction.DualReferenceInstruction;
@@ -49,6 +48,7 @@ import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JNewArrayExpr;
 import soot.jimple.internal.JimpleLocal;
+import java.util.Collections;
 
 public class InvokePolymorphicInstruction extends MethodInvocationInstruction {
 
@@ -121,7 +121,7 @@ public class InvokePolymorphicInstruction extends MethodInvocationInstruction {
         units.add(new JAssignStmt(new JArrayRef(newArrL, IntConstant.v(i)), l));
         i++;
       }
-      parms = Arrays.asList(newArrL);
+      parms = Collections.singletonList(newArrL);
     }
     
     if (ref.declaringClass().isInterface()) {

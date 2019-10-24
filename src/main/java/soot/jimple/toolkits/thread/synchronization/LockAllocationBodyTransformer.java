@@ -64,23 +64,27 @@ import soot.util.Chain;
 public class LockAllocationBodyTransformer extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(LockAllocationBodyTransformer.class);
   private static final LockAllocationBodyTransformer instance = new LockAllocationBodyTransformer();
+private static boolean addedGlobalLockDefs = false;
+private static int throwableNum = 0; // doesn't matter if not reinitialized
+static int baseLocalNum = 0;
+static int lockNumber = 0;
+static Map<EquivalentValue, StaticFieldRef> lockEqValToLock = new HashMap<>();
 
-  private LockAllocationBodyTransformer() {
+private LockAllocationBodyTransformer() {
   }
 
-  public static LockAllocationBodyTransformer v() {
+public static LockAllocationBodyTransformer v() {
     return instance;
   }
 
-  private static boolean addedGlobalLockDefs = false;
-  private static int throwableNum = 0; // doesn't matter if not reinitialized
-  // to 0
+// to 0
 
-  protected void internalTransform(Body b, String phase, Map opts) {
+  @Override
+protected void internalTransform(Body b, String phase, Map opts) {
     throw new RuntimeException("Not Supported");
   }
 
-  protected void internalTransform(Body b, FlowSet fs, List<CriticalSectionGroup> groups, boolean[] insertedGlobalLock) {
+protected void internalTransform(Body b, FlowSet fs, List<CriticalSectionGroup> groups, boolean[] insertedGlobalLock) {
     //
     JimpleBody j = (JimpleBody) b;
     SootMethod thisMethod = b.getMethod();
@@ -113,7 +117,8 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
             globalLockObj[i] = Scene.v().getMainClass().getFieldByName("globalLockObj" + i);
             // field already exists
           } catch (RuntimeException re) {
-            // field does not yet exist (or, as a pre-existing
+            logger.error(re.getMessage(), re);
+			// field does not yet exist (or, as a pre-existing
             // error, there is more than one field by this name)
             globalLockObj[i] = Scene.v().makeSootField("globalLockObj" + i, RefType.v("java.lang.Object"),
                 Modifier.STATIC | Modifier.PUBLIC);
@@ -259,7 +264,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
           } else if (lock instanceof Local) {
             clo = (Local) lock;
           } else {
-            throw new RuntimeException("Unknown type of lock (" + lock + "): expected Ref or Local");
+            throw new RuntimeException(new StringBuilder().append("Unknown type of lock (").append(lock).append("): expected Ref or Local").toString());
           }
           csr = tn;
           moreLocks = false;
@@ -298,7 +303,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
           } else if (lock instanceof Local) {
             clo = (Local) lock;
           } else {
-            throw new RuntimeException("Unknown type of lock (" + lock + "): expected FieldRef or Local");
+            throw new RuntimeException(new StringBuilder().append("Unknown type of lock (").append(lock).append("): expected FieldRef or Local").toString());
           }
 
           if (lockNum + 1 >= tn.lockset.size()) {
@@ -381,7 +386,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
           }
 
           // For each early end, reuse or insert exitmonitor stmt
-          List<Pair<Stmt, Stmt>> newEarlyEnds = new ArrayList<Pair<Stmt, Stmt>>();
+          List<Pair<Stmt, Stmt>> newEarlyEnds = new ArrayList<>();
           for (Pair<Stmt, Stmt> end : csr.earlyEnds) {
             Stmt earlyEnd = end.getO1();
             Stmt exitmonitor = end.getO2();
@@ -427,7 +432,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
               // redirectTraps(b, exitmonitor, newExitmonitor); //
               // EXPERIMENTAL
               units.remove(exitmonitor);
-              csr.end = new Pair<Stmt, Stmt>(csr.end.getO1(), newExitmonitor);
+              csr.end = new Pair<>(csr.end.getO1(), newExitmonitor);
             } else {
               if (newPrep != null) {
                 Stmt tmp = (Stmt) newPrep.clone();
@@ -443,7 +448,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
               // monitorexit
               Stmt newGotoStmt = Jimple.v().newGotoStmt(csr.after);
               units.insertBeforeNoRedirect(newGotoStmt, csr.after);
-              csr.end = new Pair<Stmt, Stmt>(newGotoStmt, newExitmonitor);
+              csr.end = new Pair<>(newGotoStmt, newExitmonitor);
               csr.last = newGotoStmt;
             }
           }
@@ -460,7 +465,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
             units.insertBefore(newExitmonitor, exitmonitor);
 
             units.remove(exitmonitor);
-            csr.exceptionalEnd = new Pair<Stmt, Stmt>(csr.exceptionalEnd.getO1(), newExitmonitor);
+            csr.exceptionalEnd = new Pair<>(csr.exceptionalEnd.getO1(), newExitmonitor);
           } else {
             // insert after the last end
             Stmt lastEnd = null; // last end stmt (not same as last
@@ -503,7 +508,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
             SootClass throwableClass = Scene.v().loadClassAndSupport("java.lang.Throwable");
             b.getTraps().addFirst(Jimple.v().newTrap(throwableClass, newExitmonitor, newThrow, newCatch));
             b.getTraps().addFirst(Jimple.v().newTrap(throwableClass, csr.beginning, lastEnd, newCatch));
-            csr.exceptionalEnd = new Pair<Stmt, Stmt>(newThrow, newExitmonitor);
+            csr.exceptionalEnd = new Pair<>(newThrow, newExitmonitor);
           }
         }
         lockNum++;
@@ -553,9 +558,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
     }
   }
 
-  static int baseLocalNum = 0;
-
-  public InstanceFieldRef reconstruct(Body b, PatchingChain<Unit> units, InstanceFieldRef lock, Stmt insertBefore,
+public InstanceFieldRef reconstruct(Body b, PatchingChain<Unit> units, InstanceFieldRef lock, Stmt insertBefore,
       boolean redirect) {
     logger.debug("Reconstructing " + lock);
 
@@ -591,8 +594,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
     } else if (base instanceof Local) {
       baseLocal = (Local) base;
     } else {
-      throw new RuntimeException("InstanceFieldRef cannot be reconstructed because it's base is of an unsupported type"
-          + base.getType() + ": " + base);
+      throw new RuntimeException(new StringBuilder().append("InstanceFieldRef cannot be reconstructed because it's base is of an unsupported type").append(base.getType()).append(": ").append(base).toString());
     }
 
     InstanceFieldRef newLock = Jimple.v().newInstanceFieldRef(baseLocal, lock.getField().makeRef());
@@ -600,10 +602,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
     return newLock;
   }
 
-  static int lockNumber = 0;
-  static Map<EquivalentValue, StaticFieldRef> lockEqValToLock = new HashMap<EquivalentValue, StaticFieldRef>();
-
-  static public Value getLockFor(EquivalentValue lockEqVal) {
+public static Value getLockFor(EquivalentValue lockEqVal) {
     Value lock = lockEqVal.getValue();
 
     if (lock instanceof InstanceFieldRef) {
@@ -697,12 +696,12 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
       return actualLockSfr;
     }
 
-    throw new RuntimeException("Unknown type of lock (" + lock + "): expected FieldRef, ArrayRef, or Local");
+    throw new RuntimeException(new StringBuilder().append("Unknown type of lock (").append(lock).append("): expected FieldRef, ArrayRef, or Local").toString());
   }
 
-  public void redirectTraps(Body b, Unit oldUnit, Unit newUnit) {
+public void redirectTraps(Body b, Unit oldUnit, Unit newUnit) {
     Chain<Trap> traps = b.getTraps();
-    for (Trap trap : traps) {
+    traps.forEach(trap -> {
       if (trap.getHandlerUnit() == oldUnit) {
         trap.setHandlerUnit(newUnit);
       }
@@ -712,7 +711,7 @@ public class LockAllocationBodyTransformer extends BodyTransformer {
       if (trap.getEndUnit() == oldUnit) {
         trap.setEndUnit(newUnit);
       }
-    }
+    });
   }
 
 }

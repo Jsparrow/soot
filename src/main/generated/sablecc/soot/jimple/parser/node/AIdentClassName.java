@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AIdentClassName extends PClassName
 {
-    private TIdentifier _identifier_;
+    private TIdentifier identifier;
 
     public AIdentClassName()
     {
@@ -26,7 +26,7 @@ public final class AIdentClassName extends PClassName
     public Object clone()
     {
         return new AIdentClassName(
-            cloneNode(this._identifier_));
+            cloneNode(this.identifier));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AIdentClassName extends PClassName
 
     public TIdentifier getIdentifier()
     {
-        return this._identifier_;
+        return this.identifier;
     }
 
     public void setIdentifier(TIdentifier node)
     {
-        if(this._identifier_ != null)
+        if(this.identifier != null)
         {
-            this._identifier_.parent(null);
+            this.identifier.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AIdentClassName extends PClassName
             node.parent(this);
         }
 
-        this._identifier_ = node;
+        this.identifier = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._identifier_);
+            + toString(this.identifier);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._identifier_ == child)
+        if(this.identifier == child)
         {
-            this._identifier_ = null;
+            this.identifier = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AIdentClassName extends PClassName
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._identifier_ == oldChild)
+        if(this.identifier == oldChild)
         {
             setIdentifier((TIdentifier) newChild);
             return;

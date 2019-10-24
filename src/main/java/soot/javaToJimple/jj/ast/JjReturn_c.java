@@ -37,7 +37,8 @@ public class JjReturn_c extends Return_c {
     super(pos, expr);
   }
 
-  public Type childExpectedType(Expr child, AscriptionVisitor av) {
+  @Override
+public Type childExpectedType(Expr child, AscriptionVisitor av) {
     if (child == expr) {
       Context c = av.context();
       CodeInstance ci = c.currentCode();

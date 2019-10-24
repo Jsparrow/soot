@@ -48,6 +48,7 @@ import soot.toolkits.graph.HashMutableDirectedGraph;
 import soot.toolkits.graph.HashMutableEdgeLabelledDirectedGraph;
 import soot.toolkits.graph.MutableDirectedGraph;
 import soot.toolkits.graph.MutableEdgeLabelledDirectedGraph;
+import java.util.stream.Collectors;
 
 public class DeadlockDetector {
   private static final Logger logger = LoggerFactory.getLogger(DeadlockDetector.class);
@@ -75,7 +76,7 @@ public class DeadlockDetector {
       iteration++;
       logger.debug("[DeadlockDetector] Deadlock Iteration #" + iteration);
       foundDeadlock = false;
-      lockOrder = new HashMutableDirectedGraph<CriticalSectionGroup>(); // start each iteration with a fresh graph
+      lockOrder = new HashMutableDirectedGraph<>(); // start each iteration with a fresh graph
 
       // Assemble the partial ordering of locks
       Iterator<CriticalSection> deadlockIt1 = criticalSections.iterator();
@@ -94,13 +95,12 @@ public class DeadlockDetector {
 
         // Get list of tn1's target methods
         if (tn1.transitiveTargets == null) {
-          tn1.transitiveTargets = new HashSet<MethodOrMethodContext>();
-          for (Unit tn1Invoke : tn1.invokes) {
-            Iterator<MethodOrMethodContext> targetIt = tt.iterator(tn1Invoke);
-            while (targetIt.hasNext()) {
+          tn1.transitiveTargets = new HashSet<>();
+          tn1.invokes.stream().map(tt::iterator).forEach(targetIt -> {
+			while (targetIt.hasNext()) {
               tn1.transitiveTargets.add(targetIt.next());
             }
-          }
+		});
         }
 
         // compare to each other tn
@@ -124,19 +124,15 @@ public class DeadlockDetector {
           if (tn1.transitiveTargets.contains(tn2.method)) {
             // This implies the partial ordering tn1lock before tn2lock
             if (optionPrintDebug) {
-              logger.debug("group" + (tn1.setNumber) + " before group" + (tn2.setNumber) + ": " + "outer: " + tn1.name
-                  + " inner: " + tn2.name);
+              logger.debug(new StringBuilder().append("group").append(tn1.setNumber).append(" before group").append(tn2.setNumber).append(": ")
+					.append("outer: ").append(tn1.name).append(" inner: ").append(tn2.name).toString());
             }
 
             // Check if tn2lock before tn1lock is in our lock order
-            List<CriticalSectionGroup> afterTn2 = new ArrayList<CriticalSectionGroup>();
+            List<CriticalSectionGroup> afterTn2 = new ArrayList<>();
             afterTn2.addAll(lockOrder.getSuccsOf(tn2.group));
-            for (int i = 0; i < afterTn2.size(); i++) {
-              for (CriticalSectionGroup o : lockOrder.getSuccsOf(afterTn2.get(i))) {
-                if (!afterTn2.contains(o)) {
-                  afterTn2.add(o);
-                }
-              }
+            for (CriticalSectionGroup anAfterTn2 : afterTn2) {
+              afterTn2.addAll(lockOrder.getSuccsOf(anAfterTn2).stream().filter(o -> !afterTn2.contains(o)).collect(Collectors.toList()));
             }
 
             if (afterTn2.contains(tn1.group)) {
@@ -144,20 +140,18 @@ public class DeadlockDetector {
                 logger.debug("[DeadlockDetector]  DEADLOCK HAS BEEN DETECTED: not correcting");
                 foundDeadlock = true;
               } else {
-                logger.debug("[DeadlockDetector]  DEADLOCK HAS BEEN DETECTED: merging group" + (tn1.setNumber) + " and group"
-                    + (tn2.setNumber) + " and restarting deadlock detection");
+                logger.debug(new StringBuilder().append("[DeadlockDetector]  DEADLOCK HAS BEEN DETECTED: merging group").append(tn1.setNumber).append(" and group").append(tn2.setNumber).append(" and restarting deadlock detection")
+						.toString());
 
                 if (optionPrintDebug) {
-                  logger.debug("tn1.setNumber was " + tn1.setNumber + " and tn2.setNumber was " + tn2.setNumber);
-                  logger.debug("tn1.group.size was " + tn1.group.criticalSections.size() + " and tn2.group.size was "
-                      + tn2.group.criticalSections.size());
-                  logger.debug("tn1.group.num was  " + tn1.group.num() + " and tn2.group.num was  " + tn2.group.num());
+                  logger.debug(new StringBuilder().append("tn1.setNumber was ").append(tn1.setNumber).append(" and tn2.setNumber was ").append(tn2.setNumber).toString());
+                  logger.debug(new StringBuilder().append("tn1.group.size was ").append(tn1.group.criticalSections.size()).append(" and tn2.group.size was ").append(tn2.group.criticalSections.size()).toString());
+                  logger.debug(new StringBuilder().append("tn1.group.num was  ").append(tn1.group.num()).append(" and tn2.group.num was  ").append(tn2.group.num()).toString());
                 }
                 tn1.group.mergeGroups(tn2.group);
                 if (optionPrintDebug) {
-                  logger.debug("tn1.setNumber is  " + tn1.setNumber + " and tn2.setNumber is  " + tn2.setNumber);
-                  logger.debug("tn1.group.size is  " + tn1.group.criticalSections.size() + " and tn2.group.size is  "
-                      + tn2.group.criticalSections.size());
+                  logger.debug(new StringBuilder().append("tn1.setNumber is  ").append(tn1.setNumber).append(" and tn2.setNumber is  ").append(tn2.setNumber).toString());
+                  logger.debug(new StringBuilder().append("tn1.group.size is  ").append(tn1.group.criticalSections.size()).append(" and tn2.group.size is  ").append(tn2.group.criticalSections.size()).toString());
                 }
 
                 foundDeadlock = true;
@@ -175,7 +169,7 @@ public class DeadlockDetector {
   public MutableEdgeLabelledDirectedGraph<Integer, CriticalSection> detectLocksetDeadlock(Map<Value, Integer> lockToLockNum,
       List<PointsToSetInternal> lockPTSets) {
     HashMutableEdgeLabelledDirectedGraph<Integer, CriticalSection> permanentOrder
-        = new HashMutableEdgeLabelledDirectedGraph<Integer, CriticalSection>();
+        = new HashMutableEdgeLabelledDirectedGraph<>();
     MutableEdgeLabelledDirectedGraph<Integer, CriticalSection> lockOrder;
     boolean foundDeadlock;
     int iteration = 0;
@@ -206,13 +200,12 @@ public class DeadlockDetector {
 
         // Get list of tn1's target methods
         if (tn1.transitiveTargets == null) {
-          tn1.transitiveTargets = new HashSet<MethodOrMethodContext>();
-          for (Unit tn1Invoke : tn1.invokes) {
-            Iterator<MethodOrMethodContext> targetIt = tt.iterator(tn1Invoke);
-            while (targetIt.hasNext()) {
+          tn1.transitiveTargets = new HashSet<>();
+          tn1.invokes.stream().map(tt::iterator).forEach(targetIt -> {
+			while (targetIt.hasNext()) {
               tn1.transitiveTargets.add(targetIt.next());
             }
-          }
+		});
         }
 
         // compare to each other tn
@@ -238,8 +231,8 @@ public class DeadlockDetector {
             // This implies the partial ordering (locks in tn1) before (locks in tn2)
             if (true) // optionPrintDebug)
             {
-              logger.debug("[DeadlockDetector] locks in " + (tn1.name) + " before locks in " + (tn2.name) + ": " + "outer: "
-                  + tn1.name + " inner: " + tn2.name);
+              logger.debug(new StringBuilder().append("[DeadlockDetector] locks in ").append(tn1.name).append(" before locks in ").append(tn2.name).append(": ")
+					.append("outer: ").append(tn1.name).append(" inner: ").append(tn2.name).toString());
             }
 
             // Check if tn2locks before tn1locks is in our lock order
@@ -247,7 +240,7 @@ public class DeadlockDetector {
               Value lock2 = lock2EqVal.getValue();
               Integer lock2Num = lockToLockNum.get(lock2);
 
-              List<Integer> afterTn2 = new ArrayList<Integer>();
+              List<Integer> afterTn2 = new ArrayList<>();
               afterTn2.addAll(lockOrder.getSuccsOf(lock2Num)); // filter here!
               ListIterator<Integer> lit = afterTn2.listIterator();
               while (lit.hasNext()) {
@@ -295,8 +288,8 @@ public class DeadlockDetector {
                     logger.debug("[DeadlockDetector] DEADLOCK HAS BEEN DETECTED: not correcting");
                     foundDeadlock = true;
                   } else {
-                    logger.debug("[DeadlockDetector] DEADLOCK HAS BEEN DETECTED while inspecting " + lock1Num + " (" + lock1
-                        + ") and " + lock2Num + " (" + lock2 + ") ");
+                    logger.debug(new StringBuilder().append("[DeadlockDetector] DEADLOCK HAS BEEN DETECTED while inspecting ").append(lock1Num).append(" (").append(lock1).append(") and ").append(lock2Num)
+							.append(" (").append(lock2).append(") ").toString());
 
                     // Create a deadlock avoidance edge
                     DeadlockAvoidanceEdge dae = new DeadlockAvoidanceEdge(tn1.method.getDeclaringClass());
@@ -311,47 +304,39 @@ public class DeadlockDetector {
                     lockPTSets.add(dummyLockPT);
 
                     // Add it to the locksets of tn1 and whoever says l2 before l1
-                    for (EquivalentValue lockEqVal : tn1.lockset) {
-                      Integer lockNum = lockToLockNum.get(lockEqVal.getValue());
-                      if (!permanentOrder.containsNode(lockNum)) {
-                        permanentOrder.addNode(lockNum);
-                      }
-                      permanentOrder.addEdge(daeNum, lockNum, tn1);
-                    }
+					tn1.lockset.stream().map(lockEqVal -> lockToLockNum.get(lockEqVal.getValue())).forEach(lockNum -> {
+						if (!permanentOrder.containsNode(lockNum)) {
+						    permanentOrder.addNode(lockNum);
+						  }
+						permanentOrder.addEdge(daeNum, lockNum, tn1);
+					});
                     tn1.lockset.add(daeEqVal);
 
                     List<CriticalSection> forwardLabels = lockOrder.getLabelsForEdges(lock1Num, lock2Num);
                     if (forwardLabels != null) {
-                      for (CriticalSection tn : forwardLabels) {
-                        if (!tn.lockset.contains(daeEqVal)) {
-                          for (EquivalentValue lockEqVal : tn.lockset) {
-                            Integer lockNum = lockToLockNum.get(lockEqVal.getValue());
-                            if (!permanentOrder.containsNode(lockNum)) {
-                              permanentOrder.addNode(lockNum);
-                            }
-                            permanentOrder.addEdge(daeNum, lockNum, tn);
-                          }
-                          tn.lockset.add(daeEqVal);
-                        }
-                      }
+                      forwardLabels.stream().filter(tn -> !tn.lockset.contains(daeEqVal)).forEach(tn -> {
+					  tn.lockset.stream().map(lockEqVal -> lockToLockNum.get(lockEqVal.getValue())).forEach(lockNum -> {
+						if (!permanentOrder.containsNode(lockNum)) {
+					      permanentOrder.addNode(lockNum);
+					    }
+						permanentOrder.addEdge(daeNum, lockNum, tn);
+					});
+					  tn.lockset.add(daeEqVal);
+					});
                     }
 
                     List<CriticalSection> backwardLabels = lockOrder.getLabelsForEdges(lock2Num, lock1Num);
                     if (backwardLabels != null) {
-                      for (CriticalSection tn : backwardLabels) {
-                        if (!tn.lockset.contains(daeEqVal)) {
-                          for (EquivalentValue lockEqVal : tn.lockset) {
-                            Integer lockNum = lockToLockNum.get(lockEqVal.getValue());
-                            if (!permanentOrder.containsNode(lockNum)) {
-                              permanentOrder.addNode(lockNum);
-                            }
-                            permanentOrder.addEdge(daeNum, lockNum, tn);
-                          }
-                          tn.lockset.add(daeEqVal);
-                          logger.debug("[DeadlockDetector]   Adding deadlock avoidance edge between " + (tn1.name) + " and "
-                              + (tn.name));
-                        }
-                      }
+                      backwardLabels.stream().filter(tn -> !tn.lockset.contains(daeEqVal)).forEach(tn -> {
+					  tn.lockset.stream().map(lockEqVal -> lockToLockNum.get(lockEqVal.getValue())).forEach(lockNum -> {
+						if (!permanentOrder.containsNode(lockNum)) {
+					      permanentOrder.addNode(lockNum);
+					    }
+						permanentOrder.addEdge(daeNum, lockNum, tn);
+					});
+					  tn.lockset.add(daeEqVal);
+					  logger.debug(new StringBuilder().append("[DeadlockDetector]   Adding deadlock avoidance edge between ").append(tn1.name).append(" and ").append(tn.name).toString());
+					});
                       logger.debug("[DeadlockDetector]   Restarting deadlock detection");
                     }
 
@@ -379,9 +364,9 @@ public class DeadlockDetector {
       MutableEdgeLabelledDirectedGraph<Integer, CriticalSection> lockOrder) {
     for (CriticalSection tn : criticalSections) {
       // Get the portion of the lock order that is visible to tn
-      HashMutableDirectedGraph<Integer> visibleOrder = new HashMutableDirectedGraph<Integer>();
+      HashMutableDirectedGraph<Integer> visibleOrder = new HashMutableDirectedGraph<>();
       if (tn.group != null) {
-        for (CriticalSection otherTn : criticalSections) {
+        criticalSections.forEach(otherTn -> {
           // Check if otherTn and tn share a static lock
           boolean tnsShareAStaticLock = false;
           for (EquivalentValue tnLockEqVal : tn.lockset) {
@@ -408,21 +393,21 @@ public class DeadlockDetector {
               if (!visibleOrder.containsNode(node1)) {
                 visibleOrder.addNode(node1);
               }
-              for (Integer node2 : orderings.getSuccsOf(node1)) {
+              orderings.getSuccsOf(node1).forEach(node2 -> {
                 if (!visibleOrder.containsNode(node2)) {
                   visibleOrder.addNode(node2);
                 }
                 visibleOrder.addEdge(node1, node2);
-              }
+              });
             }
           }
-        }
+        });
 
         logger.debug("VISIBLE ORDER FOR " + tn.name);
         visibleOrder.printGraph();
 
         // Order locks in tn's lockset according to the visible order (insertion sort)
-        List<EquivalentValue> newLockset = new ArrayList<EquivalentValue>();
+        List<EquivalentValue> newLockset = new ArrayList<>();
         for (EquivalentValue lockEqVal : tn.lockset) {
           Value lockToInsert = lockEqVal.getValue();
           Integer lockNumToInsert = lockToLockNum.get(lockToInsert);
@@ -447,8 +432,7 @@ public class DeadlockDetector {
           }
           newLockset.add(i, lockEqVal);
         }
-        logger.debug("reordered from " + LockAllocator.locksetToLockNumString(tn.lockset, lockToLockNum) + " to "
-            + LockAllocator.locksetToLockNumString(newLockset, lockToLockNum));
+        logger.debug(new StringBuilder().append("reordered from ").append(LockAllocator.locksetToLockNumString(tn.lockset, lockToLockNum)).append(" to ").append(LockAllocator.locksetToLockNumString(newLockset, lockToLockNum)).toString());
 
         tn.lockset = newLockset;
       }

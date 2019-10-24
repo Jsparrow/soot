@@ -78,7 +78,7 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
   Thread self;
 
   public SynchObliviousMhpAnalysis() {
-    threadList = new ArrayList<AbstractRuntimeThread>();
+    threadList = new ArrayList<>();
     optionPrintDebug = false;
 
     self = null;
@@ -100,7 +100,8 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
     }
   }
 
-  public void run() {
+  @Override
+public void run() {
     SootMethod mainMethod = Scene.v().getMainClass().getMethodByName("main");
 
     PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
@@ -140,7 +141,7 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
 
     // Build MHP Lists
     // logger.debug(" MHP: Building MHP Lists");
-    List<AbstractRuntimeThread> runAtOnceCandidates = new ArrayList<AbstractRuntimeThread>();
+    List<AbstractRuntimeThread> runAtOnceCandidates = new ArrayList<>();
     Iterator threadIt = startToRunMethods.entrySet().iterator();
     int threadNum = 0;
     while (threadIt.hasNext()) {
@@ -197,18 +198,16 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       // Add this list of methods to MHPLists
       threadList.add(thread);
       if (optionPrintDebug) {
-        System.out.println(thread.toString());
+        logger.info(thread.toString());
       }
 
       // Find out if the "thread" in "thread.start()" could be more than one object
       boolean mayStartMultipleThreadObjects = (threadAllocNodes.size() > 1) || so.types_for_sites();
-      if (!mayStartMultipleThreadObjects) // if there's only one alloc node
-      {
-        if (multiRunAllocNodes.contains(threadAllocNodes.iterator().next())) // but it gets run more than once
-        {
-          mayStartMultipleThreadObjects = true; // then "thread" in "thread.start()" could be more than one object
-        }
-      }
+      boolean condition = !mayStartMultipleThreadObjects && multiRunAllocNodes.contains(threadAllocNodes.iterator().next());
+	// but it gets run more than once
+	if (condition) {
+	  mayStartMultipleThreadObjects = true; // then "thread" in "thread.start()" could be more than one object
+	}
 
       if (mayStartMultipleThreadObjects) {
         thread.setStartStmtHasMultipleReachingObjects();
@@ -240,7 +239,7 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
         thread.setJoinStmt(startToJoin.get(startStmt));
         mayBeRunMultipleTimes = false; // well, actually, we don't know yet
         methodNum = 0;
-        List<SootMethod> containingMethodCalls = new ArrayList<SootMethod>();
+        List<SootMethod> containingMethodCalls = new ArrayList<>();
         containingMethodCalls.add(startStmtMethod);
         while (methodNum < containingMethodCalls.size()) // iterate over all methods in threadMethods, even as new methods
                                                          // are being added to it
@@ -272,14 +271,14 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       // and this start statement may be run more than once,
       // then add this list of methods to MHPLists *AGAIN*
       if (optionPrintDebug) {
-        System.out.println("Start Stmt " + startStmt.toString() + " mayStartMultipleThreadObjects="
-            + mayStartMultipleThreadObjects + " mayBeRunMultipleTimes=" + mayBeRunMultipleTimes);
+        logger.info(new StringBuilder().append("Start Stmt ").append(startStmt.toString()).append(" mayStartMultipleThreadObjects=").append(mayStartMultipleThreadObjects).append(" mayBeRunMultipleTimes=").append(mayBeRunMultipleTimes)
+				.toString());
       }
       if (mayStartMultipleThreadObjects && mayBeRunMultipleTimes) {
         threadList.add(thread); // add another copy
         thread.setRunsMany();
         if (optionPrintDebug) {
-          System.out.println(thread.toString());
+          logger.info(thread.toString());
         }
       } else {
         thread.setRunsOnce();
@@ -340,15 +339,11 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       }
     }
 
-    // mark the remaining threads here as run-one-at-a-time
-    Iterator<AbstractRuntimeThread> it = runAtOnceCandidates.iterator();
-    while (it.hasNext()) {
-      AbstractRuntimeThread someThread = it.next();
-      someThread.setRunsOneAtATime();
-    }
+    runAtOnceCandidates.forEach(AbstractRuntimeThread::setRunsOneAtATime);
   }
 
-  public boolean mayHappenInParallel(SootMethod m1, Unit u1, SootMethod m2, Unit u2) {
+  @Override
+public boolean mayHappenInParallel(SootMethod m1, Unit u1, SootMethod m2, Unit u2) {
     if (optionThreaded) {
       if (self == null) {
         return true; // not started...
@@ -359,14 +354,16 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       try {
         self.join();
       } catch (InterruptedException ie) {
-        return true;
+        logger.error(ie.getMessage(), ie);
+		return true;
       }
     }
 
     return mayHappenInParallelInternal(m1, m2);
   }
 
-  public boolean mayHappenInParallel(SootMethod m1, SootMethod m2) {
+  @Override
+public boolean mayHappenInParallel(SootMethod m1, SootMethod m2) {
     if (optionThreaded) {
       if (self == null) {
         return true; // not started...
@@ -377,7 +374,8 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       try {
         self.join();
       } catch (InterruptedException ie) {
-        return true;
+        logger.error(ie.getMessage(), ie);
+		return true;
       }
     }
 
@@ -403,7 +401,8 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
     return false;
   }
 
-  public void printMhpSummary() {
+  @Override
+public void printMhpSummary() {
     if (optionThreaded) {
       if (self == null) {
         return; // not run... do nothing
@@ -414,11 +413,12 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       try {
         self.join();
       } catch (InterruptedException ie) {
-        return;
+        logger.error(ie.getMessage(), ie);
+		return;
       }
     }
 
-    List<AbstractRuntimeThread> threads = new ArrayList<AbstractRuntimeThread>();
+    List<AbstractRuntimeThread> threads = new ArrayList<>();
     int size = threadList.size();
     logger.debug("[mhp]");
     for (int i = 0; i < size; i++) {
@@ -441,7 +441,8 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       try {
         self.join();
       } catch (InterruptedException ie) {
-        return null;
+        logger.error(ie.getMessage(), ie);
+		return null;
       }
     }
 
@@ -449,7 +450,7 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       return null;
     }
 
-    List<SootClass> threadClasses = new ArrayList<SootClass>();
+    List<SootClass> threadClasses = new ArrayList<>();
     int size = threadList.size();
     for (int i = 0; i < size; i++) {
       AbstractRuntimeThread thread = threadList.get(i);
@@ -464,7 +465,8 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
     return threadClasses;
   }
 
-  public List<AbstractRuntimeThread> getThreads() {
+  @Override
+public List<AbstractRuntimeThread> getThreads() {
     if (optionThreaded) {
       if (self == null) {
         return null; // not run... do nothing
@@ -475,7 +477,8 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       try {
         self.join();
       } catch (InterruptedException ie) {
-        return null;
+        logger.error(ie.getMessage(), ie);
+		return null;
       }
     }
 
@@ -483,7 +486,7 @@ public class SynchObliviousMhpAnalysis implements MhpTester, Runnable {
       return null;
     }
 
-    List<AbstractRuntimeThread> threads = new ArrayList<AbstractRuntimeThread>();
+    List<AbstractRuntimeThread> threads = new ArrayList<>();
     int size = threadList.size();
     for (int i = 0; i < size; i++) {
       if (!threads.contains(threadList.get(i))) {

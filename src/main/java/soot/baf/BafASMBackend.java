@@ -91,24 +91,12 @@ import soot.util.Chain;
 public class BafASMBackend extends AbstractASMBackend {
 
   // Contains one Label for every Unit that is the target of a branch or jump
-  protected final Map<Unit, Label> branchTargetLabels = new HashMap<Unit, Label>();
-
-  /**
-   * Returns the ASM Label for a given Unit that is the target of a branch or jump
-   *
-   * @param target
-   *          The unit that is the branch target
-   * @return The Label that specifies this unit
-   */
-  protected Label getBranchTargetLabel(Unit target) {
-    return branchTargetLabels.get(target);
-  }
-
-  // Contains a mapping of local variables to indices in the local variable
+  protected final Map<Unit, Label> branchTargetLabels = new HashMap<>();
+// Contains a mapping of local variables to indices in the local variable
   // stack
-  protected final Map<Local, Integer> localToSlot = new HashMap<Local, Integer>();
+  protected final Map<Local, Integer> localToSlot = new HashMap<>();
 
-  /**
+/**
    * Creates a new BafASMBackend with a given enforced java version
    *
    * @param sc
@@ -121,7 +109,18 @@ public class BafASMBackend extends AbstractASMBackend {
     super(sc, javaVersion);
   }
 
-  /*
+/**
+   * Returns the ASM Label for a given Unit that is the target of a branch or jump
+   *
+   * @param target
+   *          The unit that is the branch target
+   * @return The Label that specifies this unit
+   */
+  protected Label getBranchTargetLabel(Unit target) {
+    return branchTargetLabels.get(target);
+  }
+
+/*
    * (non-Javadoc)
    *
    * @see soot.AbstractASMBackend#getMinJavaVersion(soot.SootMethod)
@@ -131,12 +130,11 @@ public class BafASMBackend extends AbstractASMBackend {
     final BafBody body = getBafBody(method);
     int minVersion = Options.java_version_1_1;
 
-    // http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/classfile/classFileParser.cpp
-    if (method.getDeclaringClass().isInterface()) {
-      if (method.isStatic() && !method.isStaticInitializer()) {
+    boolean condition = method.getDeclaringClass().isInterface() && method.isStatic() && !method.isStaticInitializer();
+	// http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/classfile/classFileParser.cpp
+    if (condition) {
         minVersion = Math.max(minVersion, Options.java_version_1_8);
       }
-    }
 
     for (Unit u : body.getUnits()) {
       if (minVersion == Options.java_version_1_9) {
@@ -161,7 +159,7 @@ public class BafASMBackend extends AbstractASMBackend {
     return minVersion;
   }
 
-  /*
+/*
    * (non-Javadoc)
    *
    * @see soot.AbstractASMBackend#generateMethodBody(org.objectweb.asm. MethodVisitor, soot.SootMethod)
@@ -172,14 +170,9 @@ public class BafASMBackend extends AbstractASMBackend {
     Chain<Unit> instructions = body.getUnits();
 
     /*
-     * Create a label for each instruction that is the target of some branch
-     */
-    for (UnitBox box : body.getUnitBoxes(true)) {
-      Unit u = box.getUnit();
-      if (!branchTargetLabels.containsKey(u)) {
-        branchTargetLabels.put(u, new Label());
-      }
-    }
+	     * Create a label for each instruction that is the target of some branch
+	     */
+	body.getUnitBoxes(true).stream().map(UnitBox::getUnit).forEach(u -> branchTargetLabels.putIfAbsent(u, new Label()));
 
     Label startLabel = null;
     if (Options.v().write_local_annotations()) {
@@ -187,26 +180,24 @@ public class BafASMBackend extends AbstractASMBackend {
       mv.visitLabel(startLabel);
     }
 
-    /*
-     * Handle all TRY-CATCH-blocks
-     */
-    for (Trap trap : body.getTraps()) {
-      // Check if the try-block contains any statement
-      if (trap.getBeginUnit() != trap.getEndUnit()) {
+    // Check if the try-block contains any statement
+	/*
+	     * Handle all TRY-CATCH-blocks
+	     */
+	body.getTraps().stream().filter(trap -> trap.getBeginUnit() != trap.getEndUnit()).forEach(trap -> {
         Label start = branchTargetLabels.get(trap.getBeginUnit());
         Label end = branchTargetLabels.get(trap.getEndUnit());
         Label handler = branchTargetLabels.get(trap.getHandlerUnit());
         String type = slashify(trap.getException().getName());
         mv.visitTryCatchBlock(start, end, handler, type);
-      }
-    }
+      });
 
     /*
      * Handle local variable slots for the "this"-local and the parameters
      */
     int localCount = 0;
     int[] paramSlots = new int[method.getParameterCount()];
-    Set<Local> assignedLocals = new HashSet<Local>();
+    Set<Local> assignedLocals = new HashSet<>();
 
     /*
      * For non-static methods the first parameters and zero-slot is the "this"-local
@@ -250,20 +241,21 @@ public class BafASMBackend extends AbstractASMBackend {
     }
 
     // Generate the code
-    for (Unit u : instructions) {
+	instructions.forEach(u -> {
       if (branchTargetLabels.containsKey(u)) {
         mv.visitLabel(branchTargetLabels.get(u));
       }
       generateTagsForUnit(mv, u);
       generateInstruction(mv, (Inst) u);
-    }
+    });
 
     // Generate the local annotations
-    if (Options.v().write_local_annotations()) {
-      Label endLabel = new Label();
-      mv.visitLabel(endLabel);
-
-      for (Local local : body.getLocals()) {
+	if (!Options.v().write_local_annotations()) {
+		return;
+	}
+	Label endLabel = new Label();
+	mv.visitLabel(endLabel);
+	for (Local local : body.getLocals()) {
         Integer slot = localToSlot.get(local);
         if (slot != null) {
           BafLocal l = (BafLocal) local;
@@ -276,10 +268,9 @@ public class BafASMBackend extends AbstractASMBackend {
           }
         }
       }
-    }
   }
 
-  /**
+/**
    * Writes out the information stored in tags associated with the given unit
    * 
    * @param mv
@@ -288,20 +279,21 @@ public class BafASMBackend extends AbstractASMBackend {
    *          The unit for which to write out the tags
    */
   protected void generateTagsForUnit(MethodVisitor mv, Unit u) {
-    if (u.hasTag("LineNumberTag")) {
-      LineNumberTag lnt = (LineNumberTag) u.getTag("LineNumberTag");
-      Label l;
-      if (branchTargetLabels.containsKey(u)) {
+    if (!u.hasTag("LineNumberTag")) {
+		return;
+	}
+	LineNumberTag lnt = (LineNumberTag) u.getTag("LineNumberTag");
+	Label l;
+	if (branchTargetLabels.containsKey(u)) {
         l = branchTargetLabels.get(u);
       } else {
         l = new Label();
         mv.visitLabel(l);
       }
-      mv.visitLineNumber(lnt.getLineNumber(), l);
-    }
+	mv.visitLineNumber(lnt.getLineNumber(), l);
   }
 
-  /**
+/**
    * Emits the bytecode for a single Baf instruction
    *
    * @param mv
@@ -439,7 +431,7 @@ public class BafASMBackend extends AbstractASMBackend {
           /*
            * Do not emit a DCONST_0 for negative zero, therefore we need the following check.
            */
-          if (new Double(v).equals(0.0)) {
+          if (Double.valueOf(v).equals(0.0)) {
             mv.visitInsn(Opcodes.DCONST_0);
           } else if (v == 1) {
             mv.visitInsn(Opcodes.DCONST_1);
@@ -451,7 +443,7 @@ public class BafASMBackend extends AbstractASMBackend {
           /*
            * Do not emit a FCONST_0 for negative zero, therefore we need the following check.
            */
-          if (new Float(v).equals(0.0f)) {
+          if (Float.valueOf(v).equals(0.0f)) {
             mv.visitInsn(Opcodes.FCONST_0);
           } else if (v == 1) {
             mv.visitInsn(Opcodes.FCONST_1);

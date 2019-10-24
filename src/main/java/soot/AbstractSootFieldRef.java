@@ -37,8 +37,12 @@ import soot.options.Options;
 
 public class AbstractSootFieldRef implements SootFieldRef {
   private static final Logger logger = LoggerFactory.getLogger(AbstractSootFieldRef.class);
+private final SootClass declaringClass;
+private final String name;
+private final Type type;
+private final boolean isStatic;
 
-  public AbstractSootFieldRef(SootClass declaringClass, String name, Type type, boolean isStatic) {
+public AbstractSootFieldRef(SootClass declaringClass, String name, Type type, boolean isStatic) {
     this.declaringClass = declaringClass;
     this.name = name;
     this.type = type;
@@ -54,75 +58,50 @@ public class AbstractSootFieldRef implements SootFieldRef {
     }
   }
 
-  private final SootClass declaringClass;
-  private final String name;
-  private final Type type;
-  private final boolean isStatic;
-
-  @Override
+@Override
   public SootClass declaringClass() {
     return declaringClass;
   }
 
-  @Override
+@Override
   public String name() {
     return name;
   }
 
-  @Override
+@Override
   public Type type() {
     return type;
   }
 
-  @Override
+@Override
   public boolean isStatic() {
     return isStatic;
   }
 
-  @Override
+@Override
   public String getSignature() {
     return SootField.getSignature(declaringClass, name, type);
   }
 
-  public class FieldResolutionFailedException extends ResolutionFailedException {
-    /**
-     *
-     */
-    private static final long serialVersionUID = -4657113720516199499L;
-
-    public FieldResolutionFailedException() {
-      super("Class " + declaringClass + " doesn't have field " + name + " : " + type
-          + "; failed to resolve in superclasses and interfaces");
-    }
-
-    @Override
-    public String toString() {
-      StringBuffer ret = new StringBuffer();
-      ret.append(super.toString());
-      resolve(ret);
-      return ret.toString();
-    }
-  }
-
-  @Override
+@Override
   public SootField resolve() {
     return resolve(null);
   }
 
-  private SootField checkStatic(SootField ret) {
+private SootField checkStatic(SootField ret) {
     if ((Options.v().wrong_staticness() == Options.wrong_staticness_fail
           || Options.v().wrong_staticness() == Options.wrong_staticness_fixstrict)
           && ret.isStatic() != isStatic() && !ret.isPhantom()) {
-      throw new ResolutionFailedException("Resolved " + this + " to " + ret + " which has wrong static-ness");
+      throw new ResolutionFailedException(new StringBuilder().append("Resolved ").append(this).append(" to ").append(ret).append(" which has wrong static-ness").toString());
     }
     return ret;
   }
 
-  private SootField resolve(StringBuffer trace) {
+private SootField resolve(StringBuffer trace) {
     SootClass cl = declaringClass;
     while (true) {
       if (trace != null) {
-        trace.append("Looking in " + cl + " which has fields " + cl.getFields() + "\n");
+        trace.append(new StringBuilder().append("Looking in ").append(cl).append(" which has fields ").append(cl.getFields()).append("\n").toString());
       }
 
       // Check whether we have the field in the current class
@@ -155,7 +134,7 @@ public class AbstractSootFieldRef implements SootFieldRef {
         }
       } else {
         // Since this class is not phantom, we look at its interfaces
-        ArrayDeque<SootClass> queue = new ArrayDeque<SootClass>();
+        ArrayDeque<SootClass> queue = new ArrayDeque<>();
         queue.addAll(cl.getInterfaces());
         while (true) {
           SootClass iface = queue.poll();
@@ -164,7 +143,7 @@ public class AbstractSootFieldRef implements SootFieldRef {
           }
 
           if (trace != null) {
-            trace.append("Looking in " + iface + " which has fields " + iface.getFields() + "\n");
+            trace.append(new StringBuilder().append("Looking in ").append(iface).append(" which has fields ").append(iface.getFields()).append("\n").toString());
           }
           SootField ifaceField = iface.getFieldUnsafe(name, type);
           if (ifaceField != null) {
@@ -216,7 +195,7 @@ public class AbstractSootFieldRef implements SootFieldRef {
     return null;
   }
 
-  protected SootField handleFieldTypeMismatch(SootField clField) {
+protected SootField handleFieldTypeMismatch(SootField clField) {
     switch (Options.v().field_type_mismatches()) {
       case Options.field_type_mismatches_fail:
         throw new ConflictingFieldRefException(clField, type);
@@ -229,12 +208,12 @@ public class AbstractSootFieldRef implements SootFieldRef {
         String.format("Unsupported option for handling field type mismatches: %d", Options.v().field_type_mismatches()));
   }
 
-  @Override
+@Override
   public String toString() {
     return getSignature();
   }
 
-  @Override
+@Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -245,7 +224,7 @@ public class AbstractSootFieldRef implements SootFieldRef {
     return result;
   }
 
-  @Override
+@Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -282,6 +261,26 @@ public class AbstractSootFieldRef implements SootFieldRef {
       return false;
     }
     return true;
+  }
+
+  public class FieldResolutionFailedException extends ResolutionFailedException {
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4657113720516199499L;
+
+    public FieldResolutionFailedException() {
+      super(new StringBuilder().append("Class ").append(declaringClass).append(" doesn't have field ").append(name).append(" : ").append(type).append("; failed to resolve in superclasses and interfaces")
+			.toString());
+    }
+
+    @Override
+    public String toString() {
+      StringBuffer ret = new StringBuffer();
+      ret.append(super.toString());
+      resolve(ret);
+      return ret.toString();
+    }
   }
 
 }

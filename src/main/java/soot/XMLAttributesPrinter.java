@@ -37,22 +37,26 @@ public class XMLAttributesPrinter {
   private String useFilename;
   private String outputDir;
 
-  private void setOutputDir(String dir) {
-    outputDir = dir;
-  }
+FileOutputStream streamOut = null;
 
-  private String getOutputDir() {
-    return outputDir;
-  }
+PrintWriter writerOut = null;
 
-  public XMLAttributesPrinter(String filename, String outputDir) {
+public XMLAttributesPrinter(String filename, String outputDir) {
     setInFilename(filename);
     setOutputDir(outputDir);
     initAttributesDir();
     createUseFilename();
   }
 
-  private void initFile() {
+private void setOutputDir(String dir) {
+    outputDir = dir;
+  }
+
+private String getOutputDir() {
+    return outputDir;
+  }
+
+private void initFile() {
     try {
       streamOut = new FileOutputStream(getUseFilename());
       writerOut = new PrintWriter(new OutputStreamWriter(streamOut));
@@ -64,20 +68,20 @@ public class XMLAttributesPrinter {
 
   }
 
-  private void finishFile() {
+private void finishFile() {
     writerOut.println("</attributes>");
     writerOut.close();
   }
 
-  public void printAttrs(SootClass c, soot.xml.TagCollector tc) {
+public void printAttrs(SootClass c, soot.xml.TagCollector tc) {
     printAttrs(c, tc, false);
   }
 
-  public void printAttrs(SootClass c) {
+public void printAttrs(SootClass c) {
     printAttrs(c, new soot.xml.TagCollector(), true);
   }
 
-  private void printAttrs(SootClass c, soot.xml.TagCollector tc, boolean includeBodyTags) {
+private void printAttrs(SootClass c, soot.xml.TagCollector tc, boolean includeBodyTags) {
     tc.collectKeyTags(c);
     tc.collectTags(c, includeBodyTags);
 
@@ -91,12 +95,9 @@ public class XMLAttributesPrinter {
     finishFile();
   }
 
-  FileOutputStream streamOut = null;
-  PrintWriter writerOut = null;
+private void initAttributesDir() {
 
-  private void initAttributesDir() {
-
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     String attrDir = "attributes";
 
     sb.append(getOutputDir());
@@ -109,14 +110,15 @@ public class XMLAttributesPrinter {
       try {
         dir.mkdirs();
       } catch (SecurityException se) {
-        logger.debug("Unable to create " + attrDir);
+        logger.error(se.getMessage(), se);
+		logger.debug("Unable to create " + attrDir);
         // System.exit(0);
       }
     }
 
   }
 
-  private void createUseFilename() {
+private void createUseFilename() {
     String tmp = getInFilename();
     // logger.debug("attribute file name: "+tmp);
     tmp = tmp.substring(0, tmp.lastIndexOf('.'));
@@ -125,7 +127,7 @@ public class XMLAttributesPrinter {
       tmp = tmp.substring((slash + 1), tmp.length());
     }
 
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     String attrDir = "attributes";
     sb.append(getOutputDir());
     sb.append(System.getProperty("file.separator"));
@@ -137,19 +139,19 @@ public class XMLAttributesPrinter {
     setUseFilename(sb.toString());
   }
 
-  private void setInFilename(String file) {
+private void setInFilename(String file) {
     useFilename = file;
   }
 
-  private String getInFilename() {
+private String getInFilename() {
     return useFilename;
   }
 
-  private void setUseFilename(String file) {
+private void setUseFilename(String file) {
     useFilename = file;
   }
 
-  private String getUseFilename() {
+private String getUseFilename() {
     return useFilename;
   }
 

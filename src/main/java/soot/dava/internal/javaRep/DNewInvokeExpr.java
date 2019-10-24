@@ -35,7 +35,8 @@ public class DNewInvokeExpr extends GNewInvokeExpr {
     super(type, methodRef, args);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     ArrayList clonedArgs = new ArrayList(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {

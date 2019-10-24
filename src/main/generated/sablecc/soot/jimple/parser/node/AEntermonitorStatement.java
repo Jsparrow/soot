@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AEntermonitorStatement extends PStatement
 {
-    private TEntermonitor _entermonitor_;
-    private PImmediate _immediate_;
-    private TSemicolon _semicolon_;
+    private TEntermonitor entermonitor;
+    private PImmediate immediate;
+    private TSemicolon semicolon;
 
     public AEntermonitorStatement()
     {
@@ -34,9 +34,9 @@ public final class AEntermonitorStatement extends PStatement
     public Object clone()
     {
         return new AEntermonitorStatement(
-            cloneNode(this._entermonitor_),
-            cloneNode(this._immediate_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.entermonitor),
+            cloneNode(this.immediate),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class AEntermonitorStatement extends PStatement
 
     public TEntermonitor getEntermonitor()
     {
-        return this._entermonitor_;
+        return this.entermonitor;
     }
 
     public void setEntermonitor(TEntermonitor node)
     {
-        if(this._entermonitor_ != null)
+        if(this.entermonitor != null)
         {
-            this._entermonitor_.parent(null);
+            this.entermonitor.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class AEntermonitorStatement extends PStatement
             node.parent(this);
         }
 
-        this._entermonitor_ = node;
+        this.entermonitor = node;
     }
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AEntermonitorStatement extends PStatement
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class AEntermonitorStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._entermonitor_)
-            + toString(this._immediate_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.entermonitor)).append(toString(this.immediate)).append(toString(this.semicolon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._entermonitor_ == child)
+        if(this.entermonitor == child)
         {
-            this._entermonitor_ = null;
+            this.entermonitor = null;
             return;
         }
 
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class AEntermonitorStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._entermonitor_ == oldChild)
+        if(this.entermonitor == oldChild)
         {
             setEntermonitor((TEntermonitor) newChild);
             return;
         }
 
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

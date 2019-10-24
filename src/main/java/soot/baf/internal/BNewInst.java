@@ -32,35 +32,43 @@ public class BNewInst extends AbstractRefTypeInst implements NewInst {
     super(opType);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 0;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BNewInst(getBaseType());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 1;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "new";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseNewInst(this);
   }
 
-  public boolean containsNewExpr() {
+  @Override
+public boolean containsNewExpr() {
     return true;
   }
 }

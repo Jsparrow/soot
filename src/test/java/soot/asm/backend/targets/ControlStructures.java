@@ -30,7 +30,7 @@ public class ControlStructures {
 	List<Integer> result;
 
 	protected List<Integer> get(int i){
-		result = new ArrayList<Integer>();
+		result = new ArrayList<>();
 		
 		switch(i){
 		case 1:

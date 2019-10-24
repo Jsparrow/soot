@@ -37,16 +37,16 @@ public class QueuedSet<E> {
   private LinkedList<E> ll;
 
   public QueuedSet() {
-    this.hs = new HashSet<E>();
-    this.ll = new LinkedList<E>();
+    this.hs = new HashSet<>();
+    this.ll = new LinkedList<>();
   }
 
   public QueuedSet(List<E> os) {
     this();
-    for (E o : os) {
+    os.forEach(o -> {
       this.ll.addLast(o);
       this.hs.add(o);
-    }
+    });
   }
 
   public QueuedSet(QueuedSet<E> qs) {

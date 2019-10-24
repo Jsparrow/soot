@@ -44,7 +44,8 @@ public abstract class FilledArrayInstruction extends DexlibAbstractInstruction i
     super(instruction, codeAddress);
   }
 
-  public void finalize(DexBody body, DexlibAbstractInstruction successor) {
+  @Override
+public void finalize(DexBody body, DexlibAbstractInstruction successor) {
     // // defer final jimplification to move result
     // if (successor instanceof MoveResultInstruction) {
     // MoveResultInstruction i = (MoveResultInstruction)successor;
@@ -58,7 +59,7 @@ public abstract class FilledArrayInstruction extends DexlibAbstractInstruction i
   public Set<Type> introducedTypes() {
     ReferenceInstruction i = (ReferenceInstruction) instruction;
 
-    Set<Type> types = new HashSet<Type>();
+    Set<Type> types = new HashSet<>();
     types.add(DexType.toSoot((TypeReference) i.getReference()));
     return types;
   }

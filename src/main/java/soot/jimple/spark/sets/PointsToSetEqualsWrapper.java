@@ -71,7 +71,8 @@ public class PointsToSetEqualsWrapper implements PointsToSet {
    * @return
    * @see soot.PointsToSet#hasNonEmptyIntersection(soot.PointsToSet)
    */
-  public boolean hasNonEmptyIntersection(PointsToSet other) {
+  @Override
+public boolean hasNonEmptyIntersection(PointsToSet other) {
     // unwrap other
     other = (PointsToSet) unwrapIfNecessary(other);
     return pts.hasNonEmptyIntersection(other);
@@ -81,7 +82,8 @@ public class PointsToSetEqualsWrapper implements PointsToSet {
    * @return
    * @see soot.PointsToSet#isEmpty()
    */
-  public boolean isEmpty() {
+  @Override
+public boolean isEmpty() {
     return pts.isEmpty();
   }
 
@@ -89,7 +91,8 @@ public class PointsToSetEqualsWrapper implements PointsToSet {
    * @return
    * @see soot.PointsToSet#possibleClassConstants()
    */
-  public Set<ClassConstant> possibleClassConstants() {
+  @Override
+public Set<ClassConstant> possibleClassConstants() {
     return pts.possibleClassConstants();
   }
 
@@ -97,7 +100,8 @@ public class PointsToSetEqualsWrapper implements PointsToSet {
    * @return
    * @see soot.PointsToSet#possibleStringConstants()
    */
-  public Set<String> possibleStringConstants() {
+  @Override
+public Set<String> possibleStringConstants() {
     return pts.possibleStringConstants();
   }
 
@@ -105,7 +109,8 @@ public class PointsToSetEqualsWrapper implements PointsToSet {
    * @return
    * @see soot.PointsToSet#possibleTypes()
    */
-  public Set<Type> possibleTypes() {
+  @Override
+public Set<Type> possibleTypes() {
     return pts.possibleTypes();
   }
 

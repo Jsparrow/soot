@@ -42,63 +42,73 @@ public class EmptyPointsToSet extends PointsToSetInternal {
     super(null);
   }
 
-  public static EmptyPointsToSet v() {
-    return G.v().soot_jimple_spark_sets_EmptyPointsToSet();
-  }
-
   public EmptyPointsToSet(Singletons.Global g, Type type) {
     super(type);
   }
 
-  /** Returns true if this set contains no run-time objects. */
-  public boolean isEmpty() {
+public static EmptyPointsToSet v() {
+    return G.v().soot_jimple_spark_sets_EmptyPointsToSet();
+  }
+
+/** Returns true if this set contains no run-time objects. */
+  @Override
+public boolean isEmpty() {
     return true;
   }
 
-  /** Returns true if this set shares some objects with other. */
-  public boolean hasNonEmptyIntersection(PointsToSet other) {
+/** Returns true if this set shares some objects with other. */
+  @Override
+public boolean hasNonEmptyIntersection(PointsToSet other) {
     return false;
   }
 
-  /** Set of all possible run-time types of objects in the set. */
-  public Set<Type> possibleTypes() {
+/** Set of all possible run-time types of objects in the set. */
+  @Override
+public Set<Type> possibleTypes() {
     return Collections.emptySet();
   }
 
-  /**
+/**
    * Adds contents of other into this set, returns true if this set changed.
    */
-  public boolean addAll(PointsToSetInternal other, PointsToSetInternal exclude) {
+  @Override
+public boolean addAll(PointsToSetInternal other, PointsToSetInternal exclude) {
     throw new RuntimeException("can't add into empty immutable set");
   }
 
-  /** Calls v's visit method on all nodes in this set. */
-  public boolean forall(P2SetVisitor v) {
+/** Calls v's visit method on all nodes in this set. */
+  @Override
+public boolean forall(P2SetVisitor v) {
     return false;
   }
 
-  /** Adds n to this set, returns true if n was not already in this set. */
-  public boolean add(Node n) {
+/** Adds n to this set, returns true if n was not already in this set. */
+  @Override
+public boolean add(Node n) {
     throw new RuntimeException("can't add into empty immutable set");
   }
 
-  /** Returns true iff the set contains n. */
-  public boolean contains(Node n) {
+/** Returns true iff the set contains n. */
+  @Override
+public boolean contains(Node n) {
     return false;
   }
 
-  public Set<String> possibleStringConstants() {
+@Override
+public Set<String> possibleStringConstants() {
     return Collections.emptySet();
   }
 
-  public Set<ClassConstant> possibleClassConstants() {
+@Override
+public Set<ClassConstant> possibleClassConstants() {
     return Collections.emptySet();
   }
 
-  /**
+/**
    * {@inheritDoc}
    */
-  public String toString() {
+  @Override
+public String toString() {
     return "{}";
   }
 

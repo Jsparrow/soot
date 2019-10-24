@@ -28,7 +28,7 @@ package soot.jbco.name;
  * @author p.nesterovich
  * @since 21.03.18
  */
-public class HorrorNameGenerator extends AbstractNameGenerator implements NameGenerator {
+public class HorrorNameGenerator extends AbstractNameGenerator {
 
   private static final char stringChars[][] = { { 'S', '5', '$' }, // latin s, five, dollar sign
       { 'l', '1', 'I', 'Ι' }, // l, one, I, greek iota

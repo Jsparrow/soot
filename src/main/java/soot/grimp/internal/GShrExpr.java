@@ -37,15 +37,18 @@ public class GShrExpr extends AbstractGrimpIntLongBinopExpr implements ShrExpr {
     super(op1, op2);
   }
 
-  public String getSymbol() {
+  @Override
+public String getSymbol() {
     return " >> ";
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 650;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseShrExpr(this);
   }
 
@@ -68,7 +71,8 @@ public class GShrExpr extends AbstractGrimpIntLongBinopExpr implements ShrExpr {
     return UnknownType.v();
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GShrExpr(Grimp.cloneIfNecessary(getOp1()), Grimp.cloneIfNecessary(getOp2()));
   }
 

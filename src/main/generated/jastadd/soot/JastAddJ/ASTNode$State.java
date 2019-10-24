@@ -17,12 +17,26 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @apilevel internal
   * @ast class
  * 
  */
 public class ASTNode$State extends java.lang.Object {
+
+private static final Logger logger = LoggerFactory.getLogger(ASTNode$State.class);
+
+
+public static final int REWRITE_CHANGE = 1;
+
+
+public static final int REWRITE_NOCHANGE = 2;
+
+
+public static final int REWRITE_INTERRUPT = 3;
+
 
 /**
  * @apilevel internal
@@ -48,121 +62,85 @@ public class ASTNode$State extends java.lang.Object {
   public boolean RESET_CYCLE = false;
 
 
-  /**
-   * @apilevel internal
-   */
-  static public class CircularValue {
-    Object value;
-    int visited = -1;
-  }
+public int boundariesCrossed = 0;
 
 
-  public static final int REWRITE_CHANGE = 1;
+private int[] stack;
 
 
-  public static final int REWRITE_NOCHANGE = 2;
+private int pos;
 
 
-  public static final int REWRITE_INTERRUPT = 3;
+public Options options = new Options();
 
 
-  public int boundariesCrossed = 0;
+public int replacePos = 0;
 
 
-
-  private int[] stack;
-
-
-  private int pos;
+protected int duringImplicitConstructor = 0;
 
 
-  public ASTNode$State() {
+protected int duringBoundNames = 0;
+
+
+protected int duringNameResolution = 0;
+
+
+protected int duringSyntacticClassification = 0;
+
+
+protected int duringAnonymousClasses = 0;
+
+
+protected int duringVariableDeclarationTransformation = 0;
+
+
+protected int duringLiterals = 0;
+
+
+protected int duringDU = 0;
+
+
+protected int duringAnnotations = 0;
+
+
+protected int duringEnums = 0;
+
+
+protected int duringGenericTypeVariables = 0;
+
+
+public ASTNode$State() {
       stack = new int[64];
       pos = 0;
   }
 
 
-  private void ensureSize(int size) {
-      if(size < stack.length)
-        return;
+private void ensureSize(int size) {
+      if(size < stack.length) {
+		return;
+	}
       int[] newStack = new int[stack.length * 2];
       System.arraycopy(stack, 0, newStack, 0, stack.length);
       stack = newStack;
   }
 
 
-  public void push(int i) {
+public void push(int i) {
     ensureSize(pos+1);
     stack[pos++] = i;
   }
 
 
-  public int pop() {
+public int pop() {
     return stack[--pos];
   }
 
 
-  public int peek() {
+public int peek() {
     return stack[pos-1];
   }
 
-
-  /**
-   * @apilevel internal
-   */
-  static class IdentityHashSet extends java.util.AbstractSet implements java.util.Set {
-    public IdentityHashSet(int initialCapacity) {
-      map = new java.util.IdentityHashMap(initialCapacity);
-      }
-    private java.util.IdentityHashMap map;
-    private static final Object PRESENT = new Object();
-    public java.util.Iterator iterator() { return map.keySet().iterator(); }
-    public int size() { return map.size(); }
-    public boolean isEmpty() { return map.isEmpty(); }
-    public boolean contains(Object o) { return map.containsKey(o); }
-    public boolean add(Object o) { return map.put(o, PRESENT)==null; }
-    public boolean remove(Object o) { return map.remove(o)==PRESENT; }
-    public void clear() { map.clear(); }
-  }
-
-
-  public Options options = new Options();
-
-
-  public int replacePos = 0;
-
-
-  protected int duringImplicitConstructor = 0;
-
-
-  protected int duringBoundNames = 0;
-
-
-  protected int duringNameResolution = 0;
-
-
-  protected int duringSyntacticClassification = 0;
-
-
-  protected int duringAnonymousClasses = 0;
-
-
-  protected int duringVariableDeclarationTransformation = 0;
-
-
-  protected int duringLiterals = 0;
-
-
-  protected int duringDU = 0;
-
-
-  protected int duringAnnotations = 0;
-
-
-  protected int duringEnums = 0;
-
-
-  protected int duringGenericTypeVariables = 0;
 
 public void reset() {
     IN_CIRCLE = false;
@@ -170,49 +148,85 @@ public void reset() {
     CHANGE = false;
     boundariesCrossed = 0;
     if(duringImplicitConstructor != 0) {
-      System.out.println("Warning: resetting duringImplicitConstructor");
+      logger.info("Warning: resetting duringImplicitConstructor");
       duringImplicitConstructor = 0;
     }
     if(duringBoundNames != 0) {
-      System.out.println("Warning: resetting duringBoundNames");
+      logger.info("Warning: resetting duringBoundNames");
       duringBoundNames = 0;
     }
     if(duringNameResolution != 0) {
-      System.out.println("Warning: resetting duringNameResolution");
+      logger.info("Warning: resetting duringNameResolution");
       duringNameResolution = 0;
     }
     if(duringSyntacticClassification != 0) {
-      System.out.println("Warning: resetting duringSyntacticClassification");
+      logger.info("Warning: resetting duringSyntacticClassification");
       duringSyntacticClassification = 0;
     }
     if(duringAnonymousClasses != 0) {
-      System.out.println("Warning: resetting duringAnonymousClasses");
+      logger.info("Warning: resetting duringAnonymousClasses");
       duringAnonymousClasses = 0;
     }
     if(duringVariableDeclarationTransformation != 0) {
-      System.out.println("Warning: resetting duringVariableDeclarationTransformation");
+      logger.info("Warning: resetting duringVariableDeclarationTransformation");
       duringVariableDeclarationTransformation = 0;
     }
     if(duringLiterals != 0) {
-      System.out.println("Warning: resetting duringLiterals");
+      logger.info("Warning: resetting duringLiterals");
       duringLiterals = 0;
     }
     if(duringDU != 0) {
-      System.out.println("Warning: resetting duringDU");
+      logger.info("Warning: resetting duringDU");
       duringDU = 0;
     }
     if(duringAnnotations != 0) {
-      System.out.println("Warning: resetting duringAnnotations");
+      logger.info("Warning: resetting duringAnnotations");
       duringAnnotations = 0;
     }
     if(duringEnums != 0) {
-      System.out.println("Warning: resetting duringEnums");
+      logger.info("Warning: resetting duringEnums");
       duringEnums = 0;
     }
-    if(duringGenericTypeVariables != 0) {
-      System.out.println("Warning: resetting duringGenericTypeVariables");
-      duringGenericTypeVariables = 0;
-    }
+    if (duringGenericTypeVariables == 0) {
+		return;
+	}
+	logger.info("Warning: resetting duringGenericTypeVariables");
+	duringGenericTypeVariables = 0;
+  }
+
+
+/**
+   * @apilevel internal
+   */
+  public static class CircularValue {
+    Object value;
+    int visited = -1;
+  }
+
+
+  /**
+   * @apilevel internal
+   */
+  static class IdentityHashSet extends java.util.AbstractSet implements java.util.Set {
+    private static final Object PRESENT = new Object();
+	private java.util.IdentityHashMap map;
+	public IdentityHashSet(int initialCapacity) {
+      map = new java.util.IdentityHashMap(initialCapacity);
+      }
+	@Override
+	public java.util.Iterator iterator() { return map.keySet().iterator(); }
+	@Override
+	public int size() { return map.size(); }
+	@Override
+	public boolean isEmpty() { return map.isEmpty(); }
+	@Override
+	public boolean contains(Object o) { return map.containsKey(o); }
+	@Override
+	public boolean add(Object o) { return map.put(o, PRESENT)==null; }
+	@Override
+	public boolean remove(Object o) { return map.remove(o)==PRESENT; }
+	@Override
+	public void clear() { map.clear(); }
   }
 
 

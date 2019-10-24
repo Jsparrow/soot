@@ -27,85 +27,81 @@ import soot.PackManager;
 public class AnonClassInitMethodSource extends soot.javaToJimple.PolyglotMethodSource {
 
   private boolean hasOuterRef;
+private boolean hasQualifier;
+private boolean inStaticMethod;
+private boolean isSubType = false;
+private soot.Type superOuterType = null;
+private soot.Type thisOuterType = null;
+private polyglot.types.ClassType polyglotType;
+private polyglot.types.ClassType anonType;
+private soot.Type outerClassType;
 
-  public void hasOuterRef(boolean b) {
+public void hasOuterRef(boolean b) {
     hasOuterRef = b;
   }
 
-  public boolean hasOuterRef() {
+public boolean hasOuterRef() {
     return hasOuterRef;
   }
 
-  private boolean hasQualifier;
-
-  public void hasQualifier(boolean b) {
+public void hasQualifier(boolean b) {
     hasQualifier = b;
   }
 
-  public boolean hasQualifier() {
+public boolean hasQualifier() {
     return hasQualifier;
   }
 
-  private boolean inStaticMethod;
-
-  public void inStaticMethod(boolean b) {
+public void inStaticMethod(boolean b) {
     inStaticMethod = b;
   }
 
-  public boolean inStaticMethod() {
+public boolean inStaticMethod() {
     return inStaticMethod;
   }
 
-  private boolean isSubType = false;
-
-  public void isSubType(boolean b) {
+public void isSubType(boolean b) {
     isSubType = b;
   }
 
-  public boolean isSubType() {
+public boolean isSubType() {
     return isSubType;
   }
 
-  private soot.Type superOuterType = null;
-  private soot.Type thisOuterType = null;
-
-  public void superOuterType(soot.Type t) {
+public void superOuterType(soot.Type t) {
     superOuterType = t;
   }
 
-  public soot.Type superOuterType() {
+public soot.Type superOuterType() {
     return superOuterType;
   }
 
-  public void thisOuterType(soot.Type t) {
+public void thisOuterType(soot.Type t) {
     thisOuterType = t;
   }
 
-  public soot.Type thisOuterType() {
+public soot.Type thisOuterType() {
     return thisOuterType;
   }
 
-  private polyglot.types.ClassType polyglotType;
-
-  public void polyglotType(polyglot.types.ClassType type) {
+public void polyglotType(polyglot.types.ClassType type) {
     polyglotType = type;
   }
 
-  public polyglot.types.ClassType polyglotType() {
+public polyglot.types.ClassType polyglotType() {
     return polyglotType;
   }
 
-  private polyglot.types.ClassType anonType;
-
-  public void anonType(polyglot.types.ClassType type) {
+public void anonType(polyglot.types.ClassType type) {
     anonType = type;
   }
 
-  public polyglot.types.ClassType anonType() {
+public polyglot.types.ClassType anonType() {
     return anonType;
   }
 
-  public soot.Body getBody(soot.SootMethod sootMethod, String phaseName) {
+@Override
+public soot.Body getBody(soot.SootMethod sootMethod, String phaseName) {
     AnonInitBodyBuilder aibb = new AnonInitBodyBuilder();
     soot.jimple.JimpleBody body = aibb.createBody(sootMethod);
 
@@ -114,13 +110,11 @@ public class AnonClassInitMethodSource extends soot.javaToJimple.PolyglotMethodS
     return body;
   }
 
-  private soot.Type outerClassType;
-
-  public soot.Type outerClassType() {
+public soot.Type outerClassType() {
     return outerClassType;
   }
 
-  public void outerClassType(soot.Type type) {
+public void outerClassType(soot.Type type) {
     outerClassType = type;
   }
 }

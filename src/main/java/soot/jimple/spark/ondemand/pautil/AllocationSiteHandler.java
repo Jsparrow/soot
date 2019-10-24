@@ -60,11 +60,13 @@ public interface AllocationSiteHandler {
    *          for context-sensitive analysis, the call site; might be null
    * @return true if analysis should be terminated; false otherwise
    */
-  public boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack);
+  boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack);
 
-  public void resetState();
+  void resetState();
 
-  public static class PointsToSetHandler implements AllocationSiteHandler {
+  boolean shouldHandle(VarNode dst);
+
+public static class PointsToSetHandler implements AllocationSiteHandler {
 
     private PointsToSetInternal p2set;
 
@@ -73,7 +75,8 @@ public interface AllocationSiteHandler {
      * 
      * @see AAA.algs.AllocationSiteHandler#handleAllocationSite(soot.jimple.spark.pag.AllocNode, java.lang.Integer)
      */
-    public boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack) {
+    @Override
+	public boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack) {
       p2set.add(allocNode);
       return false;
     }
@@ -86,12 +89,14 @@ public interface AllocationSiteHandler {
       this.p2set = p2set;
     }
 
-    public void resetState() {
+    @Override
+	public void resetState() {
       // TODO support this
       throw new RuntimeException();
     }
 
-    public boolean shouldHandle(VarNode dst) {
+    @Override
+	public boolean shouldHandle(VarNode dst) {
       // TODO Auto-generated method stub
       return false;
     }
@@ -110,7 +115,8 @@ public interface AllocationSiteHandler {
      * 
      * @see AAA.algs.AllocationSiteHandler#handleAllocationSite(soot.jimple.spark.pag.AllocNode, java.lang.Integer)
      */
-    public boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack) {
+    @Override
+	public boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack) {
       castFailed = !manager.castNeverFails(allocNode.getType(), type);
       return castFailed;
     }
@@ -123,11 +129,13 @@ public interface AllocationSiteHandler {
       this.type = type;
     }
 
-    public void resetState() {
+    @Override
+	public void resetState() {
       throw new RuntimeException();
     }
 
-    public boolean shouldHandle(VarNode dst) {
+    @Override
+	public boolean shouldHandle(VarNode dst) {
       // TODO Auto-generated method stub
       P2SetVisitor v = new P2SetVisitor() {
 
@@ -152,7 +160,7 @@ public interface AllocationSiteHandler {
 
     public NumberedString methodStr;
 
-    public Set<SootMethod> possibleMethods = new HashSet<SootMethod>();
+    public Set<SootMethod> possibleMethods = new HashSet<>();
 
     /**
      * @param pag
@@ -162,7 +170,6 @@ public interface AllocationSiteHandler {
      * @param returnType
      */
     public VirtualCallHandler(PAG pag, Type receiverType, NumberedString methodStr) {
-      super();
       this.pag = pag;
       this.receiverType = receiverType;
       this.methodStr = methodStr;
@@ -173,7 +180,8 @@ public interface AllocationSiteHandler {
      * 
      * @see AAA.algs.AllocationSiteHandler#handleAllocationSite(soot.jimple.spark.pag.AllocNode, AAA.algs.MethodContext)
      */
-    public boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack) {
+    @Override
+	public boolean handleAllocationSite(AllocNode allocNode, ImmutableStack<Integer> callStack) {
       Type type = allocNode.getType();
       if (!pag.getTypeManager().castNeverFails(type, receiverType)) {
         return false;
@@ -205,15 +213,15 @@ public interface AllocationSiteHandler {
       return false;
     }
 
-    public void resetState() {
+    @Override
+	public void resetState() {
       possibleMethods.clear();
     }
 
-    public boolean shouldHandle(VarNode dst) {
+    @Override
+	public boolean shouldHandle(VarNode dst) {
       // TODO Auto-generated method stub
       return false;
     }
   }
-
-  public boolean shouldHandle(VarNode dst);
 }

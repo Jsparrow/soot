@@ -68,46 +68,54 @@ import soot.util.BitVector;
 @Deprecated
 public class TypeResolverBV {
   private static final Logger logger = LoggerFactory.getLogger(TypeResolverBV.class);
-  /** Reference to the class hierarchy **/
+private static final boolean DEBUG = false;
+/** Reference to the class hierarchy **/
   private final ClassHierarchy hierarchy;
-
-  /** All type variable instances **/
-  private final List<TypeVariableBV> typeVariableList = new ArrayList<TypeVariableBV>();
-  private final BitVector invalidIds = new BitVector();
-
-  /** Hashtable: [TypeNode or Local] -> TypeVariableBV **/
-  private final Map<Object, TypeVariableBV> typeVariableMap = new HashMap<Object, TypeVariableBV>();
-
-  private final JimpleBody stmtBody;
-
-  final TypeNode NULL;
-  private final TypeNode OBJECT;
-
-  private static final boolean DEBUG = false;
-
-  // categories for type variables (solved = hard, unsolved = soft)
+/** All type variable instances **/
+  private final List<TypeVariableBV> typeVariableList = new ArrayList<>();
+private final BitVector invalidIds = new BitVector();
+/** Hashtable: [TypeNode or Local] -> TypeVariableBV **/
+  private final Map<Object, TypeVariableBV> typeVariableMap = new HashMap<>();
+private final JimpleBody stmtBody;
+final TypeNode NULL;
+private final TypeNode object;
+// categories for type variables (solved = hard, unsolved = soft)
   private BitVector unsolved;
-  private BitVector solved;
+private BitVector solved;
+// parent categories for unsolved type variables
+  private BitVector singleSoftParent;
+private BitVector singleHardParent;
+private BitVector multipleParents;
+// child categories for unsolved type variables
+  private BitVector singleChildNotNull;
+private BitVector singleNullChild;
+private BitVector multipleChildren;
 
-  // parent categories for unsolved type variables
-  private BitVector single_soft_parent;
-  private BitVector single_hard_parent;
-  private BitVector multiple_parents;
+private TypeResolverBV(JimpleBody stmtBody, Scene scene) {
+    this.stmtBody = stmtBody;
+    hierarchy = ClassHierarchy.classHierarchy(scene);
 
-  // child categories for unsolved type variables
-  private BitVector single_child_not_null;
-  private BitVector single_null_child;
-  private BitVector multiple_children;
+    object = hierarchy.OBJECT;
+    NULL = hierarchy.NULL;
+    typeVariable(object);
+    typeVariable(NULL);
 
-  public ClassHierarchy hierarchy() {
+    // hack for J2ME library, reported by Stephen Cheng
+    if (!Options.v().j2me()) {
+      typeVariable(hierarchy.CLONEABLE);
+      typeVariable(hierarchy.SERIALIZABLE);
+    }
+  }
+
+public ClassHierarchy hierarchy() {
     return hierarchy;
   }
 
-  public TypeNode typeNode(Type type) {
+public TypeNode typeNode(Type type) {
     return hierarchy.typeNode(type);
   }
 
-  /** Get type variable for the given local. **/
+/** Get type variable for the given local. **/
   TypeVariableBV typeVariable(Local local) {
     TypeVariableBV result = typeVariableMap.get(local);
 
@@ -121,14 +129,14 @@ public class TypeResolverBV {
       typeVariableMap.put(local, result);
 
       if (DEBUG) {
-        logger.debug("[LOCAL VARIABLE \"" + local + "\" -> " + id + "]");
+        logger.debug(new StringBuilder().append("[LOCAL VARIABLE \"").append(local).append("\" -> ").append(id).append("]").toString());
       }
     }
 
     return result;
   }
 
-  /** Get type variable for the given type node. **/
+/** Get type variable for the given type node. **/
   public TypeVariableBV typeVariable(TypeNode typeNode) {
     TypeVariableBV result = typeVariableMap.get(typeNode);
 
@@ -145,17 +153,17 @@ public class TypeResolverBV {
     return result;
   }
 
-  /** Get type variable for the given soot class. **/
+/** Get type variable for the given soot class. **/
   public TypeVariableBV typeVariable(SootClass sootClass) {
     return typeVariable(hierarchy.typeNode(sootClass.getType()));
   }
 
-  /** Get type variable for the given type. **/
+/** Get type variable for the given type. **/
   public TypeVariableBV typeVariable(Type type) {
     return typeVariable(hierarchy.typeNode(type));
   }
 
-  /** Get new type variable **/
+/** Get new type variable **/
   public TypeVariableBV typeVariable() {
     int id = typeVariableList.size();
     typeVariableList.add(null);
@@ -167,23 +175,7 @@ public class TypeResolverBV {
     return result;
   }
 
-  private TypeResolverBV(JimpleBody stmtBody, Scene scene) {
-    this.stmtBody = stmtBody;
-    hierarchy = ClassHierarchy.classHierarchy(scene);
-
-    OBJECT = hierarchy.OBJECT;
-    NULL = hierarchy.NULL;
-    typeVariable(OBJECT);
-    typeVariable(NULL);
-
-    // hack for J2ME library, reported by Stephen Cheng
-    if (!Options.v().j2me()) {
-      typeVariable(hierarchy.CLONEABLE);
-      typeVariable(hierarchy.SERIALIZABLE);
-    }
-  }
-
-  public static void resolve(JimpleBody stmtBody, Scene scene) {
+public static void resolve(JimpleBody stmtBody, Scene scene) {
     if (DEBUG) {
       logger.debug("" + stmtBody.getMethod());
     }
@@ -221,29 +213,31 @@ public class TypeResolverBV {
     soot.jimple.toolkits.typing.integer.TypeResolver.resolve(stmtBody);
   }
 
-  private void debug_vars(String message) {
-    if (DEBUG) {
-      int count = 0;
-      logger.debug("**** START:" + message);
-      for (TypeVariableBV var : typeVariableList) {
-        logger.debug("" + count++ + " " + var);
+private void debug_vars(String message) {
+    if (!DEBUG) {
+		return;
+	}
+	int count = 0;
+	logger.debug("**** START:" + message);
+	for (TypeVariableBV var : typeVariableList) {
+        logger.debug(new StringBuilder().append(Integer.toString(count++)).append(" ").append(var).toString());
       }
-      logger.debug("**** END:" + message);
-    }
+	logger.debug("**** END:" + message);
   }
 
-  private void debug_body() {
-    if (DEBUG) {
-      logger.debug("-- Body Start --");
-      for (Iterator<Unit> stmtIt = stmtBody.getUnits().iterator(); stmtIt.hasNext();) {
+private void debug_body() {
+    if (!DEBUG) {
+		return;
+	}
+	logger.debug("-- Body Start --");
+	for (Iterator<Unit> stmtIt = stmtBody.getUnits().iterator(); stmtIt.hasNext();) {
         final Stmt stmt = (Stmt) stmtIt.next();
         logger.debug("" + stmt);
       }
-      logger.debug("-- Body End --");
-    }
+	logger.debug("-- Body End --");
   }
 
-  private void resolve_step_1() throws TypeException {
+private void resolve_step_1() throws TypeException {
     // remove_spurious_locals();
 
     collect_constraints_1_2();
@@ -271,7 +265,7 @@ public class TypeResolverBV {
     check_constraints();
   }
 
-  private void resolve_step_2() throws TypeException {
+private void resolve_step_2() throws TypeException {
     debug_body();
     split_new();
     debug_body();
@@ -301,14 +295,14 @@ public class TypeResolverBV {
     check_constraints();
   }
 
-  private void resolve_step_3() throws TypeException {
+private void resolve_step_3() throws TypeException {
     collect_constraints_3();
     compute_approximate_types();
     assign_types_3();
     check_and_fix_constraints();
   }
 
-  private void collect_constraints_1_2() {
+private void collect_constraints_1_2() {
     ConstraintCollectorBV collector = new ConstraintCollectorBV(this, true);
 
     for (Iterator<Unit> stmtIt = stmtBody.getUnits().iterator(); stmtIt.hasNext();) {
@@ -324,7 +318,7 @@ public class TypeResolverBV {
     }
   }
 
-  private void collect_constraints_3() {
+private void collect_constraints_3() {
     ConstraintCollectorBV collector = new ConstraintCollectorBV(this, false);
 
     for (Iterator<Unit> stmtIt = stmtBody.getUnits().iterator(); stmtIt.hasNext();) {
@@ -340,7 +334,7 @@ public class TypeResolverBV {
     }
   }
 
-  private void compute_array_depth() throws TypeException {
+private void compute_array_depth() throws TypeException {
     compute_approximate_types();
 
     TypeVariableBV[] vars = new TypeVariableBV[typeVariableList.size()];
@@ -351,7 +345,7 @@ public class TypeResolverBV {
     }
   }
 
-  private void propagate_array_constraints() {
+private void propagate_array_constraints() {
     // find max depth
     int max = 0;
     for (TypeVariableBV var : typeVariableList) {
@@ -362,36 +356,33 @@ public class TypeResolverBV {
       }
     }
 
-    if (max > 1) {
-      // hack for J2ME library, reported by Stephen Cheng
-      if (!Options.v().j2me()) {
+    boolean condition = max > 1 && !Options.v().j2me();
+	// hack for J2ME library, reported by Stephen Cheng
+	if (condition) {
         typeVariable(ArrayType.v(RefType.v("java.lang.Cloneable"), max - 1));
         typeVariable(ArrayType.v(RefType.v("java.io.Serializable"), max - 1));
       }
-    }
 
     // create lists for each array depth
     @SuppressWarnings("unchecked")
     LinkedList<TypeVariableBV>[] lists = new LinkedList[max + 1];
     for (int i = 0; i <= max; i++) {
-      lists[i] = new LinkedList<TypeVariableBV>();
+      lists[i] = new LinkedList<>();
     }
 
-    for (TypeVariableBV var : typeVariableList) {
+    typeVariableList.forEach(var -> {
       int depth = var.depth();
 
       lists[depth].add(var);
-    }
+    });
 
     // propagate constraints, starting with highest depth
     for (int i = max; i >= 0; i--) {
-      for (TypeVariableBV var : typeVariableList) {
-        var.propagate();
-      }
+      typeVariableList.forEach(TypeVariableBV::propagate);
     }
   }
 
-  private void merge_primitive_types() throws TypeException {
+private void merge_primitive_types() throws TypeException {
     // merge primitive types with all parents/children
     compute_solved();
 
@@ -440,7 +431,7 @@ public class TypeResolverBV {
     }
   }
 
-  private void merge_connected_components() throws TypeException {
+private void merge_connected_components() throws TypeException {
     refresh_solved();
     BitVector list = new BitVector();
     list.or(solved);
@@ -449,7 +440,7 @@ public class TypeResolverBV {
     new StronglyConnectedComponentsBV(list, this);
   }
 
-  private void remove_transitive_constraints() throws TypeException {
+private void remove_transitive_constraints() throws TypeException {
     refresh_solved();
     BitVector list = new BitVector();
     list.or(solved);
@@ -463,21 +454,21 @@ public class TypeResolverBV {
     }
   }
 
-  private void merge_single_constraints() throws TypeException {
+private void merge_single_constraints() throws TypeException {
     boolean finished = false;
     boolean modified = false;
     while (true) {
       categorize();
 
-      if (single_child_not_null.length() != 0) {
+      if (singleChildNotNull.length() != 0) {
         finished = false;
         modified = true;
 
-        BitSetIterator i = single_child_not_null.iterator();
+        BitSetIterator i = singleChildNotNull.iterator();
         while (i.hasNext()) {
           TypeVariableBV var = typeVariableForId(i.next());
 
-          if (single_child_not_null.get(var.id())) {
+          if (singleChildNotNull.get(var.id())) {
             // PA: Potential difference to old algorithm - using the smallest element
             // in the list rather than children().get(0);
             TypeVariableBV child = typeVariableForId(var.children().iterator().next());
@@ -488,15 +479,15 @@ public class TypeResolverBV {
       }
 
       if (finished) {
-        if (single_soft_parent.length() != 0) {
+        if (singleSoftParent.length() != 0) {
           finished = false;
           modified = true;
 
-          BitSetIterator i = single_soft_parent.iterator();
+          BitSetIterator i = singleSoftParent.iterator();
           while (i.hasNext()) {
             TypeVariableBV var = typeVariableForId(i.next());
 
-            if (single_soft_parent.get(var.id())) {
+            if (singleSoftParent.get(var.id())) {
               // PA: See above.
               TypeVariableBV parent = typeVariableForId(var.parents().iterator().next());
 
@@ -505,33 +496,33 @@ public class TypeResolverBV {
           }
         }
 
-        if (single_hard_parent.length() != 0) {
+        if (singleHardParent.length() != 0) {
           finished = false;
           modified = true;
 
-          BitSetIterator i = single_hard_parent.iterator();
+          BitSetIterator i = singleHardParent.iterator();
           while (i.hasNext()) {
             TypeVariableBV var = typeVariableForId(i.next());
 
-            if (single_hard_parent.get(var.id())) {
+            if (singleHardParent.get(var.id())) {
               // PA: See above
               TypeVariableBV parent = typeVariableForId(var.parents().iterator().next());
 
-              debug_vars("union single parent\n " + var + "\n " + parent);
+              debug_vars(new StringBuilder().append("union single parent\n ").append(var).append("\n ").append(parent).toString());
               var = var.union(parent);
             }
           }
         }
 
-        if (single_null_child.length() != 0) {
+        if (singleNullChild.length() != 0) {
           finished = false;
           modified = true;
 
-          BitSetIterator i = single_null_child.iterator();
+          BitSetIterator i = singleNullChild.iterator();
           while (i.hasNext()) {
             TypeVariableBV var = typeVariableForId(i.next());
 
-            if (single_null_child.get(var.id())) {
+            if (singleNullChild.get(var.id())) {
               // PA: See above
               TypeVariableBV child = typeVariableForId(var.children().iterator().next());
 
@@ -554,7 +545,7 @@ public class TypeResolverBV {
 
       finished = true;
 
-      multiple_children: for (BitSetIterator varIt = multiple_children.iterator(); varIt.hasNext();) {
+      multiple_children: for (BitSetIterator varIt = multipleChildren.iterator(); varIt.hasNext();) {
         final TypeVariableBV var = typeVariableForId(varIt.next());
         TypeNode lca = null;
         BitVector children_to_remove = new BitVector();
@@ -577,7 +568,7 @@ public class TypeResolverBV {
               if (lca == null) {
                 if (DEBUG) {
                   logger.debug(
-                      "==++==" + stmtBody.getMethod().getDeclaringClass().getName() + "." + stmtBody.getMethod().getName());
+                      new StringBuilder().append("==++==").append(stmtBody.getMethod().getDeclaringClass().getName()).append(".").append(stmtBody.getMethod().getName()).toString());
                 }
 
                 continue multiple_children;
@@ -596,10 +587,10 @@ public class TypeResolverBV {
         }
       }
 
-      for (BitSetIterator varIt = multiple_parents.iterator(); varIt.hasNext();) {
+      for (BitSetIterator varIt = multipleParents.iterator(); varIt.hasNext();) {
 
         final TypeVariableBV var = typeVariableForId(varIt.next());
-        LinkedList<TypeVariableBV> hp = new LinkedList<TypeVariableBV>(); // hard parents
+        LinkedList<TypeVariableBV> hp = new LinkedList<>(); // hard parents
 
         for (BitSetIterator parentIt = var.parents().iterator(); parentIt.hasNext();) {
 
@@ -633,7 +624,7 @@ public class TypeResolverBV {
     }
   }
 
-  private void assign_types_1_2() throws TypeException {
+private void assign_types_1_2() throws TypeException {
     for (Iterator<Local> localIt = stmtBody.getLocals().iterator(); localIt.hasNext();) {
       final Local local = localIt.next();
       TypeVariableBV var = typeVariable(local);
@@ -667,16 +658,16 @@ public class TypeResolverBV {
         }
       }
 
-      if (DEBUG) {
-        if ((var != null) && (var.approx() != null) && (var.approx().type() != null) && (local != null)
-            && (local.getType() != null) && !local.getType().equals(var.approx().type())) {
-          logger.debug("local: " + local + ", type: " + local.getType() + ", approx: " + var.approx().type());
-        }
+      boolean condition = DEBUG && (var != null) && (var.approx() != null) && (var.approx().type() != null) && (local != null)
+	    && (local.getType() != null) && !local.getType().equals(var.approx().type());
+	if (condition) {
+        logger.debug(new StringBuilder().append("local: ").append(local).append(", type: ").append(local.getType()).append(", approx: ").append(var.approx().type())
+				.toString());
       }
     }
   }
 
-  private void assign_types_3() throws TypeException {
+private void assign_types_3() throws TypeException {
     for (Iterator<Local> localIt = stmtBody.getLocals().iterator(); localIt.hasNext();) {
       final Local local = localIt.next();
       TypeVariableBV var = typeVariable(local);
@@ -689,19 +680,19 @@ public class TypeResolverBV {
     }
   }
 
-  private void check_constraints() throws TypeException {
+private void check_constraints() throws TypeException {
     ConstraintCheckerBV checker = new ConstraintCheckerBV(this, false);
-    StringBuffer s = null;
+    StringBuilder s = null;
 
     if (DEBUG) {
-      s = new StringBuffer("Checking:\n");
+      s = new StringBuilder("Checking:\n");
     }
 
     for (Iterator<Unit> stmtIt = stmtBody.getUnits().iterator(); stmtIt.hasNext();) {
 
       final Stmt stmt = (Stmt) stmtIt.next();
       if (DEBUG) {
-        s.append(" " + stmt + "\n");
+        s.append(new StringBuilder().append(" ").append(stmt).append("\n").toString());
       }
       try {
         checker.check(stmt, stmtBody);
@@ -714,20 +705,20 @@ public class TypeResolverBV {
     }
   }
 
-  private void check_and_fix_constraints() throws TypeException {
+private void check_and_fix_constraints() throws TypeException {
     ConstraintCheckerBV checker = new ConstraintCheckerBV(this, true);
-    StringBuffer s = null;
+    StringBuilder s = null;
     PatchingChain<Unit> units = stmtBody.getUnits();
     Stmt[] stmts = new Stmt[units.size()];
     units.toArray(stmts);
 
     if (DEBUG) {
-      s = new StringBuffer("Checking:\n");
+      s = new StringBuilder("Checking:\n");
     }
 
     for (Stmt stmt : stmts) {
       if (DEBUG) {
-        s.append(" " + stmt + "\n");
+        s.append(new StringBuilder().append(" ").append(stmt).append("\n").toString());
       }
       try {
         checker.check(stmt, stmtBody);
@@ -740,15 +731,10 @@ public class TypeResolverBV {
     }
   }
 
-  private void compute_approximate_types() throws TypeException {
-    TreeSet<TypeVariableBV> workList = new TreeSet<TypeVariableBV>();
+private void compute_approximate_types() throws TypeException {
+    TreeSet<TypeVariableBV> workList = new TreeSet<>();
 
-    for (TypeVariableBV var : typeVariableList) {
-
-      if (var.type() != null) {
-        workList.add(var);
-      }
-    }
+    typeVariableList.stream().filter(var -> var.type() != null).forEach(workList::add);
 
     TypeVariableBV.computeApprox(workList);
 
@@ -762,23 +748,20 @@ public class TypeResolverBV {
     }
   }
 
-  private void compute_solved() {
+private void compute_solved() {
     unsolved = new BitVector();
     solved = new BitVector();
 
-    for (TypeVariableBV var : typeVariableList) {
-
-      if (var.depth() == 0) {
+    typeVariableList.stream().filter(var -> var.depth() == 0).forEach(var -> {
         if (var.type() == null) {
           unsolved.set(var.id());
         } else {
           solved.set(var.id());
         }
-      }
-    }
+      });
   }
 
-  private void refresh_solved() throws TypeException {
+private void refresh_solved() throws TypeException {
     unsolved = new BitVector();
     // solved stays the same
 
@@ -798,15 +781,15 @@ public class TypeResolverBV {
     // validate();
   }
 
-  private void categorize() throws TypeException {
+private void categorize() throws TypeException {
     refresh_solved();
 
-    single_soft_parent = new BitVector();
-    single_hard_parent = new BitVector();
-    multiple_parents = new BitVector();
-    single_child_not_null = new BitVector();
-    single_null_child = new BitVector();
-    multiple_children = new BitVector();
+    singleSoftParent = new BitVector();
+    singleHardParent = new BitVector();
+    multipleParents = new BitVector();
+    singleChildNotNull = new BitVector();
+    singleNullChild = new BitVector();
+    multipleChildren = new BitVector();
 
     for (BitSetIterator i = unsolved.iterator(); i.hasNext();) {
       TypeVariableBV var = typeVariableForId(i.next());
@@ -817,18 +800,18 @@ public class TypeResolverBV {
         int size = parents.length();
 
         if (size == 0) {
-          var.addParent(typeVariable(OBJECT));
-          single_soft_parent.set(var.id());
+          var.addParent(typeVariable(object));
+          singleSoftParent.set(var.id());
         } else if (size == 1) {
           TypeVariableBV parent = typeVariableForId(parents.iterator().next());
 
           if (parent.type() == null) {
-            single_soft_parent.set(var.id());
+            singleSoftParent.set(var.id());
           } else {
-            single_hard_parent.set(var.id());
+            singleHardParent.set(var.id());
           }
         } else {
-          multiple_parents.set(var.id());
+          multipleParents.set(var.id());
         }
       }
 
@@ -839,23 +822,23 @@ public class TypeResolverBV {
 
         if (size == 0) {
           var.addChild(typeVariable(NULL));
-          single_null_child.set(var.id());
+          singleNullChild.set(var.id());
         } else if (size == 1) {
           TypeVariableBV child = typeVariableForId(children.iterator().next());
 
           if (child.type() == NULL) {
-            single_null_child.set(var.id());
+            singleNullChild.set(var.id());
           } else {
-            single_child_not_null.set(var.id());
+            singleChildNotNull.set(var.id());
           }
         } else {
-          multiple_children.set(var.id());
+          multipleChildren.set(var.id());
         }
       }
     }
   }
 
-  private void split_new() {
+private void split_new() {
     LocalDefs defs = LocalDefs.Factory.newLocalDefs(stmtBody);
     PatchingChain<Unit> units = stmtBody.getUnits();
     Stmt[] stmts = new Stmt[units.size()];
@@ -869,7 +852,7 @@ public class TypeResolverBV {
         if (invoke.getInvokeExpr() instanceof SpecialInvokeExpr) {
           SpecialInvokeExpr special = (SpecialInvokeExpr) invoke.getInvokeExpr();
 
-          if (special.getMethodRef().name().equals("<init>")) {
+          if ("<init>".equals(special.getMethodRef().name())) {
             List<Unit> deflist = defs.getDefsOfAt((Local) special.getBase(), invoke);
 
             while (deflist.size() == 1) {
@@ -901,15 +884,15 @@ public class TypeResolverBV {
     }
   }
 
-  public TypeVariableBV typeVariableForId(int idx) {
+public TypeVariableBV typeVariableForId(int idx) {
     return typeVariableList.get(idx);
   }
 
-  public BitVector invalidIds() {
+public BitVector invalidIds() {
     return invalidIds;
   }
 
-  public void invalidateId(int id) {
+public void invalidateId(int id) {
     invalidIds.set(id);
   }
 }

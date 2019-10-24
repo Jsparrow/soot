@@ -56,35 +56,31 @@ public class StrongLocalMustAliasAnalysis extends LocalMustAliasAnalysis {
 
   public StrongLocalMustAliasAnalysis(UnitGraph g) {
     super(g);
-    invalidInstanceKeys = new HashSet<Integer>();
+    invalidInstanceKeys = new HashSet<>();
     /*
      * Find all SCCs, then invalidate all instance keys for variable defined within an SCC.
      */
-    StronglyConnectedComponentsFast<Unit> sccAnalysis = new StronglyConnectedComponentsFast<Unit>(g);
-    for (List<Unit> scc : sccAnalysis.getTrueComponents()) {
-      for (Unit unit : scc) {
-        for (ValueBox vb : unit.getDefBoxes()) {
-          Value defValue = vb.getValue();
-          if (defValue instanceof Local) {
-            Local defLocal = (Local) defValue;
-            if (defLocal.getType() instanceof RefLikeType) {
-              Object instanceKey = getFlowBefore(unit).get(defLocal);
-              // if key is not already UNKNOWN
-              if (instanceKey instanceof Integer) {
-                Integer intKey = (Integer) instanceKey;
-                invalidInstanceKeys.add(intKey);
-              }
-              instanceKey = getFlowAfter(unit).get(defLocal);
-              // if key is not already UNKNOWN
-              if (instanceKey instanceof Integer) {
-                Integer intKey = (Integer) instanceKey;
-                invalidInstanceKeys.add(intKey);
-              }
-            }
-          }
-        }
-      }
-    }
+    StronglyConnectedComponentsFast<Unit> sccAnalysis = new StronglyConnectedComponentsFast<>(g);
+    // if key is not already UNKNOWN
+	// if key is not already UNKNOWN
+	sccAnalysis.getTrueComponents().stream().flatMap(List::stream).forEach(unit -> unit.getDefBoxes().forEach(vb -> {
+		Value defValue = vb.getValue();
+		if (defValue instanceof Local) {
+			Local defLocal = (Local) defValue;
+			if (defLocal.getType() instanceof RefLikeType) {
+				Object instanceKey = getFlowBefore(unit).get(defLocal);
+				if (instanceKey instanceof Integer) {
+					Integer intKey = (Integer) instanceKey;
+					invalidInstanceKeys.add(intKey);
+				}
+				instanceKey = getFlowAfter(unit).get(defLocal);
+				if (instanceKey instanceof Integer) {
+					Integer intKey = (Integer) instanceKey;
+					invalidInstanceKeys.add(intKey);
+				}
+			}
+		}
+	}));
   }
 
   /**

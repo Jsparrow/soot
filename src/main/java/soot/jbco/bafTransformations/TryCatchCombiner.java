@@ -61,27 +61,29 @@ import soot.toolkits.graph.BriefUnitGraph;
 public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform {
 
   private static final Logger logger = LoggerFactory.getLogger(TryCatchCombiner.class);
-  int totalcount = 0;
-  int changedcount = 0;
+public static String dependancies[] = new String[] { "bb.jbco_j2bl", "bb.jbco_ctbcb", "bb.jbco_ful", "bb.lp" };
+public static String name = "bb.jbco_ctbcb";
+int totalcount = 0;
+int changedcount = 0;
 
-  public static String dependancies[] = new String[] { "bb.jbco_j2bl", "bb.jbco_ctbcb", "bb.jbco_ful", "bb.lp" };
-
-  public String[] getDependencies() {
+@Override
+public String[] getDependencies() {
     return dependancies;
   }
 
-  public static String name = "bb.jbco_ctbcb";
-
-  public String getName() {
+@Override
+public String getName() {
     return name;
   }
 
-  public void outputSummary() {
+@Override
+public void outputSummary() {
     out.println("Total try blocks found: " + totalcount);
     out.println("Combined TryCatches: " + changedcount);
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
 
     int weight = soot.jbco.Main.getWeight(phaseName, b.getMethod().getSignature());
     if (weight == 0) {
@@ -90,8 +92,8 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
 
     int trapCount = 0;
     PatchingChain<Unit> units = b.getUnits();
-    ArrayList<Unit> headList = new ArrayList<Unit>();
-    ArrayList<Trap> trapList = new ArrayList<Trap>();
+    ArrayList<Unit> headList = new ArrayList<>();
+    ArrayList<Trap> trapList = new ArrayList<>();
     Iterator<Trap> traps = b.getTraps().iterator();
 
     // build list of heads and corresponding traps
@@ -129,9 +131,8 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
     }
 
     Unit first = null;
-    Iterator<Unit> uit = units.iterator();
-    while (uit.hasNext()) {
-      Unit unit = (Unit) uit.next();
+    for (Unit unit1 : units) {
+      Unit unit = (Unit) unit1;
       if (!(unit instanceof IdentityInst)) {
         break;
       }
@@ -163,7 +164,7 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
       Stack<Type> s = (Stack<Type>) stackHeightsBefore.get(begUnit).clone();
 
       if (s.size() > 0) {
-        for (int i = 0; i < s.size(); i++) {
+        for (Type aS : s) {
           if (s.pop() instanceof StmtAddressType) {
             badType = true;
             break;
@@ -193,10 +194,10 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
       units.add(pushZero);
       units.add(storZero);
 
-      Stack<Local> varsToLoad = new Stack<Local>();
+      Stack<Local> varsToLoad = new Stack<>();
       s = stackHeightsBefore.get(begUnit);
       if (s.size() > 0) {
-        for (int i = 0; i < s.size(); i++) {
+        for (Type aS : s) {
           Type type = s.pop();
 
           Local varLocal = Baf.v().newLocal("varLocal_tccomb" + varCount++, type);
@@ -212,8 +213,7 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
       units.add(Baf.v().newGotoInst(begUnit));
 
       // for each pred of the beginUnit of the try, we must insert goto initializer
-      for (int i = 0; i < l.size(); i++) {
-        Unit pred = l.get(i);
+	l.forEach(pred -> {
         if (isIf(pred)) {
           TargetArgInst ifPred = ((TargetArgInst) pred);
           if (ifPred.getTarget() == begUnit) {
@@ -229,7 +229,7 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
         } else {
           units.insertAfter(Baf.v().newGotoInst(pushZero), pred);
         }
-      }
+      });
 
       Unit handlerUnit = t.getHandlerUnit();
       Unit newBeginUnit = Baf.v().newLoadInst(IntType.v(), controlLocal);
@@ -274,20 +274,21 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
     }
   }
 
-  private void loadBooleanValue(PatchingChain<Unit> units, SootField f, Unit insert) {
+private void loadBooleanValue(PatchingChain<Unit> units, SootField f, Unit insert) {
     units.insertBefore(Baf.v().newStaticGetInst(f.makeRef()), insert);
-    if (f.getType() instanceof RefType) {
-      SootMethod boolInit = ((RefType) f.getType()).getSootClass().getMethod("boolean booleanValue()");
-      units.insertBefore(Baf.v().newVirtualInvokeInst(boolInit.makeRef()), insert);
-    }
+    if (!(f.getType() instanceof RefType)) {
+		return;
+	}
+	SootMethod boolInit = ((RefType) f.getType()).getSootClass().getMethod("boolean booleanValue()");
+	units.insertBefore(Baf.v().newVirtualInvokeInst(boolInit.makeRef()), insert);
   }
 
-  private boolean isIf(Unit u) {
+private boolean isIf(Unit u) {
     // TODO: will a RET statement be a TargetArgInst?
     return (u instanceof TargetArgInst) && !(u instanceof GotoInst) && !(u instanceof JSRInst);
   }
 
-  private boolean isRewritable(Trap t) {
+private boolean isRewritable(Trap t) {
     // ignore traps that already catch their own begin unit
     if (t.getBeginUnit() == t.getHandlerUnit()) {
       return false;
@@ -295,12 +296,12 @@ public class TryCatchCombiner extends BodyTransformer implements IJbcoTransform 
 
     // ignore runtime try blocks - these may have weird side-effects do to asynchronous exceptions
     SootClass exc = t.getException();
-    if (exc.getName().equals("java.lang.Throwable")) {
+    if ("java.lang.Throwable".equals(exc.getName())) {
       return false;
     }
 
     do {
-      if (exc.getName().equals("java.lang.RuntimeException")) {
+      if ("java.lang.RuntimeException".equals(exc.getName())) {
         return false;
       }
     } while (exc.hasSuperclass() && (exc = exc.getSuperclass()) != null);

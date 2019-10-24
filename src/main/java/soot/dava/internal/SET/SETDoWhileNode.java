@@ -42,7 +42,8 @@ public class SETDoWhileNode extends SETCycleNode {
     add_SubBody(subBody);
   }
 
-  public IterableSet get_NaturalExits() {
+  @Override
+public IterableSet get_NaturalExits() {
     IterableSet c = new IterableSet();
 
     c.add(get_CharacterizingStmt());
@@ -50,12 +51,14 @@ public class SETDoWhileNode extends SETCycleNode {
     return c;
   }
 
-  public ASTNode emit_AST() {
+  @Override
+public ASTNode emit_AST() {
     return new ASTDoWhileNode(get_Label(), (ConditionExpr) ((IfStmt) get_CharacterizingStmt().get_Stmt()).getCondition(),
         emit_ASTBody(body2childChain.get(subBodies.get(0))));
   }
 
-  public AugmentedStmt get_EntryStmt() {
+  @Override
+public AugmentedStmt get_EntryStmt() {
     return entryPoint;
   }
 }

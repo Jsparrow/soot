@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AQuotedClassName extends PClassName
 {
-    private TQuotedName _quotedName_;
+    private TQuotedName quotedName;
 
     public AQuotedClassName()
     {
@@ -26,7 +26,7 @@ public final class AQuotedClassName extends PClassName
     public Object clone()
     {
         return new AQuotedClassName(
-            cloneNode(this._quotedName_));
+            cloneNode(this.quotedName));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AQuotedClassName extends PClassName
 
     public TQuotedName getQuotedName()
     {
-        return this._quotedName_;
+        return this.quotedName;
     }
 
     public void setQuotedName(TQuotedName node)
     {
-        if(this._quotedName_ != null)
+        if(this.quotedName != null)
         {
-            this._quotedName_.parent(null);
+            this.quotedName.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AQuotedClassName extends PClassName
             node.parent(this);
         }
 
-        this._quotedName_ = node;
+        this.quotedName = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._quotedName_);
+            + toString(this.quotedName);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._quotedName_ == child)
+        if(this.quotedName == child)
         {
-            this._quotedName_ = null;
+            this.quotedName = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AQuotedClassName extends PClassName
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._quotedName_ == oldChild)
+        if(this.quotedName == oldChild)
         {
             setQuotedName((TQuotedName) newChild);
             return;

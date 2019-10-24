@@ -72,17 +72,19 @@ class IntValueContainer {
     this.type = BOT;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (type == BOT) {
       return "[B]";
     } else if (type == TOP) {
       return "[T]";
     } else {
-      return "[" + value + "]";
+      return new StringBuilder().append("[").append(value).append("]").toString();
     }
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     if (!(other instanceof IntValueContainer)) {
       return false;
     }

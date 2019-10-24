@@ -41,39 +41,48 @@ public class BInstanceOfInst extends AbstractInst implements InstanceOfInst {
     checkType = opType;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 1;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "instanceof";
   }
 
-  public Type getCheckType() {
+  @Override
+public Type getCheckType() {
     return checkType;
   }
 
-  public void setCheckType(Type t) {
+  @Override
+public void setCheckType(Type t) {
     checkType = t;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseInstanceOfInst(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BInstanceOfInst(checkType);
   }
 

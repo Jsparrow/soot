@@ -35,6 +35,8 @@ import java.util.Set;
 import soot.jimple.SpecialInvokeExpr;
 import soot.util.ConcurrentHashMultiMap;
 import soot.util.MultiMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the class hierarchy. It is closely linked to a Scene, and must be recreated if the Scene changes.
@@ -44,90 +46,50 @@ import soot.util.MultiMap;
  * @author Ondrej Lhotak
  */
 public class FastHierarchy {
-  /**
+  private static final Logger logger = LoggerFactory.getLogger(FastHierarchy.class);
+
+/**
    * This map holds all key,value pairs such that value.getSuperclass() == key. This is one of the three maps that hold the
    * inverse of the relationships given by the getSuperclass and getInterfaces methods of SootClass.
    */
-  protected MultiMap<SootClass, SootClass> classToSubclasses = new ConcurrentHashMultiMap<SootClass, SootClass>();
+  protected MultiMap<SootClass, SootClass> classToSubclasses = new ConcurrentHashMultiMap<>();
 
   /**
    * This map holds all key,value pairs such that value is an interface and key is in value.getInterfaces(). This is one of
    * the three maps that hold the inverse of the relationships given by the getSuperclass and getInterfaces methods of
    * SootClass.
    */
-  protected MultiMap<SootClass, SootClass> interfaceToSubinterfaces = new ConcurrentHashMultiMap<SootClass, SootClass>();
+  protected MultiMap<SootClass, SootClass> interfaceToSubinterfaces = new ConcurrentHashMultiMap<>();
 
   /**
    * This map holds all key,value pairs such that value is a class (NOT an interface) and key is in value.getInterfaces().
    * This is one of the three maps that hold the inverse of the relationships given by the getSuperclass and getInterfaces
    * methods of SootClass.
    */
-  protected MultiMap<SootClass, SootClass> interfaceToImplementers = new ConcurrentHashMultiMap<SootClass, SootClass>();
+  protected MultiMap<SootClass, SootClass> interfaceToImplementers = new ConcurrentHashMultiMap<>();
 
   /**
    * This map is a transitive closure of interfaceToSubinterfaces, and each set contains its superinterface itself.
    */
-  protected MultiMap<SootClass, SootClass> interfaceToAllSubinterfaces = new ConcurrentHashMultiMap<SootClass, SootClass>();
+  protected MultiMap<SootClass, SootClass> interfaceToAllSubinterfaces = new ConcurrentHashMultiMap<>();
 
   /**
    * This map gives, for an interface, all concrete classes that implement that interface and all its subinterfaces, but NOT
    * their subclasses.
    */
-  protected MultiMap<SootClass, SootClass> interfaceToAllImplementers = new ConcurrentHashMultiMap<SootClass, SootClass>();
+  protected MultiMap<SootClass, SootClass> interfaceToAllImplementers = new ConcurrentHashMultiMap<>();
 
   /**
    * For each class (NOT interface), this map contains a Interval, which is a pair of numbers giving a preorder and postorder
    * ordering of classes in the inheritance tree.
    */
-  protected Map<SootClass, Interval> classToInterval = new HashMap<SootClass, Interval>();
+  protected Map<SootClass, Interval> classToInterval = new HashMap<>();
 
   protected Scene sc;
 
   protected final RefType rtObject;
   protected final RefType rtSerializable;
   protected final RefType rtCloneable;
-
-  protected class Interval {
-    int lower;
-    int upper;
-
-    public boolean isSubrange(Interval potentialSubrange) {
-      if (potentialSubrange == null) {
-        return false;
-      }
-      if (lower > potentialSubrange.lower) {
-        return false;
-      }
-      if (upper < potentialSubrange.upper) {
-        return false;
-      }
-      return true;
-    }
-  }
-
-  protected int dfsVisit(int start, SootClass c) {
-    Interval r = new Interval();
-    r.lower = start++;
-    Collection<SootClass> col = classToSubclasses.get(c);
-    if (col != null) {
-      for (SootClass sc : col) {
-        // For some awful reason, Soot thinks interface are subclasses
-        // of java.lang.Object
-        if (sc.isInterface()) {
-          continue;
-        }
-        start = dfsVisit(start, sc);
-      }
-    }
-    r.upper = start++;
-    if (c.isInterface()) {
-      throw new RuntimeException("Attempt to dfs visit interface " + c);
-    }
-    if (!classToInterval.containsKey(c)) {
-      classToInterval.put(c, r);
-    }
-    return start;
-  }
 
   /** Constructs a hierarchy from the current scene. */
   public FastHierarchy() {
@@ -148,13 +110,13 @@ public class FastHierarchy {
           classToSubclasses.put(superClass, cl);
         }
       }
-      for (final SootClass supercl : cl.getInterfaces()) {
+      cl.getInterfaces().forEach((final SootClass supercl) -> {
         if (cl.isInterface()) {
           interfaceToSubinterfaces.put(supercl, cl);
         } else {
           interfaceToImplementers.put(supercl, cl);
         }
-      }
+      });
     }
 
     /* Now do a dfs traversal to get the Interval numbers. */
@@ -170,7 +132,29 @@ public class FastHierarchy {
     }
   }
 
-  /**
+protected int dfsVisit(int start, SootClass c) {
+    Interval r = new Interval();
+    r.lower = start++;
+    Collection<SootClass> col = classToSubclasses.get(c);
+    if (col != null) {
+      for (SootClass sc : col) {
+        // For some awful reason, Soot thinks interface are subclasses
+        // of java.lang.Object
+        if (sc.isInterface()) {
+          continue;
+        }
+        start = dfsVisit(start, sc);
+      }
+    }
+    r.upper = start++;
+    if (c.isInterface()) {
+      throw new RuntimeException("Attempt to dfs visit interface " + c);
+    }
+    classToInterval.putIfAbsent(c, r);
+    return start;
+  }
+
+/**
    * Return true if class child is a subclass of class parent, neither of them being allowed to be interfaces. If we don't
    * know any of the classes, we always return false
    */
@@ -182,7 +166,7 @@ public class FastHierarchy {
     return parentInterval != null && childInterval != null && parentInterval.isSubrange(childInterval);
   }
 
-  /**
+/**
    * For an interface parent (MUST be an interface), returns set of all implementers of it but NOT their subclasses.
    * 
    * This method can be used concurrently (is thread safe).
@@ -209,7 +193,7 @@ public class FastHierarchy {
     return result;
   }
 
-  /**
+/**
    * For an interface parent (MUST be an interface), returns set of all subinterfaces including <code>parent</code>.
    *
    * This method can be used concurrently (is thread safe).
@@ -236,7 +220,7 @@ public class FastHierarchy {
     return result;
   }
 
-  /**
+/**
    * Given an object of declared type child, returns true if the object can be stored in a variable of type parent. If child
    * is an interface that is not a subinterface of parent, this method will return false even though some objects
    * implementing the child interface may also implement the parent interface.
@@ -266,7 +250,7 @@ public class FastHierarchy {
       } else {
         SootClass base = ((AnySubType) child).getBase().getSootClass();
         SootClass parentClass = ((RefType) parent).getSootClass();
-        Deque<SootClass> worklist = new ArrayDeque<SootClass>();
+        Deque<SootClass> worklist = new ArrayDeque<>();
         if (base.isInterface()) {
           worklist.addAll(getAllImplementersOfInterface(base));
         } else {
@@ -324,7 +308,7 @@ public class FastHierarchy {
     }
   }
 
-  /**
+/**
    * Given an object of declared type child, returns true if the object can be stored in a variable of type parent. If child
    * is an interface that is not a subinterface of parent, this method will return false even though some objects
    * implementing the child interface may also implement the parent interface.
@@ -364,7 +348,7 @@ public class FastHierarchy {
     }
   }
 
-  /**
+/**
    * "Classic" implementation using the intuitive approach (without using {@link Interval}) to check whether
    * <code>child</code> can be stored in a type of <code>parent</code>:
    * 
@@ -408,15 +392,15 @@ public class FastHierarchy {
     return false;
   }
 
-  public Collection<SootMethod> resolveConcreteDispatchWithoutFailing(Collection<Type> concreteTypes, SootMethod m,
+public Collection<SootMethod> resolveConcreteDispatchWithoutFailing(Collection<Type> concreteTypes, SootMethod m,
       RefType declaredTypeOfBase) {
 
-    Set<SootMethod> ret = new HashSet<SootMethod>();
+    Set<SootMethod> ret = new HashSet<>();
     SootClass declaringClass = declaredTypeOfBase.getSootClass();
     declaringClass.checkLevel(SootClass.HIERARCHY);
     for (final Type t : concreteTypes) {
       if (t instanceof AnySubType) {
-        HashSet<SootClass> s = new HashSet<SootClass>();
+        HashSet<SootClass> s = new HashSet<>();
         s.add(declaringClass);
         while (!s.isEmpty()) {
           SootClass c = s.iterator().next();
@@ -457,7 +441,8 @@ public class FastHierarchy {
         try {
           concreteM = resolveConcreteDispatch(concreteClass, m);
         } catch (Exception e) {
-          concreteM = null;
+          logger.error(e.getMessage(), e);
+		concreteM = null;
         }
         if (concreteM != null) {
           ret.add(concreteM);
@@ -467,7 +452,8 @@ public class FastHierarchy {
         try {
           concreteM = resolveConcreteDispatch(RefType.v("java.lang.Object").getSootClass(), m);
         } catch (Exception e) {
-          concreteM = null;
+          logger.error(e.getMessage(), e);
+		concreteM = null;
         }
         if (concreteM != null) {
           ret.add(concreteM);
@@ -479,15 +465,15 @@ public class FastHierarchy {
     return ret;
   }
 
-  public Collection<SootMethod> resolveConcreteDispatch(Collection<Type> concreteTypes, SootMethod m,
+public Collection<SootMethod> resolveConcreteDispatch(Collection<Type> concreteTypes, SootMethod m,
       RefType declaredTypeOfBase) {
 
-    Set<SootMethod> ret = new HashSet<SootMethod>();
+    Set<SootMethod> ret = new HashSet<>();
     SootClass declaringClass = declaredTypeOfBase.getSootClass();
     declaringClass.checkLevel(SootClass.HIERARCHY);
     for (final Type t : concreteTypes) {
       if (t instanceof AnySubType) {
-        HashSet<SootClass> s = new HashSet<SootClass>();
+        HashSet<SootClass> s = new HashSet<>();
         s.add(declaringClass);
         while (!s.isEmpty()) {
           SootClass c = s.iterator().next();
@@ -541,7 +527,7 @@ public class FastHierarchy {
     return ret;
   }
 
-  // Questions about method invocation.
+// Questions about method invocation.
 
   /** Returns true if the method m is visible from code in the class from. */
   private boolean isVisible(SootClass from, SootMethod m) {
@@ -560,14 +546,14 @@ public class FastHierarchy {
     // || canStoreClass( from, m.getDeclaringClass() );
   }
 
-  /**
+/**
    * Given an object of declared type C, returns the methods which could be called on an o.f() invocation.
    */
   public Set<SootMethod> resolveAbstractDispatch(SootClass abstractType, SootMethod m) {
     String methodSig = m.getSubSignature();
-    HashSet<SootClass> resolved = new HashSet<SootClass>();
-    HashSet<SootMethod> ret = new HashSet<SootMethod>();
-    ArrayDeque<SootClass> worklist = new ArrayDeque<SootClass>();
+    HashSet<SootClass> resolved = new HashSet<>();
+    HashSet<SootMethod> ret = new HashSet<>();
+    ArrayDeque<SootClass> worklist = new ArrayDeque<>();
     worklist.add(abstractType);
     while (true) {
       SootClass concreteType = worklist.poll();
@@ -590,24 +576,23 @@ public class FastHierarchy {
           }
           resolved.add(concreteType);
           SootMethod method = concreteType.getMethodUnsafe(methodSig);
-          if (method != null) {
-            if (isVisible(concreteType, m)) {
-              if (method.isAbstract()) {
-                throw new RuntimeException("abstract dispatch resolved to abstract method!\nAbstract Type: " + abstractType
-                    + "\nConcrete Type: " + savedConcreteType + "\nMethod: " + m);
-              } else {
-                ret.add(method);
-                break;
-              }
-            }
-          }
+          boolean condition = method != null && isVisible(concreteType, m);
+		if (condition) {
+		  if (method.isAbstract()) {
+		    throw new RuntimeException(new StringBuilder().append("abstract dispatch resolved to abstract method!\nAbstract Type: ").append(abstractType).append("\nConcrete Type: ").append(savedConcreteType).append("\nMethod: ").append(m)
+					.toString());
+		  } else {
+		    ret.add(method);
+		    break;
+		  }
+		}
           SootClass superClass = concreteType.getSuperclassUnsafe();
           if (superClass == null) {
             if (concreteType.isPhantom()) {
               break;
             } else {
-              throw new RuntimeException("could not resolve abstract dispatch!\nAbstract Type: " + abstractType
-                  + "\nConcrete Type: " + savedConcreteType + "\nMethod: " + m);
+              throw new RuntimeException(new StringBuilder().append("could not resolve abstract dispatch!\nAbstract Type: ").append(abstractType).append("\nConcrete Type: ").append(savedConcreteType).append("\nMethod: ").append(m)
+					.toString());
             }
           }
           concreteType = superClass;
@@ -617,7 +602,7 @@ public class FastHierarchy {
     return ret;
   }
 
-  /**
+/**
    * Given an object of actual type C (o = new C()), returns the method which will be called on an o.f() invocation.
    */
   public SootMethod resolveConcreteDispatch(SootClass concreteType, SootMethod m) {
@@ -629,14 +614,13 @@ public class FastHierarchy {
     String methodSig = m.getSubSignature();
     while (true) {
       SootMethod method = concreteType.getMethodUnsafe(methodSig);
-      if (method != null) {
-        if (isVisible(concreteType, m)) {
-          if (method.isAbstract()) {
-            throw new RuntimeException("Error: Method call resolves to abstract method!");
-          }
-          return method;
-        }
-      }
+      boolean condition = method != null && isVisible(concreteType, m);
+	if (condition) {
+	  if (method.isAbstract()) {
+	    throw new RuntimeException("Error: Method call resolves to abstract method!");
+	  }
+	  return method;
+	}
       concreteType = concreteType.getSuperclassUnsafe();
       if (concreteType == null) {
         break;
@@ -649,7 +633,7 @@ public class FastHierarchy {
     // dispatch!\nType: "+concreteType+"\nMethod: "+m);
   }
 
-  /** Returns the target for the given SpecialInvokeExpr. */
+/** Returns the target for the given SpecialInvokeExpr. */
   public SootMethod resolveSpecialDispatch(SpecialInvokeExpr ie, SootMethod container) {
     SootMethod target = ie.getMethod();
 
@@ -657,7 +641,7 @@ public class FastHierarchy {
      * This is a bizarre condition! Hopefully the implementation is correct. See VM Spec, 2nd Edition, Chapter 6, in the
      * definition of invokespecial.
      */
-    if (target.getName().equals("<init>") || target.isPrivate()) {
+    if ("<init>".equals(target.getName()) || target.isPrivate()) {
       return target;
     } else if (isSubclass(target.getDeclaringClass(), container.getDeclaringClass())) {
       return resolveConcreteDispatch(container.getDeclaringClass(), target);
@@ -666,7 +650,7 @@ public class FastHierarchy {
     }
   }
 
-  /**
+/**
    * Gets the direct subclasses of a given class. The class needs to be resolved at least at the HIERARCHY level.
    *
    * @param c
@@ -680,5 +664,23 @@ public class FastHierarchy {
       return Collections.emptyList();
     }
     return ret;
+  }
+
+protected class Interval {
+    int lower;
+    int upper;
+
+    public boolean isSubrange(Interval potentialSubrange) {
+      if (potentialSubrange == null) {
+        return false;
+      }
+      if (lower > potentialSubrange.lower) {
+        return false;
+      }
+      if (upper < potentialSubrange.upper) {
+        return false;
+      }
+      return true;
+    }
   }
 }

@@ -44,61 +44,55 @@ import soot.jimple.spark.sets.PointsToSetInternal;
 
 public class Checker {
   private static final Logger logger = LoggerFactory.getLogger(Checker.class);
+protected PAG pag;
 
-  public Checker(PAG pag) {
+public Checker(PAG pag) {
     this.pag = pag;
   }
 
-  /** Actually does the propagation. */
+/** Actually does the propagation. */
   public void check() {
-    for (Object object : pag.allocSources()) {
-      handleAllocNode((AllocNode) object);
-    }
-    for (Object object : pag.simpleSources()) {
-      handleSimples((VarNode) object);
-    }
-    for (Object object : pag.loadSources()) {
-      handleLoads((FieldRefNode) object);
-    }
-    for (Object object : pag.storeSources()) {
-      handleStores((VarNode) object);
-    }
+    pag.allocSources().forEach(object -> handleAllocNode((AllocNode) object));
+    pag.simpleSources().forEach(object -> handleSimples((VarNode) object));
+    pag.loadSources().forEach(object -> handleLoads((FieldRefNode) object));
+    pag.storeSources().forEach(object -> handleStores((VarNode) object));
   }
 
-  /* End of public methods. */
+/* End of public methods. */
   /* End of package methods. */
 
   protected void checkAll(final Node container, PointsToSetInternal nodes, final Node upstream) {
     nodes.forall(new P2SetVisitor() {
-      public final void visit(Node n) {
+      @Override
+	public final void visit(Node n) {
         checkNode(container, n, upstream);
       }
     });
   }
 
-  protected void checkNode(Node container, Node n, Node upstream) {
+protected void checkNode(Node container, Node n, Node upstream) {
     if (container.getReplacement() != container) {
-      throw new RuntimeException("container " + container + " is illegal");
+      throw new RuntimeException(new StringBuilder().append("container ").append(container).append(" is illegal").toString());
     }
     if (upstream.getReplacement() != upstream) {
-      throw new RuntimeException("upstream " + upstream + " is illegal");
+      throw new RuntimeException(new StringBuilder().append("upstream ").append(upstream).append(" is illegal").toString());
     }
     PointsToSetInternal p2set = container.getP2Set();
     FastHierarchy fh = pag.getTypeManager().getFastHierarchy();
     if (!p2set.contains(n)
         && (fh == null || container.getType() == null || fh.canStoreType(n.getType(), container.getType()))) {
-      logger.debug("Check failure: " + container + " does not have " + n + "; upstream is " + upstream);
+      logger.debug(new StringBuilder().append("Check failure: ").append(container).append(" does not have ").append(n).append("; upstream is ").append(upstream).toString());
     }
   }
 
-  protected void handleAllocNode(AllocNode src) {
+protected void handleAllocNode(AllocNode src) {
     Node[] targets = pag.allocLookup(src);
     for (Node element : targets) {
       checkNode(element, src, src);
     }
   }
 
-  protected void handleSimples(VarNode src) {
+protected void handleSimples(VarNode src) {
     PointsToSetInternal srcSet = src.getP2Set();
     if (srcSet.isEmpty()) {
       return;
@@ -109,7 +103,7 @@ public class Checker {
     }
   }
 
-  protected void handleStores(final VarNode src) {
+protected void handleStores(final VarNode src) {
     final PointsToSetInternal srcSet = src.getP2Set();
     if (srcSet.isEmpty()) {
       return;
@@ -119,7 +113,8 @@ public class Checker {
       final FieldRefNode fr = (FieldRefNode) element;
       final SparkField f = fr.getField();
       fr.getBase().getP2Set().forall(new P2SetVisitor() {
-        public final void visit(Node n) {
+        @Override
+		public final void visit(Node n) {
           AllocDotField nDotF = pag.makeAllocDotField((AllocNode) n, f);
           checkAll(nDotF, srcSet, src);
         }
@@ -127,11 +122,12 @@ public class Checker {
     }
   }
 
-  protected void handleLoads(final FieldRefNode src) {
+protected void handleLoads(final FieldRefNode src) {
     final Node[] loadTargets = pag.loadLookup(src);
     final SparkField f = src.getField();
     src.getBase().getP2Set().forall(new P2SetVisitor() {
-      public final void visit(Node n) {
+      @Override
+	public final void visit(Node n) {
         AllocDotField nDotF = ((AllocNode) n).dot(f);
         if (nDotF == null) {
           return;
@@ -147,6 +143,4 @@ public class Checker {
       }
     });
   }
-
-  protected PAG pag;
 }

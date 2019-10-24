@@ -39,8 +39,9 @@ public class VisibilityAnnotationTag implements Tag {
   }
 
   // should also print here number of annotations and perhaps the annotations themselves
-  public String toString() {
-    StringBuffer sb = new StringBuffer("Visibility Annotation: level: ");
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder("Visibility Annotation: level: ");
     switch (visibility) {
       case AnnotationConstants.RUNTIME_INVISIBLE:
         sb.append("CLASS (runtime-invisible)");
@@ -54,17 +55,18 @@ public class VisibilityAnnotationTag implements Tag {
     }
     sb.append("\n Annotations:");
     if (annotations != null) {
-      for (AnnotationTag tag : annotations) {
+      annotations.forEach(tag -> {
         sb.append("\n");
         sb.append(tag.toString());
-      }
+      });
     }
     sb.append("\n");
     return sb.toString();
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "VisibilityAnnotationTag";
   }
 
@@ -77,13 +79,14 @@ public class VisibilityAnnotationTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("VisibilityAnnotationTag has no value for bytecode");
   }
 
   public void addAnnotation(AnnotationTag a) {
     if (annotations == null) {
-      annotations = new ArrayList<AnnotationTag>();
+      annotations = new ArrayList<>();
     }
     annotations.add(a);
   }

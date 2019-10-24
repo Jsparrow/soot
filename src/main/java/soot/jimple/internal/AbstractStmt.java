@@ -37,45 +37,55 @@ import soot.jimple.Stmt;
 
 @SuppressWarnings("serial")
 public abstract class AbstractStmt extends AbstractUnit implements Stmt, ConvertToBaf {
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     Unit u = Baf.v().newNopInst();
     out.add(u);
     u.addAllTagsOf(this);
   }
 
-  public boolean containsInvokeExpr() {
+  @Override
+public boolean containsInvokeExpr() {
     return false;
   }
 
-  public InvokeExpr getInvokeExpr() {
+  @Override
+public InvokeExpr getInvokeExpr() {
     throw new RuntimeException("getInvokeExpr() called with no invokeExpr present!");
   }
 
-  public ValueBox getInvokeExprBox() {
+  @Override
+public ValueBox getInvokeExprBox() {
     throw new RuntimeException("getInvokeExprBox() called with no invokeExpr present!");
   }
 
-  public boolean containsArrayRef() {
+  @Override
+public boolean containsArrayRef() {
     return false;
   }
 
-  public ArrayRef getArrayRef() {
+  @Override
+public ArrayRef getArrayRef() {
     throw new RuntimeException("getArrayRef() called with no ArrayRef present!");
   }
 
-  public ValueBox getArrayRefBox() {
+  @Override
+public ValueBox getArrayRefBox() {
     throw new RuntimeException("getArrayRefBox() called with no ArrayRef present!");
   }
 
-  public boolean containsFieldRef() {
+  @Override
+public boolean containsFieldRef() {
     return false;
   }
 
-  public FieldRef getFieldRef() {
+  @Override
+public FieldRef getFieldRef() {
     throw new RuntimeException("getFieldRef() called with no FieldRef present!");
   }
 
-  public ValueBox getFieldRefBox() {
+  @Override
+public ValueBox getFieldRefBox() {
     throw new RuntimeException("getFieldRefBox() called with no FieldRef present!");
   }
 

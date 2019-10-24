@@ -58,37 +58,39 @@ import org.slf4j.LoggerFactory;
  */
 class Instruction_Tableswitch extends Instruction {
   private static final Logger logger = LoggerFactory.getLogger(Instruction_Tableswitch.class);
+public byte pad; // number of bytes used for padding
+public int default_offset;
+public int low;
+public int high;
+public int jump_offsets[];
+public Instruction default_inst;
+public Instruction jump_insts[];
 
-  public Instruction_Tableswitch() {
+public Instruction_Tableswitch() {
     super((byte) ByteCode.TABLESWITCH);
     name = "tableswitch";
     branches = true;
   }
 
-  public byte pad; // number of bytes used for padding
-  public int default_offset;
-  public int low;
-  public int high;
-  public int jump_offsets[];
-  public Instruction default_inst;
-  public Instruction jump_insts[];
-
-  public String toString(cp_info constant_pool[]) {
+@Override
+public String toString(cp_info constant_pool[]) {
     String args;
     int i;
-    args = super.toString(constant_pool) + argsep + "(" + Integer.toString(pad) + ")";
-    args = args + argsep + "label_" + Integer.toString(default_inst.label);
-    args = args + argsep + Integer.toString(low);
-    args = args + argsep + Integer.toString(high) + ": ";
+    args = new StringBuilder().append(super.toString(constant_pool)).append(argsep).append("(").append(Integer.toString(pad)).append(")").toString();
+    args = new StringBuilder().append(args).append(argsep).append("label_").append(Integer.toString(default_inst.label)).toString();
+    args = new StringBuilder().append(args).append(argsep).append(Integer.toString(low)).toString();
+    args = new StringBuilder().append(args).append(argsep).append(Integer.toString(high)).append(": ").toString();
     for (i = 0; i < high - low + 1; i++) {
-      args = args + argsep + "label_" + Integer.toString(jump_insts[i].label);
+      args = new StringBuilder().append(args).append(argsep).append("label_").append(Integer.toString(jump_insts[i].label)).toString();
     }
     return args;
   }
 
-  public int parse(byte bc[], int index) {
+@Override
+public int parse(byte bc[], int index) {
     // first figure out padding to next 4-byte quantity
-    int i, j;
+    int i;
+	int j;
     i = index % 4;
     if (i != 0) {
       pad = (byte) (4 - i);
@@ -115,8 +117,10 @@ class Instruction_Tableswitch extends Instruction {
     return index;
   }
 
-  public int nextOffset(int curr) {
-    int i, siz = 0;
+@Override
+public int nextOffset(int curr) {
+    int i;
+	int siz = 0;
     i = (curr + 1) % 4;
     if (i != 0) {
       siz = (4 - i);
@@ -124,7 +128,8 @@ class Instruction_Tableswitch extends Instruction {
     return (curr + siz + 13 + (high - low + 1) * 4);
   }
 
-  public int compile(byte bc[], int index) {
+@Override
+public int compile(byte bc[], int index) {
     int i;
     bc[index++] = code;
     // insert padding so next instruction is on a 4-byte boundary
@@ -148,7 +153,8 @@ class Instruction_Tableswitch extends Instruction {
     return index;
   }
 
-  public void offsetToPointer(ByteCode bc) {
+@Override
+public void offsetToPointer(ByteCode bc) {
     int i;
     default_inst = bc.locateInst(default_offset + label);
     if (default_inst == null) {
@@ -157,9 +163,11 @@ class Instruction_Tableswitch extends Instruction {
     } else {
       default_inst.labelled = true;
     }
-    if (high - low + 1 > 0) {
-      jump_insts = new Instruction[high - low + 1];
-      for (i = 0; i < high - low + 1; i++) {
+    if (!(high - low + 1 > 0)) {
+		return;
+	}
+	jump_insts = new Instruction[high - low + 1];
+	for (i = 0; i < high - low + 1; i++) {
         jump_insts[i] = bc.locateInst(jump_offsets[i] + label);
         if (jump_insts[i] == null) {
           logger.warn("can't locate target of instruction");
@@ -168,10 +176,10 @@ class Instruction_Tableswitch extends Instruction {
           jump_insts[i].labelled = true;
         }
       }
-    }
   }
 
-  public Instruction[] branchpoints(Instruction next) {
+@Override
+public Instruction[] branchpoints(Instruction next) {
     Instruction i[] = new Instruction[high - low + 2];
     int j;
     i[0] = default_inst;

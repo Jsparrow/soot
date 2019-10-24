@@ -67,10 +67,12 @@ public class IFDSPossibleTypes
     super(icfg);
   }
 
-  public FlowFunctions<Unit, Pair<Value, Type>, SootMethod> createFlowFunctionsFactory() {
+  @Override
+public FlowFunctions<Unit, Pair<Value, Type>, SootMethod> createFlowFunctionsFactory() {
     return new FlowFunctions<Unit, Pair<Value, Type>, SootMethod>() {
 
-      public FlowFunction<Pair<Value, Type>> getNormalFlowFunction(Unit src, Unit dest) {
+      @Override
+	public FlowFunction<Pair<Value, Type>> getNormalFlowFunction(Unit src, Unit dest) {
         if (src instanceof DefinitionStmt) {
           DefinitionStmt defnStmt = (DefinitionStmt) src;
           if (defnStmt.containsInvokeExpr()) {
@@ -85,9 +87,10 @@ public class IFDSPossibleTypes
 
           if (right instanceof Constant || right instanceof NewExpr) {
             return new FlowFunction<Pair<Value, Type>>() {
-              public Set<Pair<Value, Type>> computeTargets(Pair<Value, Type> source) {
+              @Override
+			public Set<Pair<Value, Type>> computeTargets(Pair<Value, Type> source) {
                 if (source == zeroValue()) {
-                  Set<Pair<Value, Type>> res = new LinkedHashSet<Pair<Value, Type>>();
+                  Set<Pair<Value, Type>> res = new LinkedHashSet<>();
                   res.add(new Pair<Value, Type>(left, right.getType()));
                   res.add(zeroValue());
                   return res;
@@ -101,7 +104,8 @@ public class IFDSPossibleTypes
             };
           } else if (right instanceof Ref || right instanceof Local) {
             return new FlowFunction<Pair<Value, Type>>() {
-              public Set<Pair<Value, Type>> computeTargets(final Pair<Value, Type> source) {
+              @Override
+			public Set<Pair<Value, Type>> computeTargets(final Pair<Value, Type> source) {
                 Value value = source.getO1();
                 if (source.getO1() instanceof Local && source.getO1().equivTo(left)) {
                   // strong update for local variables
@@ -154,21 +158,23 @@ public class IFDSPossibleTypes
         return Identity.v();
       }
 
-      public FlowFunction<Pair<Value, Type>> getCallFlowFunction(final Unit src, final SootMethod dest) {
+      @Override
+	public FlowFunction<Pair<Value, Type>> getCallFlowFunction(final Unit src, final SootMethod dest) {
         Stmt stmt = (Stmt) src;
         InvokeExpr ie = stmt.getInvokeExpr();
         final List<Value> callArgs = ie.getArgs();
-        final List<Local> paramLocals = new ArrayList<Local>();
+        final List<Local> paramLocals = new ArrayList<>();
         for (int i = 0; i < dest.getParameterCount(); i++) {
           paramLocals.add(dest.getActiveBody().getParameterLocal(i));
         }
         return new FlowFunction<Pair<Value, Type>>() {
-          public Set<Pair<Value, Type>> computeTargets(Pair<Value, Type> source) {
-            if (!dest.getName().equals("<clinit>") && !dest.getSubSignature().equals("void run()")) {
+          @Override
+		public Set<Pair<Value, Type>> computeTargets(Pair<Value, Type> source) {
+            if (!"<clinit>".equals(dest.getName()) && !"void run()".equals(dest.getSubSignature())) {
               Value value = source.getO1();
               int argIndex = callArgs.indexOf(value);
               if (argIndex > -1) {
-                return Collections.singleton(new Pair<Value, Type>(paramLocals.get(argIndex), source.getO2()));
+                return Collections.singleton(new Pair<>(paramLocals.get(argIndex), source.getO2()));
               }
             }
             return Collections.emptySet();
@@ -176,47 +182,50 @@ public class IFDSPossibleTypes
         };
       }
 
-      public FlowFunction<Pair<Value, Type>> getReturnFlowFunction(Unit callSite, SootMethod callee, Unit exitStmt,
+      @Override
+	public FlowFunction<Pair<Value, Type>> getReturnFlowFunction(Unit callSite, SootMethod callee, Unit exitStmt,
           Unit retSite) {
         if (exitStmt instanceof ReturnStmt) {
           ReturnStmt returnStmt = (ReturnStmt) exitStmt;
           Value op = returnStmt.getOp();
-          if (op instanceof Local) {
-            if (callSite instanceof DefinitionStmt) {
-              DefinitionStmt defnStmt = (DefinitionStmt) callSite;
-              Value leftOp = defnStmt.getLeftOp();
-              if (leftOp instanceof Local) {
-                final Local tgtLocal = (Local) leftOp;
-                final Local retLocal = (Local) op;
-                return new FlowFunction<Pair<Value, Type>>() {
+          if (op instanceof Local && callSite instanceof DefinitionStmt) {
+		  DefinitionStmt defnStmt = (DefinitionStmt) callSite;
+		  Value leftOp = defnStmt.getLeftOp();
+		  if (leftOp instanceof Local) {
+		    final Local tgtLocal = (Local) leftOp;
+		    final Local retLocal = (Local) op;
+		    return new FlowFunction<Pair<Value, Type>>() {
 
-                  public Set<Pair<Value, Type>> computeTargets(Pair<Value, Type> source) {
-                    if (source == retLocal) {
-                      return Collections.singleton(new Pair<Value, Type>(tgtLocal, source.getO2()));
-                    }
-                    return Collections.emptySet();
-                  }
+		      @Override
+			public Set<Pair<Value, Type>> computeTargets(Pair<Value, Type> source) {
+		        if (source == retLocal) {
+		          return Collections.singleton(new Pair<>(tgtLocal, source.getO2()));
+		        }
+		        return Collections.emptySet();
+		      }
 
-                };
-              }
-            }
-          }
+		    };
+		  }
+		}
         }
         return KillAll.v();
       }
 
-      public FlowFunction<Pair<Value, Type>> getCallToReturnFlowFunction(Unit call, Unit returnSite) {
+      @Override
+	public FlowFunction<Pair<Value, Type>> getCallToReturnFlowFunction(Unit call, Unit returnSite) {
         return Identity.v();
       }
     };
   }
 
-  public Map<Unit, Set<Pair<Value, Type>>> initialSeeds() {
+  @Override
+public Map<Unit, Set<Pair<Value, Type>>> initialSeeds() {
     return DefaultSeeds.make(Collections.singleton(Scene.v().getMainMethod().getActiveBody().getUnits().getFirst()),
         zeroValue());
   }
 
-  public Pair<Value, Type> createZeroValue() {
-    return new Pair<Value, Type>(Jimple.v().newLocal("<dummy>", UnknownType.v()), UnknownType.v());
+  @Override
+public Pair<Value, Type> createZeroValue() {
+    return new Pair<>(Jimple.v().newLocal("<dummy>", UnknownType.v()), UnknownType.v());
   }
 }

@@ -70,10 +70,10 @@ public class TrapMinimizer extends TrapTransformer {
     ExceptionalUnitGraph eug = new ExceptionalUnitGraph(b, DalvikThrowAnalysis.v(), Options.v().omit_excepting_unit_edges());
     Set<Unit> unitsWithMonitor = getUnitsWithMonitor(eug);
 
-    Map<Trap, List<Trap>> replaceTrapBy = new HashMap<Trap, List<Trap>>(b.getTraps().size());
+    Map<Trap, List<Trap>> replaceTrapBy = new HashMap<>(b.getTraps().size());
     boolean updateTrap = false;
     for (Trap tr : b.getTraps()) {
-      List<Trap> newTraps = new ArrayList<Trap>(); // will contain the new
+      List<Trap> newTraps = new ArrayList<>(); // will contain the new
       // traps
       Unit firstTrapStmt = tr.getBeginUnit(); // points to the first unit
       // in the trap
@@ -93,14 +93,14 @@ public class TrapMinimizer extends TrapTransformer {
 
         // If this is the catch-all block and the current unit has an,
         // active monitor, we need to keep the block
-        if (tr.getException().getName().equals("java.lang.Throwable") && unitsWithMonitor.contains(u)) {
+        if ("java.lang.Throwable".equals(tr.getException().getName()) && unitsWithMonitor.contains(u)) {
           goesToHandler = true;
         }
 
-        // check if the current unit has an edge to the current trap's
+        boolean condition = !goesToHandler && DalvikThrowAnalysis.v().mightThrow(u).catchableAs(tr.getException().getType());
+		// check if the current unit has an edge to the current trap's
         // handler
-        if (!goesToHandler) {
-          if (DalvikThrowAnalysis.v().mightThrow(u).catchableAs(tr.getException().getType())) {
+        if (condition) {
             // We need to be careful here. The ExceptionalUnitGraph
             // will
             // always give us an edge from the predecessor of the
@@ -115,7 +115,6 @@ public class TrapMinimizer extends TrapTransformer {
               }
             }
           }
-        }
 
         if (!goesToHandler) {
           // if the current unit does not have an edge to the current
@@ -152,11 +151,11 @@ public class TrapMinimizer extends TrapTransformer {
     }
 
     // replace traps where necessary
-    for (Trap k : replaceTrapBy.keySet()) {
+	replaceTrapBy.keySet().forEach(k -> {
       b.getTraps().insertAfter(replaceTrapBy.get(k), k); // we must keep
       // the order
       b.getTraps().remove(k);
-    }
+    });
 
   }
 

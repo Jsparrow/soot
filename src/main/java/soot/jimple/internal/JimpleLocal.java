@@ -41,8 +41,9 @@ import soot.util.Switch;
 public class JimpleLocal implements Local, ConvertToBaf {
   protected String name;
   Type type;
+private volatile int number = 0;
 
-  /** Constructs a JimpleLocal of the given name and type. */
+/** Constructs a JimpleLocal of the given name and type. */
   public JimpleLocal(String name, Type type) {
     setName(name);
     setType(type);
@@ -52,13 +53,13 @@ public class JimpleLocal implements Local, ConvertToBaf {
     }
   }
 
-  /** Returns true if the given object is structurally equal to this one. */
+/** Returns true if the given object is structurally equal to this one. */
   @Override
   public boolean equivTo(Object o) {
     return this.equals(o);
   }
 
-  /**
+/**
    * Returns a hash code for this object, consistent with structural equality.
    */
   @Override
@@ -70,7 +71,7 @@ public class JimpleLocal implements Local, ConvertToBaf {
     return result;
   }
 
-  /** Returns a clone of the current JimpleLocal. */
+/** Returns a clone of the current JimpleLocal. */
   @Override
   public Object clone() {
     // do not intern the name again
@@ -79,66 +80,64 @@ public class JimpleLocal implements Local, ConvertToBaf {
     return local;
   }
 
-  /** Returns the name of this object. */
+/** Returns the name of this object. */
   @Override
   public String getName() {
     return name;
   }
 
-  /** Sets the name of this object as given. */
+/** Sets the name of this object as given. */
   @Override
   public void setName(String name) {
     this.name = (name == null) ? null : name.intern();
   }
 
-  /** Returns the type of this local. */
+/** Returns the type of this local. */
   @Override
   public Type getType() {
     return type;
   }
 
-  /** Sets the type of this local. */
+/** Sets the type of this local. */
   @Override
   public void setType(Type t) {
     this.type = t;
   }
 
-  @Override
+@Override
   public String toString() {
     return getName();
   }
 
-  @Override
+@Override
   public void toString(UnitPrinter up) {
     up.local(this);
   }
 
-  @Override
+@Override
   public final List<ValueBox> getUseBoxes() {
     return Collections.emptyList();
   }
 
-  @Override
+@Override
   public void apply(Switch sw) {
     ((JimpleValueSwitch) sw).caseLocal(this);
   }
 
-  @Override
+@Override
   public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     Unit u = Baf.v().newLoadInst(getType(), context.getBafLocalOfJimpleLocal(this));
     u.addAllTagsOf(context.getCurrentUnit());
     out.add(u);
   }
 
-  @Override
+@Override
   public final int getNumber() {
     return number;
   }
 
-  @Override
+@Override
   public void setNumber(int number) {
     this.number = number;
   }
-
-  private volatile int number = 0;
 }

@@ -146,8 +146,8 @@ import soot.xml.XMLPrinter;
 public class PackManager {
   private static final Logger logger = LoggerFactory.getLogger(PackManager.class);
   public static boolean DEBUG = false;
-  private final Map<String, Pack> packNameToPack = new HashMap<String, Pack>();
-  private final List<Pack> packList = new LinkedList<Pack>();
+  private final Map<String, Pack> packNameToPack = new HashMap<>();
+  private final List<Pack> packList = new LinkedList<>();
   private boolean onlyStandardPacks = false;
   private JarOutputStream jarFile = null;
   protected DexPrinter dexPrinter = null;
@@ -429,10 +429,7 @@ public class PackManager {
     setupJAR();
     for (String path : Options.v().process_dir()) {
       // hack1: resolve to signatures only
-      for (String cl : SourceLocator.v().getClassesUnder(path)) {
-        SootClass clazz = Scene.v().forceResolve(cl, SootClass.SIGNATURES);
-        clazz.setApplicationClass();
-      }
+	SourceLocator.v().getClassesUnder(path).stream().map(cl -> Scene.v().forceResolve(cl, SootClass.SIGNATURES)).forEach(SootClass::setApplicationClass);
       // hack2: for each class one after another:
       // a) resolve to bodies
       // b) run packs
@@ -455,15 +452,15 @@ public class PackManager {
         }
 
         // Create tags from all values we only have in code assingments
-        // now
-        for (SootClass sc : Scene.v().getApplicationClasses()) {
+		// now
+		Scene.v().getApplicationClasses().forEach(sc -> {
           if (Options.v().validate()) {
             sc.validate();
           }
           if (!sc.isPhantom) {
             ConstantInitializerToTagTransformer.v().transformClass(sc, true);
           }
-        }
+        });
 
         runBodyPacks(clazz);
         // generate output
@@ -497,14 +494,14 @@ public class PackManager {
     retrieveAllBodies();
 
     // Create tags from all values we only have in code assignments now
-    for (SootClass sc : Scene.v().getApplicationClasses()) {
+	Scene.v().getApplicationClasses().forEach(sc -> {
       if (Options.v().validate()) {
         sc.validate();
       }
       if (!sc.isPhantom) {
         ConstantInitializerToTagTransformer.v().transformClass(sc, true);
       }
-    }
+    });
 
     // if running coffi cfg metrics, print out results and exit
     if (soot.jbco.Main.metrics) {
@@ -526,7 +523,9 @@ public class PackManager {
   }
 
   public void coffiMetrics() {
-    int tV = 0, tE = 0, hM = 0;
+    int tV = 0;
+	int tE = 0;
+	int hM = 0;
     double aM = 0;
     HashMap<SootMethod, int[]> hashVem = soot.coffi.CFG.methodsToVEM;
     Iterator<SootMethod> it = hashVem.keySet().iterator();
@@ -543,7 +542,8 @@ public class PackManager {
       aM /= hashVem.size();
     }
 
-    logger.debug("Vertices, Edges, Avg Degree, Highest Deg:    " + tV + "  " + tE + "  " + aM + "  " + hM);
+    logger.debug(new StringBuilder().append("Vertices, Edges, Avg Degree, Highest Deg:    ").append(tV).append("  ").append(tE).append("  ").append(aM).append("  ")
+			.append(hM).toString());
   }
 
   public void runBodyPacks() {
@@ -592,7 +592,8 @@ public class PackManager {
       try {
         jarFile = new JarOutputStream(new FileOutputStream(outFileName));
       } catch (IOException e) {
-        throw new CompilationDeathException("Cannot open output Jar file " + outFileName);
+        logger.error(e.getMessage(), e);
+		throw new CompilationDeathException("Cannot open output Jar file " + outFileName);
       }
     } else {
       jarFile = null;
@@ -618,11 +619,12 @@ public class PackManager {
 
   /* preprocess classes for DAVA */
   private void preProcessDAVA() {
-    if (Options.v().output_format() == Options.output_format_dava) {
-
-      Map<String, String> options = PhaseOptions.v().getPhaseOptions("db");
-      boolean isSourceJavac = PhaseOptions.getBoolean(options, "source-is-javac");
-      if (!isSourceJavac) {
+    if (Options.v().output_format() != Options.output_format_dava) {
+		return;
+	}
+	Map<String, String> options = PhaseOptions.v().getPhaseOptions("db");
+	boolean isSourceJavac = PhaseOptions.getBoolean(options, "source-is-javac");
+	if (!isSourceJavac) {
         /*
          * It turns out that the exception attributes of a method i.e. those exceptions that a method can throw are only
          * checked by the Java compiler and not the JVM
@@ -635,19 +637,16 @@ public class PackManager {
          * See ThrowFinder for more details
          */
         if (DEBUG) {
-          System.out.println("Source is not Javac hence invoking ThrowFinder");
+          logger.info("Source is not Javac hence invoking ThrowFinder");
         }
 
         ThrowFinder.v().find();
       } else {
         if (DEBUG) {
-          System.out.println("Source is javac hence we dont need to invoke ThrowFinder");
+          logger.info("Source is javac hence we dont need to invoke ThrowFinder");
         }
       }
-
-      PackageNamer.v().fixNames();
-
-    }
+	PackageNamer.v().fixNames();
   }
 
   private void runBodyPacks(final Iterator<SootClass> classes) {
@@ -666,7 +665,7 @@ public class PackManager {
       executor.shutdown();
     } catch (InterruptedException e) {
       // Something went horribly wrong
-      throw new RuntimeException("Could not wait for pack threads to " + "finish: " + e.getMessage(), e);
+      throw new RuntimeException(new StringBuilder().append("Could not wait for pack threads to ").append("finish: ").append(e.getMessage()).toString(), e);
     }
 
     // If something went wrong, we tell the world
@@ -705,7 +704,7 @@ public class PackManager {
       executor.shutdown();
     } catch (InterruptedException e) {
       // Something went horribly wrong
-      throw new RuntimeException("Could not wait for writer threads to " + "finish: " + e.getMessage(), e);
+      throw new RuntimeException(new StringBuilder().append("Could not wait for writer threads to ").append("finish: ").append(e.getMessage()).toString(), e);
     }
 
     // If something went wrong, we tell the world
@@ -769,7 +768,7 @@ public class PackManager {
 
       // debug("analyzeAST","Advanced Analyses ALL DISABLED");
 
-      logger.debug("Analyzing " + fileName + "... ");
+      logger.debug(new StringBuilder().append("Analyzing ").append(fileName).append("... ").toString());
 
       /*
        * Nomair A. Naeem 29th Jan 2006 Added hook into going through each decompiled method again Need it for all the
@@ -815,11 +814,8 @@ public class PackManager {
      * Generate decompiled code
      */
     String pathForBuild = null;
-    ArrayList<String> decompiledClasses = new ArrayList<String>();
-    Iterator<SootClass> classIt = appClasses.iterator();
-    while (classIt.hasNext()) {
-      SootClass s = classIt.next();
-
+    ArrayList<String> decompiledClasses = new ArrayList<>();
+    for (SootClass s : appClasses) {
       OutputStream streamOut = null;
       PrintWriter writerOut = null;
       String fileName = SourceLocator.v().getFileNameFor(s, Options.v().output_format());
@@ -848,7 +844,7 @@ public class PackManager {
         throw new CompilationDeathException("Cannot output file " + fileName, e);
       }
 
-      logger.debug("Generating " + fileName + "... ");
+      logger.debug(new StringBuilder().append("Generating ").append(fileName).append("... ").toString());
 
       G.v().out.flush();
 
@@ -863,33 +859,31 @@ public class PackManager {
             streamOut.close();
           }
         } catch (IOException e) {
-          throw new CompilationDeathException("Cannot close output file " + fileName);
+          logger.error(e.getMessage(), e);
+		throw new CompilationDeathException("Cannot close output file " + fileName);
         }
       }
     } // going through all classes
 
     /*
-     * Create the build.xml for Dava
-     */
-    if (pathForBuild != null) {
-      // path for build is probably ending in sootoutput/dava/src
+	     * Create the build.xml for Dava
+	     */
+	if (pathForBuild == null) {
+		return;
+	}
+	// path for build is probably ending in sootoutput/dava/src
       // definetly remove the src
       if (pathForBuild.endsWith("src/")) {
         pathForBuild = pathForBuild.substring(0, pathForBuild.length() - 4);
       }
-
-      String fileName = pathForBuild + "build.xml";
-
-      try {
-        OutputStream streamOut = new FileOutputStream(fileName);
+	String fileName = pathForBuild + "build.xml";
+	try (OutputStream streamOut = new FileOutputStream(fileName)) {
         PrintWriter writerOut = new PrintWriter(new OutputStreamWriter(streamOut));
         DavaBuildFile.generate(writerOut, decompiledClasses);
         writerOut.flush();
-        streamOut.close();
       } catch (IOException e) {
         throw new CompilationDeathException("Cannot output file " + fileName, e);
       }
-    }
   }
 
   @SuppressWarnings("fallthrough")
@@ -905,7 +899,11 @@ public class PackManager {
       logger.debug("Transforming {}...", c.getName());
     }
 
-    boolean produceBaf = false, produceGrimp = false, produceDava = false, produceJimple = true, produceShimple = false;
+    boolean produceBaf = false;
+	boolean produceGrimp = false;
+	boolean produceDava = false;
+	boolean produceJimple = true;
+	boolean produceShimple = false;
 
     switch (format) {
       case Options.output_format_none:
@@ -955,14 +953,12 @@ public class PackManager {
     // such adding of methods happens in rare occasions: for instance when
     // resolving a method reference to a non-existing method, then this
     // method is created as a phantom method when phantom-refs are enabled
-    ArrayList<SootMethod> methodsCopy = new ArrayList<SootMethod>(c.getMethods());
+    ArrayList<SootMethod> methodsCopy = new ArrayList<>(c.getMethods());
     for (SootMethod m : methodsCopy) {
-      if (DEBUG) {
-        if (m.getExceptions().size() != 0) {
-          System.out.println("PackManager printing out jimple body exceptions for method " + m.toString() + " "
-              + m.getExceptions().toString());
-        }
-      }
+      boolean condition = DEBUG && m.getExceptions().size() != 0;
+	if (condition) {
+	  logger.info(new StringBuilder().append("PackManager printing out jimple body exceptions for method ").append(m.toString()).append(" ").append(m.getExceptions().toString()).toString());
+	}
 
       if (!m.isConcrete()) {
         continue;
@@ -1029,8 +1025,11 @@ public class PackManager {
       // System.out.println("processed xml for class");
     }
 
-    if (produceDava) {
-      for (SootMethod m : c.getMethods()) {
+    // end if produceDava
+	if (!produceDava) {
+		return;
+	}
+	for (SootMethod m : c.getMethods()) {
         if (!m.isConcrete()) {
           continue;
         }
@@ -1038,8 +1037,7 @@ public class PackManager {
         // is invoked from within newBody
         m.setActiveBody(Dava.v().newBody(m.getActiveBody()));
       }
-
-      /*
+	/*
        * January 13th, 2006 SuperFirstStmtHandler might have set SootMethodAddedByDava if it needs to create a new method.
        */
       // could use G to add new method...................
@@ -1047,15 +1045,10 @@ public class PackManager {
         // System.out.println("PACKMANAGER SAYS:----------------Have to
         // add the new method(s)");
         ArrayList<SootMethod> sootMethodsAdded = G.v().SootMethodsAdded;
-        Iterator<SootMethod> it = sootMethodsAdded.iterator();
-        while (it.hasNext()) {
-          c.addMethod(it.next());
-        }
-        G.v().SootMethodsAdded = new ArrayList<SootMethod>();
+        sootMethodsAdded.forEach(c::addMethod);
+        G.v().SootMethodsAdded = new ArrayList<>();
         G.v().SootMethodAddedByDava = false;
       }
-
-    } // end if produceDava
   }
 
   public BafBody convertJimpleBodyToBaf(SootMethod m) {
@@ -1075,13 +1068,12 @@ public class PackManager {
   }
 
   protected void writeClass(SootClass c) {
-    // Create code assignments for those values we only have in code
+    boolean condition = Options.v().output_format() == Options.output_format_jimple && !c.isPhantom;
+	// Create code assignments for those values we only have in code
     // assignments
-    if (Options.v().output_format() == Options.output_format_jimple) {
-      if (!c.isPhantom) {
+    if (condition) {
         ConstantValueToInitializerTransformer.v().transformClass(c);
       }
-    }
 
     final int format = Options.v().output_format();
     if (format == Options.output_format_none) {
@@ -1120,11 +1112,10 @@ public class PackManager {
       if (Options.v().gzip()) {
         streamOut = new GZIPOutputStream(streamOut);
       }
-      if (format == Options.output_format_class) {
-        if (Options.v().jasmin_backend()) {
-          streamOut = new JasminOutputStream(streamOut);
-        }
-      }
+      boolean condition1 = format == Options.output_format_class && Options.v().jasmin_backend();
+	if (condition1) {
+	  streamOut = new JasminOutputStream(streamOut);
+	}
       writerOut = new PrintWriter(new OutputStreamWriter(streamOut));
       logger.debug("Writing to " + fileName);
     } catch (IOException e) {
@@ -1182,7 +1173,8 @@ public class PackManager {
         jarFile.closeEntry();
       }
     } catch (IOException e) {
-      throw new CompilationDeathException("Cannot close output file " + fileName);
+      logger.error(e.getMessage(), e);
+	throw new CompilationDeathException("Cannot close output file " + fileName);
     }
   }
 
@@ -1272,14 +1264,7 @@ public class PackManager {
       while (methodIt.hasNext()) {
         final SootMethod m = methodIt.next();
         if (m.isConcrete()) {
-          executor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-              m.retrieveActiveBody();
-            }
-
-          });
+          executor.execute(m::retrieveActiveBody);
         }
       }
     }
@@ -1290,7 +1275,7 @@ public class PackManager {
       executor.shutdown();
     } catch (InterruptedException e) {
       // Something went horribly wrong
-      throw new RuntimeException("Could not wait for loader threads to " + "finish: " + e.getMessage(), e);
+      throw new RuntimeException(new StringBuilder().append("Could not wait for loader threads to ").append("finish: ").append(e.getMessage()).toString(), e);
     }
 
     // If something went wrong, we tell the world

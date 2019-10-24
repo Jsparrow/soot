@@ -48,13 +48,13 @@ public class AnnotatedAnnotatedClassTest extends AbstractASMBackendTest {
 		av0 = cw.visitAnnotation("Lsoot/asm/backend/targets/MyAnnotatedAnnotation;", false);
 		{
 		AnnotationVisitor av1 = av0.visitAnnotation("value", "Lsoot/asm/backend/targets/MyTestAnnotation;");
-		av1.visit("iVal", new Integer(1));
-		av1.visit("fVal", new Float("1.0"));
-		av1.visit("lVal", new Long(1L));
-		av1.visit("dVal", new Double("1.0"));
+		av1.visit("iVal", Integer.valueOf(1));
+		av1.visit("fVal", Float.valueOf("1.0"));
+		av1.visit("lVal", Long.valueOf(1L));
+		av1.visit("dVal", Double.valueOf("1.0"));
 		av1.visit("zVal", Boolean.TRUE);
-		av1.visit("bVal", new Byte((byte)1));
-		av1.visit("sVal", new Short((short)1));
+		av1.visit("bVal", Byte.valueOf((byte)1));
+		av1.visit("sVal", Short.valueOf((short)1));
 		av1.visit("strVal", "1");
 		av1.visit("rVal", Type.getType("Lsoot/asm/backend/targets/AnnotatedClass;"));
 		av1.visit("iAVal", new int[] {1,2,3,4});

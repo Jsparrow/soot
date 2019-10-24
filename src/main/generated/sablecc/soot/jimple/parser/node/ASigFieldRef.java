@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ASigFieldRef extends PFieldRef
 {
-    private PFieldSignature _fieldSignature_;
+    private PFieldSignature fieldSignature;
 
     public ASigFieldRef()
     {
@@ -26,7 +26,7 @@ public final class ASigFieldRef extends PFieldRef
     public Object clone()
     {
         return new ASigFieldRef(
-            cloneNode(this._fieldSignature_));
+            cloneNode(this.fieldSignature));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ASigFieldRef extends PFieldRef
 
     public PFieldSignature getFieldSignature()
     {
-        return this._fieldSignature_;
+        return this.fieldSignature;
     }
 
     public void setFieldSignature(PFieldSignature node)
     {
-        if(this._fieldSignature_ != null)
+        if(this.fieldSignature != null)
         {
-            this._fieldSignature_.parent(null);
+            this.fieldSignature.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ASigFieldRef extends PFieldRef
             node.parent(this);
         }
 
-        this._fieldSignature_ = node;
+        this.fieldSignature = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._fieldSignature_);
+            + toString(this.fieldSignature);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._fieldSignature_ == child)
+        if(this.fieldSignature == child)
         {
-            this._fieldSignature_ = null;
+            this.fieldSignature = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ASigFieldRef extends PFieldRef
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._fieldSignature_ == oldChild)
+        if(this.fieldSignature == oldChild)
         {
             setFieldSignature((PFieldSignature) newChild);
             return;

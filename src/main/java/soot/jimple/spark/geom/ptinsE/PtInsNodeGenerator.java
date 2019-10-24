@@ -52,10 +52,12 @@ public class PtInsNodeGenerator extends IEncodingBroker {
   public void initFlowGraph(GeomPointsTo ptAnalyzer) {
     int k;
     int n_legal_cons;
-    int nf1, nf2;
+    int nf1;
+	int nf2;
     int code;
     CgEdge q;
-    IVarAbstraction my_lhs, my_rhs;
+    IVarAbstraction my_lhs;
+	IVarAbstraction my_rhs;
 
     // Visit all the simple constraints
     n_legal_cons = 0;
@@ -88,8 +90,7 @@ public class PtInsNodeGenerator extends IEncodingBroker {
           // The core part of any context sensitive algorithms
           if (cons.interCallEdges != null) {
             // Inter-procedural assignment
-            for (Iterator<Edge> it = cons.interCallEdges.iterator(); it.hasNext();) {
-              Edge sEdge = it.next();
+			for (Edge sEdge : cons.interCallEdges) {
               q = ptAnalyzer.getInternalEdgeFromSootEdge(sEdge);
               if (q.is_obsoleted == true) {
                 continue;

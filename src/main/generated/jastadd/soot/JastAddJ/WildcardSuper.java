@@ -18,30 +18,59 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production WildcardSuper : {@link AbstractWildcard} ::= <span class="component">{@link Access}</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.ast:23
  */
-public class WildcardSuper extends AbstractWildcard implements Cloneable {
-  /**
+public class WildcardSuper extends AbstractWildcard {
+  private static final Logger logger = LoggerFactory.getLogger(WildcardSuper.class);
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+/**
+   * @ast method 
+   * 
+   */
+  public WildcardSuper() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public WildcardSuper(Access p0) {
+    setChild(p0, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     type_computed = false;
     type_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public WildcardSuper clone() throws CloneNotSupportedException {
     WildcardSuper node = (WildcardSuper)super.clone();
     node.type_computed = false;
@@ -50,29 +79,33 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public WildcardSuper copy() {
     try {
       WildcardSuper node = (WildcardSuper) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public WildcardSuper fullCopy() {
     WildcardSuper tree = (WildcardSuper) copy();
     if (children != null) {
@@ -86,25 +119,17 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericsPrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/GenericsPrettyPrint.jrag:168
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     s.append("? super ");
     getAccess().toString(s);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public WildcardSuper() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -112,33 +137,29 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[1];
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public WildcardSuper(Access p0) {
-    setChild(p0, 0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 1;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Access child.
    * @param node The new node to replace the Access child.
    * @apilevel high-level
@@ -148,7 +169,7 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
   public void setAccess(Access node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the Access child.
    * @return The current node used as the Access child.
    * @apilevel high-level
@@ -158,7 +179,7 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
   public Access getAccess() {
     return (Access)getChild(0);
   }
-  /**
+/**
    * Retrieves the Access child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Access child.
@@ -169,20 +190,13 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
   public Access getAccessNoTransform() {
     return (Access)getChildNoTransform(0);
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1371
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -191,14 +205,16 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {  return lookupWildcardSuper(getAccess().type());  }
-  /**
+/**
    * @attribute inh
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1372
@@ -209,10 +225,11 @@ public class WildcardSuper extends AbstractWildcard implements Cloneable {
     TypeDecl lookupWildcardSuper_TypeDecl_value = getParent().Define_TypeDecl_lookupWildcardSuper(this, null, typeDecl);
     return lookupWildcardSuper_TypeDecl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

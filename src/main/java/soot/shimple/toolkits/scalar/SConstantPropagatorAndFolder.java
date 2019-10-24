@@ -77,18 +77,18 @@ import soot.util.Chain;
  **/
 public class SConstantPropagatorAndFolder extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(SConstantPropagatorAndFolder.class);
+protected ShimpleBody sb;
+protected boolean debug;
 
-  public SConstantPropagatorAndFolder(Singletons.Global g) {
+public SConstantPropagatorAndFolder(Singletons.Global g) {
   }
 
-  public static SConstantPropagatorAndFolder v() {
+public static SConstantPropagatorAndFolder v() {
     return G.v().soot_shimple_toolkits_scalar_SConstantPropagatorAndFolder();
   }
 
-  protected ShimpleBody sb;
-  protected boolean debug;
-
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     if (!(b instanceof ShimpleBody)) {
       throw new RuntimeException("SConstantPropagatorAndFolder requires a ShimpleBody.");
     }
@@ -105,20 +105,21 @@ public class SConstantPropagatorAndFolder extends BodyTransformer {
     debug |= sb.getOptions().debug();
 
     if (Options.v().verbose()) {
-      logger.debug("[" + sb.getMethod().getName() + "] Propagating and folding constants (SSA)...");
+      logger.debug(new StringBuilder().append("[").append(sb.getMethod().getName()).append("] Propagating and folding constants (SSA)...").toString());
     }
 
     // *** FIXME: What happens when Shimple is built with another UnitGraph?
     SCPFAnalysis scpf = new SCPFAnalysis(new ExceptionalUnitGraph(sb));
 
     propagateResults(scpf.getResults());
-    if (pruneCFG) {
-      removeStmts(scpf.getDeadStmts());
-      replaceStmts(scpf.getStmtsToReplace());
-    }
+    if (!pruneCFG) {
+		return;
+	}
+	removeStmts(scpf.getDeadStmts());
+	replaceStmts(scpf.getStmtsToReplace());
   }
 
-  /**
+/**
    * Propagates constants to the definition and uses of the relevant locals given a mapping. Notice that we use the Shimple
    * implementation of LocalDefs and LocalUses.
    **/
@@ -128,9 +129,7 @@ public class SConstantPropagatorAndFolder extends BodyTransformer {
     ShimpleLocalDefs localDefs = new ShimpleLocalDefs(sb);
     ShimpleLocalUses localUses = new ShimpleLocalUses(sb);
 
-    Iterator<Local> localsIt = locals.iterator();
-    while (localsIt.hasNext()) {
-      Local local = localsIt.next();
+    for (Local local : locals) {
       Constant constant = localToConstant.get(local);
 
       if (constant instanceof MetaConstant) {
@@ -152,7 +151,8 @@ public class SConstantPropagatorAndFolder extends BodyTransformer {
             ((UnitBoxOwner) defSrc).clearUnitBoxes();
           }
         } else if (debug) {
-          logger.warn("Couldn't propagate constant " + constant + " to box " + defSrcBox.getValue() + " in unit " + stmt);
+          logger.warn(new StringBuilder().append("Couldn't propagate constant ").append(constant).append(" to box ").append(defSrcBox.getValue()).append(" in unit ").append(stmt)
+				.toString());
         }
       }
 
@@ -168,27 +168,26 @@ public class SConstantPropagatorAndFolder extends BodyTransformer {
             useBox.setValue(constant);
           } else if (debug) {
             logger.warn(
-                "Couldn't propagate constant " + constant + " to box " + useBox.getValue() + " in unit " + pair.getUnit());
+                new StringBuilder().append("Couldn't propagate constant ").append(constant).append(" to box ").append(useBox.getValue()).append(" in unit ").append(pair.getUnit())
+						.toString());
           }
         }
       }
     }
   }
 
-  /**
+/**
    * Removes the given list of fall through IfStmts from the body.
    **/
   protected void removeStmts(List<IfStmt> deadStmts) {
     Chain units = sb.getUnits();
-    Iterator<IfStmt> deadIt = deadStmts.iterator();
-    while (deadIt.hasNext()) {
-      Unit dead = deadIt.next();
+    deadStmts.forEach(dead -> {
       units.remove(dead);
       dead.clearUnitBoxes();
-    }
+    });
   }
 
-  /**
+/**
    * Replaces conditional branches by unconditional branches as given by the mapping.
    **/
   protected void replaceStmts(Map<Stmt, GotoStmt> stmtsToReplace) {
@@ -256,78 +255,78 @@ class SCPFAnalysis extends ForwardBranchedFlowAnalysis {
    **/
   protected List<IfStmt> deadStmts;
 
-  /**
+  public SCPFAnalysis(UnitGraph graph) {
+    super(graph);
+    emptySet = new ArraySparseSet();
+    stmtToReplacement = new HashMap<>();
+    deadStmts = new ArrayList<>();
+
+    // initialise localToConstant map -- assume all scalars are
+    // constant (Top)
+    {
+      Collection<Local> locals = graph.getBody().getLocals();
+      localToConstant = new HashMap<>(graph.size() * 2 + 1, 0.7f);
+
+      locals.stream().map(local1 -> (Local) local1).forEach(local -> localToConstant.put(local, TopConstant.v()));
+    }
+
+    doAnalysis();
+  }
+
+/**
    * Returns the localToConstant map.
    **/
   public Map<Local, Constant> getResults() {
     return localToConstant;
   }
 
-  /**
+/**
    * Returns the list of fall through IfStmts.
    **/
   public List<IfStmt> getDeadStmts() {
     return deadStmts;
   }
 
-  /**
+/**
    * Returns a Map from conditional branches to the unconditional branches that can replace them.
    **/
   public Map<Stmt, GotoStmt> getStmtsToReplace() {
     return stmtToReplacement;
   }
 
-  public SCPFAnalysis(UnitGraph graph) {
-    super(graph);
-    emptySet = new ArraySparseSet();
-    stmtToReplacement = new HashMap<Stmt, GotoStmt>();
-    deadStmts = new ArrayList<IfStmt>();
-
-    // initialise localToConstant map -- assume all scalars are
-    // constant (Top)
-    {
-      Collection<Local> locals = graph.getBody().getLocals();
-      Iterator<Local> localsIt = locals.iterator();
-      localToConstant = new HashMap<Local, Constant>(graph.size() * 2 + 1, 0.7f);
-
-      while (localsIt.hasNext()) {
-        Local local = (Local) localsIt.next();
-        localToConstant.put(local, TopConstant.v());
-      }
-    }
-
-    doAnalysis();
-  }
-
-  // *** NOTE: this is here because ForwardBranchedFlowAnalysis does
+// *** NOTE: this is here because ForwardBranchedFlowAnalysis does
   // *** not handle exceptional control flow properly in the
   // *** dataflow analysis. this should be removed when
   // *** ForwardBranchedFlowAnalysis is fixed.
-  protected boolean treatTrapHandlersAsEntries() {
+  @Override
+protected boolean treatTrapHandlersAsEntries() {
     return true;
   }
 
-  /**
+/**
    * If a node has empty IN sets we assume that it is not reachable. Hence, we initialise the entry sets to be non-empty to
    * indicate that they are reachable.
    **/
-  protected Object entryInitialFlow() {
+  @Override
+protected Object entryInitialFlow() {
     FlowSet entrySet = (FlowSet) emptySet.emptySet();
     entrySet.add(TopConstant.v());
     return entrySet;
   }
 
-  /**
+/**
    * All other nodes are assumed to be unreachable by default.
    **/
-  protected Object newInitialFlow() {
+  @Override
+protected Object newInitialFlow() {
     return emptySet.emptySet();
   }
 
-  /**
+/**
    * Since we are interested in control flow from all branches, take the union.
    **/
-  protected void merge(Object in1, Object in2, Object out) {
+  @Override
+protected void merge(Object in1, Object in2, Object out) {
     FlowSet fin1 = (FlowSet) in1;
     FlowSet fin2 = (FlowSet) in2;
     FlowSet fout = (FlowSet) out;
@@ -335,17 +334,18 @@ class SCPFAnalysis extends ForwardBranchedFlowAnalysis {
     fin1.union(fin2, fout);
   }
 
-  /**
+/**
    * Defer copy to FlowSet.
    **/
-  protected void copy(Object source, Object dest) {
+  @Override
+protected void copy(Object source, Object dest) {
     FlowSet fource = (FlowSet) source;
     FlowSet fest = (FlowSet) dest;
 
     fource.copy(fest);
   }
 
-  /**
+/**
    * If a node has an empty in set, it is considered unreachable. Otherwise the node is examined and if any assumptions have
    * to be corrected, a Pair containing the corrected assumptions is flowed to the reachable nodes. If no assumptions have to
    * be corrected then no information other than the in set is propagated to the reachable nodes.
@@ -354,7 +354,8 @@ class SCPFAnalysis extends ForwardBranchedFlowAnalysis {
    * Pair serves no other purpose than to keep the analysis flowing for as long as needed. The final results are accumulated
    * in the localToConstant map.
    **/
-  protected void flowThrough(Object in, Unit s, List fallOut, List branchOuts) {
+  @Override
+protected void flowThrough(Object in, Unit s, List fallOut, List branchOuts) {
     FlowSet fin = ((FlowSet) in).clone();
 
     // not reachable
@@ -544,7 +545,7 @@ class SCPFAnalysis extends ForwardBranchedFlowAnalysis {
     }
   }
 
-  /**
+/**
    * Returns (Unit, Constant) pair if an assumption has changed due to the fact that u is reachable. Else returns null.
    **/
   protected Pair processDefinitionStmt(Unit u) {
@@ -576,7 +577,7 @@ class SCPFAnalysis extends ForwardBranchedFlowAnalysis {
     return new Pair(u, localToConstant.get(local));
   }
 
-  /**
+/**
    * Verifies if the given assumption "constant" changes the previous assumption about "local" and merges the information
    * into the localToConstant map. Returns true if something changed.
    **/

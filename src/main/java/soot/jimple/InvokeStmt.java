@@ -26,9 +26,9 @@ import soot.Value;
 import soot.ValueBox;
 
 public interface InvokeStmt extends Stmt {
-  public void setInvokeExpr(Value invokeExpr);
+  void setInvokeExpr(Value invokeExpr);
 
-  public InvokeExpr getInvokeExpr();
+  @Override InvokeExpr getInvokeExpr();
 
-  public ValueBox getInvokeExprBox();
+  @Override ValueBox getInvokeExprBox();
 }

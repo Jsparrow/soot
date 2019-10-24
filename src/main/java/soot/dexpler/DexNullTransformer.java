@@ -82,14 +82,13 @@ public class DexNullTransformer extends AbstractNullTransformer {
 
   private boolean usedAsObject;
   private boolean doBreak = false;
+private Local l = null;
 
-  public static DexNullTransformer v() {
+public static DexNullTransformer v() {
     return new DexNullTransformer();
   }
 
-  private Local l = null;
-
-  @Override
+@Override
   protected void internalTransform(final Body body, String phaseName, Map<String, String> options) {
     final DexDefUseAnalysis localDefs = new DexDefUseAnalysis(body);
     AbstractStmtSwitch checkDef = new AbstractStmtSwitch() { // Alex: should also end as
@@ -139,11 +138,12 @@ public class DexNullTransformer extends AbstractNullTransformer {
 
       @Override
       public void caseIdentityStmt(IdentityStmt stmt) {
-        if (stmt.getLeftOp() == l) {
-          usedAsObject = isObject(stmt.getRightOp().getType());
-          doBreak = true;
-          return;
-        }
+        if (stmt.getLeftOp() != l) {
+			return;
+		}
+		usedAsObject = isObject(stmt.getRightOp().getType());
+		doBreak = true;
+		return;
       }
     };
     AbstractStmtSwitch checkUse = new AbstractStmtSwitch() {
@@ -158,15 +158,14 @@ public class DexNullTransformer extends AbstractNullTransformer {
         }
         // check for base
         SootMethodRef sm = e.getMethodRef();
-        if (!sm.isStatic()) {
-          if (e instanceof AbstractInvokeExpr) {
+        boolean condition = !sm.isStatic() && e instanceof AbstractInvokeExpr;
+		if (condition) {
             AbstractInstanceInvokeExpr aiiexpr = (AbstractInstanceInvokeExpr) e;
             Value b = aiiexpr.getBase();
             if (b == l) {
               return true;
             }
           }
-        }
         return false;
       }
 
@@ -317,8 +316,7 @@ public class DexNullTransformer extends AbstractNullTransformer {
         if (u instanceof DefinitionStmt) {
           l = (Local) ((DefinitionStmt) u).getLeftOp();
         } else if (u instanceof IfStmt) {
-          throw new RuntimeException("ERROR: def can not be something else than Assign or Identity statement! (def: " + u
-              + " class: " + u.getClass() + "");
+          throw new RuntimeException(new StringBuilder().append("ERROR: def can not be something else than Assign or Identity statement! (def: ").append(u).append(" class: ").append(u.getClass()).append("").toString());
         }
 
         // check defs
@@ -343,22 +341,19 @@ public class DexNullTransformer extends AbstractNullTransformer {
 
       // change values
       if (usedAsObject) {
-        for (Unit u : defs) {
+        defs.forEach(u -> {
           replaceWithNull(u);
-          Set<Value> defLocals = new HashSet<Value>();
-          for (ValueBox vb : u.getDefBoxes()) {
-            defLocals.add(vb.getValue());
-          }
+          Set<Value> defLocals = new HashSet<>();
+          u.getDefBoxes().forEach(vb -> defLocals.add(vb.getValue()));
 
           Local l = (Local) ((DefinitionStmt) u).getLeftOp();
-          for (Unit uuse : localDefs.getUsesOf(l)) {
-            Stmt use = (Stmt) uuse;
-            // If we have a[x] = 0 and a is an object, we may not conclude 0 -> null
+          localDefs.getUsesOf(l).stream().map(uuse -> (Stmt) uuse).forEach(use -> {
+			// If we have a[x] = 0 and a is an object, we may not conclude 0 -> null
             if (!use.containsArrayRef() || !defLocals.contains(use.getArrayRef().getBase())) {
               replaceWithNull(use);
             }
-          }
-        }
+		});
+        });
       } // end if
     }
 
@@ -383,12 +378,13 @@ public class DexNullTransformer extends AbstractNullTransformer {
         }
 
         // Case a[0] = 0
-        if (stmt.getLeftOp() instanceof ArrayRef && isConstZero(stmt.getRightOp())) {
-          ArrayRef ar = (ArrayRef) stmt.getLeftOp();
-          if (isObjectArray(ar.getBase(), body) || stmt.hasTag("ObjectOpTag")) {
+		if (!(stmt.getLeftOp() instanceof ArrayRef && isConstZero(stmt.getRightOp()))) {
+			return;
+		}
+		ArrayRef ar = (ArrayRef) stmt.getLeftOp();
+		if (isObjectArray(ar.getBase(), body) || stmt.hasTag("ObjectOpTag")) {
             stmt.setRightOp(nullConstant);
           }
-        }
       }
 
       private boolean isConstZero(Value rightOp) {
@@ -403,11 +399,12 @@ public class DexNullTransformer extends AbstractNullTransformer {
 
       @Override
       public void caseReturnStmt(ReturnStmt stmt) {
-        if (stmt.getOp() instanceof IntConstant && isObject(body.getMethod().getReturnType())) {
-          IntConstant iconst = (IntConstant) stmt.getOp();
-          assert iconst.value == 0;
-          stmt.setOp(nullConstant);
-        }
+        if (!(stmt.getOp() instanceof IntConstant && isObject(body.getMethod().getReturnType()))) {
+			return;
+		}
+		IntConstant iconst = (IntConstant) stmt.getOp();
+		assert iconst.value == 0;
+		stmt.setOp(nullConstant);
       }
 
       @Override
@@ -427,27 +424,25 @@ public class DexNullTransformer extends AbstractNullTransformer {
     };
 
     final NullConstant nullConstant = NullConstant.v();
-    for (Unit u : body.getUnits()) {
+    body.getUnits().forEach(u -> {
       u.apply(inlinedZeroValues);
       if (u instanceof Stmt) {
         Stmt stmt = (Stmt) u;
         if (stmt.containsInvokeExpr()) {
           InvokeExpr invExpr = stmt.getInvokeExpr();
           for (int i = 0; i < invExpr.getArgCount(); i++) {
-            if (isObject(invExpr.getMethodRef().parameterType(i))) {
-              if (invExpr.getArg(i) instanceof IntConstant) {
+            if (isObject(invExpr.getMethodRef().parameterType(i)) && invExpr.getArg(i) instanceof IntConstant) {
                 IntConstant iconst = (IntConstant) invExpr.getArg(i);
                 assert iconst.value == 0;
                 invExpr.setArg(i, nullConstant);
               }
-            }
           }
         }
       }
-    }
+    });
   }
 
-  private boolean isObjectArray(Value v, Body body) {
+private boolean isObjectArray(Value v, Body body) {
     for (Unit u : body.getUnits()) {
       if (u instanceof AssignStmt) {
         AssignStmt assign = (AssignStmt) u;
@@ -459,11 +454,9 @@ public class DexNullTransformer extends AbstractNullTransformer {
             }
           } else if (assign.getRightOp() instanceof FieldRef) {
             FieldRef fr = (FieldRef) assign.getRightOp();
-            if (fr.getType() instanceof ArrayType) {
-              if (isObject(((ArrayType) fr.getType()).getArrayElementType())) {
+            if (fr.getType() instanceof ArrayType && isObject(((ArrayType) fr.getType()).getArrayElementType())) {
                 return true;
               }
-            }
           }
         }
       }
@@ -471,7 +464,7 @@ public class DexNullTransformer extends AbstractNullTransformer {
     return false;
   }
 
-  /**
+/**
    * Collect all the locals which are assigned a IntConstant(0) or are used within a zero comparison.
    *
    * @param body
@@ -490,7 +483,7 @@ public class DexNullTransformer extends AbstractNullTransformer {
         if ((r instanceof IntConstant && ((IntConstant) r).value == 0)
             || (r instanceof LongConstant && ((LongConstant) r).value == 0)) {
           if (candidates == null) {
-            candidates = new HashSet<Local>();
+            candidates = new HashSet<>();
           }
           candidates.add(l);
         }
@@ -498,7 +491,7 @@ public class DexNullTransformer extends AbstractNullTransformer {
         ConditionExpr expr = (ConditionExpr) ((IfStmt) u).getCondition();
         if (isZeroComparison(expr) && expr.getOp1() instanceof Local) {
           if (candidates == null) {
-            candidates = new HashSet<Local>();
+            candidates = new HashSet<>();
           }
           candidates.add((Local) expr.getOp1());
         }

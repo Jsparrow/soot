@@ -84,24 +84,22 @@ import soot.util.IterableSet;
  */
 public class ThrowFinder {
   private static final Logger logger = LoggerFactory.getLogger(ThrowFinder.class);
+public static boolean DEBUG = false;
+private HashSet<SootMethod> registeredMethods;
+private HashMap<Stmt, HashSet<SootClass>> protectionSet;
 
-  public ThrowFinder(Singletons.Global g) {
+public ThrowFinder(Singletons.Global g) {
   }
 
-  public static ThrowFinder v() {
+public static ThrowFinder v() {
     return G.v().soot_dava_toolkits_base_misc_ThrowFinder();
   }
 
-  private HashSet<SootMethod> registeredMethods;
-  private HashMap<Stmt, HashSet<SootClass>> protectionSet;
-
-  public static boolean DEBUG = false;
-
-  public void find() {
+public void find() {
     logger.debug("" + "Verifying exception handling.. ");
 
-    registeredMethods = new HashSet<SootMethod>();
-    protectionSet = new HashMap<Stmt, HashSet<SootClass>>();
+    registeredMethods = new HashSet<>();
+    protectionSet = new HashMap<>();
 
     CallGraph cg;
     if (Scene.v().hasCallGraph()) {
@@ -129,10 +127,10 @@ public class ThrowFinder {
     }
 
     // Build the subClass and superClass mappings.
-    HashMap<SootClass, IterableSet> subClassSet = new HashMap<SootClass, IterableSet>(),
-        superClassSet = new HashMap<SootClass, IterableSet>();
+    HashMap<SootClass, IterableSet> subClassSet = new HashMap<>();
+	HashMap<SootClass, IterableSet> superClassSet = new HashMap<>();
 
-    HashSet<SootClass> applicationClasses = new HashSet<SootClass>();
+    HashSet<SootClass> applicationClasses = new HashSet<>();
     applicationClasses.addAll(Scene.v().getApplicationClasses());
 
     classIt = Scene.v().getApplicationClasses().iterator();
@@ -178,7 +176,7 @@ public class ThrowFinder {
     }
 
     // Build the subMethod and superMethod mappings.
-    HashMap<SootMethod, IterableSet> agreementMethodSet = new HashMap<SootMethod, IterableSet>();
+    HashMap<SootMethod, IterableSet> agreementMethodSet = new HashMap<>();
 
     // Get exceptions from throw statements and add them to the exceptions that the method throws.
     Iterator worklistIt = worklist.iterator();
@@ -218,11 +216,11 @@ public class ThrowFinder {
                   exceptionSet.add(c);
                   changed = true;
                   if (DEBUG) {
-                    System.out.println("Added exception which is explicitly thrown" + c.getName());
+                    logger.info("Added exception which is explicitly thrown" + c.getName());
                   }
                 } else {
                   if (DEBUG) {
-                    System.out.println("Found monitor exit" + pred + " hence not adding");
+                    logger.info(new StringBuilder().append("Found monitor exit").append(pred).append(" hence not adding").toString());
                   }
                 }
               }
@@ -337,11 +335,11 @@ public class ThrowFinder {
 
   }
 
-  private void find_OtherMethods(SootMethod startingMethod, HashMap<SootMethod, IterableSet> methodMapping,
+private void find_OtherMethods(SootMethod startingMethod, HashMap<SootMethod, IterableSet> methodMapping,
       HashMap<SootClass, IterableSet> classMapping, HashSet<SootClass> applicationClasses) {
     IterableSet worklist = (IterableSet) classMapping.get(startingMethod.getDeclaringClass()).clone();
 
-    HashSet<SootClass> touchSet = new HashSet<SootClass>();
+    HashSet<SootClass> touchSet = new HashSet<>();
     touchSet.addAll(worklist);
 
     String signature = startingMethod.getSubSignature();
@@ -381,7 +379,7 @@ public class ThrowFinder {
     }
   }
 
-  private void register_AreasOfProtection(SootMethod m) {
+private void register_AreasOfProtection(SootMethod m) {
     if (registeredMethods.contains(m)) {
       return;
     }
@@ -406,7 +404,7 @@ public class ThrowFinder {
 
         HashSet<SootClass> handled = null;
         if ((handled = protectionSet.get(s)) == null) {
-          handled = new HashSet<SootClass>();
+          handled = new HashSet<>();
           protectionSet.put(s, handled);
         }
 
@@ -417,7 +415,7 @@ public class ThrowFinder {
     }
   }
 
-  private boolean handled_Exception(HashSet handledExceptions, SootClass c) {
+private boolean handled_Exception(HashSet handledExceptions, SootClass c) {
     SootClass thrownException = c;
 
     if (is_HandledByRuntime(thrownException)) {
@@ -441,9 +439,10 @@ public class ThrowFinder {
     }
   }
 
-  private boolean is_HandledByRuntime(SootClass c) {
-    SootClass thrownException = c, runtimeException = Scene.v().getSootClass("java.lang.RuntimeException"),
-        error = Scene.v().getSootClass("java.lang.Error");
+private boolean is_HandledByRuntime(SootClass c) {
+    SootClass thrownException = c;
+	SootClass runtimeException = Scene.v().getSootClass("java.lang.RuntimeException");
+	SootClass error = Scene.v().getSootClass("java.lang.Error");
 
     while (true) {
       if ((thrownException == runtimeException) || (thrownException == error)) {

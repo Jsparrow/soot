@@ -33,7 +33,8 @@ import java.util.List;
  */
 public class DotGraphEdge implements Renderable {
   private boolean isDirected;
-  private DotGraphNode start, end;
+  private DotGraphNode start;
+private DotGraphNode end;
   private List<DotGraphAttribute> attributes;
 
   /**
@@ -75,7 +76,7 @@ public class DotGraphEdge implements Renderable {
   public void setLabel(String label) {
     label = DotGraphUtility.replaceQuotes(label);
     label = DotGraphUtility.replaceReturns(label);
-    this.setAttribute("label", "\"" + label + "\"");
+    this.setAttribute("label", new StringBuilder().append("\"").append(label).append("\"").toString());
   }
 
   /**
@@ -109,14 +110,15 @@ public class DotGraphEdge implements Renderable {
    */
   public void setAttribute(DotGraphAttribute attr) {
     if (this.attributes == null) {
-      this.attributes = new LinkedList<DotGraphAttribute>();
+      this.attributes = new LinkedList<>();
     }
 
     this.attributes.add(attr);
   }
 
-  public void render(OutputStream out, int indent) throws IOException {
-    StringBuffer line = new StringBuffer(start.getName());
+  @Override
+public void render(OutputStream out, int indent) throws IOException {
+    StringBuilder line = new StringBuilder(start.getName());
     line.append((this.isDirected) ? "->" : "--");
     line.append(end.getName());
 

@@ -32,7 +32,8 @@ public class UnknownMethodSource implements MethodSource {
   UnknownMethodSource() {
   }
 
-  public Body getBody(SootMethod m, String phaseName) {
+  @Override
+public Body getBody(SootMethod m, String phaseName) {
     // we ignore options here.
     // actually we should have default option verbatim,
     // and apply phase options.

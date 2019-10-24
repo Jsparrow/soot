@@ -75,16 +75,14 @@ public class DavaBuildFile {
     out.print("		<arg value=\"--src-prec\" />\n");
     out.print("		<arg value=\"java\" />\n");
 
-    Iterator<String> it = decompiledClasses.iterator();
-    while (it.hasNext()) {
-      String temp = it.next();
+    decompiledClasses.forEach(temp -> {
       if (temp.endsWith(".java")) {
         temp = temp.substring(0, temp.length() - 5);
       }
       // System.out.println(temp);
-      out.print("		<arg value=\"" + temp + "\" />\n");
+      out.print(new StringBuilder().append("		<arg value=\"").append(temp).append("\" />\n").toString());
 
-    }
+    });
 
     out.print("");
     out.print("	  </exec>\n");

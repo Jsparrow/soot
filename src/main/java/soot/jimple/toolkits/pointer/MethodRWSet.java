@@ -39,26 +39,34 @@ import soot.SootField;
 /** Represents the read or write set of a statement. */
 public class MethodRWSet extends RWSet {
   private static final Logger logger = LoggerFactory.getLogger(MethodRWSet.class);
-  public Set globals;
-  public Map<Object, PointsToSet> fields;
-  protected boolean callsNative = false;
-  protected boolean isFull = false;
-  public static final int MAX_SIZE = Integer.MAX_VALUE;
+public static final int MAX_SIZE = Integer.MAX_VALUE;
+public Set globals;
+public Map<Object, PointsToSet> fields;
+protected boolean callsNative = false;
+protected boolean isFull = false;
 
-  public String toString() {
+// static int count = 0;
+  public MethodRWSet() {
+    /*
+     * count++; if( 0 == (count % 1000) ) { logger.debug(""+ "Created "+count+"th MethodRWSet" ); }
+     */
+  }
+
+@Override
+public String toString() {
     boolean empty = true;
-    StringBuffer ret = new StringBuffer();
+    StringBuilder ret = new StringBuilder();
     if (fields != null) {
       for (Object element : fields.keySet()) {
         final Object field = element;
-        ret.append("[Field: " + field + " " + fields.get(field) + "]\n");
+        ret.append(new StringBuilder().append("[Field: ").append(field).append(" ").append(fields.get(field)).append("]\n").toString());
         empty = false;
       }
     }
     if (globals != null) {
       for (Iterator globalIt = globals.iterator(); globalIt.hasNext();) {
         final Object global = globalIt.next();
-        ret.append("[Global: " + global + "]\n");
+        ret.append(new StringBuilder().append("[Global: ").append(global).append("]\n").toString());
         empty = false;
       }
     }
@@ -68,7 +76,8 @@ public class MethodRWSet extends RWSet {
     return ret.toString();
   }
 
-  public int size() {
+@Override
+public int size() {
     if (globals == null) {
       if (fields == null) {
         return 0;
@@ -84,25 +93,21 @@ public class MethodRWSet extends RWSet {
     }
   }
 
-  // static int count = 0;
-  public MethodRWSet() {
-    /*
-     * count++; if( 0 == (count % 1000) ) { logger.debug(""+ "Created "+count+"th MethodRWSet" ); }
-     */
-  }
-
-  public boolean getCallsNative() {
+@Override
+public boolean getCallsNative() {
     return callsNative;
   }
 
-  public boolean setCallsNative() {
+@Override
+public boolean setCallsNative() {
     boolean ret = !callsNative;
     callsNative = true;
     return ret;
   }
 
-  /** Returns an iterator over any globals read/written. */
-  public Set getGlobals() {
+/** Returns an iterator over any globals read/written. */
+  @Override
+public Set getGlobals() {
     if (isFull) {
       return G.v().MethodRWSet_allGlobals;
     }
@@ -112,8 +117,9 @@ public class MethodRWSet extends RWSet {
     return globals;
   }
 
-  /** Returns an iterator over any fields read/written. */
-  public Set getFields() {
+/** Returns an iterator over any fields read/written. */
+  @Override
+public Set getFields() {
     if (isFull) {
       return G.v().MethodRWSet_allFields;
     }
@@ -123,8 +129,9 @@ public class MethodRWSet extends RWSet {
     return fields.keySet();
   }
 
-  /** Returns a set of base objects whose field f is read/written. */
-  public PointsToSet getBaseForField(Object f) {
+/** Returns a set of base objects whose field f is read/written. */
+  @Override
+public PointsToSet getBaseForField(Object f) {
     if (isFull) {
       return FullObjectSet.v();
     }
@@ -134,7 +141,8 @@ public class MethodRWSet extends RWSet {
     return fields.get(f);
   }
 
-  public boolean hasNonEmptyIntersection(RWSet oth) {
+@Override
+public boolean hasNonEmptyIntersection(RWSet oth) {
     if (isFull) {
       return oth != null;
     }
@@ -152,18 +160,17 @@ public class MethodRWSet extends RWSet {
     if (fields != null && other.fields != null && !fields.isEmpty() && !other.fields.isEmpty()) {
       for (Object element : other.fields.keySet()) {
         final Object field = element;
-        if (fields.containsKey(field)) {
-          if (Union.hasNonEmptyIntersection(getBaseForField(field), other.getBaseForField(field))) {
+        if (fields.containsKey(field) && Union.hasNonEmptyIntersection(getBaseForField(field), other.getBaseForField(field))) {
             return true;
           }
-        }
       }
     }
     return false;
   }
 
-  /** Adds the RWSet other into this set. */
-  public boolean union(RWSet other) {
+/** Adds the RWSet other into this set. */
+  @Override
+public boolean union(RWSet other) {
     if (other == null) {
       return false;
     }
@@ -181,7 +188,7 @@ public class MethodRWSet extends RWSet {
         ret = !isFull | ret;
         isFull = true;
         if (true) {
-          throw new RuntimeException("attempt to add full set " + o + " into " + this);
+          throw new RuntimeException(new StringBuilder().append("attempt to add full set ").append(o).append(" into ").append(this).toString());
         }
         globals = null;
         fields = null;
@@ -195,7 +202,7 @@ public class MethodRWSet extends RWSet {
         if (globals.size() > MAX_SIZE) {
           globals = null;
           isFull = true;
-          throw new RuntimeException("attempt to add full set " + o + " into " + this);
+          throw new RuntimeException(new StringBuilder().append("attempt to add full set ").append(o).append(" into ").append(this).toString());
         }
       }
       if (o.fields != null) {
@@ -213,14 +220,15 @@ public class MethodRWSet extends RWSet {
         ret = addGlobal((SootField) oth.field) | ret;
       }
     }
-    if (!getCallsNative() && other.getCallsNative()) {
-      setCallsNative();
-      return true;
-    }
-    return ret;
+    if (!(!getCallsNative() && other.getCallsNative())) {
+		return ret;
+	}
+	setCallsNative();
+	return true;
   }
 
-  public boolean addGlobal(SootField global) {
+@Override
+public boolean addGlobal(SootField global) {
     if (globals == null) {
       globals = new HashSet();
     }
@@ -228,12 +236,13 @@ public class MethodRWSet extends RWSet {
     if (globals.size() > MAX_SIZE) {
       globals = null;
       isFull = true;
-      throw new RuntimeException("attempt to add more than " + MAX_SIZE + " globals into " + this);
+      throw new RuntimeException(new StringBuilder().append("attempt to add more than ").append(MAX_SIZE).append(" globals into ").append(this).toString());
     }
     return ret;
   }
 
-  public boolean addFieldRef(PointsToSet otherBase, Object field) {
+@Override
+public boolean addFieldRef(PointsToSet otherBase, Object field) {
     boolean ret = false;
     if (fields == null) {
       fields = new HashMap();
@@ -250,7 +259,7 @@ public class MethodRWSet extends RWSet {
       return false;
     }
     Union u;
-    if (base == null || !(base instanceof Union)) {
+    if (!(base instanceof Union)) {
       u = G.v().Union_factory.newUnion();
       if (base != null) {
         u.addAll(base);
@@ -264,7 +273,7 @@ public class MethodRWSet extends RWSet {
         fields = null;
         isFull = true;
         if (true) {
-          throw new RuntimeException("attempt to add more than " + MAX_SIZE + " fields into " + this);
+          throw new RuntimeException(new StringBuilder().append("attempt to add more than ").append(MAX_SIZE).append(" fields into ").append(this).toString());
         }
         return true;
       }
@@ -275,10 +284,11 @@ public class MethodRWSet extends RWSet {
     return ret;
   }
 
-  static void addedField(int size) {
+static void addedField(int size) {
   }
 
-  public boolean isEquivTo(RWSet other) {
+@Override
+public boolean isEquivTo(RWSet other) {
     return other == this;
   }
 }

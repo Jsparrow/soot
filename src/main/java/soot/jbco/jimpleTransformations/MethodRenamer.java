@@ -229,7 +229,7 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
 
         final Set<SootClass> declaringClasses = getDeclaringClasses(applicationClass, method);
         if (declaringClasses.isEmpty()) {
-          throw new IllegalStateException("Cannot find classes that declare " + method.getSignature() + ".");
+          throw new IllegalStateException(new StringBuilder().append("Cannot find classes that declare ").append(method.getSignature()).append(".").toString());
         }
 
         final Optional<SootClass> libraryClass = declaringClasses.stream().filter(SootClass::isLibraryClass).findAny();
@@ -280,9 +280,9 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
     }
 
     // rename methods AFTER creating mapping
-    for (SootClass applicationClass : Scene.v().getApplicationClasses()) {
+	Scene.v().getApplicationClasses().forEach(applicationClass -> {
       final List<SootMethod> methods = new ArrayList<>(applicationClass.getMethods());
-      for (SootMethod method : methods) {
+      methods.forEach(method -> {
         final String newName = getNewName(Collections.singleton(applicationClass), method.getName());
         if (newName != null) {
           if (isVerbose()) {
@@ -291,8 +291,8 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
 
           method.setName(newName);
         }
-      }
-    }
+      });
+    });
 
     // iterate through application classes, update references of renamed methods
     for (SootClass applicationClass : Scene.v().getApplicationClasses()) {
@@ -397,14 +397,13 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
       return false; // skip the main method
     }
 
-    if (method.getName().equals(SootMethod.constructorName) || method.getName().equals(SootMethod.staticInitializerName)) {
-      if (isVerbose()) {
+    if (!(method.getName().equals(SootMethod.constructorName) || method.getName().equals(SootMethod.staticInitializerName))) {
+		return true;
+	}
+	if (isVerbose()) {
         logger.info("Skipping renaming \"{}\" method as it is constructor or static initializer.", subSignature);
       }
-      return false; // skip constructors/initializers
-    }
-
-    return true;
+	return false; // skip constructors/initializers
   }
 
   private boolean isNotUnique(String methodName) {
@@ -481,7 +480,7 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
 
   private Set<SootClass> getChildrenOfIncluding(Collection<SootClass> classes) {
     return Stream
-        .concat(classes.stream().filter(c -> !c.getName().equals("java.lang.Object"))
+        .concat(classes.stream().filter(c -> !"java.lang.Object".equals(c.getName()))
             .map(c -> c.isInterface() ? Scene.v().getActiveHierarchy().getImplementersOf(c)
                 : Scene.v().getActiveHierarchy().getSubclassesOf(c))
             .flatMap(Collection::stream), classes.stream())
@@ -491,7 +490,7 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
   private Set<SootClass> getParentsOfIncluding(Collection<SootClass> classes) {
     final Set<SootClass> parents = new HashSet<>(classes);
 
-    for (SootClass clazz : classes) {
+    classes.forEach(clazz -> {
       // add implementing interfaces
       parents.addAll(clazz.getInterfaces());
 
@@ -503,7 +502,7 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
       // and superclasses (superinterfaces) of passed applicationClass
       parents.addAll(clazz.isInterface() ? Scene.v().getActiveHierarchy().getSuperinterfacesOfIncluding(clazz)
           : Scene.v().getActiveHierarchy().getSuperclassesOfIncluding(clazz));
-    }
+    });
 
     return parents;
   }
@@ -533,13 +532,7 @@ public class MethodRenamer extends SceneTransformer implements IJbcoTransform {
    * @return {@code true} if passed class contains similar method; {@code false} otherwise
    */
   private boolean isDeclared(SootClass sootClass, String methodName, List<Type> parameterTypes) {
-    for (SootMethod declared : sootClass.getMethods()) {
-      if (declared.getName().equals(methodName) && declared.getParameterCount() == parameterTypes.size()) {
-        return true;
-      }
-    }
-
-    return false;
+    return sootClass.getMethods().stream().anyMatch(declared -> declared.getName().equals(methodName) && declared.getParameterCount() == parameterTypes.size());
   }
 
   private static Body getActiveBodySafely(SootMethod method) {

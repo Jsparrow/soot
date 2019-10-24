@@ -37,8 +37,9 @@ public class MethodDescriptor extends java.lang.Object {
       p = parser;
       int descriptor_index = p.u2();
       String descriptor = ((CONSTANT_Utf8_Info) p.constantPool[descriptor_index]).string();
-      if(BytecodeParser.VERBOSE)
-        p.println("  Method: " + name + ", " + descriptor);
+      if(BytecodeParser.VERBOSE) {
+		p.println(new StringBuilder().append("  Method: ").append(name).append(", ").append(descriptor).toString());
+	}
       //String[] strings = descriptor.substring(1).split("\\)");
       //parameterDescriptors = strings[0];
       //typeDescriptor = strings[1];

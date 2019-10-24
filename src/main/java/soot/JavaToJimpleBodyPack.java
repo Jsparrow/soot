@@ -85,7 +85,8 @@ public class JavaToJimpleBodyPack extends BodyPack {
     }
   }
 
-  protected void internalApply(Body b) {
+  @Override
+protected void internalApply(Body b) {
     applyPhaseOptions((JimpleBody) b, PhaseOptions.v().getPhaseOptions(getPhaseName()));
   }
 }

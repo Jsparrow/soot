@@ -33,6 +33,8 @@ import soot.dava.DavaBody;
 import soot.dava.internal.AST.ASTMethodNode;
 import soot.dava.internal.AST.ASTNode;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * It has been seen that Dava's output contains the default constructor with just the invocation
@@ -48,18 +50,19 @@ import soot.util.Chain;
  * also check tht the call to super has no arguments i.e. default super
  */
 public class RemoveEmptyBodyDefaultConstructor {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(RemoveEmptyBodyDefaultConstructor.class);
+public static boolean DEBUG = false;
 
   public static void checkAndRemoveDefault(SootClass s) {
     debug("\n\nRemoveEmptyBodyDefaultConstructor----" + s.getName());
     List methods = s.getMethods();
     Iterator it = methods.iterator();
-    List<SootMethod> constructors = new ArrayList<SootMethod>();
+    List<SootMethod> constructors = new ArrayList<>();
 
     while (it.hasNext()) {
       SootMethod method = (SootMethod) it.next();
       debug("method name is" + method.getName());
-      if (method.getName().indexOf("<init>") > -1) {
+      if (method.getName().contains("<init>")) {
         // constructor add to constructor list
         constructors.add(method);
       }
@@ -132,7 +135,7 @@ public class RemoveEmptyBodyDefaultConstructor {
 
   public static void debug(String debug) {
     if (DEBUG) {
-      System.out.println("DEBUG: " + debug);
+      logger.info("DEBUG: " + debug);
     }
   }
 

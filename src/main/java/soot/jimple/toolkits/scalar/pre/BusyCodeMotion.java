@@ -68,26 +68,26 @@ import soot.util.UnitMap;
  */
 public class BusyCodeMotion extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(BusyCodeMotion.class);
+private static final String PREFIX = "$bcm";
 
-  public BusyCodeMotion(Singletons.Global g) {
+public BusyCodeMotion(Singletons.Global g) {
   }
 
-  public static BusyCodeMotion v() {
+public static BusyCodeMotion v() {
     return G.v().soot_jimple_toolkits_scalar_pre_BusyCodeMotion();
   }
 
-  private static final String PREFIX = "$bcm";
-
-  /**
+/**
    * performs the busy code motion.
    */
-  protected void internalTransform(Body b, String phaseName, Map<String, String> opts) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> opts) {
     BCMOptions options = new BCMOptions(opts);
-    HashMap<EquivalentValue, Local> expToHelper = new HashMap<EquivalentValue, Local>();
+    HashMap<EquivalentValue, Local> expToHelper = new HashMap<>();
     Chain<Unit> unitChain = b.getUnits();
 
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     performing Busy Code Motion...");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     performing Busy Code Motion...").toString());
     }
 
     CriticalEdgeRemover.v().transform(b, phaseName + ".cer");
@@ -96,7 +96,8 @@ public class BusyCodeMotion extends BodyTransformer {
 
     /* map each unit to its RHS. only take binary expressions */
     Map<Unit, EquivalentValue> unitToEquivRhs = new UnitMap<EquivalentValue>(b, graph.size() + 1, 0.7f) {
-      protected EquivalentValue mapTo(Unit unit) {
+      @Override
+	protected EquivalentValue mapTo(Unit unit) {
         Value tmp = SootFilter.noInvokeRhs(unit);
         Value tmp2 = SootFilter.binop(tmp);
         if (tmp2 == null) {
@@ -108,7 +109,8 @@ public class BusyCodeMotion extends BodyTransformer {
 
     /* same as before, but without exception-throwing expressions */
     Map<Unit, EquivalentValue> unitToNoExceptionEquivRhs = new UnitMap<EquivalentValue>(b, graph.size() + 1, 0.7f) {
-      protected EquivalentValue mapTo(Unit unit) {
+      @Override
+	protected EquivalentValue mapTo(Unit unit) {
         Value tmp = SootFilter.binopRhs(unit);
         tmp = SootFilter.noExceptionThrowing(tmp);
         return SootFilter.equiVal(tmp);
@@ -172,16 +174,11 @@ public class BusyCodeMotion extends BodyTransformer {
       }
     }
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     Busy Code Motion done!");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     Busy Code Motion done!").toString());
     }
   }
 
-  private Unit getFirstNonIdentityStmt(Body b) {
-    for (Unit u : b.getUnits()) {
-      if (!(u instanceof IdentityStmt)) {
-        return u;
-      }
-    }
-    return null;
+private Unit getFirstNonIdentityStmt(Body b) {
+    return b.getUnits().stream().filter(u -> !(u instanceof IdentityStmt)).findFirst().orElse(null);
   }
 }

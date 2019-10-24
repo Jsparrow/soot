@@ -99,8 +99,9 @@ public final class SharedBitSet {
     return value.iterator();
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     for (BitSetIterator it = iterator(); it.hasNext();) {
       b.append(it.next());
       b.append(",");

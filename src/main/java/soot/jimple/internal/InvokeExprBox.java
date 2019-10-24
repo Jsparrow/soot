@@ -31,7 +31,8 @@ public class InvokeExprBox extends AbstractValueBox {
     setValue(value);
   }
 
-  public boolean canContainValue(Value value) {
+  @Override
+public boolean canContainValue(Value value) {
     return value instanceof InvokeExpr;
   }
 }

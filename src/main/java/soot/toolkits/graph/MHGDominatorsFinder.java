@@ -67,9 +67,9 @@ public class MHGDominatorsFinder<N> implements DominatorsFinder<N> {
 
   protected void doAnalysis() {
     heads = graph.getHeads();
-    nodeToFlowSet = new HashMap<N, BitSet>();
-    nodeToIndex = new HashMap<N, Integer>();
-    indexToNode = new HashMap<Integer, N>();
+    nodeToFlowSet = new HashMap<>();
+    nodeToIndex = new HashMap<>();
+    indexToNode = new HashMap<>();
 
     // build full set
     fullSet = new BitSet(graph.size());
@@ -91,8 +91,7 @@ public class MHGDominatorsFinder<N> implements DominatorsFinder<N> {
     boolean changed = true;
     do {
       changed = false;
-      for (Iterator<N> i = graph.iterator(); i.hasNext();) {
-        N o = i.next();
+      for (N o : graph) {
         if (heads.contains(o)) {
           continue;
         }
@@ -129,13 +128,15 @@ public class MHGDominatorsFinder<N> implements DominatorsFinder<N> {
     return index;
   }
 
-  public DirectedGraph<N> getGraph() {
+  @Override
+public DirectedGraph<N> getGraph() {
     return graph;
   }
 
-  public List<N> getDominators(N node) {
+  @Override
+public List<N> getDominators(N node) {
     // reconstruct list of dominators from bitset
-    List<N> result = new ArrayList<N>();
+    List<N> result = new ArrayList<>();
     BitSet bitSet = nodeToFlowSet.get(node);
     for (int i = 0; i < bitSet.length(); i++) {
       if (bitSet.get(i)) {
@@ -145,7 +146,8 @@ public class MHGDominatorsFinder<N> implements DominatorsFinder<N> {
     return result;
   }
 
-  public N getImmediateDominator(N node) {
+  @Override
+public N getImmediateDominator(N node) {
     // root node
     if (getGraph().getHeads().contains(node)) {
       return null;
@@ -174,11 +176,13 @@ public class MHGDominatorsFinder<N> implements DominatorsFinder<N> {
     return immediateDominator;
   }
 
-  public boolean isDominatedBy(N node, N dominator) {
+  @Override
+public boolean isDominatedBy(N node, N dominator) {
     return getDominators(node).contains(dominator);
   }
 
-  public boolean isDominatedByAll(N node, Collection<N> dominators) {
+  @Override
+public boolean isDominatedByAll(N node, Collection<N> dominators) {
     return getDominators(node).containsAll(dominators);
   }
 

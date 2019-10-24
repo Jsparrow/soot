@@ -8,8 +8,8 @@ import soot.jimple.parser.analysis.*;
 public final class AReturnStatement extends PStatement
 {
     private TReturn _return_;
-    private PImmediate _immediate_;
-    private TSemicolon _semicolon_;
+    private PImmediate immediate;
+    private TSemicolon semicolon;
 
     public AReturnStatement()
     {
@@ -35,8 +35,8 @@ public final class AReturnStatement extends PStatement
     {
         return new AReturnStatement(
             cloneNode(this._return_),
-            cloneNode(this._immediate_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.immediate),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -72,14 +72,14 @@ public final class AReturnStatement extends PStatement
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AReturnStatement extends PStatement
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -117,16 +117,13 @@ public final class AReturnStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._return_)
-            + toString(this._immediate_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this._return_)).append(toString(this.immediate)).append(toString(this.semicolon)).toString();
     }
 
     @Override
@@ -139,15 +136,15 @@ public final class AReturnStatement extends PStatement
             return;
         }
 
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -164,13 +161,13 @@ public final class AReturnStatement extends PStatement
             return;
         }
 
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

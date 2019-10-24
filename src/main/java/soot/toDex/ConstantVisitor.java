@@ -78,7 +78,7 @@ public class ConstantVisitor extends AbstractConstantSwitch {
   public void defaultCase(Object o) {
     // const* opcodes not used since there seems to be no point in doing so:
     // CONST_HIGH16, CONST_WIDE_HIGH16
-    throw new Error("unknown Object (" + o.getClass() + ") as Constant: " + o);
+    throw new Error(new StringBuilder().append("unknown Object (").append(o.getClass()).append(") as Constant: ").append(o).toString());
   }
 
   @Override

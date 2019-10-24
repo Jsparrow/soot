@@ -23,69 +23,69 @@ package soot.jimple;
  */
 
 public interface ExprSwitch extends soot.util.Switch {
-  public abstract void caseAddExpr(AddExpr v);
+  abstract void caseAddExpr(AddExpr v);
 
-  public abstract void caseAndExpr(AndExpr v);
+  abstract void caseAndExpr(AndExpr v);
 
-  public abstract void caseCmpExpr(CmpExpr v);
+  abstract void caseCmpExpr(CmpExpr v);
 
-  public abstract void caseCmpgExpr(CmpgExpr v);
+  abstract void caseCmpgExpr(CmpgExpr v);
 
-  public abstract void caseCmplExpr(CmplExpr v);
+  abstract void caseCmplExpr(CmplExpr v);
 
-  public abstract void caseDivExpr(DivExpr v);
+  abstract void caseDivExpr(DivExpr v);
 
-  public abstract void caseEqExpr(EqExpr v);
+  abstract void caseEqExpr(EqExpr v);
 
-  public abstract void caseNeExpr(NeExpr v);
+  abstract void caseNeExpr(NeExpr v);
 
-  public abstract void caseGeExpr(GeExpr v);
+  abstract void caseGeExpr(GeExpr v);
 
-  public abstract void caseGtExpr(GtExpr v);
+  abstract void caseGtExpr(GtExpr v);
 
-  public abstract void caseLeExpr(LeExpr v);
+  abstract void caseLeExpr(LeExpr v);
 
-  public abstract void caseLtExpr(LtExpr v);
+  abstract void caseLtExpr(LtExpr v);
 
-  public abstract void caseMulExpr(MulExpr v);
+  abstract void caseMulExpr(MulExpr v);
 
-  public abstract void caseOrExpr(OrExpr v);
+  abstract void caseOrExpr(OrExpr v);
 
-  public abstract void caseRemExpr(RemExpr v);
+  abstract void caseRemExpr(RemExpr v);
 
-  public abstract void caseShlExpr(ShlExpr v);
+  abstract void caseShlExpr(ShlExpr v);
 
-  public abstract void caseShrExpr(ShrExpr v);
+  abstract void caseShrExpr(ShrExpr v);
 
-  public abstract void caseUshrExpr(UshrExpr v);
+  abstract void caseUshrExpr(UshrExpr v);
 
-  public abstract void caseSubExpr(SubExpr v);
+  abstract void caseSubExpr(SubExpr v);
 
-  public abstract void caseXorExpr(XorExpr v);
+  abstract void caseXorExpr(XorExpr v);
 
-  public abstract void caseInterfaceInvokeExpr(InterfaceInvokeExpr v);
+  abstract void caseInterfaceInvokeExpr(InterfaceInvokeExpr v);
 
-  public abstract void caseSpecialInvokeExpr(SpecialInvokeExpr v);
+  abstract void caseSpecialInvokeExpr(SpecialInvokeExpr v);
 
-  public abstract void caseStaticInvokeExpr(StaticInvokeExpr v);
+  abstract void caseStaticInvokeExpr(StaticInvokeExpr v);
 
-  public abstract void caseVirtualInvokeExpr(VirtualInvokeExpr v);
+  abstract void caseVirtualInvokeExpr(VirtualInvokeExpr v);
 
-  public abstract void caseDynamicInvokeExpr(DynamicInvokeExpr v);
+  abstract void caseDynamicInvokeExpr(DynamicInvokeExpr v);
 
-  public abstract void caseCastExpr(CastExpr v);
+  abstract void caseCastExpr(CastExpr v);
 
-  public abstract void caseInstanceOfExpr(InstanceOfExpr v);
+  abstract void caseInstanceOfExpr(InstanceOfExpr v);
 
-  public abstract void caseNewArrayExpr(NewArrayExpr v);
+  abstract void caseNewArrayExpr(NewArrayExpr v);
 
-  public abstract void caseNewMultiArrayExpr(NewMultiArrayExpr v);
+  abstract void caseNewMultiArrayExpr(NewMultiArrayExpr v);
 
-  public abstract void caseNewExpr(NewExpr v);
+  abstract void caseNewExpr(NewExpr v);
 
-  public abstract void caseLengthExpr(LengthExpr v);
+  abstract void caseLengthExpr(LengthExpr v);
 
-  public abstract void caseNegExpr(NegExpr v);
+  abstract void caseNegExpr(NegExpr v);
 
-  public abstract void defaultCase(Object obj);
+  abstract void defaultCase(Object obj);
 }

@@ -35,25 +35,26 @@ public class JavaLangClassLoaderNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature
-        .equals("java.lang.Class defineClass0(java.lang.String,byte[],int,int,java.lang.security.ProtectionDomain)")) {
+    if ("java.lang.Class defineClass0(java.lang.String,byte[],int,int,java.lang.security.ProtectionDomain)"
+        .equals(subSignature)) {
       java_lang_ClassLoader_defineClass0(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class findBootstrapClass(java.lang.String)")) {
+    } else if ("java.lang.Class findBootstrapClass(java.lang.String)".equals(subSignature)) {
       java_lang_ClassLoader_findBootstrapClass(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Class findLoadedClass(java.lang.String)")) {
+    } else if ("java.lang.Class findLoadedClass(java.lang.String)".equals(subSignature)) {
       java_lang_ClassLoader_findLoadedClass(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.ClassLoader getCallerClassLoader()")) {
+    } else if ("java.lang.ClassLoader getCallerClassLoader()".equals(subSignature)) {
       java_lang_ClassLoader_getCallerClassLoader(method, thisVar, returnVar, params);
       return;
 

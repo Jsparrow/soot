@@ -48,57 +48,52 @@ import soot.javaToJimple.IInitialResolver;
  */
 public class JastAddInitialResolver implements IInitialResolver {
   private static final Logger logger = LoggerFactory.getLogger(JastAddInitialResolver.class);
+protected Map<String, CompilationUnit> classNameToCU = new HashMap<>();
 
-  public JastAddInitialResolver(soot.Singletons.Global g) {
+public JastAddInitialResolver(soot.Singletons.Global g) {
   }
 
-  public static JastAddInitialResolver v() {
+public static JastAddInitialResolver v() {
     return soot.G.v().soot_JastAddInitialResolver();
   }
 
-  protected Map<String, CompilationUnit> classNameToCU = new HashMap<String, CompilationUnit>();
-
-  public void formAst(String fullPath, List<String> locations, String className) {
+@Override
+public void formAst(String fullPath, List<String> locations, String className) {
     Program program = SootResolver.v().getProgram();
     CompilationUnit u = program.getCachedOrLoadCompilationUnit(fullPath);
-    if (u != null && !u.isResolved) {
-      u.isResolved = true;
-      java.util.ArrayList<soot.JastAddJ.Problem> errors = new java.util.ArrayList<soot.JastAddJ.Problem>();
-      u.errorCheck(errors);
-      if (!errors.isEmpty()) {
-        for (soot.JastAddJ.Problem p : errors) {
-          logger.debug("" + p);
-        }
+    if (!(u != null && !u.isResolved)) {
+		return;
+	}
+	u.isResolved = true;
+	java.util.ArrayList<soot.JastAddJ.Problem> errors = new java.util.ArrayList<>();
+	u.errorCheck(errors);
+	if (!errors.isEmpty()) {
+        errors.forEach(p -> logger.debug("" + p));
         // die
         throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED,
             "there were errors during parsing and/or type checking (JastAdd frontend)");
       }
-      u.transformation();
-      u.jimplify1phase1();
-      u.jimplify1phase2();
-      HashSet<SootClass> types = new HashSet<SootClass>();
-      for (TypeDecl typeDecl : u.getTypeDecls()) {
+	u.transformation();
+	u.jimplify1phase1();
+	u.jimplify1phase2();
+	HashSet<SootClass> types = new HashSet<>();
+	for (TypeDecl typeDecl : u.getTypeDecls()) {
         collectTypeDecl(typeDecl, types);
       }
-      if (types.isEmpty()) {
+	if (types.isEmpty()) {
         classNameToCU.put(className, u);
       } else {
-        for (SootClass sc : types) {
-          classNameToCU.put(sc.getName(), u);
-        }
+        types.forEach(sc -> classNameToCU.put(sc.getName(), u));
       }
-    }
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   private void collectTypeDecl(TypeDecl typeDecl, HashSet<SootClass> types) {
     types.add(typeDecl.getSootClassDecl());
-    for (TypeDecl nestedType : (Collection<TypeDecl>) typeDecl.nestedTypes()) {
-      collectTypeDecl(nestedType, types);
-    }
+    ((Collection<TypeDecl>) typeDecl.nestedTypes()).forEach(nestedType -> collectTypeDecl(nestedType, types));
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   private TypeDecl findNestedTypeDecl(TypeDecl typeDecl, SootClass sc) {
     if (typeDecl.sootClass() == sc) {
       return typeDecl;
@@ -112,14 +107,15 @@ public class JastAddInitialResolver implements IInitialResolver {
     return null;
   }
 
-  public Dependencies resolveFromJavaFile(SootClass sootclass) {
+@Override
+public Dependencies resolveFromJavaFile(SootClass sootclass) {
     CompilationUnit u = classNameToCU.get(sootclass.getName());
 
     if (u == null) {
-      throw new RuntimeException("Error: couldn't find class: " + sootclass.getName() + " are the packages set properly?");
+      throw new RuntimeException(new StringBuilder().append("Error: couldn't find class: ").append(sootclass.getName()).append(" are the packages set properly?").toString());
     }
 
-    HashSet<SootClass> types = new HashSet<SootClass>();
+    HashSet<SootClass> types = new HashSet<>();
     for (TypeDecl typeDecl : u.getTypeDecls()) {
       collectTypeDecl(typeDecl, types);
     }
@@ -129,29 +125,28 @@ public class JastAddInitialResolver implements IInitialResolver {
 
     for (SootClass sc : types) {
       for (SootMethod m : sc.getMethods()) {
-        m.setSource(new MethodSource() {
-          public Body getBody(SootMethod m, String phaseName) {
-            SootClass sc = m.getDeclaringClass();
-            CompilationUnit u = classNameToCU.get(sc.getName());
-            for (TypeDecl typeDecl : u.getTypeDecls()) {
-              typeDecl = findNestedTypeDecl(typeDecl, sc);
-              if (typeDecl != null) {
-                if (typeDecl.clinit == m) {
-                  typeDecl.jimplify2clinit();
-                  return m.getActiveBody();
+        m.setSource((SootMethod m1, String phaseName) -> {
+            SootClass sc1 = m1.getDeclaringClass();
+            CompilationUnit u1 = classNameToCU.get(sc1.getName());
+            for (TypeDecl typeDecl1 : u1.getTypeDecls()) {
+              typeDecl1 = findNestedTypeDecl(typeDecl1, sc1);
+              if (typeDecl1 != null) {
+                if (typeDecl1.clinit == m1) {
+                  typeDecl1.jimplify2clinit();
+                  return m1.getActiveBody();
                 }
-                for (BodyDecl bodyDecl : typeDecl.getBodyDecls()) {
+                for (BodyDecl bodyDecl : typeDecl1.getBodyDecls()) {
                   if (bodyDecl instanceof MethodDecl) {
                     MethodDecl methodDecl = (MethodDecl) bodyDecl;
-                    if (m.equals(methodDecl.sootMethod)) {
+                    if (m1.equals(methodDecl.sootMethod)) {
                       methodDecl.jimplify2();
-                      return m.getActiveBody();
+                      return m1.getActiveBody();
                     }
                   } else if (bodyDecl instanceof ConstructorDecl) {
                     ConstructorDecl constrDecl = (ConstructorDecl) bodyDecl;
-                    if (m.equals(constrDecl.sootMethod)) {
+                    if (m1.equals(constrDecl.sootMethod)) {
                       constrDecl.jimplify2();
-                      return m.getActiveBody();
+                      return m1.getActiveBody();
                     }
                   }
                 }
@@ -159,9 +154,8 @@ public class JastAddInitialResolver implements IInitialResolver {
               }
             }
             throw new RuntimeException(
-                "Could not find body for " + m.getSignature() + " in " + m.getDeclaringClass().getName());
-          }
-        });
+                new StringBuilder().append("Could not find body for ").append(m1.getSignature()).append(" in ").append(m1.getDeclaringClass().getName()).toString());
+          });
       }
     }
     return deps;

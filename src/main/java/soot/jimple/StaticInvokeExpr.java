@@ -26,7 +26,7 @@ import soot.Type;
 import soot.util.Switch;
 
 public interface StaticInvokeExpr extends InvokeExpr {
-  public Type getType();
+  @Override Type getType();
 
-  public void apply(Switch sw);
+  @Override void apply(Switch sw);
 }

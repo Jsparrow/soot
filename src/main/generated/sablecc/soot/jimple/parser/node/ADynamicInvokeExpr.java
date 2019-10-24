@@ -7,16 +7,16 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ADynamicInvokeExpr extends PInvokeExpr
 {
-    private TDynamicinvoke _dynamicinvoke_;
-    private TStringConstant _stringConstant_;
-    private PUnnamedMethodSignature _dynmethod_;
-    private TLParen _firstl_;
-    private PArgList _dynargs_;
-    private TRParen _firstr_;
-    private PMethodSignature _bsm_;
-    private TLParen _lParen_;
-    private PArgList _staticargs_;
-    private TRParen _rParen_;
+    private TDynamicinvoke dynamicinvoke;
+    private TStringConstant stringConstant;
+    private PUnnamedMethodSignature dynmethod;
+    private TLParen firstl;
+    private PArgList dynargs;
+    private TRParen firstr;
+    private PMethodSignature bsm;
+    private TLParen lParen;
+    private PArgList staticargs;
+    private TRParen rParen;
 
     public ADynamicInvokeExpr()
     {
@@ -62,16 +62,16 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
     public Object clone()
     {
         return new ADynamicInvokeExpr(
-            cloneNode(this._dynamicinvoke_),
-            cloneNode(this._stringConstant_),
-            cloneNode(this._dynmethod_),
-            cloneNode(this._firstl_),
-            cloneNode(this._dynargs_),
-            cloneNode(this._firstr_),
-            cloneNode(this._bsm_),
-            cloneNode(this._lParen_),
-            cloneNode(this._staticargs_),
-            cloneNode(this._rParen_));
+            cloneNode(this.dynamicinvoke),
+            cloneNode(this.stringConstant),
+            cloneNode(this.dynmethod),
+            cloneNode(this.firstl),
+            cloneNode(this.dynargs),
+            cloneNode(this.firstr),
+            cloneNode(this.bsm),
+            cloneNode(this.lParen),
+            cloneNode(this.staticargs),
+            cloneNode(this.rParen));
     }
 
     @Override
@@ -82,14 +82,14 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
 
     public TDynamicinvoke getDynamicinvoke()
     {
-        return this._dynamicinvoke_;
+        return this.dynamicinvoke;
     }
 
     public void setDynamicinvoke(TDynamicinvoke node)
     {
-        if(this._dynamicinvoke_ != null)
+        if(this.dynamicinvoke != null)
         {
-            this._dynamicinvoke_.parent(null);
+            this.dynamicinvoke.parent(null);
         }
 
         if(node != null)
@@ -102,19 +102,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._dynamicinvoke_ = node;
+        this.dynamicinvoke = node;
     }
 
     public TStringConstant getStringConstant()
     {
-        return this._stringConstant_;
+        return this.stringConstant;
     }
 
     public void setStringConstant(TStringConstant node)
     {
-        if(this._stringConstant_ != null)
+        if(this.stringConstant != null)
         {
-            this._stringConstant_.parent(null);
+            this.stringConstant.parent(null);
         }
 
         if(node != null)
@@ -127,19 +127,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._stringConstant_ = node;
+        this.stringConstant = node;
     }
 
     public PUnnamedMethodSignature getDynmethod()
     {
-        return this._dynmethod_;
+        return this.dynmethod;
     }
 
     public void setDynmethod(PUnnamedMethodSignature node)
     {
-        if(this._dynmethod_ != null)
+        if(this.dynmethod != null)
         {
-            this._dynmethod_.parent(null);
+            this.dynmethod.parent(null);
         }
 
         if(node != null)
@@ -152,19 +152,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._dynmethod_ = node;
+        this.dynmethod = node;
     }
 
     public TLParen getFirstl()
     {
-        return this._firstl_;
+        return this.firstl;
     }
 
     public void setFirstl(TLParen node)
     {
-        if(this._firstl_ != null)
+        if(this.firstl != null)
         {
-            this._firstl_.parent(null);
+            this.firstl.parent(null);
         }
 
         if(node != null)
@@ -177,19 +177,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._firstl_ = node;
+        this.firstl = node;
     }
 
     public PArgList getDynargs()
     {
-        return this._dynargs_;
+        return this.dynargs;
     }
 
     public void setDynargs(PArgList node)
     {
-        if(this._dynargs_ != null)
+        if(this.dynargs != null)
         {
-            this._dynargs_.parent(null);
+            this.dynargs.parent(null);
         }
 
         if(node != null)
@@ -202,19 +202,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._dynargs_ = node;
+        this.dynargs = node;
     }
 
     public TRParen getFirstr()
     {
-        return this._firstr_;
+        return this.firstr;
     }
 
     public void setFirstr(TRParen node)
     {
-        if(this._firstr_ != null)
+        if(this.firstr != null)
         {
-            this._firstr_.parent(null);
+            this.firstr.parent(null);
         }
 
         if(node != null)
@@ -227,19 +227,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._firstr_ = node;
+        this.firstr = node;
     }
 
     public PMethodSignature getBsm()
     {
-        return this._bsm_;
+        return this.bsm;
     }
 
     public void setBsm(PMethodSignature node)
     {
-        if(this._bsm_ != null)
+        if(this.bsm != null)
         {
-            this._bsm_.parent(null);
+            this.bsm.parent(null);
         }
 
         if(node != null)
@@ -252,19 +252,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._bsm_ = node;
+        this.bsm = node;
     }
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -277,19 +277,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PArgList getStaticargs()
     {
-        return this._staticargs_;
+        return this.staticargs;
     }
 
     public void setStaticargs(PArgList node)
     {
-        if(this._staticargs_ != null)
+        if(this.staticargs != null)
         {
-            this._staticargs_.parent(null);
+            this.staticargs.parent(null);
         }
 
         if(node != null)
@@ -302,19 +302,19 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._staticargs_ = node;
+        this.staticargs = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -327,86 +327,78 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._dynamicinvoke_)
-            + toString(this._stringConstant_)
-            + toString(this._dynmethod_)
-            + toString(this._firstl_)
-            + toString(this._dynargs_)
-            + toString(this._firstr_)
-            + toString(this._bsm_)
-            + toString(this._lParen_)
-            + toString(this._staticargs_)
-            + toString(this._rParen_);
+        return new StringBuilder().append("").append(toString(this.dynamicinvoke)).append(toString(this.stringConstant)).append(toString(this.dynmethod)).append(toString(this.firstl))
+				.append(toString(this.dynargs)).append(toString(this.firstr)).append(toString(this.bsm)).append(toString(this.lParen)).append(toString(this.staticargs))
+				.append(toString(this.rParen)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._dynamicinvoke_ == child)
+        if(this.dynamicinvoke == child)
         {
-            this._dynamicinvoke_ = null;
+            this.dynamicinvoke = null;
             return;
         }
 
-        if(this._stringConstant_ == child)
+        if(this.stringConstant == child)
         {
-            this._stringConstant_ = null;
+            this.stringConstant = null;
             return;
         }
 
-        if(this._dynmethod_ == child)
+        if(this.dynmethod == child)
         {
-            this._dynmethod_ = null;
+            this.dynmethod = null;
             return;
         }
 
-        if(this._firstl_ == child)
+        if(this.firstl == child)
         {
-            this._firstl_ = null;
+            this.firstl = null;
             return;
         }
 
-        if(this._dynargs_ == child)
+        if(this.dynargs == child)
         {
-            this._dynargs_ = null;
+            this.dynargs = null;
             return;
         }
 
-        if(this._firstr_ == child)
+        if(this.firstr == child)
         {
-            this._firstr_ = null;
+            this.firstr = null;
             return;
         }
 
-        if(this._bsm_ == child)
+        if(this.bsm == child)
         {
-            this._bsm_ = null;
+            this.bsm = null;
             return;
         }
 
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._staticargs_ == child)
+        if(this.staticargs == child)
         {
-            this._staticargs_ = null;
+            this.staticargs = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
@@ -417,61 +409,61 @@ public final class ADynamicInvokeExpr extends PInvokeExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._dynamicinvoke_ == oldChild)
+        if(this.dynamicinvoke == oldChild)
         {
             setDynamicinvoke((TDynamicinvoke) newChild);
             return;
         }
 
-        if(this._stringConstant_ == oldChild)
+        if(this.stringConstant == oldChild)
         {
             setStringConstant((TStringConstant) newChild);
             return;
         }
 
-        if(this._dynmethod_ == oldChild)
+        if(this.dynmethod == oldChild)
         {
             setDynmethod((PUnnamedMethodSignature) newChild);
             return;
         }
 
-        if(this._firstl_ == oldChild)
+        if(this.firstl == oldChild)
         {
             setFirstl((TLParen) newChild);
             return;
         }
 
-        if(this._dynargs_ == oldChild)
+        if(this.dynargs == oldChild)
         {
             setDynargs((PArgList) newChild);
             return;
         }
 
-        if(this._firstr_ == oldChild)
+        if(this.firstr == oldChild)
         {
             setFirstr((TRParen) newChild);
             return;
         }
 
-        if(this._bsm_ == oldChild)
+        if(this.bsm == oldChild)
         {
             setBsm((PMethodSignature) newChild);
             return;
         }
 
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._staticargs_ == oldChild)
+        if(this.staticargs == oldChild)
         {
             setStaticargs((PArgList) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;

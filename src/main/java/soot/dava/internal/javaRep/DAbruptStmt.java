@@ -41,20 +41,24 @@ public class DAbruptStmt extends AbstractStmt {
     surpressDestinationLabel = false;
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new DAbruptStmt(command, label);
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
     b.append(command);
 
@@ -66,20 +70,22 @@ public class DAbruptStmt extends AbstractStmt {
     return b.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(command);
-    if ((surpressDestinationLabel == false) && (label.toString() != null)) {
-      up.literal(" ");
-      up.literal(label.toString());
-    }
+    if (!((surpressDestinationLabel == false) && (label.toString() != null))) {
+		return;
+	}
+	up.literal(" ");
+	up.literal(label.toString());
   }
 
   public boolean is_Continue() {
-    return command.equals("continue");
+    return "continue".equals(command);
   }
 
   public boolean is_Break() {
-    return command.equals("break");
+    return "break".equals(command);
   }
 
   /*

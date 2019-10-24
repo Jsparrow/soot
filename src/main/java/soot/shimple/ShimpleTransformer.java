@@ -54,7 +54,8 @@ public class ShimpleTransformer extends SceneTransformer {
     return G.v().soot_shimple_ShimpleTransformer();
   }
 
-  protected void internalTransform(String phaseName, Map options) {
+  @Override
+protected void internalTransform(String phaseName, Map options) {
     if (Options.v().verbose()) {
       logger.debug("Transforming all classes in the Scene to Shimple...");
     }

@@ -29,6 +29,8 @@ import org.apache.tools.ant.*;
 import org.apache.tools.ant.taskdefs.*;
 import org.apache.tools.ant.types.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Soot ant task.
@@ -36,612 +38,1237 @@ import java.util.*;
  */
 @javax.annotation.Generated(value = "Saxonica v3.0", comments = "from soot_options.xml")
 public class AntTask extends MatchingTask {
-    public static final boolean DEBUG = true;
-    private void debug(String s) {
-        if(DEBUG) System.err.println(s);
+    private static final Logger logger = LoggerFactory.getLogger(AntTask.class);
+
+	public static final boolean DEBUG = true;
+
+	private ArrayList args = new ArrayList();
+
+	private List phaseopts = new ArrayList();
+
+	private Path phaseHelp = null;
+
+	private Path processDir = null;
+
+	private Path dumpBody = null;
+
+	private Path dumpCfg = null;
+
+	private Path plugin = null;
+
+	private Path include = null;
+
+	private Path exclude = null;
+
+	private Path dynamicClass = null;
+
+	private Path dynamicDir = null;
+
+	private Path dynamicPackage = null;
+	private void debug(String s) {
+        if(DEBUG) {
+			logger.error(s);
+		}
     }
-    private ArrayList args = new ArrayList();
-    public List args() { return args; }
-    private void addArg( String s ) { args.add(s); }
-    private void addArg( String s, String s2 ) { args.add(s); args.add(s2); }
-    private Path appendToPath( Path old, Path newPath ) {
-        if( old == null ) return newPath;
+	public List args() { return args; }
+	private void addArg( String s ) { args.add(s); }
+	private void addArg( String s, String s2 ) { args.add(s); args.add(s2); }
+	private Path appendToPath( Path old, Path newPath ) {
+        if( old == null ) {
+			return newPath;
+		}
         old.append(newPath);
         return old;
     }
-    private void addPath(String option, Path path) {
-        if( path.size() == 0 ) return;
+	private void addPath(String option, Path path) {
+        if( path.size() == 0 ) {
+			return;
+		}
         addArg(option);
         addArg(path.toString());
     }
-    private List phaseopts = new ArrayList(); 
+	@Override
+	public void execute() {
 
-        private Path phase_help = null;
+        if( phaseHelp != null ) {
+			addPath("-phase-help", phaseHelp);
+		}
   
-        private Path process_dir = null;
+        if( processDir != null ) {
+			addPath("-process-dir", processDir);
+		}
   
-        private Path dump_body = null;
+        if( dumpBody != null ) {
+			addPath("-dump-body", dumpBody);
+		}
   
-        private Path dump_cfg = null;
+        if( dumpCfg != null ) {
+			addPath("-dump-cfg", dumpCfg);
+		}
   
-        private Path plugin = null;
+        if( plugin != null ) {
+			addPath("-plugin", plugin);
+		}
   
-        private Path include = null;
+        if( include != null ) {
+			addPath("-include", include);
+		}
   
-        private Path exclude = null;
+        if( exclude != null ) {
+			addPath("-exclude", exclude);
+		}
   
-        private Path dynamic_class = null;
+        if( dynamicClass != null ) {
+			addPath("-dynamic-class", dynamicClass);
+		}
   
-        private Path dynamic_dir = null;
+        if( dynamicDir != null ) {
+			addPath("-dynamic-dir", dynamicDir);
+		}
   
-        private Path dynamic_package = null;
+        if( dynamicPackage != null ) {
+			addPath("-dynamic-package", dynamicPackage);
+		}
   
-    public void execute() throws BuildException {
-
-        if( phase_help != null ) addPath("-phase-help", phase_help);
-  
-        if( process_dir != null ) addPath("-process-dir", process_dir);
-  
-        if( dump_body != null ) addPath("-dump-body", dump_body);
-  
-        if( dump_cfg != null ) addPath("-dump-cfg", dump_cfg);
-  
-        if( plugin != null ) addPath("-plugin", plugin);
-  
-        if( include != null ) addPath("-include", include);
-  
-        if( exclude != null ) addPath("-exclude", exclude);
-  
-        if( dynamic_class != null ) addPath("-dynamic-class", dynamic_class);
-  
-        if( dynamic_dir != null ) addPath("-dynamic-dir", dynamic_dir);
-  
-        if( dynamic_package != null ) addPath("-dynamic-package", dynamic_package);
-  
-        if(DEBUG) System.out.println(args);
+        if(DEBUG) {
+			logger.info(String.valueOf(args));
+		}
         try {
             soot.Main.main((String[]) args.toArray(new String[0]));
             soot.G.v().reset();
         } catch( Exception e ) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             throw new BuildException(e);
         }
     }
-
-
-
-        public void setcoffi(boolean arg) {
-            if(arg) addArg("-coffi");
-        }
-  
-        public void setjasmin_backend(boolean arg) {
-            if(arg) addArg("-jasmin-backend");
-        }
-  
-        public void sethelp(boolean arg) {
-            if(arg) addArg("-help");
-        }
-  
-        public void setphase_list(boolean arg) {
-            if(arg) addArg("-phase-list");
-        }
-  
-        public void setphase_help(Path arg) {
-            if(phase_help == null )
-                phase_help = new Path(getProject());
-            phase_help = appendToPath(phase_help, arg);
-        }
-
-        public Path createphase_help() {
-            if(phase_help == null )
-                phase_help = new Path(getProject());
-            return phase_help.createPath();
-        }
-  
-        public void setversion(boolean arg) {
-            if(arg) addArg("-version");
-        }
-  
-        public void setverbose(boolean arg) {
-            if(arg) addArg("-verbose");
-        }
-  
-        public void setinteractive_mode(boolean arg) {
-            if(arg) addArg("-interactive-mode");
-        }
-  
-        public void setunfriendly_mode(boolean arg) {
-            if(arg) addArg("-unfriendly-mode");
-        }
-  
-        public void setapp(boolean arg) {
-            if(arg) addArg("-app");
-        }
-  
-        public void setwhole_program(boolean arg) {
-            if(arg) addArg("-whole-program");
-        }
-  
-        public void setwhole_shimple(boolean arg) {
-            if(arg) addArg("-whole-shimple");
-        }
-  
-        public void seton_the_fly(boolean arg) {
-            if(arg) addArg("-on-the-fly");
-        }
-  
-        public void setvalidate(boolean arg) {
-            if(arg) addArg("-validate");
-        }
-  
-        public void setdebug(boolean arg) {
-            if(arg) addArg("-debug");
-        }
-  
-        public void setdebug_resolver(boolean arg) {
-            if(arg) addArg("-debug-resolver");
-        }
-  
-        public void setignore_resolving_levels(boolean arg) {
-            if(arg) addArg("-ignore-resolving-levels");
-        }
-  
-        public void setsoot_classpath(String arg) {
-            addArg("-soot-classpath");
-            addArg(arg);
-        }
-  
-        public void setprepend_classpath(boolean arg) {
-            if(arg) addArg("-prepend-classpath");
-        }
-  
-        public void setignore_classpath_errors(boolean arg) {
-            if(arg) addArg("-ignore-classpath-errors");
-        }
-  
-        public void setprocess_multiple_dex(boolean arg) {
-            if(arg) addArg("-process-multiple-dex");
-        }
-  
-        public void setsearch_dex_in_archives(boolean arg) {
-            if(arg) addArg("-search-dex-in-archives");
-        }
-  
-        public void setprocess_dir(Path arg) {
-            if(process_dir == null )
-                process_dir = new Path(getProject());
-            process_dir = appendToPath(process_dir, arg);
-        }
-
-        public Path createprocess_dir() {
-            if(process_dir == null )
-                process_dir = new Path(getProject());
-            return process_dir.createPath();
-        }
-  
-        public void setoaat(boolean arg) {
-            if(arg) addArg("-oaat");
-        }
-  
-        public void setandroid_jars(String arg) {
-            addArg("-android-jars");
-            addArg(arg);
-        }
-  
-        public void setforce_android_jar(String arg) {
-            addArg("-force-android-jar");
-            addArg(arg);
-        }
-  
-        public void setast_metrics(boolean arg) {
-            if(arg) addArg("-ast-metrics");
-        }
-  
-        public void setsrc_prec(String arg) {
-            if(false
-    
-                || arg.equals( "c" )
-                || arg.equals( "class" )
-                || arg.equals( "only-class" )
-                || arg.equals( "J" )
-                || arg.equals( "jimple" )
-                || arg.equals( "java" )
-                || arg.equals( "apk" )
-                || arg.equals( "apk-class-jimple" )
-                || arg.equals( "apk-c-j" )
-                ) {
-                addArg("-src-prec");
-                addArg(arg);
-            } else {
-                throw new BuildException("Bad value "+arg+" for option src_prec");
-            }
-        }
-  
-        public void setfull_resolver(boolean arg) {
-            if(arg) addArg("-full-resolver");
-        }
-  
-        public void setallow_phantom_refs(boolean arg) {
-            if(arg) addArg("-allow-phantom-refs");
-        }
-  
-        public void setallow_phantom_elms(boolean arg) {
-            if(arg) addArg("-allow-phantom-elms");
-        }
-  
-        public void setno_bodies_for_excluded(boolean arg) {
-            if(arg) addArg("-no-bodies-for-excluded");
-        }
-  
-        public void setj2me(boolean arg) {
-            if(arg) addArg("-j2me");
-        }
-  
-        public void setmain_class(String arg) {
-            addArg("-main-class");
-            addArg(arg);
-        }
-  
-        public void setpolyglot(boolean arg) {
-            if(arg) addArg("-polyglot");
-        }
-  
-        public void setpermissive_resolving(boolean arg) {
-            if(arg) addArg("-permissive-resolving");
-        }
-  
-        public void setdrop_bodies_after_load(boolean arg) {
-            if(arg) addArg("-drop-bodies-after-load");
-        }
-  
-        public void setoutput_dir(String arg) {
-            addArg("-output-dir");
-            addArg(arg);
-        }
-  
-        public void setoutput_format(String arg) {
-            if(false
-    
-                || arg.equals( "J" )
-                || arg.equals( "jimple" )
-                || arg.equals( "j" )
-                || arg.equals( "jimp" )
-                || arg.equals( "S" )
-                || arg.equals( "shimple" )
-                || arg.equals( "s" )
-                || arg.equals( "shimp" )
-                || arg.equals( "B" )
-                || arg.equals( "baf" )
-                || arg.equals( "b" )
-                || arg.equals( "G" )
-                || arg.equals( "grimple" )
-                || arg.equals( "g" )
-                || arg.equals( "grimp" )
-                || arg.equals( "X" )
-                || arg.equals( "xml" )
-                || arg.equals( "dex" )
-                || arg.equals( "force-dex" )
-                || arg.equals( "n" )
-                || arg.equals( "none" )
-                || arg.equals( "jasmin" )
-                || arg.equals( "c" )
-                || arg.equals( "class" )
-                || arg.equals( "d" )
-                || arg.equals( "dava" )
-                || arg.equals( "t" )
-                || arg.equals( "template" )
-                || arg.equals( "a" )
-                || arg.equals( "asm" )
-                ) {
-                addArg("-output-format");
-                addArg(arg);
-            } else {
-                throw new BuildException("Bad value "+arg+" for option output_format");
-            }
-        }
-  
-        public void setjava_version(String arg) {
-            if(false
-    
-                || arg.equals( "default" )
-                || arg.equals( "1.1" )
-                || arg.equals( "1" )
-                || arg.equals( "1.2" )
-                || arg.equals( "2" )
-                || arg.equals( "1.3" )
-                || arg.equals( "3" )
-                || arg.equals( "1.4" )
-                || arg.equals( "4" )
-                || arg.equals( "1.5" )
-                || arg.equals( "5" )
-                || arg.equals( "1.6" )
-                || arg.equals( "6" )
-                || arg.equals( "1.7" )
-                || arg.equals( "7" )
-                || arg.equals( "1.8" )
-                || arg.equals( "8" )
-                || arg.equals( "1.9" )
-                || arg.equals( "9" )
-                ) {
-                addArg("-java-version");
-                addArg(arg);
-            } else {
-                throw new BuildException("Bad value "+arg+" for option java_version");
-            }
-        }
-  
-        public void setoutput_jar(boolean arg) {
-            if(arg) addArg("-output-jar");
-        }
-  
-        public void sethierarchy_dirs(boolean arg) {
-            if(arg) addArg("-hierarchy-dirs");
-        }
-  
-        public void setxml_attributes(boolean arg) {
-            if(arg) addArg("-xml-attributes");
-        }
-  
-        public void setprint_tags_in_output(boolean arg) {
-            if(arg) addArg("-print-tags-in-output");
-        }
-  
-        public void setno_output_source_file_attribute(boolean arg) {
-            if(arg) addArg("-no-output-source-file-attribute");
-        }
-  
-        public void setno_output_inner_classes_attribute(boolean arg) {
-            if(arg) addArg("-no-output-inner-classes-attribute");
-        }
-  
-        public void setdump_body(Path arg) {
-            if(dump_body == null )
-                dump_body = new Path(getProject());
-            dump_body = appendToPath(dump_body, arg);
-        }
-
-        public Path createdump_body() {
-            if(dump_body == null )
-                dump_body = new Path(getProject());
-            return dump_body.createPath();
-        }
-  
-        public void setdump_cfg(Path arg) {
-            if(dump_cfg == null )
-                dump_cfg = new Path(getProject());
-            dump_cfg = appendToPath(dump_cfg, arg);
-        }
-
-        public Path createdump_cfg() {
-            if(dump_cfg == null )
-                dump_cfg = new Path(getProject());
-            return dump_cfg.createPath();
-        }
-  
-        public void setshow_exception_dests(boolean arg) {
-            if(arg) addArg("-show-exception-dests");
-        }
-  
-        public void setgzip(boolean arg) {
-            if(arg) addArg("-gzip");
-        }
-  
-        public void setforce_overwrite(boolean arg) {
-            if(arg) addArg("-force-overwrite");
-        }
-  
-        public void setplugin(Path arg) {
-            if(plugin == null )
-                plugin = new Path(getProject());
-            plugin = appendToPath(plugin, arg);
-        }
-
-        public Path createplugin() {
-            if(plugin == null )
-                plugin = new Path(getProject());
-            return plugin.createPath();
-        }
-  
-        public void setwrong_staticness(String arg) {
-            if(false
-    
-                || arg.equals( "fail" )
-                || arg.equals( "ignore" )
-                || arg.equals( "fix" )
-                || arg.equals( "fixstrict" )
-                ) {
-                addArg("-wrong-staticness");
-                addArg(arg);
-            } else {
-                throw new BuildException("Bad value "+arg+" for option wrong_staticness");
-            }
-        }
-  
-        public void setfield_type_mismatches(String arg) {
-            if(false
-    
-                || arg.equals( "fail" )
-                || arg.equals( "ignore" )
-                || arg.equals( "null" )
-                ) {
-                addArg("-field-type-mismatches");
-                addArg(arg);
-            } else {
-                throw new BuildException("Bad value "+arg+" for option field_type_mismatches");
-            }
-        }
-  
-        public void setoptimize(boolean arg) {
-            if(arg) addArg("-optimize");
-        }
-  
-        public void setwhole_optimize(boolean arg) {
-            if(arg) addArg("-whole-optimize");
-        }
-  
-        public void setvia_grimp(boolean arg) {
-            if(arg) addArg("-via-grimp");
-        }
-  
-        public void setvia_shimple(boolean arg) {
-            if(arg) addArg("-via-shimple");
-        }
-  
-        public void setthrow_analysis(String arg) {
-            if(false
-    
-                || arg.equals( "pedantic" )
-                || arg.equals( "unit" )
-                || arg.equals( "dalvik" )
-                ) {
-                addArg("-throw-analysis");
-                addArg(arg);
-            } else {
-                throw new BuildException("Bad value "+arg+" for option throw_analysis");
-            }
-        }
-  
-        public void setcheck_init_throw_analysis(String arg) {
-            if(false
-    
-                || arg.equals( "auto" )
-                || arg.equals( "pedantic" )
-                || arg.equals( "unit" )
-                || arg.equals( "dalvik" )
-                ) {
-                addArg("-check-init-throw-analysis");
-                addArg(arg);
-            } else {
-                throw new BuildException("Bad value "+arg+" for option check_init_throw_analysis");
-            }
-        }
-  
-        public void setomit_excepting_unit_edges(boolean arg) {
-            if(arg) addArg("-omit-excepting-unit-edges");
-        }
-  
-        public void settrim_cfgs(boolean arg) {
-            if(arg) addArg("-trim-cfgs");
-        }
-  
-        public void setignore_resolution_errors(boolean arg) {
-            if(arg) addArg("-ignore-resolution-errors");
-        }
-  
-        public void setinclude(Path arg) {
-            if(include == null )
-                include = new Path(getProject());
-            include = appendToPath(include, arg);
-        }
-
-        public Path createinclude() {
-            if(include == null )
-                include = new Path(getProject());
-            return include.createPath();
-        }
-  
-        public void setexclude(Path arg) {
-            if(exclude == null )
-                exclude = new Path(getProject());
-            exclude = appendToPath(exclude, arg);
-        }
-
-        public Path createexclude() {
-            if(exclude == null )
-                exclude = new Path(getProject());
-            return exclude.createPath();
-        }
-  
-        public void setinclude_all(boolean arg) {
-            if(arg) addArg("-include-all");
-        }
-  
-        public void setdynamic_class(Path arg) {
-            if(dynamic_class == null )
-                dynamic_class = new Path(getProject());
-            dynamic_class = appendToPath(dynamic_class, arg);
-        }
-
-        public Path createdynamic_class() {
-            if(dynamic_class == null )
-                dynamic_class = new Path(getProject());
-            return dynamic_class.createPath();
-        }
-  
-        public void setdynamic_dir(Path arg) {
-            if(dynamic_dir == null )
-                dynamic_dir = new Path(getProject());
-            dynamic_dir = appendToPath(dynamic_dir, arg);
-        }
-
-        public Path createdynamic_dir() {
-            if(dynamic_dir == null )
-                dynamic_dir = new Path(getProject());
-            return dynamic_dir.createPath();
-        }
-  
-        public void setdynamic_package(Path arg) {
-            if(dynamic_package == null )
-                dynamic_package = new Path(getProject());
-            dynamic_package = appendToPath(dynamic_package, arg);
-        }
-
-        public Path createdynamic_package() {
-            if(dynamic_package == null )
-                dynamic_package = new Path(getProject());
-            return dynamic_package.createPath();
-        }
-  
-        public void setkeep_line_number(boolean arg) {
-            if(arg) addArg("-keep-line-number");
-        }
-  
-        public void setkeep_offset(boolean arg) {
-            if(arg) addArg("-keep-offset");
-        }
-  
-        public void setwrite_local_annotations(boolean arg) {
-            if(arg) addArg("-write-local-annotations");
-        }
-  
-        public void setannot_purity(boolean arg) {
-            if(arg) addArg("-annot-purity");
-        }
-  
-        public void setannot_nullpointer(boolean arg) {
-            if(arg) addArg("-annot-nullpointer");
-        }
-  
-        public void setannot_arraybounds(boolean arg) {
-            if(arg) addArg("-annot-arraybounds");
-        }
-  
-        public void setannot_side_effect(boolean arg) {
-            if(arg) addArg("-annot-side-effect");
-        }
-  
-        public void setannot_fieldrw(boolean arg) {
-            if(arg) addArg("-annot-fieldrw");
-        }
-  
-        public void settime(boolean arg) {
-            if(arg) addArg("-time");
-        }
-  
-        public void setsubtract_gc(boolean arg) {
-            if(arg) addArg("-subtract-gc");
-        }
-  
-        public void setno_writeout_body_releasing(boolean arg) {
-            if(arg) addArg("-no-writeout-body-releasing");
-        }
-  
-        public Object createp_jb() {
-            Object ret = new PhaseOptjb();
-            phaseopts.add(ret);
-            return ret;
-        }
-        public class PhaseOptjb {
+	public void setcoffi(boolean arg) {
+	    if(arg) {
+			addArg("-coffi");
+		}
+	}
+	public void setjasmin_backend(boolean arg) {
+	    if(arg) {
+			addArg("-jasmin-backend");
+		}
+	}
+	public void sethelp(boolean arg) {
+	    if(arg) {
+			addArg("-help");
+		}
+	}
+	public void setphase_list(boolean arg) {
+	    if(arg) {
+			addArg("-phase-list");
+		}
+	}
+	public void setphase_help(Path arg) {
+	    if(phaseHelp == null ) {
+			phaseHelp = new Path(getProject());
+		}
+	    phaseHelp = appendToPath(phaseHelp, arg);
+	}
+	public Path createphase_help() {
+	    if(phaseHelp == null ) {
+			phaseHelp = new Path(getProject());
+		}
+	    return phaseHelp.createPath();
+	}
+	public void setversion(boolean arg) {
+	    if(arg) {
+			addArg("-version");
+		}
+	}
+	public void setverbose(boolean arg) {
+	    if(arg) {
+			addArg("-verbose");
+		}
+	}
+	public void setinteractive_mode(boolean arg) {
+	    if(arg) {
+			addArg("-interactive-mode");
+		}
+	}
+	public void setunfriendly_mode(boolean arg) {
+	    if(arg) {
+			addArg("-unfriendly-mode");
+		}
+	}
+	public void setapp(boolean arg) {
+	    if(arg) {
+			addArg("-app");
+		}
+	}
+	public void setwhole_program(boolean arg) {
+	    if(arg) {
+			addArg("-whole-program");
+		}
+	}
+	public void setwhole_shimple(boolean arg) {
+	    if(arg) {
+			addArg("-whole-shimple");
+		}
+	}
+	public void seton_the_fly(boolean arg) {
+	    if(arg) {
+			addArg("-on-the-fly");
+		}
+	}
+	public void setvalidate(boolean arg) {
+	    if(arg) {
+			addArg("-validate");
+		}
+	}
+	public void setdebug(boolean arg) {
+	    if(arg) {
+			addArg("-debug");
+		}
+	}
+	public void setdebug_resolver(boolean arg) {
+	    if(arg) {
+			addArg("-debug-resolver");
+		}
+	}
+	public void setignore_resolving_levels(boolean arg) {
+	    if(arg) {
+			addArg("-ignore-resolving-levels");
+		}
+	}
+	public void setsoot_classpath(String arg) {
+	    addArg("-soot-classpath");
+	    addArg(arg);
+	}
+	public void setprepend_classpath(boolean arg) {
+	    if(arg) {
+			addArg("-prepend-classpath");
+		}
+	}
+	public void setignore_classpath_errors(boolean arg) {
+	    if(arg) {
+			addArg("-ignore-classpath-errors");
+		}
+	}
+	public void setprocess_multiple_dex(boolean arg) {
+	    if(arg) {
+			addArg("-process-multiple-dex");
+		}
+	}
+	public void setsearch_dex_in_archives(boolean arg) {
+	    if(arg) {
+			addArg("-search-dex-in-archives");
+		}
+	}
+	public void setprocess_dir(Path arg) {
+	    if(processDir == null ) {
+			processDir = new Path(getProject());
+		}
+	    processDir = appendToPath(processDir, arg);
+	}
+	public Path createprocess_dir() {
+	    if(processDir == null ) {
+			processDir = new Path(getProject());
+		}
+	    return processDir.createPath();
+	}
+	public void setoaat(boolean arg) {
+	    if(arg) {
+			addArg("-oaat");
+		}
+	}
+	public void setandroid_jars(String arg) {
+	    addArg("-android-jars");
+	    addArg(arg);
+	}
+	public void setforce_android_jar(String arg) {
+	    addArg("-force-android-jar");
+	    addArg(arg);
+	}
+	public void setast_metrics(boolean arg) {
+	    if(arg) {
+			addArg("-ast-metrics");
+		}
+	}
+	public void setsrc_prec(String arg) {
+	    if(false
+   
+	        || "c".equals( arg )
+	        || "class".equals( arg )
+	        || "only-class".equals( arg )
+	        || "J".equals( arg )
+	        || "jimple".equals( arg )
+	        || "java".equals( arg )
+	        || "apk".equals( arg )
+	        || "apk-class-jimple".equals( arg )
+	        || "apk-c-j".equals( arg )
+	        ) {
+	        addArg("-src-prec");
+	        addArg(arg);
+	    } else {
+	        throw new BuildException(new StringBuilder().append("Bad value ").append(arg).append(" for option src_prec").toString());
+	    }
+	}
+	public void setfull_resolver(boolean arg) {
+	    if(arg) {
+			addArg("-full-resolver");
+		}
+	}
+	public void setallow_phantom_refs(boolean arg) {
+	    if(arg) {
+			addArg("-allow-phantom-refs");
+		}
+	}
+	public void setallow_phantom_elms(boolean arg) {
+	    if(arg) {
+			addArg("-allow-phantom-elms");
+		}
+	}
+	public void setno_bodies_for_excluded(boolean arg) {
+	    if(arg) {
+			addArg("-no-bodies-for-excluded");
+		}
+	}
+	public void setj2me(boolean arg) {
+	    if(arg) {
+			addArg("-j2me");
+		}
+	}
+	public void setmain_class(String arg) {
+	    addArg("-main-class");
+	    addArg(arg);
+	}
+	public void setpolyglot(boolean arg) {
+	    if(arg) {
+			addArg("-polyglot");
+		}
+	}
+	public void setpermissive_resolving(boolean arg) {
+	    if(arg) {
+			addArg("-permissive-resolving");
+		}
+	}
+	public void setdrop_bodies_after_load(boolean arg) {
+	    if(arg) {
+			addArg("-drop-bodies-after-load");
+		}
+	}
+	public void setoutput_dir(String arg) {
+	    addArg("-output-dir");
+	    addArg(arg);
+	}
+	public void setoutput_format(String arg) {
+	    if(false
+   
+	        || "J".equals( arg )
+	        || "jimple".equals( arg )
+	        || "j".equals( arg )
+	        || "jimp".equals( arg )
+	        || "S".equals( arg )
+	        || "shimple".equals( arg )
+	        || "s".equals( arg )
+	        || "shimp".equals( arg )
+	        || "B".equals( arg )
+	        || "baf".equals( arg )
+	        || "b".equals( arg )
+	        || "G".equals( arg )
+	        || "grimple".equals( arg )
+	        || "g".equals( arg )
+	        || "grimp".equals( arg )
+	        || "X".equals( arg )
+	        || "xml".equals( arg )
+	        || "dex".equals( arg )
+	        || "force-dex".equals( arg )
+	        || "n".equals( arg )
+	        || "none".equals( arg )
+	        || "jasmin".equals( arg )
+	        || "c".equals( arg )
+	        || "class".equals( arg )
+	        || "d".equals( arg )
+	        || "dava".equals( arg )
+	        || "t".equals( arg )
+	        || "template".equals( arg )
+	        || "a".equals( arg )
+	        || "asm".equals( arg )
+	        ) {
+	        addArg("-output-format");
+	        addArg(arg);
+	    } else {
+	        throw new BuildException(new StringBuilder().append("Bad value ").append(arg).append(" for option output_format").toString());
+	    }
+	}
+	public void setjava_version(String arg) {
+	    if(false
+   
+	        || "default".equals( arg )
+	        || "1.1".equals( arg )
+	        || "1".equals( arg )
+	        || "1.2".equals( arg )
+	        || "2".equals( arg )
+	        || "1.3".equals( arg )
+	        || "3".equals( arg )
+	        || "1.4".equals( arg )
+	        || "4".equals( arg )
+	        || "1.5".equals( arg )
+	        || "5".equals( arg )
+	        || "1.6".equals( arg )
+	        || "6".equals( arg )
+	        || "1.7".equals( arg )
+	        || "7".equals( arg )
+	        || "1.8".equals( arg )
+	        || "8".equals( arg )
+	        || "1.9".equals( arg )
+	        || "9".equals( arg )
+	        ) {
+	        addArg("-java-version");
+	        addArg(arg);
+	    } else {
+	        throw new BuildException(new StringBuilder().append("Bad value ").append(arg).append(" for option java_version").toString());
+	    }
+	}
+	public void setoutput_jar(boolean arg) {
+	    if(arg) {
+			addArg("-output-jar");
+		}
+	}
+	public void sethierarchy_dirs(boolean arg) {
+	    if(arg) {
+			addArg("-hierarchy-dirs");
+		}
+	}
+	public void setxml_attributes(boolean arg) {
+	    if(arg) {
+			addArg("-xml-attributes");
+		}
+	}
+	public void setprint_tags_in_output(boolean arg) {
+	    if(arg) {
+			addArg("-print-tags-in-output");
+		}
+	}
+	public void setno_output_source_file_attribute(boolean arg) {
+	    if(arg) {
+			addArg("-no-output-source-file-attribute");
+		}
+	}
+	public void setno_output_inner_classes_attribute(boolean arg) {
+	    if(arg) {
+			addArg("-no-output-inner-classes-attribute");
+		}
+	}
+	public void setdump_body(Path arg) {
+	    if(dumpBody == null ) {
+			dumpBody = new Path(getProject());
+		}
+	    dumpBody = appendToPath(dumpBody, arg);
+	}
+	public Path createdump_body() {
+	    if(dumpBody == null ) {
+			dumpBody = new Path(getProject());
+		}
+	    return dumpBody.createPath();
+	}
+	public void setdump_cfg(Path arg) {
+	    if(dumpCfg == null ) {
+			dumpCfg = new Path(getProject());
+		}
+	    dumpCfg = appendToPath(dumpCfg, arg);
+	}
+	public Path createdump_cfg() {
+	    if(dumpCfg == null ) {
+			dumpCfg = new Path(getProject());
+		}
+	    return dumpCfg.createPath();
+	}
+	public void setshow_exception_dests(boolean arg) {
+	    if(arg) {
+			addArg("-show-exception-dests");
+		}
+	}
+	public void setgzip(boolean arg) {
+	    if(arg) {
+			addArg("-gzip");
+		}
+	}
+	public void setforce_overwrite(boolean arg) {
+	    if(arg) {
+			addArg("-force-overwrite");
+		}
+	}
+	public void setplugin(Path arg) {
+	    if(plugin == null ) {
+			plugin = new Path(getProject());
+		}
+	    plugin = appendToPath(plugin, arg);
+	}
+	public Path createplugin() {
+	    if(plugin == null ) {
+			plugin = new Path(getProject());
+		}
+	    return plugin.createPath();
+	}
+	public void setwrong_staticness(String arg) {
+	    if(false
+   
+	        || "fail".equals( arg )
+	        || "ignore".equals( arg )
+	        || "fix".equals( arg )
+	        || "fixstrict".equals( arg )
+	        ) {
+	        addArg("-wrong-staticness");
+	        addArg(arg);
+	    } else {
+	        throw new BuildException(new StringBuilder().append("Bad value ").append(arg).append(" for option wrong_staticness").toString());
+	    }
+	}
+	public void setfield_type_mismatches(String arg) {
+	    if(false
+   
+	        || "fail".equals( arg )
+	        || "ignore".equals( arg )
+	        || "null".equals( arg )
+	        ) {
+	        addArg("-field-type-mismatches");
+	        addArg(arg);
+	    } else {
+	        throw new BuildException(new StringBuilder().append("Bad value ").append(arg).append(" for option field_type_mismatches").toString());
+	    }
+	}
+	public void setoptimize(boolean arg) {
+	    if(arg) {
+			addArg("-optimize");
+		}
+	}
+	public void setwhole_optimize(boolean arg) {
+	    if(arg) {
+			addArg("-whole-optimize");
+		}
+	}
+	public void setvia_grimp(boolean arg) {
+	    if(arg) {
+			addArg("-via-grimp");
+		}
+	}
+	public void setvia_shimple(boolean arg) {
+	    if(arg) {
+			addArg("-via-shimple");
+		}
+	}
+	public void setthrow_analysis(String arg) {
+	    if(false
+   
+	        || "pedantic".equals( arg )
+	        || "unit".equals( arg )
+	        || "dalvik".equals( arg )
+	        ) {
+	        addArg("-throw-analysis");
+	        addArg(arg);
+	    } else {
+	        throw new BuildException(new StringBuilder().append("Bad value ").append(arg).append(" for option throw_analysis").toString());
+	    }
+	}
+	public void setcheck_init_throw_analysis(String arg) {
+	    if(false
+   
+	        || "auto".equals( arg )
+	        || "pedantic".equals( arg )
+	        || "unit".equals( arg )
+	        || "dalvik".equals( arg )
+	        ) {
+	        addArg("-check-init-throw-analysis");
+	        addArg(arg);
+	    } else {
+	        throw new BuildException(new StringBuilder().append("Bad value ").append(arg).append(" for option check_init_throw_analysis").toString());
+	    }
+	}
+	public void setomit_excepting_unit_edges(boolean arg) {
+	    if(arg) {
+			addArg("-omit-excepting-unit-edges");
+		}
+	}
+	public void settrim_cfgs(boolean arg) {
+	    if(arg) {
+			addArg("-trim-cfgs");
+		}
+	}
+	public void setignore_resolution_errors(boolean arg) {
+	    if(arg) {
+			addArg("-ignore-resolution-errors");
+		}
+	}
+	public void setinclude(Path arg) {
+	    if(include == null ) {
+			include = new Path(getProject());
+		}
+	    include = appendToPath(include, arg);
+	}
+	public Path createinclude() {
+	    if(include == null ) {
+			include = new Path(getProject());
+		}
+	    return include.createPath();
+	}
+	public void setexclude(Path arg) {
+	    if(exclude == null ) {
+			exclude = new Path(getProject());
+		}
+	    exclude = appendToPath(exclude, arg);
+	}
+	public Path createexclude() {
+	    if(exclude == null ) {
+			exclude = new Path(getProject());
+		}
+	    return exclude.createPath();
+	}
+	public void setinclude_all(boolean arg) {
+	    if(arg) {
+			addArg("-include-all");
+		}
+	}
+	public void setdynamic_class(Path arg) {
+	    if(dynamicClass == null ) {
+			dynamicClass = new Path(getProject());
+		}
+	    dynamicClass = appendToPath(dynamicClass, arg);
+	}
+	public Path createdynamic_class() {
+	    if(dynamicClass == null ) {
+			dynamicClass = new Path(getProject());
+		}
+	    return dynamicClass.createPath();
+	}
+	public void setdynamic_dir(Path arg) {
+	    if(dynamicDir == null ) {
+			dynamicDir = new Path(getProject());
+		}
+	    dynamicDir = appendToPath(dynamicDir, arg);
+	}
+	public Path createdynamic_dir() {
+	    if(dynamicDir == null ) {
+			dynamicDir = new Path(getProject());
+		}
+	    return dynamicDir.createPath();
+	}
+	public void setdynamic_package(Path arg) {
+	    if(dynamicPackage == null ) {
+			dynamicPackage = new Path(getProject());
+		}
+	    dynamicPackage = appendToPath(dynamicPackage, arg);
+	}
+	public Path createdynamic_package() {
+	    if(dynamicPackage == null ) {
+			dynamicPackage = new Path(getProject());
+		}
+	    return dynamicPackage.createPath();
+	}
+	public void setkeep_line_number(boolean arg) {
+	    if(arg) {
+			addArg("-keep-line-number");
+		}
+	}
+	public void setkeep_offset(boolean arg) {
+	    if(arg) {
+			addArg("-keep-offset");
+		}
+	}
+	public void setwrite_local_annotations(boolean arg) {
+	    if(arg) {
+			addArg("-write-local-annotations");
+		}
+	}
+	public void setannot_purity(boolean arg) {
+	    if(arg) {
+			addArg("-annot-purity");
+		}
+	}
+	public void setannot_nullpointer(boolean arg) {
+	    if(arg) {
+			addArg("-annot-nullpointer");
+		}
+	}
+	public void setannot_arraybounds(boolean arg) {
+	    if(arg) {
+			addArg("-annot-arraybounds");
+		}
+	}
+	public void setannot_side_effect(boolean arg) {
+	    if(arg) {
+			addArg("-annot-side-effect");
+		}
+	}
+	public void setannot_fieldrw(boolean arg) {
+	    if(arg) {
+			addArg("-annot-fieldrw");
+		}
+	}
+	public void settime(boolean arg) {
+	    if(arg) {
+			addArg("-time");
+		}
+	}
+	public void setsubtract_gc(boolean arg) {
+	    if(arg) {
+			addArg("-subtract-gc");
+		}
+	}
+	public void setno_writeout_body_releasing(boolean arg) {
+	    if(arg) {
+			addArg("-no-writeout-body-releasing");
+		}
+	}
+	public Object createp_jb() {
+	    Object ret = new PhaseOptjb();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_dtr() {
+	    Object ret = new PhaseOptjb_dtr();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_ese() {
+	    Object ret = new PhaseOptjb_ese();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_ls() {
+	    Object ret = new PhaseOptjb_ls();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_a() {
+	    Object ret = new PhaseOptjb_a();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_ule() {
+	    Object ret = new PhaseOptjb_ule();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_tr() {
+	    Object ret = new PhaseOptjb_tr();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_ulp() {
+	    Object ret = new PhaseOptjb_ulp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_lns() {
+	    Object ret = new PhaseOptjb_lns();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_cp() {
+	    Object ret = new PhaseOptjb_cp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_dae() {
+	    Object ret = new PhaseOptjb_dae();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_cp_ule() {
+	    Object ret = new PhaseOptjb_cp_ule();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_lp() {
+	    Object ret = new PhaseOptjb_lp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_ne() {
+	    Object ret = new PhaseOptjb_ne();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_uce() {
+	    Object ret = new PhaseOptjb_uce();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jb_tt() {
+	    Object ret = new PhaseOptjb_tt();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj() {
+	    Object ret = new PhaseOptjj();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_ls() {
+	    Object ret = new PhaseOptjj_ls();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_a() {
+	    Object ret = new PhaseOptjj_a();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_ule() {
+	    Object ret = new PhaseOptjj_ule();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_tr() {
+	    Object ret = new PhaseOptjj_tr();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_ulp() {
+	    Object ret = new PhaseOptjj_ulp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_lns() {
+	    Object ret = new PhaseOptjj_lns();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_cp() {
+	    Object ret = new PhaseOptjj_cp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_dae() {
+	    Object ret = new PhaseOptjj_dae();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_cp_ule() {
+	    Object ret = new PhaseOptjj_cp_ule();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_lp() {
+	    Object ret = new PhaseOptjj_lp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_ne() {
+	    Object ret = new PhaseOptjj_ne();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jj_uce() {
+	    Object ret = new PhaseOptjj_uce();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjpp() {
+	    Object ret = new PhaseOptwjpp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjpp_cimbt() {
+	    Object ret = new PhaseOptwjpp_cimbt();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wspp() {
+	    Object ret = new PhaseOptwspp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_cg() {
+	    Object ret = new PhaseOptcg();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_cg_cha() {
+	    Object ret = new PhaseOptcg_cha();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_cg_spark() {
+	    Object ret = new PhaseOptcg_spark();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_cg_paddle() {
+	    Object ret = new PhaseOptcg_paddle();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wstp() {
+	    Object ret = new PhaseOptwstp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wsop() {
+	    Object ret = new PhaseOptwsop();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjtp() {
+	    Object ret = new PhaseOptwjtp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjtp_mhp() {
+	    Object ret = new PhaseOptwjtp_mhp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjtp_tn() {
+	    Object ret = new PhaseOptwjtp_tn();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjtp_rdc() {
+	    Object ret = new PhaseOptwjtp_rdc();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjop() {
+	    Object ret = new PhaseOptwjop();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjop_smb() {
+	    Object ret = new PhaseOptwjop_smb();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjop_si() {
+	    Object ret = new PhaseOptwjop_si();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjap() {
+	    Object ret = new PhaseOptwjap();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjap_ra() {
+	    Object ret = new PhaseOptwjap_ra();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjap_umt() {
+	    Object ret = new PhaseOptwjap_umt();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjap_uft() {
+	    Object ret = new PhaseOptwjap_uft();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjap_tqt() {
+	    Object ret = new PhaseOptwjap_tqt();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjap_cgg() {
+	    Object ret = new PhaseOptwjap_cgg();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_wjap_purity() {
+	    Object ret = new PhaseOptwjap_purity();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_shimple() {
+	    Object ret = new PhaseOptshimple();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_stp() {
+	    Object ret = new PhaseOptstp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_sop() {
+	    Object ret = new PhaseOptsop();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_sop_cpf() {
+	    Object ret = new PhaseOptsop_cpf();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jtp() {
+	    Object ret = new PhaseOptjtp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop() {
+	    Object ret = new PhaseOptjop();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_cse() {
+	    Object ret = new PhaseOptjop_cse();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_bcm() {
+	    Object ret = new PhaseOptjop_bcm();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_lcm() {
+	    Object ret = new PhaseOptjop_lcm();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_cp() {
+	    Object ret = new PhaseOptjop_cp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_cpf() {
+	    Object ret = new PhaseOptjop_cpf();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_cbf() {
+	    Object ret = new PhaseOptjop_cbf();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_dae() {
+	    Object ret = new PhaseOptjop_dae();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_nce() {
+	    Object ret = new PhaseOptjop_nce();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_uce1() {
+	    Object ret = new PhaseOptjop_uce1();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_ubf1() {
+	    Object ret = new PhaseOptjop_ubf1();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_uce2() {
+	    Object ret = new PhaseOptjop_uce2();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_ubf2() {
+	    Object ret = new PhaseOptjop_ubf2();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jop_ule() {
+	    Object ret = new PhaseOptjop_ule();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap() {
+	    Object ret = new PhaseOptjap();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_npc() {
+	    Object ret = new PhaseOptjap_npc();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_npcolorer() {
+	    Object ret = new PhaseOptjap_npcolorer();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_abc() {
+	    Object ret = new PhaseOptjap_abc();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_profiling() {
+	    Object ret = new PhaseOptjap_profiling();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_sea() {
+	    Object ret = new PhaseOptjap_sea();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_fieldrw() {
+	    Object ret = new PhaseOptjap_fieldrw();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_cgtagger() {
+	    Object ret = new PhaseOptjap_cgtagger();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_parity() {
+	    Object ret = new PhaseOptjap_parity();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_pat() {
+	    Object ret = new PhaseOptjap_pat();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_lvtagger() {
+	    Object ret = new PhaseOptjap_lvtagger();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_rdtagger() {
+	    Object ret = new PhaseOptjap_rdtagger();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_che() {
+	    Object ret = new PhaseOptjap_che();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_umt() {
+	    Object ret = new PhaseOptjap_umt();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_lit() {
+	    Object ret = new PhaseOptjap_lit();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_aet() {
+	    Object ret = new PhaseOptjap_aet();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_jap_dmt() {
+	    Object ret = new PhaseOptjap_dmt();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_gb() {
+	    Object ret = new PhaseOptgb();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_gb_a1() {
+	    Object ret = new PhaseOptgb_a1();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_gb_cf() {
+	    Object ret = new PhaseOptgb_cf();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_gb_a2() {
+	    Object ret = new PhaseOptgb_a2();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_gb_ule() {
+	    Object ret = new PhaseOptgb_ule();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_gop() {
+	    Object ret = new PhaseOptgop();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_bb() {
+	    Object ret = new PhaseOptbb();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_bb_lso() {
+	    Object ret = new PhaseOptbb_lso();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_bb_sco() {
+	    Object ret = new PhaseOptbb_sco();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_bb_pho() {
+	    Object ret = new PhaseOptbb_pho();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_bb_ule() {
+	    Object ret = new PhaseOptbb_ule();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_bb_lp() {
+	    Object ret = new PhaseOptbb_lp();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_bop() {
+	    Object ret = new PhaseOptbop();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_tag() {
+	    Object ret = new PhaseOpttag();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_tag_ln() {
+	    Object ret = new PhaseOpttag_ln();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_tag_an() {
+	    Object ret = new PhaseOpttag_an();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_tag_dep() {
+	    Object ret = new PhaseOpttag_dep();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_tag_fieldrw() {
+	    Object ret = new PhaseOpttag_fieldrw();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_db() {
+	    Object ret = new PhaseOptdb();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_db_transformations() {
+	    Object ret = new PhaseOptdb_transformations();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_db_renamer() {
+	    Object ret = new PhaseOptdb_renamer();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_db_deobfuscate() {
+	    Object ret = new PhaseOptdb_deobfuscate();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+	public Object createp_db_force_recompile() {
+	    Object ret = new PhaseOptdb_force_recompile();
+	    phaseopts.add(ret);
+	    return ret;
+	}
+    public class PhaseOptjb {
       
           public void setenabled(boolean arg) {
             addArg("-p");
@@ -675,11 +1302,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_dtr() {
-            Object ret = new PhaseOptjb_dtr();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_dtr {
       
           public void setenabled(boolean arg) {
@@ -690,11 +1312,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_ese() {
-            Object ret = new PhaseOptjb_ese();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_ese {
       
           public void setenabled(boolean arg) {
@@ -705,11 +1322,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_ls() {
-            Object ret = new PhaseOptjb_ls();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_ls {
       
           public void setenabled(boolean arg) {
@@ -720,11 +1332,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_a() {
-            Object ret = new PhaseOptjb_a();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_a {
       
           public void setenabled(boolean arg) {
@@ -741,11 +1348,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_ule() {
-            Object ret = new PhaseOptjb_ule();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_ule {
       
           public void setenabled(boolean arg) {
@@ -756,11 +1358,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_tr() {
-            Object ret = new PhaseOptjb_tr();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_tr {
       
           public void setenabled(boolean arg) {
@@ -789,11 +1386,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_ulp() {
-            Object ret = new PhaseOptjb_ulp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_ulp {
       
           public void setenabled(boolean arg) {
@@ -810,11 +1402,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_lns() {
-            Object ret = new PhaseOptjb_lns();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_lns {
       
           public void setenabled(boolean arg) {
@@ -837,11 +1424,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_cp() {
-            Object ret = new PhaseOptjb_cp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_cp {
       
           public void setenabled(boolean arg) {
@@ -864,11 +1446,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_dae() {
-            Object ret = new PhaseOptjb_dae();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_dae {
       
           public void setenabled(boolean arg) {
@@ -885,11 +1462,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_cp_ule() {
-            Object ret = new PhaseOptjb_cp_ule();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_cp_ule {
       
           public void setenabled(boolean arg) {
@@ -900,11 +1472,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_lp() {
-            Object ret = new PhaseOptjb_lp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_lp {
       
           public void setenabled(boolean arg) {
@@ -921,11 +1488,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_ne() {
-            Object ret = new PhaseOptjb_ne();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_ne {
       
           public void setenabled(boolean arg) {
@@ -936,11 +1498,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_uce() {
-            Object ret = new PhaseOptjb_uce();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_uce {
       
           public void setenabled(boolean arg) {
@@ -957,11 +1514,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jb_tt() {
-            Object ret = new PhaseOptjb_tt();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjb_tt {
       
           public void setenabled(boolean arg) {
@@ -972,11 +1524,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj() {
-            Object ret = new PhaseOptjj();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj {
       
           public void setenabled(boolean arg) {
@@ -993,11 +1540,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_ls() {
-            Object ret = new PhaseOptjj_ls();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_ls {
       
           public void setenabled(boolean arg) {
@@ -1008,11 +1550,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_a() {
-            Object ret = new PhaseOptjj_a();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_a {
       
           public void setenabled(boolean arg) {
@@ -1029,11 +1566,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_ule() {
-            Object ret = new PhaseOptjj_ule();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_ule {
       
           public void setenabled(boolean arg) {
@@ -1044,11 +1576,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_tr() {
-            Object ret = new PhaseOptjj_tr();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_tr {
       
           public void setenabled(boolean arg) {
@@ -1059,11 +1586,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_ulp() {
-            Object ret = new PhaseOptjj_ulp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_ulp {
       
           public void setenabled(boolean arg) {
@@ -1080,11 +1602,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_lns() {
-            Object ret = new PhaseOptjj_lns();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_lns {
       
           public void setenabled(boolean arg) {
@@ -1101,11 +1618,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_cp() {
-            Object ret = new PhaseOptjj_cp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_cp {
       
           public void setenabled(boolean arg) {
@@ -1128,11 +1640,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_dae() {
-            Object ret = new PhaseOptjj_dae();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_dae {
       
           public void setenabled(boolean arg) {
@@ -1149,11 +1656,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_cp_ule() {
-            Object ret = new PhaseOptjj_cp_ule();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_cp_ule {
       
           public void setenabled(boolean arg) {
@@ -1164,11 +1666,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_lp() {
-            Object ret = new PhaseOptjj_lp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_lp {
       
           public void setenabled(boolean arg) {
@@ -1185,11 +1682,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_ne() {
-            Object ret = new PhaseOptjj_ne();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_ne {
       
           public void setenabled(boolean arg) {
@@ -1200,11 +1692,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jj_uce() {
-            Object ret = new PhaseOptjj_uce();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjj_uce {
       
           public void setenabled(boolean arg) {
@@ -1215,11 +1702,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjpp() {
-            Object ret = new PhaseOptwjpp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjpp {
       
           public void setenabled(boolean arg) {
@@ -1230,11 +1712,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjpp_cimbt() {
-            Object ret = new PhaseOptwjpp_cimbt();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjpp_cimbt {
       
           public void setenabled(boolean arg) {
@@ -1251,11 +1728,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wspp() {
-            Object ret = new PhaseOptwspp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwspp {
       
           public void setenabled(boolean arg) {
@@ -1266,11 +1738,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_cg() {
-            Object ret = new PhaseOptcg();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptcg {
       
           public void setenabled(boolean arg) {
@@ -1353,11 +1820,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_cg_cha() {
-            Object ret = new PhaseOptcg_cha();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptcg_cha {
       
           public void setenabled(boolean arg) {
@@ -1380,11 +1842,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_cg_spark() {
-            Object ret = new PhaseOptcg_spark();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptcg_spark {
       
           public void setenabled(boolean arg) {
@@ -1671,11 +2128,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_cg_paddle() {
-            Object ret = new PhaseOptcg_paddle();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptcg_paddle {
       
           public void setenabled(boolean arg) {
@@ -1890,11 +2342,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wstp() {
-            Object ret = new PhaseOptwstp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwstp {
       
           public void setenabled(boolean arg) {
@@ -1905,11 +2352,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wsop() {
-            Object ret = new PhaseOptwsop();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwsop {
       
           public void setenabled(boolean arg) {
@@ -1920,11 +2362,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjtp() {
-            Object ret = new PhaseOptwjtp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjtp {
       
           public void setenabled(boolean arg) {
@@ -1935,11 +2372,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjtp_mhp() {
-            Object ret = new PhaseOptwjtp_mhp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjtp_mhp {
       
           public void setenabled(boolean arg) {
@@ -1950,11 +2382,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjtp_tn() {
-            Object ret = new PhaseOptwjtp_tn();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjtp_tn {
       
           public void setenabled(boolean arg) {
@@ -2013,11 +2440,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjtp_rdc() {
-            Object ret = new PhaseOptwjtp_rdc();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjtp_rdc {
       
           public void setenabled(boolean arg) {
@@ -2034,11 +2456,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjop() {
-            Object ret = new PhaseOptwjop();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjop {
       
           public void setenabled(boolean arg) {
@@ -2049,11 +2466,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjop_smb() {
-            Object ret = new PhaseOptwjop_smb();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjop_smb {
       
           public void setenabled(boolean arg) {
@@ -2082,11 +2494,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjop_si() {
-            Object ret = new PhaseOptwjop_si();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjop_si {
       
           public void setenabled(boolean arg) {
@@ -2139,11 +2546,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjap() {
-            Object ret = new PhaseOptwjap();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjap {
       
           public void setenabled(boolean arg) {
@@ -2154,11 +2556,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjap_ra() {
-            Object ret = new PhaseOptwjap_ra();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjap_ra {
       
           public void setenabled(boolean arg) {
@@ -2169,11 +2566,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjap_umt() {
-            Object ret = new PhaseOptwjap_umt();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjap_umt {
       
           public void setenabled(boolean arg) {
@@ -2184,11 +2576,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjap_uft() {
-            Object ret = new PhaseOptwjap_uft();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjap_uft {
       
           public void setenabled(boolean arg) {
@@ -2199,11 +2586,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjap_tqt() {
-            Object ret = new PhaseOptwjap_tqt();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjap_tqt {
       
           public void setenabled(boolean arg) {
@@ -2214,11 +2596,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjap_cgg() {
-            Object ret = new PhaseOptwjap_cgg();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjap_cgg {
       
           public void setenabled(boolean arg) {
@@ -2235,11 +2612,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_wjap_purity() {
-            Object ret = new PhaseOptwjap_purity();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptwjap_purity {
       
           public void setenabled(boolean arg) {
@@ -2286,11 +2658,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_shimple() {
-            Object ret = new PhaseOptshimple();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptshimple {
       
           public void setenabled(boolean arg) {
@@ -2325,11 +2692,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_stp() {
-            Object ret = new PhaseOptstp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptstp {
       
           public void setenabled(boolean arg) {
@@ -2340,11 +2702,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_sop() {
-            Object ret = new PhaseOptsop();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptsop {
       
           public void setenabled(boolean arg) {
@@ -2355,11 +2712,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_sop_cpf() {
-            Object ret = new PhaseOptsop_cpf();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptsop_cpf {
       
           public void setenabled(boolean arg) {
@@ -2376,11 +2728,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jtp() {
-            Object ret = new PhaseOptjtp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjtp {
       
           public void setenabled(boolean arg) {
@@ -2391,11 +2738,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop() {
-            Object ret = new PhaseOptjop();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop {
       
           public void setenabled(boolean arg) {
@@ -2406,11 +2748,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_cse() {
-            Object ret = new PhaseOptjop_cse();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_cse {
       
           public void setenabled(boolean arg) {
@@ -2427,11 +2764,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_bcm() {
-            Object ret = new PhaseOptjop_bcm();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_bcm {
       
           public void setenabled(boolean arg) {
@@ -2448,11 +2780,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_lcm() {
-            Object ret = new PhaseOptjop_lcm();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_lcm {
       
           public void setenabled(boolean arg) {
@@ -2481,11 +2808,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_cp() {
-            Object ret = new PhaseOptjop_cp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_cp {
       
           public void setenabled(boolean arg) {
@@ -2508,11 +2830,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_cpf() {
-            Object ret = new PhaseOptjop_cpf();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_cpf {
       
           public void setenabled(boolean arg) {
@@ -2523,11 +2840,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_cbf() {
-            Object ret = new PhaseOptjop_cbf();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_cbf {
       
           public void setenabled(boolean arg) {
@@ -2538,11 +2850,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_dae() {
-            Object ret = new PhaseOptjop_dae();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_dae {
       
           public void setenabled(boolean arg) {
@@ -2565,11 +2872,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_nce() {
-            Object ret = new PhaseOptjop_nce();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_nce {
       
           public void setenabled(boolean arg) {
@@ -2580,11 +2882,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_uce1() {
-            Object ret = new PhaseOptjop_uce1();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_uce1 {
       
           public void setenabled(boolean arg) {
@@ -2601,11 +2898,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_ubf1() {
-            Object ret = new PhaseOptjop_ubf1();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_ubf1 {
       
           public void setenabled(boolean arg) {
@@ -2616,11 +2908,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_uce2() {
-            Object ret = new PhaseOptjop_uce2();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_uce2 {
       
           public void setenabled(boolean arg) {
@@ -2637,11 +2924,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_ubf2() {
-            Object ret = new PhaseOptjop_ubf2();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_ubf2 {
       
           public void setenabled(boolean arg) {
@@ -2652,11 +2934,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jop_ule() {
-            Object ret = new PhaseOptjop_ule();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjop_ule {
       
           public void setenabled(boolean arg) {
@@ -2667,11 +2944,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap() {
-            Object ret = new PhaseOptjap();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap {
       
           public void setenabled(boolean arg) {
@@ -2682,11 +2954,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_npc() {
-            Object ret = new PhaseOptjap_npc();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_npc {
       
           public void setenabled(boolean arg) {
@@ -2709,11 +2976,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_npcolorer() {
-            Object ret = new PhaseOptjap_npcolorer();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_npcolorer {
       
           public void setenabled(boolean arg) {
@@ -2724,11 +2986,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_abc() {
-            Object ret = new PhaseOptjap_abc();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_abc {
       
           public void setenabled(boolean arg) {
@@ -2787,11 +3044,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_profiling() {
-            Object ret = new PhaseOptjap_profiling();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_profiling {
       
           public void setenabled(boolean arg) {
@@ -2808,11 +3060,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_sea() {
-            Object ret = new PhaseOptjap_sea();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_sea {
       
           public void setenabled(boolean arg) {
@@ -2829,11 +3076,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_fieldrw() {
-            Object ret = new PhaseOptjap_fieldrw();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_fieldrw {
       
           public void setenabled(boolean arg) {
@@ -2850,11 +3092,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_cgtagger() {
-            Object ret = new PhaseOptjap_cgtagger();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_cgtagger {
       
           public void setenabled(boolean arg) {
@@ -2865,11 +3102,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_parity() {
-            Object ret = new PhaseOptjap_parity();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_parity {
       
           public void setenabled(boolean arg) {
@@ -2880,11 +3112,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_pat() {
-            Object ret = new PhaseOptjap_pat();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_pat {
       
           public void setenabled(boolean arg) {
@@ -2895,11 +3122,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_lvtagger() {
-            Object ret = new PhaseOptjap_lvtagger();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_lvtagger {
       
           public void setenabled(boolean arg) {
@@ -2910,11 +3132,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_rdtagger() {
-            Object ret = new PhaseOptjap_rdtagger();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_rdtagger {
       
           public void setenabled(boolean arg) {
@@ -2925,11 +3142,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_che() {
-            Object ret = new PhaseOptjap_che();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_che {
       
           public void setenabled(boolean arg) {
@@ -2940,11 +3152,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_umt() {
-            Object ret = new PhaseOptjap_umt();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_umt {
       
           public void setenabled(boolean arg) {
@@ -2955,11 +3162,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_lit() {
-            Object ret = new PhaseOptjap_lit();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_lit {
       
           public void setenabled(boolean arg) {
@@ -2970,11 +3172,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_aet() {
-            Object ret = new PhaseOptjap_aet();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_aet {
       
           public void setenabled(boolean arg) {
@@ -2991,11 +3188,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_jap_dmt() {
-            Object ret = new PhaseOptjap_dmt();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptjap_dmt {
       
           public void setenabled(boolean arg) {
@@ -3006,11 +3198,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_gb() {
-            Object ret = new PhaseOptgb();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptgb {
       
           public void setenabled(boolean arg) {
@@ -3021,11 +3208,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_gb_a1() {
-            Object ret = new PhaseOptgb_a1();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptgb_a1 {
       
           public void setenabled(boolean arg) {
@@ -3042,11 +3224,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_gb_cf() {
-            Object ret = new PhaseOptgb_cf();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptgb_cf {
       
           public void setenabled(boolean arg) {
@@ -3057,11 +3234,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_gb_a2() {
-            Object ret = new PhaseOptgb_a2();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptgb_a2 {
       
           public void setenabled(boolean arg) {
@@ -3078,11 +3250,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_gb_ule() {
-            Object ret = new PhaseOptgb_ule();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptgb_ule {
       
           public void setenabled(boolean arg) {
@@ -3093,11 +3260,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_gop() {
-            Object ret = new PhaseOptgop();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptgop {
       
           public void setenabled(boolean arg) {
@@ -3108,11 +3270,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_bb() {
-            Object ret = new PhaseOptbb();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptbb {
       
           public void setenabled(boolean arg) {
@@ -3123,11 +3280,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_bb_lso() {
-            Object ret = new PhaseOptbb_lso();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptbb_lso {
       
           public void setenabled(boolean arg) {
@@ -3174,11 +3326,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_bb_sco() {
-            Object ret = new PhaseOptbb_sco();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptbb_sco {
       
           public void setenabled(boolean arg) {
@@ -3189,11 +3336,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_bb_pho() {
-            Object ret = new PhaseOptbb_pho();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptbb_pho {
       
           public void setenabled(boolean arg) {
@@ -3204,11 +3346,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_bb_ule() {
-            Object ret = new PhaseOptbb_ule();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptbb_ule {
       
           public void setenabled(boolean arg) {
@@ -3219,11 +3356,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_bb_lp() {
-            Object ret = new PhaseOptbb_lp();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptbb_lp {
       
           public void setenabled(boolean arg) {
@@ -3240,11 +3372,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_bop() {
-            Object ret = new PhaseOptbop();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptbop {
       
           public void setenabled(boolean arg) {
@@ -3255,11 +3382,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_tag() {
-            Object ret = new PhaseOpttag();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOpttag {
       
           public void setenabled(boolean arg) {
@@ -3270,11 +3392,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_tag_ln() {
-            Object ret = new PhaseOpttag_ln();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOpttag_ln {
       
           public void setenabled(boolean arg) {
@@ -3285,11 +3402,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_tag_an() {
-            Object ret = new PhaseOpttag_an();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOpttag_an {
       
           public void setenabled(boolean arg) {
@@ -3300,11 +3412,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_tag_dep() {
-            Object ret = new PhaseOpttag_dep();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOpttag_dep {
       
           public void setenabled(boolean arg) {
@@ -3315,11 +3422,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_tag_fieldrw() {
-            Object ret = new PhaseOpttag_fieldrw();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOpttag_fieldrw {
       
           public void setenabled(boolean arg) {
@@ -3330,11 +3432,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_db() {
-            Object ret = new PhaseOptdb();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptdb {
       
           public void setenabled(boolean arg) {
@@ -3351,11 +3448,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_db_transformations() {
-            Object ret = new PhaseOptdb_transformations();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptdb_transformations {
       
           public void setenabled(boolean arg) {
@@ -3366,11 +3458,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_db_renamer() {
-            Object ret = new PhaseOptdb_renamer();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptdb_renamer {
       
           public void setenabled(boolean arg) {
@@ -3381,11 +3468,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_db_deobfuscate() {
-            Object ret = new PhaseOptdb_deobfuscate();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptdb_deobfuscate {
       
           public void setenabled(boolean arg) {
@@ -3396,11 +3478,6 @@ public class AntTask extends MatchingTask {
       
         }
     
-        public Object createp_db_force_recompile() {
-            Object ret = new PhaseOptdb_force_recompile();
-            phaseopts.add(ret);
-            return ret;
-        }
         public class PhaseOptdb_force_recompile {
       
           public void setenabled(boolean arg) {

@@ -26,7 +26,7 @@ public class AnalysisAdapter implements Analysis
     {
         if(this.in == null)
         {
-            this.in = new Hashtable<Node,Object>(1);
+            this.in = new Hashtable<>(1);
         }
 
         if(o != null)
@@ -55,7 +55,7 @@ public class AnalysisAdapter implements Analysis
     {
         if(this.out == null)
         {
-            this.out = new Hashtable<Node,Object>(1);
+            this.out = new Hashtable<>(1);
         }
 
         if(o != null)

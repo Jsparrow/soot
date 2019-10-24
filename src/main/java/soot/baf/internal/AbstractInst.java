@@ -28,48 +28,59 @@ import soot.baf.Inst;
 
 public abstract class AbstractInst extends AbstractUnit implements Inst {
 
-  public String toString() {
+  @Override
+public String toString() {
     return getName() + getParameters();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(getName());
     getParameters(up);
   }
 
-  public int getInCount() {
-    throw new RuntimeException("undefined " + toString() + "!");
+  @Override
+public int getInCount() {
+    throw new RuntimeException(new StringBuilder().append("undefined ").append(toString()).append("!").toString());
   }
 
-  public int getOutCount() {
-    throw new RuntimeException("undefined " + toString() + "!");
+  @Override
+public int getOutCount() {
+    throw new RuntimeException(new StringBuilder().append("undefined ").append(toString()).append("!").toString());
   }
 
-  public int getNetCount() {
+  @Override
+public int getNetCount() {
     return getOutCount() - getInCount();
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 
-  public int getInMachineCount() {
-    throw new RuntimeException("undefined" + toString() + "!");
+  @Override
+public int getInMachineCount() {
+    throw new RuntimeException(new StringBuilder().append("undefined").append(toString()).append("!").toString());
   }
 
-  public int getOutMachineCount() {
-    throw new RuntimeException("undefined" + toString() + "!");
+  @Override
+public int getOutMachineCount() {
+    throw new RuntimeException(new StringBuilder().append("undefined").append(toString()).append("!").toString());
   }
 
-  public int getNetMachineCount() {
+  @Override
+public int getNetMachineCount() {
     return getOutMachineCount() - getInMachineCount();
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     throw new RuntimeException("undefined clone for: " + this.toString());
   }
 
@@ -82,19 +93,23 @@ public abstract class AbstractInst extends AbstractUnit implements Inst {
   protected void getParameters(UnitPrinter up) {
   }
 
-  public boolean containsInvokeExpr() {
+  @Override
+public boolean containsInvokeExpr() {
     return false;
   }
 
-  public boolean containsArrayRef() {
+  @Override
+public boolean containsArrayRef() {
     return false;
   }
 
-  public boolean containsFieldRef() {
+  @Override
+public boolean containsFieldRef() {
     return false;
   }
 
-  public boolean containsNewExpr() {
+  @Override
+public boolean containsNewExpr() {
     return false;
   }
 }

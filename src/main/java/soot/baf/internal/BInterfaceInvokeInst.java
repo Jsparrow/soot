@@ -32,15 +32,6 @@ import soot.util.Switch;
 public class BInterfaceInvokeInst extends AbstractInvokeInst implements InterfaceInvokeInst {
   int argCount;
 
-  public int getInCount() {
-    return methodRef.parameterTypes().size() + 1;
-
-  }
-
-  public int getInMachineCount() {
-    return super.getInMachineCount() + 1;
-  }
-
   public BInterfaceInvokeInst(SootMethodRef methodRef, int argCount) {
     if (methodRef.isStatic()) {
       throw new RuntimeException("wrong static-ness");
@@ -49,33 +40,51 @@ public class BInterfaceInvokeInst extends AbstractInvokeInst implements Interfac
     this.argCount = argCount;
   }
 
-  public Object clone() {
+@Override
+public int getInCount() {
+    return methodRef.parameterTypes().size() + 1;
+
+  }
+
+@Override
+public int getInMachineCount() {
+    return super.getInMachineCount() + 1;
+  }
+
+@Override
+public Object clone() {
     return new BInterfaceInvokeInst(methodRef, getArgCount());
   }
 
-  final public String getName() {
+@Override
+public final String getName() {
     return "interfaceinvoke";
   }
 
-  final String getParameters() {
-    return super.getParameters() + " " + argCount;
+@Override
+final String getParameters() {
+    return new StringBuilder().append(super.getParameters()).append(" ").append(argCount).toString();
   }
 
-  protected void getParameters(UnitPrinter up) {
+@Override
+protected void getParameters(UnitPrinter up) {
     super.getParameters(up);
     up.literal(" ");
-    up.literal(new Integer(argCount).toString());
+    up.literal(Integer.toString(argCount));
   }
 
-  public int getArgCount() {
+@Override
+public int getArgCount() {
     return argCount;
   }
 
-  public void setArgCount(int x) {
+@Override
+public void setArgCount(int x) {
     argCount = x;
   }
 
-  public void apply(Switch sw) {
+@Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseInterfaceInvokeInst(this);
   }
 }

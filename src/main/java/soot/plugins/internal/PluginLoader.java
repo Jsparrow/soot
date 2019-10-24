@@ -49,7 +49,10 @@ public class PluginLoader {
 
   private static ClassLoadingStrategy loadStrategy = new ReflectionClassLoadingStrategy();
 
-  /**
+  private PluginLoader() {
+  }
+
+/**
    * Each phase has to support the enabled option. We will add it if necessary.
    *
    * @param declaredOptions
@@ -58,7 +61,7 @@ public class PluginLoader {
    */
   private static String[] appendEnabled(final String[] options) {
     for (final String option : options) {
-      if (option.equals("enabled")) {
+      if ("enabled".equals(option)) {
         return options;
       }
     }
@@ -70,7 +73,7 @@ public class PluginLoader {
     return result;
   }
 
-  /**
+/**
    * Creates a space separated list from {@code declaredOptions}.
    *
    * @param options
@@ -92,7 +95,7 @@ public class PluginLoader {
     return sb.toString();
   }
 
-  /**
+/**
    * Splits a phase name and returns the pack name.
    *
    * @param phaseName
@@ -101,13 +104,13 @@ public class PluginLoader {
    */
   private static String getPackName(final String phaseName) {
     if (!phaseName.contains(".")) {
-      throw new RuntimeException("Name of phase '" + phaseName + "'does not contain a dot.");
+      throw new RuntimeException(new StringBuilder().append("Name of phase '").append(phaseName).append("'does not contain a dot.").toString());
     }
 
     return phaseName.substring(0, phaseName.indexOf('.'));
   }
 
-  /**
+/**
    * Loads the phase plugin and adds it to PackManager.
    *
    * @param pluginDescription
@@ -119,7 +122,7 @@ public class PluginLoader {
 
       if (!(instance instanceof SootPhasePlugin)) {
         throw new RuntimeException(
-            "The plugin class '" + pluginDescription.getClassName() + "' does not implement SootPhasePlugin.");
+            new StringBuilder().append("The plugin class '").append(pluginDescription.getClassName()).append("' does not implement SootPhasePlugin.").toString());
       }
 
       final SootPhasePlugin phasePlugin = (SootPhasePlugin) instance;
@@ -133,13 +136,13 @@ public class PluginLoader {
       PackManager.v().getPack(packName).add(transform);
 
     } catch (final ClassNotFoundException e) {
-      throw new RuntimeException("Failed to load plugin class for " + pluginDescription + ".", e);
+      throw new RuntimeException(new StringBuilder().append("Failed to load plugin class for ").append(pluginDescription).append(".").toString(), e);
     } catch (final InstantiationException e) {
-      throw new RuntimeException("Failed to instanciate plugin class for " + pluginDescription + ".", e);
+      throw new RuntimeException(new StringBuilder().append("Failed to instanciate plugin class for ").append(pluginDescription).append(".").toString(), e);
     }
   }
 
-  /**
+/**
    * Loads the plugin configuration file {@code file} and registers the plugins.
    *
    * @param file
@@ -150,12 +153,12 @@ public class PluginLoader {
     final File configFile = new File(file);
 
     if (!configFile.exists()) {
-      System.err.println("The configuration file '" + configFile + "' does not exist.");
+      logger.error(new StringBuilder().append("The configuration file '").append(configFile).append("' does not exist.").toString());
       return false;
     }
 
     if (!configFile.canRead()) {
-      System.err.println("Cannot read the configuration file '" + configFile + "'.");
+      logger.error(new StringBuilder().append("Cannot read the configuration file '").append(configFile).append("'.").toString());
       return false;
     }
 
@@ -166,17 +169,17 @@ public class PluginLoader {
       final Object root = unmarshaller.unmarshal(configFile);
 
       if (!(root instanceof Plugins)) {
-        System.err.println("Expected a root node of type Plugins got " + root.getClass());
+        logger.error("Expected a root node of type Plugins got " + root.getClass());
         return false;
       }
 
       loadPlugins((Plugins) root);
     } catch (final RuntimeException e) {
-      System.err.println("Failed to load plugin correctly.");
+      logger.error("Failed to load plugin correctly.");
       logger.error(e.getMessage(), e);
       return false;
     } catch (final JAXBException e) {
-      System.err.println("An error occured while loading plugin configuration '" + file + "'.");
+      logger.error(new StringBuilder().append("An error occured while loading plugin configuration '").append(file).append("'.").toString());
       logger.error(e.getMessage(), e);
       return false;
     }
@@ -184,7 +187,7 @@ public class PluginLoader {
     return true;
   }
 
-  /**
+/**
    * Load all plugins. Can be called by a custom main function.
    *
    * @param plugins
@@ -193,17 +196,17 @@ public class PluginLoader {
    * @throws RuntimeException
    *           if an error occurs during loading.
    */
-  public static void loadPlugins(final Plugins plugins) throws RuntimeException {
-    for (final PluginDescription plugin : plugins.getPluginDescriptions()) {
+  public static void loadPlugins(final Plugins plugins) {
+    plugins.getPluginDescriptions().forEach((final PluginDescription plugin) -> {
       if (plugin instanceof PhasePluginDescription) {
         handlePhasePlugin((PhasePluginDescription) plugin);
       } else {
-        logger.debug("[Warning] Unhandled plugin of type '" + plugin.getClass() + "'");
+        logger.debug(new StringBuilder().append("[Warning] Unhandled plugin of type '").append(plugin.getClass()).append("'").toString());
       }
-    }
+    });
   }
 
-  /**
+/**
    * Changes the class loading strategy used by Soot.
    *
    * @param strategy
@@ -215,8 +218,5 @@ public class PluginLoader {
     }
 
     PluginLoader.loadStrategy = strategy;
-  }
-
-  private PluginLoader() {
   }
 }

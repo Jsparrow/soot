@@ -42,24 +42,29 @@ public class StringConstant extends Constant {
   }
 
   // In this case, equals should be structural equality.
-  public boolean equals(Object c) {
+  @Override
+public boolean equals(Object c) {
     return (c instanceof StringConstant && ((StringConstant) c).value.equals(this.value));
   }
 
   /** Returns a hash code for this StringConstant object. */
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return value.hashCode();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return StringTools.getQuotedStringOf(value);
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return RefType.v("java.lang.String");
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ConstantSwitch) sw).caseStringConstant(this);
   }
 }

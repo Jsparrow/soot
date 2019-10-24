@@ -36,7 +36,8 @@ import soot.util.Switch;
 
 public class BTableSwitchInst extends AbstractInst implements TableSwitchInst {
   UnitBox defaultTargetBox;
-  int lowIndex, highIndex;
+  int lowIndex;
+int highIndex;
   UnitBox[] targetBoxes;
   List unitBoxes;
 
@@ -65,7 +66,8 @@ public class BTableSwitchInst extends AbstractInst implements TableSwitchInst {
     }
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     List list = new ArrayList();
     for (UnitBox element : targetBoxes) {
       list.add(element.getUnit());
@@ -74,47 +76,58 @@ public class BTableSwitchInst extends AbstractInst implements TableSwitchInst {
     return new BTableSwitchInst(defaultTargetBox.getUnit(), lowIndex, highIndex, list);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  public Unit getDefaultTarget() {
+  @Override
+public Unit getDefaultTarget() {
     return defaultTargetBox.getUnit();
   }
 
-  public void setDefaultTarget(Unit defaultTarget) {
+  @Override
+public void setDefaultTarget(Unit defaultTarget) {
     defaultTargetBox.setUnit(defaultTarget);
   }
 
-  public UnitBox getDefaultTargetBox() {
+  @Override
+public UnitBox getDefaultTargetBox() {
     return defaultTargetBox;
   }
 
-  public void setLowIndex(int lowIndex) {
+  @Override
+public void setLowIndex(int lowIndex) {
     this.lowIndex = lowIndex;
   }
 
-  public void setHighIndex(int highIndex) {
+  @Override
+public void setHighIndex(int highIndex) {
     this.highIndex = highIndex;
   }
 
-  public int getLowIndex() {
+  @Override
+public int getLowIndex() {
     return lowIndex;
   }
 
-  public int getHighIndex() {
+  @Override
+public int getHighIndex() {
     return highIndex;
   }
 
@@ -122,25 +135,30 @@ public class BTableSwitchInst extends AbstractInst implements TableSwitchInst {
     return targetBoxes.length;
   }
 
-  public Unit getTarget(int index) {
+  @Override
+public Unit getTarget(int index) {
     return targetBoxes[index].getUnit();
   }
 
-  public void setTarget(int index, Unit target) {
+  @Override
+public void setTarget(int index, Unit target) {
     targetBoxes[index].setUnit(target);
   }
 
-  public void setTargets(List<Unit> targets) {
+  @Override
+public void setTargets(List<Unit> targets) {
     for (int i = 0; i < targets.size(); i++) {
       targetBoxes[i].setUnit(targets.get(i));
     }
   }
 
-  public UnitBox getTargetBox(int index) {
+  @Override
+public UnitBox getTargetBox(int index) {
     return targetBoxes[index];
   }
 
-  public List getTargets() {
+  @Override
+public List getTargets() {
     List targets = new ArrayList();
 
     for (UnitBox element : targetBoxes) {
@@ -150,12 +168,14 @@ public class BTableSwitchInst extends AbstractInst implements TableSwitchInst {
     return targets;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "tableswitch";
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
     String endOfLine = " ";
 
     buffer.append("tableswitch" + endOfLine);
@@ -165,17 +185,18 @@ public class BTableSwitchInst extends AbstractInst implements TableSwitchInst {
     // In this for-loop, we cannot use "<=" since 'i' would wrap around.
     // The case for "i == highIndex" is handled separately after the loop.
     for (int i = lowIndex; i < highIndex; i++) {
-      buffer.append("    case " + i + ": goto " + getTarget(i - lowIndex) + ";" + endOfLine);
+      buffer.append(new StringBuilder().append("    case ").append(i).append(": goto ").append(getTarget(i - lowIndex)).append(";").append(endOfLine).toString());
     }
-    buffer.append("    case " + highIndex + ": goto " + getTarget(highIndex - lowIndex) + ";" + endOfLine);
+    buffer.append(new StringBuilder().append("    case ").append(highIndex).append(": goto ").append(getTarget(highIndex - lowIndex)).append(";").append(endOfLine).toString());
 
-    buffer.append("    default: goto " + getDefaultTarget() + ";" + endOfLine);
+    buffer.append(new StringBuilder().append("    default: goto ").append(getDefaultTarget()).append(";").append(endOfLine).toString());
     buffer.append("}");
 
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal("tableswitch");
     up.newline();
     up.literal("{");
@@ -197,26 +218,30 @@ public class BTableSwitchInst extends AbstractInst implements TableSwitchInst {
 
   private void printCaseTarget(UnitPrinter up, int targetIndex) {
     up.literal("    case ");
-    up.literal(new Integer(targetIndex).toString());
+    up.literal(Integer.toString(targetIndex));
     up.literal(": goto ");
     targetBoxes[targetIndex - lowIndex].toString(up);
     up.literal(";");
     up.newline();
   }
 
-  public List getUnitBoxes() {
+  @Override
+public List getUnitBoxes() {
     return unitBoxes;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseTableSwitchInst(this);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return true;
   }
 

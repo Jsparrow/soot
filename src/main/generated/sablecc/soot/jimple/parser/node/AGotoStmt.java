@@ -8,8 +8,8 @@ import soot.jimple.parser.analysis.*;
 public final class AGotoStmt extends PGotoStmt
 {
     private TGoto _goto_;
-    private PLabelName _labelName_;
-    private TSemicolon _semicolon_;
+    private PLabelName labelName;
+    private TSemicolon semicolon;
 
     public AGotoStmt()
     {
@@ -35,8 +35,8 @@ public final class AGotoStmt extends PGotoStmt
     {
         return new AGotoStmt(
             cloneNode(this._goto_),
-            cloneNode(this._labelName_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.labelName),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -72,14 +72,14 @@ public final class AGotoStmt extends PGotoStmt
 
     public PLabelName getLabelName()
     {
-        return this._labelName_;
+        return this.labelName;
     }
 
     public void setLabelName(PLabelName node)
     {
-        if(this._labelName_ != null)
+        if(this.labelName != null)
         {
-            this._labelName_.parent(null);
+            this.labelName.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AGotoStmt extends PGotoStmt
             node.parent(this);
         }
 
-        this._labelName_ = node;
+        this.labelName = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -117,16 +117,13 @@ public final class AGotoStmt extends PGotoStmt
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._goto_)
-            + toString(this._labelName_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this._goto_)).append(toString(this.labelName)).append(toString(this.semicolon)).toString();
     }
 
     @Override
@@ -139,15 +136,15 @@ public final class AGotoStmt extends PGotoStmt
             return;
         }
 
-        if(this._labelName_ == child)
+        if(this.labelName == child)
         {
-            this._labelName_ = null;
+            this.labelName = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -164,13 +161,13 @@ public final class AGotoStmt extends PGotoStmt
             return;
         }
 
-        if(this._labelName_ == oldChild)
+        if(this.labelName == oldChild)
         {
             setLabelName((PLabelName) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

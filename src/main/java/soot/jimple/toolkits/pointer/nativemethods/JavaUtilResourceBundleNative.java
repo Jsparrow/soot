@@ -34,12 +34,13 @@ public class JavaUtilResourceBundleNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.Class[] getClassContext()")) {
+    if ("java.lang.Class[] getClassContext()".equals(subSignature)) {
       java_util_ResourceBundle_getClassContext(method, thisVar, returnVar, params);
       return;
 

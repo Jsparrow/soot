@@ -159,11 +159,11 @@ public class IdentityOperationEliminator extends BodyTransformer {
    * @return True if the given value is the constant integer 0, otherwise false
    */
   private boolean isConstZero(Value op) {
-    if (op instanceof IntConstant) {
-      IntConstant ic = (IntConstant) op;
-      return ic.value == 0;
-    }
-    return false;
+    if (!(op instanceof IntConstant)) {
+		return false;
+	}
+	IntConstant ic = (IntConstant) op;
+	return ic.value == 0;
   }
 
 }

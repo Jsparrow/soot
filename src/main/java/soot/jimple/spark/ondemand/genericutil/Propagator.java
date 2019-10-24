@@ -31,7 +31,6 @@ public class Propagator<T> {
   private final Stack<T> worklist;
 
   public Propagator(Set<T> marked, Stack<T> worklist) {
-    super();
     this.marked = marked;
     this.worklist = worklist;
   }

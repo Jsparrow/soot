@@ -37,6 +37,8 @@ import soot.jimple.LongConstant;
 import soot.jimple.MulExpr;
 import soot.jimple.NumericConstant;
 import soot.jimple.SubExpr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * x = 2+3  should be simplified to x =5
@@ -50,10 +52,10 @@ import soot.jimple.SubExpr;
  */
 
 public class SimplifyExpressions extends DepthFirstAdapter {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(SimplifyExpressions.class);
+public static boolean DEBUG = false;
 
   public SimplifyExpressions() {
-    super();
   }
 
   public SimplifyExpressions(boolean verbose) {
@@ -68,7 +70,8 @@ public class SimplifyExpressions extends DepthFirstAdapter {
    * ValueBox op2Box = condExpr.getOp2Box(); }
    */
 
-  public void outExprOrRefValueBox(ValueBox vb) {
+  @Override
+public void outExprOrRefValueBox(ValueBox vb) {
     // System.out.println("here"+vb);
     Value v = vb.getValue();
     if (!(v instanceof BinopExpr)) {
@@ -77,7 +80,7 @@ public class SimplifyExpressions extends DepthFirstAdapter {
 
     BinopExpr binop = (BinopExpr) v;
     if (DEBUG) {
-      System.out.println("calling getResult");
+      logger.info("calling getResult");
     }
     NumericConstant constant = getResult(binop);
 
@@ -85,14 +88,14 @@ public class SimplifyExpressions extends DepthFirstAdapter {
       return;
     }
     if (DEBUG) {
-      System.out.println("Changin" + vb + " to...." + constant);
+      logger.info(new StringBuilder().append("Changin").append(vb).append(" to....").append(constant).toString());
     }
     vb.setValue(constant);
   }
 
   public NumericConstant getResult(BinopExpr binop) {
     if (DEBUG) {
-      System.out.println("Binop expr" + binop);
+      logger.info("Binop expr" + binop);
     }
     Value leftOp = binop.getOp1();
     Value rightOp = binop.getOp2();
@@ -109,15 +112,15 @@ public class SimplifyExpressions extends DepthFirstAdapter {
 
     if (op == 0) {
       if (DEBUG) {
-        System.out.println("not add sub or mult");
-        System.out.println(binop.getClass().getName());
+        logger.info("not add sub or mult");
+        logger.info(binop.getClass().getName());
       }
       return null;
     }
     NumericConstant constant = null;
     if (leftOp instanceof LongConstant && rightOp instanceof LongConstant) {
       if (DEBUG) {
-        System.out.println("long constants!!");
+        logger.info("long constants!!");
       }
       if (op == 1) {
         constant = ((LongConstant) leftOp).add((LongConstant) rightOp);
@@ -128,7 +131,7 @@ public class SimplifyExpressions extends DepthFirstAdapter {
       }
     } else if (leftOp instanceof DoubleConstant && rightOp instanceof DoubleConstant) {
       if (DEBUG) {
-        System.out.println("double constants!!");
+        logger.info("double constants!!");
       }
       if (op == 1) {
         constant = ((DoubleConstant) leftOp).add((DoubleConstant) rightOp);
@@ -140,7 +143,7 @@ public class SimplifyExpressions extends DepthFirstAdapter {
 
     } else if (leftOp instanceof FloatConstant && rightOp instanceof FloatConstant) {
       if (DEBUG) {
-        System.out.println("Float constants!!");
+        logger.info("Float constants!!");
       }
       if (op == 1) {
         constant = ((FloatConstant) leftOp).add((FloatConstant) rightOp);
@@ -151,7 +154,7 @@ public class SimplifyExpressions extends DepthFirstAdapter {
       }
     } else if (leftOp instanceof IntConstant && rightOp instanceof IntConstant) {
       if (DEBUG) {
-        System.out.println("Integer constants!!");
+        logger.info("Integer constants!!");
       }
       if (op == 1) {
         constant = ((IntConstant) leftOp).add((IntConstant) rightOp);

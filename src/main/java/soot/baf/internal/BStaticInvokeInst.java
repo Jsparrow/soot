@@ -37,16 +37,19 @@ public class BStaticInvokeInst extends AbstractInvokeInst implements StaticInvok
     this.methodRef = methodRef;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return methodRef.parameterTypes().size();
 
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BStaticInvokeInst(methodRef);
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     if (methodRef.returnType() instanceof VoidType) {
       return 0;
     } else {
@@ -54,11 +57,13 @@ public class BStaticInvokeInst extends AbstractInvokeInst implements StaticInvok
     }
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "staticinvoke";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseStaticInvokeInst(this);
   }
 }

@@ -38,9 +38,9 @@ public class CONSTANT_InterfaceMethodref_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
-      return "InterfaceMethodRefInfo: " + p.constantPool[class_index] + " "
-        + p.constantPool[name_and_type_index];
+    @Override
+	public String toString() {
+      return new StringBuilder().append("InterfaceMethodRefInfo: ").append(p.constantPool[class_index]).append(" ").append(p.constantPool[name_and_type_index]).toString();
     }
 
 

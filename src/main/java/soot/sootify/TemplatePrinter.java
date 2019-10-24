@@ -79,13 +79,13 @@ public class TemplatePrinter {
     println("public void create() {");
     indent();
 
-    println("SootClass c = new SootClass(\"" + c.getName() + "\");");
+    println(new StringBuilder().append("SootClass c = new SootClass(\"").append(c.getName()).append("\");").toString());
     println("c.setApplicationClass();");
     // todo modifiers, extends etc.
     println("Scene.v().addClass(c);");
 
     for (int i = 0; i < c.getMethodCount(); i++) {
-      println("createMethod" + i + "(c);");
+      println(new StringBuilder().append("createMethod").append(i).append("(c);").toString());
     }
 
     // close main method
@@ -97,7 +97,7 @@ public class TemplatePrinter {
       newMethod("createMethod" + i);
 
       // TODO modifiers, types
-      println("SootMethod m = new SootMethod(\"" + m.getName() + "\",null,null);");
+      println(new StringBuilder().append("SootMethod m = new SootMethod(\"").append(m.getName()).append("\",null,null);").toString());
       println("Body b = Jimple.v().newBody(m);");
       println("m.setActiveBody(b);");
 
@@ -108,20 +108,12 @@ public class TemplatePrinter {
       Body b = m.getActiveBody();
 
       println("Chain<Local> locals = b.getLocals();");
-      for (Local l : b.getLocals()) {
-
-        // TODO properly treat primitive types
-        println("locals.add(Jimple.v().newLocal(\"" + l.getName() + "\", RefType.v(\"" + l.getType() + "\")));");
-
-      }
+      // TODO properly treat primitive types
+	b.getLocals().forEach(l -> println(new StringBuilder().append("locals.add(Jimple.v().newLocal(\"").append(l.getName()).append("\", RefType.v(\"").append(l.getType()).append("\")));").toString()));
 
       println("Chain<Unit> units = b.getUnits();");
       StmtTemplatePrinter sw = new StmtTemplatePrinter(this, b.getUnits());
-      for (Unit u : b.getUnits()) {
-
-        u.apply(sw);
-
-      }
+      b.getUnits().forEach(u -> u.apply(sw));
 
       // TODO print traps
 
@@ -143,7 +135,7 @@ public class TemplatePrinter {
 
   private void newMethod(String name) {
     indent();
-    println("public void " + name + "(SootClass c) {");
+    println(new StringBuilder().append("public void ").append(name).append("(SootClass c) {").toString());
     indent();
   }
 

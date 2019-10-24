@@ -31,6 +31,8 @@ import soot.Local;
 import soot.Type;
 import soot.Unit;
 import soot.jbco.IJbcoTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michael Batchelder
@@ -39,32 +41,36 @@ import soot.jbco.IJbcoTransform;
  */
 public class BAFPrintout extends BodyTransformer implements IJbcoTransform {
 
-  public static String name = "bb.printout";
+  private static final Logger logger = LoggerFactory.getLogger(BAFPrintout.class);
+public static String name = "bb.printout";
+static boolean stack = false;
 
-  public void outputSummary() {
+public BAFPrintout() {
   }
 
-  public String[] getDependencies() {
-    return new String[0];
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  static boolean stack = false;
-
-  public BAFPrintout() {
-  }
-
-  public BAFPrintout(String newname, boolean print_stack) {
+public BAFPrintout(String newname, boolean print_stack) {
     name = newname;
     stack = print_stack;
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+@Override
+public void outputSummary() {
+  }
+
+@Override
+public String[] getDependencies() {
+    return new String[0];
+  }
+
+@Override
+public String getName() {
+    return name;
+  }
+
+@Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     // if (b.getMethod().getSignature().indexOf("run")<0) return;
-    System.out.println("\n" + b.getMethod().getSignature());
+    logger.info("\n" + b.getMethod().getSignature());
 
     if (stack) {
       Map<Unit, Stack<Type>> stacks = null;
@@ -79,7 +85,7 @@ public class BAFPrintout extends BodyTransformer implements IJbcoTransform {
 
         StackTypeHeightCalculator.printStack(b.getUnits(), stacks, true);
       } catch (Exception exc) {
-        System.out.println("\n**************Exception calculating height " + exc + ", printing plain bytecode now\n\n");
+        logger.info(new StringBuilder().append("\n**************Exception calculating height ").append(exc).append(", printing plain bytecode now\n\n").toString(), exc);
         soot.jbco.util.Debugger.printUnits(b, "  FINAL");
       }
     } else {

@@ -42,8 +42,9 @@ public class FieldInfo extends java.lang.Object {
     public FieldInfo(BytecodeParser parser) {
       p = parser;
       flags = p.u2();
-      if(BytecodeParser.VERBOSE)
-        p.print("Flags: " + flags);
+      if(BytecodeParser.VERBOSE) {
+		p.print("Flags: " + flags);
+	}
       int name_index = p.u2();
       name = ((CONSTANT_Utf8_Info) p.constantPool[name_index]).string();
 
@@ -55,15 +56,15 @@ public class FieldInfo extends java.lang.Object {
 
     public BodyDecl bodyDecl() {
       FieldDeclaration f;
-      if((flags & Flags.ACC_ENUM) != 0)
-        //EnumConstant : FieldDeclaration ::= Modifiers <ID:String> Arg:Expr* BodyDecl* /TypeAccess:Access/ /[Init:Expr]/;
+      if((flags & Flags.ACC_ENUM) != 0) {
+		//EnumConstant : FieldDeclaration ::= Modifiers <ID:String> Arg:Expr* BodyDecl* /TypeAccess:Access/ /[Init:Expr]/;
         f = new EnumConstant(
             BytecodeParser.modifiers(flags),
             name,
             new List(),
             new List()
             );
-      else {
+	} else {
         Signatures.FieldSignature s = attributes.fieldSignature;
         Access type = s != null ? s.fieldTypeAccess() : fieldDescriptor.type();
         f = new FieldDeclaration(
@@ -73,17 +74,20 @@ public class FieldInfo extends java.lang.Object {
             new Opt()
             );
       }
-      if(attributes.constantValue() != null)
-        if(fieldDescriptor.isBoolean()) {
+      if(attributes.constantValue() != null) {
+		if(fieldDescriptor.isBoolean()) {
           f.setInit(attributes.constantValue().exprAsBoolean());
         }
         else {
           f.setInit(attributes.constantValue().expr());
         }
+	}
 
-      if(attributes.annotations != null)
-        for(Iterator iter = attributes.annotations.iterator(); iter.hasNext(); )
-          f.getModifiersNoTransform().addModifier((Modifier)iter.next());
+      if(attributes.annotations != null) {
+		for(Iterator iter = attributes.annotations.iterator(); iter.hasNext(); ) {
+			f.getModifiersNoTransform().addModifier((Modifier)iter.next());
+		}
+	}
 
       return f;
     }

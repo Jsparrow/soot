@@ -31,7 +31,8 @@ import soot.toolkits.graph.DirectedGraph;
 
 class SwitchNodeGraph implements DirectedGraph {
   private LinkedList body;
-  private final LinkedList heads, tails;
+  private final LinkedList heads;
+private final LinkedList tails;
   private final HashMap binding;
 
   public SwitchNodeGraph(List body) {
@@ -70,27 +71,33 @@ class SwitchNodeGraph implements DirectedGraph {
     }
   }
 
-  public int size() {
+  @Override
+public int size() {
     return body.size();
   }
 
-  public List getHeads() {
+  @Override
+public List getHeads() {
     return heads;
   }
 
-  public List getTails() {
+  @Override
+public List getTails() {
     return tails;
   }
 
-  public List getPredsOf(Object o) {
+  @Override
+public List getPredsOf(Object o) {
     return ((SwitchNode) o).get_Preds();
   }
 
-  public List getSuccsOf(Object o) {
+  @Override
+public List getSuccsOf(Object o) {
     return ((SwitchNode) o).get_Succs();
   }
 
-  public Iterator iterator() {
+  @Override
+public Iterator iterator() {
     return body.iterator();
   }
 

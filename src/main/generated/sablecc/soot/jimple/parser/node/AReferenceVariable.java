@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AReferenceVariable extends PVariable
 {
-    private PReference _reference_;
+    private PReference reference;
 
     public AReferenceVariable()
     {
@@ -26,7 +26,7 @@ public final class AReferenceVariable extends PVariable
     public Object clone()
     {
         return new AReferenceVariable(
-            cloneNode(this._reference_));
+            cloneNode(this.reference));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AReferenceVariable extends PVariable
 
     public PReference getReference()
     {
-        return this._reference_;
+        return this.reference;
     }
 
     public void setReference(PReference node)
     {
-        if(this._reference_ != null)
+        if(this.reference != null)
         {
-            this._reference_.parent(null);
+            this.reference.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AReferenceVariable extends PVariable
             node.parent(this);
         }
 
-        this._reference_ = node;
+        this.reference = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._reference_);
+            + toString(this.reference);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._reference_ == child)
+        if(this.reference == child)
         {
-            this._reference_ = null;
+            this.reference = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AReferenceVariable extends PVariable
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._reference_ == oldChild)
+        if(this.reference == oldChild)
         {
             setReference((PReference) newChild);
             return;

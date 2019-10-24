@@ -30,35 +30,43 @@ public class BReturnVoidInst extends AbstractInst implements ReturnVoidInst {
   public BReturnVoidInst() {
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 0;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BReturnVoidInst();
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "return";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseReturnVoidInst(this);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 

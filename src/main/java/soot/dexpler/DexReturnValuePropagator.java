@@ -116,10 +116,10 @@ public class DexReturnValuePropagator extends BodyTransformer {
    * @return True if there is at least one path between unitDef and unitUse on which local l gets redefined, otherwise false
    */
   private boolean isRedefined(Local l, Unit unitUse, AssignStmt unitDef, UnitGraph graph) {
-    List<Unit> workList = new ArrayList<Unit>();
+    List<Unit> workList = new ArrayList<>();
     workList.add(unitUse);
 
-    Set<Unit> doneSet = new HashSet<Unit>();
+    Set<Unit> doneSet = new HashSet<>();
 
     // Check for redefinitions of the local between definition and use
     while (!workList.isEmpty()) {

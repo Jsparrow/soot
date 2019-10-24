@@ -39,11 +39,11 @@ public class LabelAssigner {
 
   private int lastLabelId = 0;
 
-  private Map<Stmt, Label> stmtToLabel = new HashMap<Stmt, Label>();
-  private Map<Stmt, String> stmtToLabelName = new HashMap<Stmt, String>();
+  private Map<Stmt, Label> stmtToLabel = new HashMap<>();
+  private Map<Stmt, String> stmtToLabelName = new HashMap<>();
 
-  private Map<AbstractPayload, Label> payloadToLabel = new HashMap<AbstractPayload, Label>();
-  private Map<AbstractPayload, String> payloadToLabelName = new HashMap<AbstractPayload, String>();
+  private Map<AbstractPayload, Label> payloadToLabel = new HashMap<>();
+  private Map<AbstractPayload, String> payloadToLabelName = new HashMap<>();
 
   public LabelAssigner(MethodImplementationBuilder builder) {
     this.builder = builder;
@@ -108,12 +108,7 @@ public class LabelAssigner {
   }
 
   public Label getLabelAtAddress(int address) {
-    for (Label lb : stmtToLabel.values()) {
-      if (lb.isPlaced() && lb.getCodeAddress() == address) {
-        return lb;
-      }
-    }
-    return null;
+    return stmtToLabel.values().stream().filter(lb -> lb.isPlaced() && lb.getCodeAddress() == address).findFirst().orElse(null);
   }
 
   public Collection<Label> getAllLabels() {

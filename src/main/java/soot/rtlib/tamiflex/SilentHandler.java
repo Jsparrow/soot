@@ -27,21 +27,27 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class SilentHandler implements IUnexpectedReflectiveCallHandler {
-  public void methodInvoke(Object receiver, Method m) {
+  @Override
+public void methodInvoke(Object receiver, Method m) {
   }
 
-  public void constructorNewInstance(Constructor<?> c) {
+  @Override
+public void constructorNewInstance(Constructor<?> c) {
   }
 
-  public void classNewInstance(Class<?> c) {
+  @Override
+public void classNewInstance(Class<?> c) {
   }
 
-  public void classForName(String typeName) {
+  @Override
+public void classForName(String typeName) {
   }
 
-  public void fieldSet(Object receiver, Field f) {
+  @Override
+public void fieldSet(Object receiver, Field f) {
   }
 
-  public void fieldGet(Object receiver, Field f) {
+  @Override
+public void fieldGet(Object receiver, Field f) {
   }
 }

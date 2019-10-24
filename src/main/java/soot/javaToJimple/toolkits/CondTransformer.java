@@ -43,19 +43,19 @@ import soot.jimple.Stmt;
 
 public class CondTransformer extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(CondTransformer.class);
+private static final int SEQ_LENGTH = 6;
+private Stmt[] stmtSeq = new Stmt[SEQ_LENGTH];
+private boolean sameGoto = true;
 
-  public CondTransformer(Singletons.Global g) {
+public CondTransformer(Singletons.Global g) {
   }
 
-  public static CondTransformer v() {
+public static CondTransformer v() {
     return G.v().soot_javaToJimple_toolkits_CondTransformer();
   }
 
-  private static final int SEQ_LENGTH = 6;
-  private Stmt[] stmtSeq = new Stmt[SEQ_LENGTH];
-  private boolean sameGoto = true;
-
-  protected void internalTransform(Body b, String phaseName, Map options) {
+@Override
+protected void internalTransform(Body b, String phaseName, Map options) {
 
     // logger.debug("running cond and/or transformer");
     boolean change = true;
@@ -91,7 +91,7 @@ public class CondTransformer extends BodyTransformer {
     }
   }
 
-  private void transformBody(Body b, Stmt next) {
+private void transformBody(Body b, Stmt next) {
     // change target of stmts 0 and 1 to target of stmt 5
     // remove stmts 2, 3, 4, 5
     Stmt newTarget = null;
@@ -113,7 +113,7 @@ public class CondTransformer extends BodyTransformer {
     }
   }
 
-  private boolean testStmtSeq(Stmt s, int pos) {
+private boolean testStmtSeq(Stmt s, int pos) {
     switch (pos) {
       case 0: {
         if (s instanceof IfStmt) {
@@ -123,12 +123,11 @@ public class CondTransformer extends BodyTransformer {
         break;
       }
       case 1: {
-        if (s instanceof IfStmt) {
-          if (sameTarget(stmtSeq[pos - 1], s)) {
+        boolean condition = s instanceof IfStmt && sameTarget(stmtSeq[pos - 1], s);
+		if (condition) {
             stmtSeq[pos] = s;
             return true;
           }
-        }
         break;
       }
       case 2: {
@@ -150,12 +149,11 @@ public class CondTransformer extends BodyTransformer {
         break;
       }
       case 4: {
-        if (s instanceof AssignStmt) {
-          if (isTarget(((IfStmt) stmtSeq[0]).getTarget(), s) && sameLocal(stmtSeq[2], s)) {
+        boolean condition1 = s instanceof AssignStmt && isTarget(((IfStmt) stmtSeq[0]).getTarget(), s) && sameLocal(stmtSeq[2], s);
+		if (condition1) {
             stmtSeq[pos] = s;
             return true;
           }
-        }
         break;
       }
       case 5: {
@@ -180,7 +178,7 @@ public class CondTransformer extends BodyTransformer {
     return false;
   }
 
-  private boolean sameTarget(Stmt s1, Stmt s2) {
+private boolean sameTarget(Stmt s1, Stmt s2) {
     IfStmt is1 = (IfStmt) s1;
     IfStmt is2 = (IfStmt) s2;
     if (is1.getTarget().equals(is2.getTarget())) {
@@ -189,14 +187,14 @@ public class CondTransformer extends BodyTransformer {
     return false;
   }
 
-  private boolean isTarget(Stmt s1, Stmt s) {
+private boolean isTarget(Stmt s1, Stmt s) {
     if (s1.equals(s)) {
       return true;
     }
     return false;
   }
 
-  private boolean sameLocal(Stmt s1, Stmt s2) {
+private boolean sameLocal(Stmt s1, Stmt s2) {
     AssignStmt as1 = (AssignStmt) s1;
     AssignStmt as2 = (AssignStmt) s2;
     if (as1.getLeftOp().equals(as2.getLeftOp())) {
@@ -205,7 +203,7 @@ public class CondTransformer extends BodyTransformer {
     return false;
   }
 
-  private boolean sameCondLocal(Stmt s1, Stmt s2) {
+private boolean sameCondLocal(Stmt s1, Stmt s2) {
     AssignStmt as1 = (AssignStmt) s1;
     IfStmt is2 = (IfStmt) s2;
     if (is2.getCondition() instanceof BinopExpr) {

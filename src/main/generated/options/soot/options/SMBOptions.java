@@ -30,20 +30,23 @@ import java.util.*;
 @javax.annotation.Generated(value = "Saxonica v3.0", comments = "from soot_options.xml")
 public class SMBOptions {
 
-    private Map<String, String> options;
+    public static final int allowed_modifier_changes_unsafe = 1;
+	public static final int allowed_modifier_changes_safe = 2;
+	public static final int allowed_modifier_changes_none = 3;
+	private Map<String, String> options;
 
-    public SMBOptions(Map<String, String> options) {
+	public SMBOptions(Map<String, String> options) {
         this.options = options;
     }
 
-    /**
+	/**
      * Enabled
      */
     public boolean enabled() {
         return soot.PhaseOptions.getBoolean(options, "enabled");
     }
 
-    /**
+	/**
      * Insert Null Checks
      * Insert a check that, before invoking the static copy of the 
      * target method, throws a NullPointerException if the receiver 
@@ -54,7 +57,7 @@ public class SMBOptions {
         return soot.PhaseOptions.getBoolean(options, "insert-null-checks");
     }
 
-    /**
+	/**
      * Insert Redundant Casts
      * Insert extra casts for the Java bytecode verifier. If the target 
      * method uses its this parameter, a reference to the receiver 
@@ -77,25 +80,25 @@ public class SMBOptions {
         return soot.PhaseOptions.getBoolean(options, "insert-redundant-casts");
     }
 
-    public static final int allowed_modifier_changes_unsafe = 1;
-    public static final int allowed_modifier_changes_safe = 2;
-    public static final int allowed_modifier_changes_none = 3;
-
-    /**
+	/**
      * Allowed Modifier Changes
      * Specify which changes in visibility modifiers are allowed.
      */
     public int allowed_modifier_changes() {
         String s = soot.PhaseOptions.getString(options, "allowed-modifier-changes");
-        if (s == null || s.isEmpty())
-        	return allowed_modifier_changes_unsafe;
+        if (s == null || s.isEmpty()) {
+			return allowed_modifier_changes_unsafe;
+		}
 	
-        if (s.equalsIgnoreCase("unsafe"))
-            return allowed_modifier_changes_unsafe;
-        if (s.equalsIgnoreCase("safe"))
-            return allowed_modifier_changes_safe;
-        if (s.equalsIgnoreCase("none"))
-            return allowed_modifier_changes_none;
+        if ("unsafe".equalsIgnoreCase(s)) {
+			return allowed_modifier_changes_unsafe;
+		}
+        if ("safe".equalsIgnoreCase(s)) {
+			return allowed_modifier_changes_safe;
+		}
+        if ("none".equalsIgnoreCase(s)) {
+			return allowed_modifier_changes_none;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option allowed-modifier-changes", s));
     }

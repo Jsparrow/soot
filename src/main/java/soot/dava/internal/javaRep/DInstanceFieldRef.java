@@ -39,7 +39,8 @@ public class DInstanceFieldRef extends GInstanceFieldRef {
     this.thisLocals = thisLocals;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (thisLocals.contains(getBase())) {
       up.fieldRef(fieldRef);
     } else {
@@ -47,7 +48,8 @@ public class DInstanceFieldRef extends GInstanceFieldRef {
     }
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (thisLocals.contains(getBase())) {
       return fieldRef.name();
     }
@@ -55,7 +57,8 @@ public class DInstanceFieldRef extends GInstanceFieldRef {
     return super.toString();
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new DInstanceFieldRef(getBase(), fieldRef, thisLocals);
   }
 }

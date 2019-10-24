@@ -1,5 +1,8 @@
 package soot.asm.backend.targets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*-
  * #%L
  * Soot - a J*va Optimization Framework
@@ -24,12 +27,15 @@ package soot.asm.backend.targets;
 
 public class TryCatch {
 	
+	private static final Logger logger = LoggerFactory.getLogger(TryCatch.class);
+
 	int doSth(Object o){
 		int i = 0;
 		try{
 			o.notify();
 			i = 1;
 		} catch (NullPointerException e){
+			logger.error(e.getMessage(), e);
 			i = -1;
 		} finally {
 			return i;

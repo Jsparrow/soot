@@ -38,15 +38,16 @@ public class SaveASTVisitor extends polyglot.frontend.AbstractPass {
     this.extInfo = extInfo;
   }
 
-  public boolean run() {
-    if (extInfo instanceof soot.javaToJimple.jj.ExtensionInfo) {
-      soot.javaToJimple.jj.ExtensionInfo jjInfo = (soot.javaToJimple.jj.ExtensionInfo) extInfo;
-      if (jjInfo.sourceJobMap() == null) {
-        jjInfo.sourceJobMap(new HashMap<Source, Job>());
+  @Override
+public boolean run() {
+    if (!(extInfo instanceof soot.javaToJimple.jj.ExtensionInfo)) {
+		return false;
+	}
+	soot.javaToJimple.jj.ExtensionInfo jjInfo = (soot.javaToJimple.jj.ExtensionInfo) extInfo;
+	if (jjInfo.sourceJobMap() == null) {
+        jjInfo.sourceJobMap(new HashMap<>());
       }
-      jjInfo.sourceJobMap().put(job.source(), job);
-      return true;
-    }
-    return false;
+	jjInfo.sourceJobMap().put(job.source(), job);
+	return true;
   }
 }

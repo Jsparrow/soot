@@ -35,31 +35,38 @@ public class BIfCmpNeInst extends AbstractOpTypeBranchInst implements IfCmpNeIns
     super(opType, Baf.v().newInstBox(target));
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 2;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BIfCmpNeInst(getOpType(), getTarget());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 2 * AbstractJasminClass.sizeOfType(getOpType());
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "ifcmpne";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseIfCmpNeInst(this);
   }
 }

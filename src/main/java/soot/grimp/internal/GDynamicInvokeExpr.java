@@ -58,7 +58,8 @@ public class GDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     }
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     ArrayList clonedArgs = new ArrayList(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {
@@ -73,52 +74,59 @@ public class GDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     return new GDynamicInvokeExpr(bsmRef, clonedBsmArgs, methodRef, tag, clonedArgs);
   }
 
-  public Value getBootstrapArg(int i) {
+  @Override
+public Value getBootstrapArg(int i) {
     return bsmArgBoxes[i].getValue();
   }
 
-  public int getBootstrapArgCount() {
+  @Override
+public int getBootstrapArgCount() {
     return bsmArgBoxes.length;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseDynamicInvokeExpr(this);
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof GDynamicInvokeExpr) {
-      GDynamicInvokeExpr ie = (GDynamicInvokeExpr) o;
-      if (!(getMethod().equals(ie.getMethod())
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof GDynamicInvokeExpr)) {
+		return false;
+	}
+	GDynamicInvokeExpr ie = (GDynamicInvokeExpr) o;
+	if (!(getMethod().equals(ie.getMethod())
           && (argBoxes == null ? 0 : argBoxes.length) == (ie.argBoxes == null ? 0 : ie.argBoxes.length))) {
         return false;
       }
-      if (argBoxes != null) {
+	if (argBoxes != null) {
         for (ValueBox element : argBoxes) {
           if (!(element.getValue().equivTo(element.getValue()))) {
             return false;
           }
         }
       }
-      if (!methodRef.equals(ie.methodRef)) {
+	if (!methodRef.equals(ie.methodRef)) {
         return false;
       }
-      if (!bsmRef.equals(ie.bsmRef)) {
+	if (!bsmRef.equals(ie.bsmRef)) {
         return false;
       }
-      return true;
-    }
-    return false;
+	return true;
   }
 
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return getMethod().equivHashCode();
   }
 
-  public SootMethodRef getBootstrapMethodRef() {
+  @Override
+public SootMethodRef getBootstrapMethodRef() {
     return bsmRef;
   }
 
-  public List<Value> getBootstrapArgs() {
+  @Override
+public List<Value> getBootstrapArgs() {
     List l = new ArrayList();
     for (ValueBox element : bsmArgBoxes) {
       l.add(element.getValue());
@@ -127,8 +135,9 @@ public class GDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     return l;
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
     buffer.append(Jimple.DYNAMICINVOKE);
     buffer.append(" \"");
@@ -164,11 +173,10 @@ public class GDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.DYNAMICINVOKE);
-    up.literal(" \"" + methodRef.name() + "\" <"
-        + SootMethod.getSubSignature(""/* no method name here */, methodRef.parameterTypes(), methodRef.returnType())
-        + ">(");
+    up.literal(new StringBuilder().append(" \"").append(methodRef.name()).append("\" <").append(SootMethod.getSubSignature(""/* no method name here */, methodRef.parameterTypes(), methodRef.returnType())).append(">(").toString());
 
     if (argBoxes != null) {
       for (int i = 0; i < argBoxes.length; i++) {

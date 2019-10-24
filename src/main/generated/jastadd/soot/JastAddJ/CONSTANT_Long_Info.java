@@ -34,13 +34,15 @@ public class CONSTANT_Long_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
+    @Override
+	public String toString() {
       return "LongInfo: " + Long.toString(value);
     }
 
 
 
-    public Expr expr() {
+    @Override
+	public Expr expr() {
       return Literal.buildLongLiteral(value);
     }
 

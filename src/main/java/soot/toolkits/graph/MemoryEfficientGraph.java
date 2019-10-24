@@ -31,19 +31,22 @@ import java.util.HashMap;
 
 public class MemoryEfficientGraph<N> extends HashMutableDirectedGraph<N> {
 
-  HashMap<N, N> self = new HashMap<N, N>();
+  HashMap<N, N> self = new HashMap<>();
 
-  public void addNode(N o) {
+  @Override
+public void addNode(N o) {
     super.addNode(o);
     self.put(o, o);
   }
 
-  public void removeNode(N o) {
+  @Override
+public void removeNode(N o) {
     super.removeNode(o);
     self.remove(o);
   }
 
-  public void addEdge(N from, N to) {
+  @Override
+public void addEdge(N from, N to) {
     if (containsNode(from) && containsNode(to)) {
       super.addEdge(self.get(from), self.get(to));
     } else if (!containsNode(from)) {
@@ -53,7 +56,8 @@ public class MemoryEfficientGraph<N> extends HashMutableDirectedGraph<N> {
     }
   }
 
-  public void removeEdge(N from, N to) {
+  @Override
+public void removeEdge(N from, N to) {
     if (containsNode(from) && containsNode(to)) {
       super.removeEdge(self.get(from), self.get(to));
     } else if (!containsNode(from)) {

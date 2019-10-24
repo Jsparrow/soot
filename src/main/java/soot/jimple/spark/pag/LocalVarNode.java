@@ -35,35 +35,37 @@ import soot.Type;
  * @author Ondrej Lhotak
  */
 public class LocalVarNode extends VarNode {
-  public ContextVarNode context(Object context) {
-    return cvns == null ? null : cvns.get(context);
-  }
-
-  public SootMethod getMethod() {
-    return method;
-  }
-
-  public String toString() {
-    return "LocalVarNode " + getNumber() + " " + variable + " " + method;
-  }
-  /* End of public methods. */
-
-  LocalVarNode(PAG pag, Object variable, Type t, SootMethod m) {
-    super(pag, variable, t);
-    this.method = m;
-    // if( m == null ) throw new RuntimeException( "method shouldn't be null" );
-  }
-
-  /** Registers a cvn as having this node as its base. */
-  void addContext(ContextVarNode cvn, Object context) {
-    if (cvns == null) {
-      cvns = new HashMap<Object, ContextVarNode>();
-    }
-    cvns.put(context, cvn);
-  }
-
   /* End of package methods. */
+	
+	  protected Map<Object, ContextVarNode> cvns;
+	protected SootMethod method;
+	/* End of public methods. */
+	
+	  LocalVarNode(PAG pag, Object variable, Type t, SootMethod m) {
+	    super(pag, variable, t);
+	    this.method = m;
+	    // if( m == null ) throw new RuntimeException( "method shouldn't be null" );
+	  }
 
-  protected Map<Object, ContextVarNode> cvns;
-  protected SootMethod method;
+	public ContextVarNode context(Object context) {
+	    return cvns == null ? null : cvns.get(context);
+	  }
+
+	public SootMethod getMethod() {
+	    return method;
+	  }
+
+	@Override
+	public String toString() {
+	    return new StringBuilder().append("LocalVarNode ").append(getNumber()).append(" ").append(variable).append(" ").append(method)
+				.toString();
+	  }
+
+	/** Registers a cvn as having this node as its base. */
+	  void addContext(ContextVarNode cvn, Object context) {
+	    if (cvns == null) {
+	      cvns = new HashMap<>();
+	    }
+	    cvns.put(context, cvn);
+	  }
 }

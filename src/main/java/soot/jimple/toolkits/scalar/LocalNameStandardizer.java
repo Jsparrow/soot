@@ -60,7 +60,7 @@ public class LocalNameStandardizer extends BodyTransformer {
     return G.v().soot_jimple_toolkits_scalar_LocalNameStandardizer();
   }
   
-  private final static int digits(int n) {
+  private static final int digits(int n) {
     int len = String.valueOf(n).length();
     if (n < 0) {
       return len - 1;
@@ -69,8 +69,8 @@ public class LocalNameStandardizer extends BodyTransformer {
     }
   }
 
-  private final static String genName(String prefix, String type, int n, int digits) {
-    return String.format("%s%s%0" + digits + "d", prefix, type, n);
+  private static final String genName(String prefix, String type, int n, int digits) {
+    return String.format(new StringBuilder().append("%s%s%0").append(digits).append("d").toString(), prefix, type, n);
   }
 
   @Override
@@ -122,10 +122,10 @@ public class LocalNameStandardizer extends BodyTransformer {
     if (sortLocals) {
       Chain<Local> locals = body.getLocals();
       final List<ValueBox> defs = body.getDefBoxes();
-      ArrayList<Local> sortedLocals = new ArrayList<Local>(locals);
+      ArrayList<Local> sortedLocals = new ArrayList<>(locals);
 
-      Collections.sort(sortedLocals, new Comparator<Local>() {
-        private Map<Local, Integer> firstOccuranceCache = new HashMap<Local, Integer>();
+      sortedLocals.sort(new Comparator<Local>() {
+        private Map<Local, Integer> firstOccuranceCache = new HashMap<>();
 
         @Override
         public int compare(Local arg0, Local arg1) {
@@ -160,11 +160,13 @@ public class LocalNameStandardizer extends BodyTransformer {
       locals.addAll(sortedLocals);
     }
 
-    if (!onlyStackName) {
-      // Change the names to the standard forms now.
+    if (onlyStackName) {
+		return;
+	}
+	// Change the names to the standard forms now.
       Chain<Local> locals = body.getLocals();
-      int maxDigits = sortLocals ? digits(locals.size()) : 1;
-      for (Local l : locals) {
+	int maxDigits = sortLocals ? digits(locals.size()) : 1;
+	for (Local l : locals) {
         String prefix = l.getName().startsWith("$") ? "$" : "";
         final Type type = l.getType();
 
@@ -194,6 +196,5 @@ public class LocalNameStandardizer extends BodyTransformer {
           l.setName(genName(prefix, "r", objectCount++, maxDigits));
         }
       }
-    }
   }
 }

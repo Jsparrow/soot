@@ -22,13 +22,13 @@ package soot;
  * #L%
  */
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import soot.jimple.GotoStmt;
 import soot.jimple.Jimple;
 import soot.util.Chain;
+import java.util.Collections;
 
 /**
  * Although the Patching Chain is meant to only work for units, it can also work with certain subclasses of units. However,
@@ -56,7 +56,7 @@ public class UnitPatchingChain extends PatchingChain<Unit> {
    *          the target point of an edge
    */
   public void insertOnEdge(Unit toInsert, Unit point_src, Unit point_tgt) {
-    insertOnEdge(Arrays.asList(toInsert), point_src, point_tgt);
+    insertOnEdge(Collections.singletonList(toInsert), point_src, point_tgt);
 
   }
 
@@ -104,11 +104,7 @@ public class UnitPatchingChain extends PatchingChain<Unit> {
     // 2- Insert 'toInsert' after 'source' in Chain
     if (getSuccOf(point_src) == point_tgt) {
       List<UnitBox> boxes = point_src.getUnitBoxes();
-      for (UnitBox box : boxes) {
-        if (box.getUnit() == point_tgt) {
-          box.setUnit(toInsert.iterator().next());
-        }
-      }
+      boxes.stream().filter(box -> box.getUnit() == point_tgt).forEach(box -> box.setUnit(toInsert.iterator().next()));
       innerChain.insertAfter(toInsert, point_src);
       return;
     }
@@ -158,7 +154,7 @@ public class UnitPatchingChain extends PatchingChain<Unit> {
         }
 
         Unit goto_unit = Jimple.v().newGotoStmt(point_tgt);
-        innerChain.insertBefore(Arrays.asList(goto_unit), toInsert.iterator().next());
+        innerChain.insertBefore(Collections.singletonList(goto_unit), toInsert.iterator().next());
       }
       return;
     }
@@ -169,15 +165,14 @@ public class UnitPatchingChain extends PatchingChain<Unit> {
     // When this happens, the original edge [src -> tgt] ceases to exist.
     // The following code handles such scenarios.
     final Unit succ = getSuccOf(point_src);
-    if (succ instanceof GotoStmt) {
-      if (succ.getUnitBoxes().get(0).getUnit() == point_tgt) {
+    boolean condition = succ instanceof GotoStmt && succ.getUnitBoxes().get(0).getUnit() == point_tgt;
+	if (condition) {
 
         succ.redirectJumpsToThisTo(toInsert.iterator().next());
         innerChain.insertBefore(toInsert, succ);
 
         return;
       }
-    }
     // If the control reaches this point, it means that an edge [src -> tgt]
     // as specified by user does not exist and is thus invalid
     // Return an exception.

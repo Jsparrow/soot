@@ -32,13 +32,14 @@ import soot.jimple.Jimple;
 import soot.jimple.JimpleToBafContext;
 
 @SuppressWarnings("serial")
-abstract public class AbstractJimpleIntBinopExpr extends AbstractIntBinopExpr implements ConvertToBaf {
+public abstract class AbstractJimpleIntBinopExpr extends AbstractIntBinopExpr implements ConvertToBaf {
   protected AbstractJimpleIntBinopExpr(Value op1, Value op2) {
     this.op1Box = Jimple.v().newArgBox(op1);
     this.op2Box = Jimple.v().newArgBox(op2);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) this.getOp1()).convertToBaf(context, out);
     ((ConvertToBaf) this.getOp2()).convertToBaf(context, out);
 

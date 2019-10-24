@@ -27,18 +27,20 @@ import java.util.HashMap;
 public class DavaMonitor {
   private static final DavaMonitor instance = new DavaMonitor();
 
-  private final HashMap<Object, Lock> ref, lockTable;
+  private final HashMap<Object, Lock> ref;
+
+private final HashMap<Object, Lock> lockTable;
 
   private DavaMonitor() {
-    ref = new HashMap<Object, Lock>(1, 0.7f);
-    lockTable = new HashMap<Object, Lock>(1, 0.7f);
+    ref = new HashMap<>(1, 0.7f);
+    lockTable = new HashMap<>(1, 0.7f);
   }
 
   public static DavaMonitor v() {
     return instance;
   }
 
-  public synchronized void enter(Object o) throws NullPointerException {
+  public synchronized void enter(Object o) {
     Thread currentThread = Thread.currentThread();
 
     if (o == null) {
@@ -83,7 +85,7 @@ public class DavaMonitor {
     lock.owner = currentThread;
   }
 
-  public synchronized void exit(Object o) throws NullPointerException, IllegalMonitorStateException {
+  public synchronized void exit(Object o) {
     if (o == null) {
       throw new NullPointerException();
     }

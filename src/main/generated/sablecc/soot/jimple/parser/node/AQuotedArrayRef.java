@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AQuotedArrayRef extends PArrayRef
 {
-    private TQuotedName _quotedName_;
-    private PFixedArrayDescriptor _fixedArrayDescriptor_;
+    private TQuotedName quotedName;
+    private PFixedArrayDescriptor fixedArrayDescriptor;
 
     public AQuotedArrayRef()
     {
@@ -30,8 +30,8 @@ public final class AQuotedArrayRef extends PArrayRef
     public Object clone()
     {
         return new AQuotedArrayRef(
-            cloneNode(this._quotedName_),
-            cloneNode(this._fixedArrayDescriptor_));
+            cloneNode(this.quotedName),
+            cloneNode(this.fixedArrayDescriptor));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class AQuotedArrayRef extends PArrayRef
 
     public TQuotedName getQuotedName()
     {
-        return this._quotedName_;
+        return this.quotedName;
     }
 
     public void setQuotedName(TQuotedName node)
     {
-        if(this._quotedName_ != null)
+        if(this.quotedName != null)
         {
-            this._quotedName_.parent(null);
+            this.quotedName.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class AQuotedArrayRef extends PArrayRef
             node.parent(this);
         }
 
-        this._quotedName_ = node;
+        this.quotedName = node;
     }
 
     public PFixedArrayDescriptor getFixedArrayDescriptor()
     {
-        return this._fixedArrayDescriptor_;
+        return this.fixedArrayDescriptor;
     }
 
     public void setFixedArrayDescriptor(PFixedArrayDescriptor node)
     {
-        if(this._fixedArrayDescriptor_ != null)
+        if(this.fixedArrayDescriptor != null)
         {
-            this._fixedArrayDescriptor_.parent(null);
+            this.fixedArrayDescriptor.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class AQuotedArrayRef extends PArrayRef
             node.parent(this);
         }
 
-        this._fixedArrayDescriptor_ = node;
+        this.fixedArrayDescriptor = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._quotedName_)
-            + toString(this._fixedArrayDescriptor_);
+        return new StringBuilder().append("").append(toString(this.quotedName)).append(toString(this.fixedArrayDescriptor)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._quotedName_ == child)
+        if(this.quotedName == child)
         {
-            this._quotedName_ = null;
+            this.quotedName = null;
             return;
         }
 
-        if(this._fixedArrayDescriptor_ == child)
+        if(this.fixedArrayDescriptor == child)
         {
-            this._fixedArrayDescriptor_ = null;
+            this.fixedArrayDescriptor = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class AQuotedArrayRef extends PArrayRef
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._quotedName_ == oldChild)
+        if(this.quotedName == oldChild)
         {
             setQuotedName((TQuotedName) newChild);
             return;
         }
 
-        if(this._fixedArrayDescriptor_ == oldChild)
+        if(this.fixedArrayDescriptor == oldChild)
         {
             setFixedArrayDescriptor((PFixedArrayDescriptor) newChild);
             return;

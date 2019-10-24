@@ -35,19 +35,23 @@ public class WordType extends Type {
     return G.v().soot_baf_WordType();
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0xB747239F;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "word";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     throw new RuntimeException("invalid switch case");
   }
 }

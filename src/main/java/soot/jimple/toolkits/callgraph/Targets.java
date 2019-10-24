@@ -38,16 +38,19 @@ public final class Targets implements Iterator<MethodOrMethodContext> {
     this.edges = edges;
   }
 
-  public boolean hasNext() {
+  @Override
+public boolean hasNext() {
     return edges.hasNext();
   }
 
-  public MethodOrMethodContext next() {
+  @Override
+public MethodOrMethodContext next() {
     Edge e = edges.next();
     return e.getTgt();
   }
 
-  public void remove() {
+  @Override
+public void remove() {
     throw new UnsupportedOperationException();
   }
 }

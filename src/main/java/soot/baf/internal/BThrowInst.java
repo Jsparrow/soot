@@ -30,35 +30,43 @@ public class BThrowInst extends AbstractInst implements ThrowInst {
   public BThrowInst() {
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 1;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 1;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "athrow";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseThrowInst(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BThrowInst();
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 }

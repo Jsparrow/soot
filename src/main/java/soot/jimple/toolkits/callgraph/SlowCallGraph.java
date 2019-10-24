@@ -41,7 +41,7 @@ import soot.util.queue.QueueReader;
  * @author Ondrej Lhotak
  */
 public class SlowCallGraph extends CallGraph {
-  private final Set<Edge> edges = new HashSet<Edge>();
+  private final Set<Edge> edges = new HashSet<>();
   private final MultiMap srcMap = new HashMultiMap();
   private final MultiMap unitMap = new HashMultiMap();
   private final MultiMap tgtMap = new HashMultiMap();
@@ -51,7 +51,8 @@ public class SlowCallGraph extends CallGraph {
   /**
    * Used to add an edge to the call graph. Returns true iff the edge was not already present.
    */
-  public boolean addEdge(Edge e) {
+  @Override
+public boolean addEdge(Edge e) {
     if (!edges.add(e)) {
       return false;
     }
@@ -67,7 +68,8 @@ public class SlowCallGraph extends CallGraph {
   /**
    * Removes the edge e from the call graph. Returns true iff the edge was originally present in the call graph.
    */
-  public boolean removeEdge(Edge e) {
+  @Override
+public boolean removeEdge(Edge e) {
     if (!edges.remove(e)) {
       return false;
     }
@@ -82,22 +84,26 @@ public class SlowCallGraph extends CallGraph {
   /**
    * Returns an iterator over all methods that are the sources of at least one edge.
    */
-  public Iterator sourceMethods() {
+  @Override
+public Iterator sourceMethods() {
     return new ArrayList(srcMap.keySet()).iterator();
   }
 
   /** Returns an iterator over all edges that have u as their source unit. */
-  public Iterator edgesOutOf(Unit u) {
+  @Override
+public Iterator edgesOutOf(Unit u) {
     return new ArrayList(unitMap.get(u)).iterator();
   }
 
   /** Returns an iterator over all edges that have m as their source method. */
-  public Iterator edgesOutOf(MethodOrMethodContext m) {
+  @Override
+public Iterator edgesOutOf(MethodOrMethodContext m) {
     return new ArrayList(srcMap.get(m)).iterator();
   }
 
   /** Returns an iterator over all edges that have m as their target method. */
-  public Iterator edgesInto(MethodOrMethodContext m) {
+  @Override
+public Iterator edgesInto(MethodOrMethodContext m) {
     return new ArrayList(tgtMap.get(m)).iterator();
   }
 
@@ -105,20 +111,23 @@ public class SlowCallGraph extends CallGraph {
    * Returns a QueueReader object containing all edges added so far, and which will be informed of any new edges that are
    * later added to the graph.
    */
-  public QueueReader listener() {
+  @Override
+public QueueReader listener() {
     return (QueueReader) reader.clone();
   }
 
   /**
    * Returns a QueueReader object which will contain ONLY NEW edges which will be added to the graph.
    */
-  public QueueReader newListener() {
+  @Override
+public QueueReader newListener() {
     return stream.reader();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     QueueReader reader = listener();
-    StringBuffer out = new StringBuffer();
+    StringBuilder out = new StringBuilder();
     while (reader.hasNext()) {
       Edge e = (Edge) reader.next();
       out.append(e.toString() + "\n");
@@ -127,7 +136,8 @@ public class SlowCallGraph extends CallGraph {
   }
 
   /** Returns the number of edges in the call graph. */
-  public int size() {
+  @Override
+public int size() {
     return edges.size();
   }
 }

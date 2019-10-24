@@ -72,7 +72,8 @@ public class DexArrayInitReducer extends BodyTransformer {
     }
 
     // Look for a chain of two constant assignments followed by an array put
-    Unit u1 = null, u2 = null;
+    Unit u1 = null;
+	Unit u2 = null;
     for (Iterator<Unit> uIt = b.getUnits().snapshotIterator(); uIt.hasNext();) {
       Unit u = uIt.next();
 
@@ -110,7 +111,10 @@ public class DexArrayInitReducer extends BodyTransformer {
 
           // Remove the unnecessary assignments
           Unit checkU = u;
-          boolean foundU1 = false, foundU2 = false, doneU1 = false, doneU2 = false;
+          boolean foundU1 = false;
+		boolean foundU2 = false;
+		boolean doneU1 = false;
+		boolean doneU2 = false;
           while (!(doneU1 && doneU2) && !(foundU1 && foundU2) && checkU != null) {
             // Does the current statement use the value?
             for (ValueBox vb : checkU.getUseBoxes()) {
@@ -141,24 +145,22 @@ public class DexArrayInitReducer extends BodyTransformer {
             // Get the next statement
             checkU = b.getUnits().getSuccOf(checkU);
           }
-          if (!foundU1) {
-            // only remove constant assignment if the left value is Local
-            if (u1val instanceof Local) {
-              b.getUnits().remove(u1);
-              if (Options.v().verbose()) {
-                logger.debug("[" + b.getMethod().getName() + "]    remove 1 " + u1);
-              }
-            }
-          }
-          if (!foundU2) {
-            // only remove constant assignment if the left value is Local
-            if (u2val instanceof Local) {
-              b.getUnits().remove(u2);
-              if (Options.v().verbose()) {
-                logger.debug("[" + b.getMethod().getName() + "]    remove 2 " + u2);
-              }
-            }
-          }
+          boolean condition = !foundU1 && u1val instanceof Local;
+		// only remove constant assignment if the left value is Local
+		if (condition) {
+		  b.getUnits().remove(u1);
+		  if (Options.v().verbose()) {
+		    logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]    remove 1 ").append(u1).toString());
+		  }
+		}
+          boolean condition1 = !foundU2 && u2val instanceof Local;
+		// only remove constant assignment if the left value is Local
+		if (condition1) {
+		  b.getUnits().remove(u2);
+		  if (Options.v().verbose()) {
+		    logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]    remove 2 ").append(u2).toString());
+		  }
+		}
 
           u1 = null;
           u2 = null;

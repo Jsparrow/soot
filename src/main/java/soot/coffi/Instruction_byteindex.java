@@ -63,24 +63,29 @@ class Instruction_byteindex extends Instruction {
     super(c);
   }
 
-  public String toString(cp_info constant_pool[]) {
+  @Override
+public String toString(cp_info constant_pool[]) {
     int i = (arg_b) & 0xff;
-    return super.toString(constant_pool) + argsep + "[" + constant_pool[i].toString(constant_pool) + "]";
+    return new StringBuilder().append(super.toString(constant_pool)).append(argsep).append("[").append(constant_pool[i].toString(constant_pool)).append("]").toString();
   }
 
-  public int nextOffset(int curr) {
+  @Override
+public int nextOffset(int curr) {
     return curr + 2;
   }
 
-  public void markCPRefs(boolean[] refs) {
+  @Override
+public void markCPRefs(boolean[] refs) {
     refs[(arg_b) & 0xff] = true;
   }
 
-  public void redirectCPRefs(short redirect[]) {
+  @Override
+public void redirectCPRefs(short redirect[]) {
     arg_b = (byte) (redirect[(arg_b) & 0xff]);
   }
 
-  public int parse(byte bc[], int index) {
+  @Override
+public int parse(byte bc[], int index) {
     arg_b = bc[index];
 
     arg_b = (arg_b >= 0) ? arg_b : (short) (256 + arg_b);
@@ -88,7 +93,8 @@ class Instruction_byteindex extends Instruction {
     return index + 1;
   }
 
-  public int compile(byte bc[], int index) {
+  @Override
+public int compile(byte bc[], int index) {
     bc[index++] = code;
     bc[index++] = (byte) arg_b;
     return index;

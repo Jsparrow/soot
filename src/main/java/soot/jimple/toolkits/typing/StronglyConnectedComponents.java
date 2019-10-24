@@ -33,54 +33,40 @@ import org.slf4j.LoggerFactory;
 
 class StronglyConnectedComponents {
   private static final Logger logger = LoggerFactory.getLogger(StronglyConnectedComponents.class);
-  List<TypeVariable> variables;
-  Set<TypeVariable> black;
-  List<TypeVariable> finished;
+private static final boolean DEBUG = false;
+List<TypeVariable> variables;
+Set<TypeVariable> black;
+List<TypeVariable> finished;
+List<List<TypeVariable>> forest = new LinkedList<>();
+List<TypeVariable> current_tree;
 
-  List<List<TypeVariable>> forest = new LinkedList<List<TypeVariable>>();
-  List<TypeVariable> current_tree;
-
-  private static final boolean DEBUG = false;
-
-  public static void merge(List<TypeVariable> typeVariableList) throws TypeException {
-    new StronglyConnectedComponents(typeVariableList);
-  }
-
-  private StronglyConnectedComponents(List<TypeVariable> typeVariableList) throws TypeException {
+private StronglyConnectedComponents(List<TypeVariable> typeVariableList) throws TypeException {
     variables = typeVariableList;
 
-    black = new TreeSet<TypeVariable>();
-    finished = new LinkedList<TypeVariable>();
+    black = new TreeSet<>();
+    finished = new LinkedList<>();
 
-    for (TypeVariable var : variables) {
-      if (!black.add(var)) {
-        dfsg_visit(var);
-      }
-    }
+    variables.stream().filter(var -> !black.add(var)).forEach(this::dfsg_visit);
 
-    black = new TreeSet<TypeVariable>();
+    black = new TreeSet<>();
 
-    for (TypeVariable var : finished) {
-      if (!black.add(var)) {
-        current_tree = new LinkedList<TypeVariable>();
+    finished.stream().filter(var -> !black.add(var)).forEach(var -> {
+        current_tree = new LinkedList<>();
         forest.add(current_tree);
         dfsgt_visit(var);
-      }
-    }
+      });
 
     for (Iterator<List<TypeVariable>> i = forest.iterator(); i.hasNext();) {
       List<TypeVariable> list = i.next();
       TypeVariable previous = null;
-      StringBuffer s = null;
+      StringBuilder s = null;
       if (DEBUG) {
-        s = new StringBuffer("scc:\n");
+        s = new StringBuilder("scc:\n");
       }
 
-      for (Iterator<TypeVariable> j = list.iterator(); j.hasNext();) {
-        TypeVariable current = j.next();
-
+      for (TypeVariable current : list) {
         if (DEBUG) {
-          s.append(" " + current + "\n");
+          s.append(new StringBuilder().append(" ").append(current).append("\n").toString());
         }
 
         if (previous == null) {
@@ -99,27 +85,23 @@ class StronglyConnectedComponents {
     }
   }
 
-  private void dfsg_visit(TypeVariable var) {
+public static void merge(List<TypeVariable> typeVariableList) throws TypeException {
+    new StronglyConnectedComponents(typeVariableList);
+  }
+
+private void dfsg_visit(TypeVariable var) {
     List<TypeVariable> parents = var.parents();
 
-    for (TypeVariable parent : parents) {
-      if (!black.add(parent)) {
-        dfsg_visit(parent);
-      }
-    }
+    parents.stream().filter(parent -> !black.add(parent)).forEach(this::dfsg_visit);
 
     finished.add(0, var);
   }
 
-  private void dfsgt_visit(TypeVariable var) {
+private void dfsgt_visit(TypeVariable var) {
     current_tree.add(var);
 
     List<TypeVariable> children = var.children();
 
-    for (TypeVariable child : children) {
-      if (!black.add(child)) {
-        dfsgt_visit(child);
-      }
-    }
+    children.stream().filter(child -> !black.add(child)).forEach(this::dfsgt_visit);
   }
 }

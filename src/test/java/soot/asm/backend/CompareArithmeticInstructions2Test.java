@@ -81,13 +81,13 @@ public class CompareArithmeticInstructions2Test extends AbstractASMBackendTest {
             mv.visitInsn(ICONST_2);
             mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/CompareArithmeticInstructions2", "i", "I");
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitLdcInsn(new Float("221349.02"));
+            mv.visitLdcInsn(Float.valueOf("221349.02"));
             mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/CompareArithmeticInstructions2", "f", "F");
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitLdcInsn(new Double("2123996.1231231233"));
+            mv.visitLdcInsn(Double.valueOf("2123996.1231231233"));
             mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/CompareArithmeticInstructions2", "d", "D");
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitLdcInsn(new Long(2L));
+            mv.visitLdcInsn(Long.valueOf(2L));
             mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/CompareArithmeticInstructions2", "l", "J");
             mv.visitVarInsn(ALOAD, 0);
             mv.visitInsn(ICONST_2);
@@ -166,7 +166,7 @@ public class CompareArithmeticInstructions2Test extends AbstractASMBackendTest {
             Label l0 = new Label();
             mv.visitJumpInsn(IFLT, l0);
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitLdcInsn(new Double("2.0"));
+            mv.visitLdcInsn(Double.valueOf("2.0"));
             mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/CompareArithmeticInstructions2", "d", "D");
             mv.visitLabel(l0);
             //mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
@@ -251,7 +251,7 @@ public class CompareArithmeticInstructions2Test extends AbstractASMBackendTest {
             Label l0 = new Label();
             mv.visitJumpInsn(IFLT, l0);
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitLdcInsn(new Long(2L));
+            mv.visitLdcInsn(Long.valueOf(2L));
             mv.visitFieldInsn(PUTFIELD, "soot/asm/backend/targets/CompareArithmeticInstructions2", "l", "J");
             mv.visitLabel(l0);
             //mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);

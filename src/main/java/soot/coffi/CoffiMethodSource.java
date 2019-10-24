@@ -48,7 +48,8 @@ public class CoffiMethodSource implements MethodSource {
     this.coffiMethod = coffiMethod;
   }
 
-  public Body getBody(SootMethod m, String phaseName) {
+  @Override
+public Body getBody(SootMethod m, String phaseName) {
     JimpleBody jb = Jimple.v().newBody(m);
 
     Map options = PhaseOptions.v().getPhaseOptions(phaseName);
@@ -63,7 +64,7 @@ public class CoffiMethodSource implements MethodSource {
      * 
      */
     if (Options.v().verbose()) {
-      logger.debug("[" + m.getName() + "] Constructing JimpleBody from coffi...");
+      logger.debug(new StringBuilder().append("[").append(m.getName()).append("] Constructing JimpleBody from coffi...").toString());
     }
 
     if (m.isAbstract() || m.isNative() || m.isPhantom()) {
@@ -76,7 +77,7 @@ public class CoffiMethodSource implements MethodSource {
 
     if (coffiMethod.instructions == null) {
       if (Options.v().verbose()) {
-        logger.debug("[" + m.getName() + "]     Parsing Coffi instructions...");
+        logger.debug(new StringBuilder().append("[").append(m.getName()).append("]     Parsing Coffi instructions...").toString());
       }
 
       coffiClass.parseMethod(coffiMethod);
@@ -84,7 +85,7 @@ public class CoffiMethodSource implements MethodSource {
 
     if (coffiMethod.cfg == null) {
       if (Options.v().verbose()) {
-        logger.debug("[" + m.getName() + "]     Building Coffi CFG...");
+        logger.debug(new StringBuilder().append("[").append(m.getName()).append("]     Building Coffi CFG...").toString());
       }
 
       new soot.coffi.CFG(coffiMethod);
@@ -96,7 +97,7 @@ public class CoffiMethodSource implements MethodSource {
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + m.getName() + "]     Producing naive Jimple...");
+      logger.debug(new StringBuilder().append("[").append(m.getName()).append("]     Producing naive Jimple...").toString());
     }
 
     boolean oldPhantomValue = Scene.v().getPhantomRefs();

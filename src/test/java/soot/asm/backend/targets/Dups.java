@@ -31,7 +31,7 @@ public class Dups {
 	
 	public long dubl(){
 		long l = 1234;
-		l = l + l;
+		l += l;
 		return l;
 	}
 	

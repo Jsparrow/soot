@@ -68,12 +68,12 @@ public class RegionAnalysis {
   protected UnitGraph m_reverseCFG;
   protected BlockGraph m_blockCFG;
   protected BlockGraph m_reverseBlockCFG;
-  protected Hashtable<Integer, Region> m_regions = new Hashtable<Integer, Region>();
+  protected Hashtable<Integer, Region> m_regions = new Hashtable<>();
   protected List<Region> m_regionsList = null;
-  private int m_regCount = 0;
-  private MHGDominatorTree<Block> m_dom;
+  private int mRegCount = 0;
+  private MHGDominatorTree<Block> mDom;
   // this would actually be the postdominator tree in the original CFG
-  private MHGDominatorTree<Block> m_pdom;
+  private MHGDominatorTree<Block> mPdom;
   protected Region m_topLevelRegion = null;
   protected Hashtable<Block, Region> m_block2region = null;
 
@@ -85,11 +85,11 @@ public class RegionAnalysis {
 
     if (Options.v().verbose()) {
       logger.debug(
-          "[RegionAnalysis]~~~~~~~~~~~~~~~ Begin Region Analsis for method: " + m.getName() + " ~~~~~~~~~~~~~~~~~~~~");
+          new StringBuilder().append("[RegionAnalysis]~~~~~~~~~~~~~~~ Begin Region Analsis for method: ").append(m.getName()).append(" ~~~~~~~~~~~~~~~~~~~~").toString());
     }
     this.findWeakRegions();
     if (Options.v().verbose()) {
-      logger.debug("[RegionAnalysis]~~~~~~~~~~~~~~~ End:" + m.getName() + " ~~~~~~~~~~~~~~~~~~~~");
+      logger.debug(new StringBuilder().append("[RegionAnalysis]~~~~~~~~~~~~~~~ End:").append(m.getName()).append(" ~~~~~~~~~~~~~~~~~~~~").toString());
     }
   }
 
@@ -110,17 +110,17 @@ public class RegionAnalysis {
       throw new RuntimeException("Unsupported CFG passed into the RegionAnalyis constructor!");
     }
 
-    this.m_dom = new MHGDominatorTree<Block>(new MHGDominatorsFinder<Block>(this.m_blockCFG));
+    this.mDom = new MHGDominatorTree<>(new MHGDominatorsFinder<Block>(this.m_blockCFG));
 
     try {
 
-      this.m_pdom = new MHGDominatorTree<Block>(new MHGPostDominatorsFinder<Block>(m_blockCFG));
+      this.mPdom = new MHGDominatorTree<>(new MHGPostDominatorsFinder<Block>(m_blockCFG));
 
       if (Options.v().verbose()) {
         logger.debug("[RegionAnalysis] PostDominator tree: ");
       }
 
-      this.m_regCount = -1;
+      this.mRegCount = -1;
 
       /*
        * If a Brief graph or Exceptional graph is used, the CFG might be multi-headed and/or multi-tailed, which in turn,
@@ -136,13 +136,13 @@ public class RegionAnalysis {
        */
 
       if (this.m_blockCFG.getHeads().size() == 1) {
-        this.m_regCount++;
-        this.m_regions.put(this.m_regCount, this.createRegion(this.m_regCount));
-        this.weakRegionDFS2(this.m_blockCFG.getHeads().get(0), this.m_regCount);
+        this.mRegCount++;
+        this.m_regions.put(this.mRegCount, this.createRegion(this.mRegCount));
+        this.weakRegionDFS2(this.m_blockCFG.getHeads().get(0), this.mRegCount);
       } else if (this.m_blockCFG.getTails().size() == 1) {
-        this.m_regCount++;
-        this.m_regions.put(this.m_regCount, this.createRegion(this.m_regCount));
-        this.weakRegionDFS(this.m_blockCFG.getTails().get(0), this.m_regCount);
+        this.mRegCount++;
+        this.m_regions.put(this.mRegCount, this.createRegion(this.mRegCount));
+        this.weakRegionDFS(this.m_blockCFG.getTails().get(0), this.mRegCount);
 
       } else {
         if (Options.v().verbose()) {
@@ -151,9 +151,9 @@ public class RegionAnalysis {
         }
 
         for (int i = 0; i < this.m_blockCFG.getTails().size(); i++) {
-          this.m_regCount++;
-          this.m_regions.put(this.m_regCount, this.createRegion(this.m_regCount));
-          this.weakRegionDFS(this.m_blockCFG.getTails().get(i), this.m_regCount);
+          this.mRegCount++;
+          this.m_regions.put(this.mRegCount, this.createRegion(this.mRegCount));
+          this.weakRegionDFS(this.m_blockCFG.getTails().get(i), this.mRegCount);
 
         }
         // throw new RuntimeException("RegionAnalysis: cannot properly deal with multi-headed and tailed CFG!");
@@ -180,25 +180,24 @@ public class RegionAnalysis {
       // System.out.println("##entered weakRegionDFS for region " + r);
       this.m_regions.get(r).add(v);
 
-      DominatorNode<Block> parentOfV = this.m_dom.getParentOf(this.m_dom.getDode(v));
+      DominatorNode<Block> parentOfV = this.mDom.getParentOf(this.mDom.getDode(v));
       Block u2 = (parentOfV == null) ? null : parentOfV.getGode();
 
-      List<DominatorNode<Block>> children = this.m_pdom.getChildrenOf(this.m_pdom.getDode(v));
-      for (int i = 0; i < children.size(); i++) {
-        DominatorNode<Block> w = children.get(i);
+      List<DominatorNode<Block>> children = this.mPdom.getChildrenOf(this.mPdom.getDode(v));
+      children.forEach(w -> {
         Block u1 = w.getGode();
 
         if (u2 != null && u1.equals(u2)) {
           this.weakRegionDFS(w.getGode(), r);
         } else {
-          this.m_regCount++;
-          this.m_regions.put(this.m_regCount, this.createRegion(this.m_regCount));
-          this.weakRegionDFS(w.getGode(), this.m_regCount);
+          this.mRegCount++;
+          this.m_regions.put(this.mRegCount, this.createRegion(this.mRegCount));
+          this.weakRegionDFS(w.getGode(), this.mRegCount);
         }
-      }
+      });
     } catch (RuntimeException e) {
       logger.debug("[RegionAnalysis] Exception in weakRegionDFS: ", e);
-      logger.debug("v is  " + v.toShortString() + " in region " + r);
+      logger.debug(new StringBuilder().append("v is  ").append(v.toShortString()).append(" in region ").append(r).toString());
       G.v().out.flush();
     }
   }
@@ -215,28 +214,27 @@ public class RegionAnalysis {
     // below.
     this.m_regions.get(r).add2Back(v);
 
-    DominatorNode<Block> parentOfV = this.m_pdom.getParentOf(this.m_pdom.getDode(v));
+    DominatorNode<Block> parentOfV = this.mPdom.getParentOf(this.mPdom.getDode(v));
     Block u2 = (parentOfV == null) ? null : parentOfV.getGode();
 
-    List<DominatorNode<Block>> children = this.m_dom.getChildrenOf(this.m_dom.getDode(v));
-    for (int i = 0; i < children.size(); i++) {
-      DominatorNode<Block> w = children.get(i);
+    List<DominatorNode<Block>> children = this.mDom.getChildrenOf(this.mDom.getDode(v));
+    children.forEach(w -> {
       Block u1 = w.getGode();
 
       if (u2 != null && u1.equals(u2)) {
         this.weakRegionDFS2(w.getGode(), r);
       } else {
-        this.m_regCount++;
-        this.m_regions.put(this.m_regCount, this.createRegion(this.m_regCount));
-        this.weakRegionDFS2(w.getGode(), this.m_regCount);
+        this.mRegCount++;
+        this.m_regions.put(this.mRegCount, this.createRegion(this.mRegCount));
+        this.weakRegionDFS2(w.getGode(), this.mRegCount);
       }
-    }
+    });
 
   }
 
   public List<Region> getRegions() {
     if (this.m_regionsList == null) {
-      this.m_regionsList = new ArrayList<Region>(this.m_regions.values());
+      this.m_regionsList = new ArrayList<>(this.m_regions.values());
     }
 
     return this.m_regionsList;
@@ -244,37 +242,27 @@ public class RegionAnalysis {
   }
 
   public Hashtable<Unit, Region> getUnit2RegionMap() {
-    Hashtable<Unit, Region> unit2region = new Hashtable<Unit, Region>();
+    Hashtable<Unit, Region> unit2region = new Hashtable<>();
     List<Region> regions = this.getRegions();
 
-    for (Iterator<Region> itr = regions.iterator(); itr.hasNext();) {
-      Region r = itr.next();
+    regions.forEach(r -> {
       List<Unit> units = r.getUnits();
-      for (Iterator<Unit> itr1 = units.iterator(); itr1.hasNext();) {
-        Unit u = itr1.next();
-        unit2region.put(u, r);
-
-      }
-    }
+      units.forEach(u -> unit2region.put(u, r));
+    });
 
     return unit2region;
   }
 
   public Hashtable<Block, Region> getBlock2RegionMap() {
     if (this.m_block2region == null) {
-      this.m_block2region = new Hashtable<Block, Region>();
+      this.m_block2region = new Hashtable<>();
 
       List<Region> regions = this.getRegions();
 
-      for (Iterator<Region> itr = regions.iterator(); itr.hasNext();) {
-        Region r = itr.next();
+      regions.forEach(r -> {
         List<Block> blocks = r.getBlocks();
-        for (Iterator<Block> itr1 = blocks.iterator(); itr1.hasNext();) {
-          Block u = itr1.next();
-          m_block2region.put(u, r);
-
-        }
-      }
+        blocks.forEach(u -> m_block2region.put(u, r));
+      });
     }
     return this.m_block2region;
 
@@ -285,11 +273,11 @@ public class RegionAnalysis {
   }
 
   public DominatorTree<Block> getPostDominatorTree() {
-    return this.m_pdom;
+    return this.mPdom;
   }
 
   public DominatorTree<Block> getDominatorTree() {
-    return this.m_dom;
+    return this.mDom;
   }
 
   public void reset() {
@@ -299,7 +287,7 @@ public class RegionAnalysis {
     this.m_block2region.clear();
     this.m_block2region = null;
 
-    m_regCount = 0;
+    mRegCount = 0;
   }
 
   /**
@@ -321,9 +309,9 @@ public class RegionAnalysis {
 
   public static String CFGtoString(DirectedGraph<Block> cfg, boolean blockDetail) {
     String s = "";
-    s += "Headers: " + cfg.getHeads().size() + " " + cfg.getHeads();
+    s += new StringBuilder().append("Headers: ").append(cfg.getHeads().size()).append(" ").append(cfg.getHeads()).toString();
     for (Block node : cfg) {
-      s += "Node = " + node.toShortString() + "\n";
+      s += new StringBuilder().append("Node = ").append(node.toShortString()).append("\n").toString();
       s += "Preds:\n";
       for (Iterator<Block> predsIt = cfg.getPredsOf(node).iterator(); predsIt.hasNext();) {
         s += "     ";
@@ -338,8 +326,7 @@ public class RegionAnalysis {
 
     if (blockDetail) {
       s += "Blocks Detail:";
-      for (Iterator<Block> it = cfg.iterator(); it.hasNext();) {
-        Block node = it.next();
+      for (Block node : cfg) {
         s += node + "\n";
       }
 

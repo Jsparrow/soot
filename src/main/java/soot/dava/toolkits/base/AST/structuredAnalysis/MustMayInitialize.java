@@ -68,228 +68,224 @@ import soot.jimple.Stmt;
  */
 
 public class MustMayInitialize extends StructuredAnalysis {
-  HashMap<Object, List> mapping;
-  DavaFlowSet finalResult;
-
   public static final int MUST = 0;
-  public static final int MAY = 1;
+	public static final int MAY = 1;
+	HashMap<Object, List> mapping;
+	DavaFlowSet finalResult;
+	int MUSTMAY;
 
-  int MUSTMAY;
+	public MustMayInitialize(Object analyze, int MUSTorMAY) {
+	    mapping = new HashMap<>();
+	    MUSTMAY = MUSTorMAY;
+	
+	    // System.out.println("MustOrMay value is"+MUSTorMAY);
+	    setMergeType();
+	    // the input to the process method is an empty DavaFlow Set meaning
+	    // out(start) ={} (no var initialized)
+	    finalResult = (DavaFlowSet) process(analyze, new DavaFlowSet());
+	
+	    // finalResult contains the flowSet of having processed the whole of the
+	    // method
+	  }
 
-  public MustMayInitialize(Object analyze, int MUSTorMAY) {
-    super();
-    mapping = new HashMap<Object, List>();
-    MUSTMAY = MUSTorMAY;
+	@Override
+	public DavaFlowSet emptyFlowSet() {
+	    return new DavaFlowSet();
+	  }
 
-    // System.out.println("MustOrMay value is"+MUSTorMAY);
-    setMergeType();
-    // the input to the process method is an empty DavaFlow Set meaning
-    // out(start) ={} (no var initialized)
-    finalResult = (DavaFlowSet) process(analyze, new DavaFlowSet());
+	@Override
+	public void setMergeType() {
+	    // System.out.println("here"+MUSTMAY);
+	    if (MUSTMAY == MUST) {
+	      MERGETYPE = INTERSECTION;
+	      // System.out.println("MERGETYPE set to intersection");
+	    } else if (MUSTMAY == MAY) {
+	      MERGETYPE = UNION;
+	      // System.out.println("MERGETYPE set to union");
+	    } else {
+	      throw new DavaFlowAnalysisException("Only allowed 0 or 1 for MUST or MAY values");
+	    }
+	  }
 
-    // finalResult contains the flowSet of having processed the whole of the
-    // method
-  }
+	/*
+	   * newInitialFlow set is used only for start of catch bodies and here we assume that no var is ever being initialized
+	   */
+	  @Override
+	  public DavaFlowSet newInitialFlow() {
+	    return new DavaFlowSet();
+	  }
 
-  public DavaFlowSet emptyFlowSet() {
-    return new DavaFlowSet();
-  }
+	@Override
+	  public DavaFlowSet cloneFlowSet(DavaFlowSet flowSet) {
+	    return ((DavaFlowSet) flowSet).clone();
+	  }
 
-  public void setMergeType() {
-    // System.out.println("here"+MUSTMAY);
-    if (MUSTMAY == MUST) {
-      MERGETYPE = INTERSECTION;
-      // System.out.println("MERGETYPE set to intersection");
-    } else if (MUSTMAY == MAY) {
-      MERGETYPE = UNION;
-      // System.out.println("MERGETYPE set to union");
-    } else {
-      throw new DavaFlowAnalysisException("Only allowed 0 or 1 for MUST or MAY values");
-    }
-  }
+	/*
+	   * By construction conditions never have assignment statements. Hence processing a condition has no effect on this analysis
+	   */
+	  @Override
+	  public DavaFlowSet processUnaryBinaryCondition(ASTUnaryBinaryCondition cond, DavaFlowSet input) {
+	    return input;
+	  }
 
-  /*
-   * newInitialFlow set is used only for start of catch bodies and here we assume that no var is ever being initialized
-   */
-  @Override
-  public DavaFlowSet newInitialFlow() {
-    return new DavaFlowSet();
-  }
+	/*
+	   * By construction the synchronized Local is a Value and can definetly not have an assignment stmt Processing a synch local
+	   * has no effect on this analysis
+	   */
+	  @Override
+	  public DavaFlowSet processSynchronizedLocal(Local local, DavaFlowSet input) {
+	    return input;
+	  }
 
-  @Override
-  public DavaFlowSet cloneFlowSet(DavaFlowSet flowSet) {
-    return ((DavaFlowSet) flowSet).clone();
-  }
+	/*
+	   * The switch key is stored as a value and hence can never have an assignment stmt Processing the switch key has no effect
+	   * on the analysis
+	   */
+	  @Override
+	  public DavaFlowSet processSwitchKey(Value key, DavaFlowSet input) {
+	    return input;
+	  }
 
-  /*
-   * By construction conditions never have assignment statements. Hence processing a condition has no effect on this analysis
-   */
-  @Override
-  public DavaFlowSet processUnaryBinaryCondition(ASTUnaryBinaryCondition cond, DavaFlowSet input) {
-    return input;
-  }
+	/*
+	   * This method internally invoked by the process method decides which Statement specialized method to call
+	   */
+	  @Override
+	  public DavaFlowSet processStatement(Stmt s, DavaFlowSet inSet) {
+	    /*
+	     * If this path will not be taken return no path straightaway
+	     */
+	    if (inSet == NOPATH) {
+	      return inSet;
+	    }
+	
+	    if (!(s instanceof DefinitionStmt)) {
+			return inSet;
+		}
+		DavaFlowSet toReturn = (DavaFlowSet) cloneFlowSet(inSet);
+	      // x = expr;
+		Value leftOp = ((DefinitionStmt) s).getLeftOp();
+		SootField field = null;
+		if (leftOp instanceof Local) {
+	        toReturn.add(leftOp);
+	
+	        /*
+	         * Gather more information just in case someone might need the def points
+	         */
+	        Object temp = mapping.get(leftOp);
+	        List<Stmt> defs;
+	
+	        if (temp == null) {
+	          // first definition
+	          defs = new ArrayList<>();
+	        } else {
+	          defs = (ArrayList<Stmt>) temp;
+	        }
+	        defs.add(s);
+	        mapping.put(leftOp, defs);
+	
+	      } else if (leftOp instanceof FieldRef) {
+	        field = ((FieldRef) leftOp).getField();
+	        toReturn.add(field);
+	
+	        /*
+	         * Gather more information just in case someone might need the def points
+	         */
+	        Object temp = mapping.get(field);
+	        List<Stmt> defs;
+	
+	        if (temp == null) {
+	          // first definition
+	          defs = new ArrayList<>();
+	        } else {
+	          defs = (ArrayList<Stmt>) temp;
+	        }
+	        defs.add(s);
+	
+	        mapping.put(field, defs);
+	      }
+		return toReturn;
+	  }
 
-  /*
-   * By construction the synchronized Local is a Value and can definetly not have an assignment stmt Processing a synch local
-   * has no effect on this analysis
-   */
-  @Override
-  public DavaFlowSet processSynchronizedLocal(Local local, DavaFlowSet input) {
-    return input;
-  }
+	public boolean isMayInitialized(SootField field) {
+	    if (MUSTMAY == MAY) {
+	      Object temp = mapping.get(field);
+	      if (temp == null) {
+	        return false;
+	      } else {
+	        List list = (List) temp;
+	        if (list.size() == 0) {
+	          return false;
+	        } else {
+	          return true;
+	        }
+	      }
+	    } else {
+	      throw new RuntimeException("Cannot invoke isMayInitialized for a MUST analysis");
+	    }
+	  }
 
-  /*
-   * The switch key is stored as a value and hence can never have an assignment stmt Processing the switch key has no effect
-   * on the analysis
-   */
-  @Override
-  public DavaFlowSet processSwitchKey(Value key, DavaFlowSet input) {
-    return input;
-  }
+	public boolean isMayInitialized(Value local) {
+	    if (MUSTMAY == MAY) {
+	      Object temp = mapping.get(local);
+	      if (temp == null) {
+	        return false;
+	      } else {
+	        List list = (List) temp;
+	        if (list.size() == 0) {
+	          return false;
+	        } else {
+	          return true;
+	        }
+	      }
+	    } else {
+	      throw new RuntimeException("Cannot invoke isMayInitialized for a MUST analysis");
+	    }
+	  }
 
-  /*
-   * This method internally invoked by the process method decides which Statement specialized method to call
-   */
-  @Override
-  public DavaFlowSet processStatement(Stmt s, DavaFlowSet inSet) {
-    /*
-     * If this path will not be taken return no path straightaway
-     */
-    if (inSet == NOPATH) {
-      return inSet;
-    }
+	public boolean isMustInitialized(SootField field) {
+	    if (MUSTMAY == MUST) {
+	      if (finalResult.contains(field)) {
+	        return true;
+	      }
+	      return false;
+	    } else {
+	      throw new RuntimeException("Cannot invoke isMustinitialized for a MAY analysis");
+	    }
+	  }
 
-    if (s instanceof DefinitionStmt) {
-      DavaFlowSet toReturn = (DavaFlowSet) cloneFlowSet(inSet);
-      // x = expr;
+	public boolean isMustInitialized(Value local) {
+	    if (MUSTMAY == MUST) {
+	      if (finalResult.contains(local)) {
+	        return true;
+	      }
+	      return false;
+	    } else {
+	      throw new RuntimeException("Cannot invoke isMustinitialized for a MAY analysis");
+	    }
+	  }
 
-      Value leftOp = ((DefinitionStmt) s).getLeftOp();
+	/*
+	   * Given a local ask for all def positions Notice this could be null in the case there was no definition
+	   */
+	  public List getDefs(Value local) {
+	    Object temp = mapping.get(local);
+	    if (temp == null) {
+	      return null;
+	    } else {
+	      return (List) temp;
+	    }
+	  }
 
-      SootField field = null;
-      ;
-      if (leftOp instanceof Local) {
-        toReturn.add(leftOp);
-
-        /*
-         * Gather more information just in case someone might need the def points
-         */
-        Object temp = mapping.get(leftOp);
-        List<Stmt> defs;
-
-        if (temp == null) {
-          // first definition
-          defs = new ArrayList<Stmt>();
-        } else {
-          defs = (ArrayList<Stmt>) temp;
-        }
-        defs.add(s);
-        mapping.put(leftOp, defs);
-
-      } else if (leftOp instanceof FieldRef) {
-        field = ((FieldRef) leftOp).getField();
-        toReturn.add(field);
-
-        /*
-         * Gather more information just in case someone might need the def points
-         */
-        Object temp = mapping.get(field);
-        List<Stmt> defs;
-
-        if (temp == null) {
-          // first definition
-          defs = new ArrayList<Stmt>();
-        } else {
-          defs = (ArrayList<Stmt>) temp;
-        }
-        defs.add(s);
-
-        mapping.put(field, defs);
-      }
-      return toReturn;
-    }
-    return inSet;
-  }
-
-  public boolean isMayInitialized(SootField field) {
-    if (MUSTMAY == MAY) {
-      Object temp = mapping.get(field);
-      if (temp == null) {
-        return false;
-      } else {
-        List list = (List) temp;
-        if (list.size() == 0) {
-          return false;
-        } else {
-          return true;
-        }
-      }
-    } else {
-      throw new RuntimeException("Cannot invoke isMayInitialized for a MUST analysis");
-    }
-  }
-
-  public boolean isMayInitialized(Value local) {
-    if (MUSTMAY == MAY) {
-      Object temp = mapping.get(local);
-      if (temp == null) {
-        return false;
-      } else {
-        List list = (List) temp;
-        if (list.size() == 0) {
-          return false;
-        } else {
-          return true;
-        }
-      }
-    } else {
-      throw new RuntimeException("Cannot invoke isMayInitialized for a MUST analysis");
-    }
-  }
-
-  public boolean isMustInitialized(SootField field) {
-    if (MUSTMAY == MUST) {
-      if (finalResult.contains(field)) {
-        return true;
-      }
-      return false;
-    } else {
-      throw new RuntimeException("Cannot invoke isMustinitialized for a MAY analysis");
-    }
-  }
-
-  public boolean isMustInitialized(Value local) {
-    if (MUSTMAY == MUST) {
-      if (finalResult.contains(local)) {
-        return true;
-      }
-      return false;
-    } else {
-      throw new RuntimeException("Cannot invoke isMustinitialized for a MAY analysis");
-    }
-  }
-
-  /*
-   * Given a local ask for all def positions Notice this could be null in the case there was no definition
-   */
-  public List getDefs(Value local) {
-    Object temp = mapping.get(local);
-    if (temp == null) {
-      return null;
-    } else {
-      return (List) temp;
-    }
-  }
-
-  /*
-   * Given a field ask for all def positions Notice this could be null in the case there was no definition
-   */
-  public List getDefs(SootField field) {
-    Object temp = mapping.get(field);
-    if (temp == null) {
-      return null;
-    } else {
-      return (List) temp;
-    }
-  }
+	/*
+	   * Given a field ask for all def positions Notice this could be null in the case there was no definition
+	   */
+	  public List getDefs(SootField field) {
+	    Object temp = mapping.get(field);
+	    if (temp == null) {
+	      return null;
+	    } else {
+	      return (List) temp;
+	    }
+	  }
 
 }

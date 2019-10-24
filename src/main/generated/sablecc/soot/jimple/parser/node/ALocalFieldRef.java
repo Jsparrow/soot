@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ALocalFieldRef extends PFieldRef
 {
-    private PLocalName _localName_;
-    private TDot _dot_;
-    private PFieldSignature _fieldSignature_;
+    private PLocalName localName;
+    private TDot dot;
+    private PFieldSignature fieldSignature;
 
     public ALocalFieldRef()
     {
@@ -34,9 +34,9 @@ public final class ALocalFieldRef extends PFieldRef
     public Object clone()
     {
         return new ALocalFieldRef(
-            cloneNode(this._localName_),
-            cloneNode(this._dot_),
-            cloneNode(this._fieldSignature_));
+            cloneNode(this.localName),
+            cloneNode(this.dot),
+            cloneNode(this.fieldSignature));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class ALocalFieldRef extends PFieldRef
 
     public PLocalName getLocalName()
     {
-        return this._localName_;
+        return this.localName;
     }
 
     public void setLocalName(PLocalName node)
     {
-        if(this._localName_ != null)
+        if(this.localName != null)
         {
-            this._localName_.parent(null);
+            this.localName.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class ALocalFieldRef extends PFieldRef
             node.parent(this);
         }
 
-        this._localName_ = node;
+        this.localName = node;
     }
 
     public TDot getDot()
     {
-        return this._dot_;
+        return this.dot;
     }
 
     public void setDot(TDot node)
     {
-        if(this._dot_ != null)
+        if(this.dot != null)
         {
-            this._dot_.parent(null);
+            this.dot.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class ALocalFieldRef extends PFieldRef
             node.parent(this);
         }
 
-        this._dot_ = node;
+        this.dot = node;
     }
 
     public PFieldSignature getFieldSignature()
     {
-        return this._fieldSignature_;
+        return this.fieldSignature;
     }
 
     public void setFieldSignature(PFieldSignature node)
     {
-        if(this._fieldSignature_ != null)
+        if(this.fieldSignature != null)
         {
-            this._fieldSignature_.parent(null);
+            this.fieldSignature.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class ALocalFieldRef extends PFieldRef
             node.parent(this);
         }
 
-        this._fieldSignature_ = node;
+        this.fieldSignature = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._localName_)
-            + toString(this._dot_)
-            + toString(this._fieldSignature_);
+        return new StringBuilder().append("").append(toString(this.localName)).append(toString(this.dot)).append(toString(this.fieldSignature)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._localName_ == child)
+        if(this.localName == child)
         {
-            this._localName_ = null;
+            this.localName = null;
             return;
         }
 
-        if(this._dot_ == child)
+        if(this.dot == child)
         {
-            this._dot_ = null;
+            this.dot = null;
             return;
         }
 
-        if(this._fieldSignature_ == child)
+        if(this.fieldSignature == child)
         {
-            this._fieldSignature_ = null;
+            this.fieldSignature = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class ALocalFieldRef extends PFieldRef
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._localName_ == oldChild)
+        if(this.localName == oldChild)
         {
             setLocalName((PLocalName) newChild);
             return;
         }
 
-        if(this._dot_ == oldChild)
+        if(this.dot == oldChild)
         {
             setDot((TDot) newChild);
             return;
         }
 
-        if(this._fieldSignature_ == oldChild)
+        if(this.fieldSignature == oldChild)
         {
             setFieldSignature((PFieldSignature) newChild);
             return;

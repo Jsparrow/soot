@@ -45,11 +45,13 @@ public class Insn22t extends InsnWithOffset implements TwoRegInsn {
     regs.add(regB);
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 
-  public Register getRegB() {
+  @Override
+public Register getRegB() {
     return regs.get(REG_B_IDX);
   }
 

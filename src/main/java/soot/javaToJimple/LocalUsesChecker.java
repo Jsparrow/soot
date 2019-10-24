@@ -33,33 +33,31 @@ public class LocalUsesChecker extends polyglot.visit.NodeVisitor {
   private final ArrayList<IdentityKey> localDecls;
   private final ArrayList<Node> news;
 
-  public ArrayList<IdentityKey> getLocals() {
+  public LocalUsesChecker() {
+    locals = new ArrayList<>();
+    localDecls = new ArrayList<>();
+    news = new ArrayList<>();
+  }
+
+public ArrayList<IdentityKey> getLocals() {
     return locals;
   }
 
-  public ArrayList<Node> getNews() {
+public ArrayList<Node> getNews() {
     return news;
   }
 
-  public ArrayList<IdentityKey> getLocalDecls() {
+public ArrayList<IdentityKey> getLocalDecls() {
     return localDecls;
   }
 
-  public LocalUsesChecker() {
-    locals = new ArrayList<IdentityKey>();
-    localDecls = new ArrayList<IdentityKey>();
-    news = new ArrayList<Node>();
-  }
+@Override
+public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
 
-  public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
-
-    if (n instanceof polyglot.ast.Local) {
-      if (!(locals.contains(new polyglot.util.IdentityKey(((polyglot.ast.Local) n).localInstance())))) {
-        if (!((polyglot.ast.Local) n).isConstant()) {
-          locals.add(new polyglot.util.IdentityKey(((polyglot.ast.Local) n).localInstance()));
-        }
-      }
-    }
+    boolean condition = n instanceof polyglot.ast.Local && !(locals.contains(new polyglot.util.IdentityKey(((polyglot.ast.Local) n).localInstance()))) && !((polyglot.ast.Local) n).isConstant();
+	if (condition) {
+	  locals.add(new polyglot.util.IdentityKey(((polyglot.ast.Local) n).localInstance()));
+	}
 
     if (n instanceof polyglot.ast.LocalDecl) {
       localDecls.add(new polyglot.util.IdentityKey(((polyglot.ast.LocalDecl) n).localInstance()));

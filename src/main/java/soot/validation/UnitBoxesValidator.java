@@ -40,7 +40,7 @@ public enum UnitBoxesValidator implements BodyValidator {
     for (UnitBox ub : body.getAllUnitBoxes()) {
       if (!body.getUnits().contains(ub.getUnit())) {
         throw new RuntimeException(
-            "Unitbox points outside unitChain! to unit : " + ub.getUnit() + " in " + body.getMethod());
+            new StringBuilder().append("Unitbox points outside unitChain! to unit : ").append(ub.getUnit()).append(" in ").append(body.getMethod()).toString());
       }
     }
   }

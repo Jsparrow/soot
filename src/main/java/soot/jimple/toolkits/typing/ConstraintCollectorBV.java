@@ -222,15 +222,18 @@ class ConstraintCollectorBV extends AbstractStmtSwitch {
     }
   }
 
-  public void caseBreakpointStmt(BreakpointStmt stmt) {
+  @Override
+public void caseBreakpointStmt(BreakpointStmt stmt) {
     // Do nothing
   }
 
-  public void caseInvokeStmt(InvokeStmt stmt) {
+  @Override
+public void caseInvokeStmt(InvokeStmt stmt) {
     handleInvokeExpr(stmt.getInvokeExpr());
   }
 
-  public void caseAssignStmt(AssignStmt stmt) {
+  @Override
+public void caseAssignStmt(AssignStmt stmt) {
     Value l = stmt.getLeftOp();
     Value r = stmt.getRightOp();
 
@@ -248,11 +251,9 @@ class ConstraintCollectorBV extends AbstractStmtSwitch {
       baseType.makeElement();
       left = baseType.element();
 
-      if (index instanceof Local) {
-        if (uses) {
-          resolver.typeVariable((Local) index).addParent(resolver.typeVariable(IntType.v()));
-        }
-      }
+      if (index instanceof Local && uses) {
+	  resolver.typeVariable((Local) index).addParent(resolver.typeVariable(IntType.v()));
+	}
     } else if (l instanceof Local) {
       left = resolver.typeVariable((Local) l);
     } else if (l instanceof InstanceFieldRef) {
@@ -285,11 +286,9 @@ class ConstraintCollectorBV extends AbstractStmtSwitch {
       baseType.makeElement();
       right = baseType.element();
 
-      if (index instanceof Local) {
-        if (uses) {
-          resolver.typeVariable((Local) index).addParent(resolver.typeVariable(IntType.v()));
-        }
-      }
+      if (index instanceof Local && uses) {
+	  resolver.typeVariable((Local) index).addParent(resolver.typeVariable(IntType.v()));
+	}
     } else if (r instanceof DoubleConstant) {
       right = resolver.typeVariable(DoubleType.v());
     } else if (r instanceof FloatConstant) {
@@ -440,11 +439,9 @@ class ConstraintCollectorBV extends AbstractStmtSwitch {
     } else if (r instanceof LengthExpr) {
       LengthExpr le = (LengthExpr) r;
 
-      if (uses) {
-        if (le.getOp() instanceof Local) {
-          resolver.typeVariable((Local) le.getOp()).makeElement();
-        }
-      }
+      if (uses && le.getOp() instanceof Local) {
+	  resolver.typeVariable((Local) le.getOp()).makeElement();
+	}
 
       right = resolver.typeVariable(IntType.v());
     } else if (r instanceof NegExpr) {
@@ -487,68 +484,62 @@ class ConstraintCollectorBV extends AbstractStmtSwitch {
     }
   }
 
-  public void caseIdentityStmt(IdentityStmt stmt) {
+  @Override
+public void caseIdentityStmt(IdentityStmt stmt) {
     Value l = stmt.getLeftOp();
     Value r = stmt.getRightOp();
 
-    if (l instanceof Local) {
-      TypeVariableBV left = resolver.typeVariable((Local) l);
-
-      if (!(r instanceof CaughtExceptionRef)) {
+    if (!(l instanceof Local)) {
+		return;
+	}
+	TypeVariableBV left = resolver.typeVariable((Local) l);
+	if (!(r instanceof CaughtExceptionRef)) {
         TypeVariableBV right = resolver.typeVariable(r.getType());
         right.addParent(left);
       } else {
         List<RefType> exceptionTypes = TrapManager.getExceptionTypesOf(stmt, stmtBody);
-        Iterator<RefType> typeIt = exceptionTypes.iterator();
-
-        while (typeIt.hasNext()) {
-          Type t = typeIt.next();
-
-          resolver.typeVariable(t).addParent(left);
-        }
+        exceptionTypes.forEach(t -> resolver.typeVariable(t).addParent(left));
 
         if (uses) {
           left.addParent(resolver.typeVariable(RefType.v("java.lang.Throwable")));
         }
       }
-    }
   }
 
-  public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
-    if (uses) {
-      if (stmt.getOp() instanceof Local) {
+  @Override
+public void caseEnterMonitorStmt(EnterMonitorStmt stmt) {
+    if (uses && stmt.getOp() instanceof Local) {
         TypeVariableBV op = resolver.typeVariable((Local) stmt.getOp());
 
         op.addParent(resolver.typeVariable(RefType.v("java.lang.Object")));
       }
-    }
   }
 
-  public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
-    if (uses) {
-      if (stmt.getOp() instanceof Local) {
+  @Override
+public void caseExitMonitorStmt(ExitMonitorStmt stmt) {
+    if (uses && stmt.getOp() instanceof Local) {
         TypeVariableBV op = resolver.typeVariable((Local) stmt.getOp());
 
         op.addParent(resolver.typeVariable(RefType.v("java.lang.Object")));
       }
-    }
   }
 
-  public void caseGotoStmt(GotoStmt stmt) {
+  @Override
+public void caseGotoStmt(GotoStmt stmt) {
   }
 
-  public void caseIfStmt(IfStmt stmt) {
-    if (uses) {
-      ConditionExpr cond = (ConditionExpr) stmt.getCondition();
-
-      BinopExpr expr = cond;
-      Value lv = expr.getOp1();
-      Value rv = expr.getOp2();
-
-      TypeVariableBV lop;
-      TypeVariableBV rop;
-
-      // ******** LEFT ********
+  @Override
+public void caseIfStmt(IfStmt stmt) {
+    if (!uses) {
+		return;
+	}
+	ConditionExpr cond = (ConditionExpr) stmt.getCondition();
+	BinopExpr expr = cond;
+	Value lv = expr.getOp1();
+	Value rv = expr.getOp2();
+	TypeVariableBV lop;
+	TypeVariableBV rop;
+	// ******** LEFT ********
       if (lv instanceof Local) {
         lop = resolver.typeVariable((Local) lv);
       } else if (lv instanceof DoubleConstant) {
@@ -568,8 +559,7 @@ class ConstraintCollectorBV extends AbstractStmtSwitch {
       } else {
         throw new RuntimeException("Unhandled binary expression left operand type: " + lv.getClass());
       }
-
-      // ******** RIGHT ********
+	// ******** RIGHT ********
       if (rv instanceof Local) {
         rop = resolver.typeVariable((Local) rv);
       } else if (rv instanceof DoubleConstant) {
@@ -589,55 +579,55 @@ class ConstraintCollectorBV extends AbstractStmtSwitch {
       } else {
         throw new RuntimeException("Unhandled binary expression right operand type: " + rv.getClass());
       }
-
-      TypeVariableBV common = resolver.typeVariable();
-      rop.addParent(common);
-      lop.addParent(common);
-    }
+	TypeVariableBV common = resolver.typeVariable();
+	rop.addParent(common);
+	lop.addParent(common);
   }
 
-  public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
-    if (uses) {
-      Value key = stmt.getKey();
-
-      if (key instanceof Local) {
+  @Override
+public void caseLookupSwitchStmt(LookupSwitchStmt stmt) {
+    if (!uses) {
+		return;
+	}
+	Value key = stmt.getKey();
+	if (key instanceof Local) {
         resolver.typeVariable((Local) key).addParent(resolver.typeVariable(IntType.v()));
       }
-    }
   }
 
-  public void caseNopStmt(NopStmt stmt) {
+  @Override
+public void caseNopStmt(NopStmt stmt) {
   }
 
-  public void caseReturnStmt(ReturnStmt stmt) {
-    if (uses) {
-      if (stmt.getOp() instanceof Local) {
+  @Override
+public void caseReturnStmt(ReturnStmt stmt) {
+    if (uses && stmt.getOp() instanceof Local) {
         resolver.typeVariable((Local) stmt.getOp()).addParent(resolver.typeVariable(stmtBody.getMethod().getReturnType()));
       }
-    }
   }
 
-  public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
+  @Override
+public void caseReturnVoidStmt(ReturnVoidStmt stmt) {
   }
 
-  public void caseTableSwitchStmt(TableSwitchStmt stmt) {
-    if (uses) {
-      Value key = stmt.getKey();
-
-      if (key instanceof Local) {
+  @Override
+public void caseTableSwitchStmt(TableSwitchStmt stmt) {
+    if (!uses) {
+		return;
+	}
+	Value key = stmt.getKey();
+	if (key instanceof Local) {
         resolver.typeVariable((Local) key).addParent(resolver.typeVariable(IntType.v()));
       }
-    }
   }
 
-  public void caseThrowStmt(ThrowStmt stmt) {
-    if (uses) {
-      if (stmt.getOp() instanceof Local) {
+  @Override
+public void caseThrowStmt(ThrowStmt stmt) {
+    if (uses && stmt.getOp() instanceof Local) {
         TypeVariableBV op = resolver.typeVariable((Local) stmt.getOp());
 
         op.addParent(resolver.typeVariable(RefType.v("java.lang.Throwable")));
       }
-    }
   }
 
   public void defaultCase(Stmt stmt) {

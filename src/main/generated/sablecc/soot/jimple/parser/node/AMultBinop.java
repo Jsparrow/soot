@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AMultBinop extends PBinop
 {
-    private TMult _mult_;
+    private TMult mult;
 
     public AMultBinop()
     {
@@ -26,7 +26,7 @@ public final class AMultBinop extends PBinop
     public Object clone()
     {
         return new AMultBinop(
-            cloneNode(this._mult_));
+            cloneNode(this.mult));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AMultBinop extends PBinop
 
     public TMult getMult()
     {
-        return this._mult_;
+        return this.mult;
     }
 
     public void setMult(TMult node)
     {
-        if(this._mult_ != null)
+        if(this.mult != null)
         {
-            this._mult_.parent(null);
+            this.mult.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AMultBinop extends PBinop
             node.parent(this);
         }
 
-        this._mult_ = node;
+        this.mult = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._mult_);
+            + toString(this.mult);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._mult_ == child)
+        if(this.mult == child)
         {
-            this._mult_ = null;
+            this.mult = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AMultBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._mult_ == oldChild)
+        if(this.mult == oldChild)
         {
             setMult((TMult) newChild);
             return;

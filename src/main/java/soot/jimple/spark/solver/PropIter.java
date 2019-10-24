@@ -52,23 +52,23 @@ import soot.util.queue.QueueReader;
 
 public class PropIter extends Propagator {
   private static final Logger logger = LoggerFactory.getLogger(PropIter.class);
+protected PAG pag;
 
-  public PropIter(PAG pag) {
+public PropIter(PAG pag) {
     this.pag = pag;
   }
 
-  /** Actually does the propagation. */
-  public void propagate() {
+/** Actually does the propagation. */
+  @Override
+public void propagate() {
     final OnFlyCallGraph ofcg = pag.getOnFlyCallGraph();
     new TopoSorter(pag, false).sort();
-    for (Object object : pag.allocSources()) {
-      handleAllocNode((AllocNode) object);
-    }
+    pag.allocSources().forEach(object -> handleAllocNode((AllocNode) object));
     int iteration = 1;
     boolean change;
     do {
       change = false;
-      TreeSet<VarNode> simpleSources = new TreeSet<VarNode>(pag.simpleSources());
+      TreeSet<VarNode> simpleSources = new TreeSet<>(pag.simpleSources());
       if (pag.getOpts().verbose()) {
         logger.debug("Iteration " + (iteration++));
       }
@@ -111,7 +111,7 @@ public class PropIter extends Propagator {
     } while (change);
   }
 
-  /* End of public methods. */
+/* End of public methods. */
   /* End of package methods. */
 
   /**
@@ -126,7 +126,7 @@ public class PropIter extends Propagator {
     return ret;
   }
 
-  protected boolean handleSimples(VarNode src) {
+protected boolean handleSimples(VarNode src) {
     boolean ret = false;
     PointsToSetInternal srcSet = src.getP2Set();
     if (srcSet.isEmpty()) {
@@ -145,7 +145,7 @@ public class PropIter extends Propagator {
     return ret;
   }
 
-  protected boolean handleStores(VarNode src) {
+protected boolean handleStores(VarNode src) {
     boolean ret = false;
     final PointsToSetInternal srcSet = src.getP2Set();
     if (srcSet.isEmpty()) {
@@ -156,7 +156,8 @@ public class PropIter extends Propagator {
       final FieldRefNode fr = (FieldRefNode) element;
       final SparkField f = fr.getField();
       ret = fr.getBase().getP2Set().forall(new P2SetVisitor() {
-        public final void visit(Node n) {
+        @Override
+		public final void visit(Node n) {
           AllocDotField nDotF = pag.makeAllocDotField((AllocNode) n, f);
           if (nDotF.makeP2Set().addAll(srcSet, null)) {
             returnValue = true;
@@ -167,12 +168,13 @@ public class PropIter extends Propagator {
     return ret;
   }
 
-  protected boolean handleLoads(FieldRefNode src) {
+protected boolean handleLoads(FieldRefNode src) {
     boolean ret = false;
     final Node[] loadTargets = pag.loadLookup(src);
     final SparkField f = src.getField();
     ret = src.getBase().getP2Set().forall(new P2SetVisitor() {
-      public final void visit(Node n) {
+      @Override
+	public final void visit(Node n) {
         AllocDotField nDotF = ((AllocNode) n).dot(f);
         if (nDotF == null) {
           return;
@@ -192,7 +194,7 @@ public class PropIter extends Propagator {
     return ret;
   }
 
-  protected boolean handleNewInstances(final NewInstanceNode src) {
+protected boolean handleNewInstances(final NewInstanceNode src) {
     boolean ret = false;
     final Node[] newInstances = pag.assignInstanceLookup(src);
     for (final Node instance : newInstances) {
@@ -200,25 +202,22 @@ public class PropIter extends Propagator {
 
         @Override
         public void visit(Node n) {
-          if (n instanceof ClassConstantNode) {
-            ClassConstantNode ccn = (ClassConstantNode) n;
-            Type ccnType = ccn.getClassConstant().toSootType();
-
-            // If the referenced class has not been loaded, we do
-            // this now
-            SootClass targetClass = ((RefType) ccnType).getSootClass();
-            if (targetClass.resolvingLevel() == SootClass.DANGLING) {
-              Scene.v().forceResolve(targetClass.getName(), SootClass.SIGNATURES);
-            }
-
-            instance.makeP2Set().add(pag.makeAllocNode(src.getValue(), ccnType, ccn.getMethod()));
-          }
+          if (!(n instanceof ClassConstantNode)) {
+			return;
+		}
+		ClassConstantNode ccn = (ClassConstantNode) n;
+		Type ccnType = ccn.getClassConstant().toSootType();
+		// If the referenced class has not been loaded, we do
+		// this now
+		SootClass targetClass = ((RefType) ccnType).getSootClass();
+		if (targetClass.resolvingLevel() == SootClass.DANGLING) {
+		  Scene.v().forceResolve(targetClass.getName(), SootClass.SIGNATURES);
+		}
+		instance.makeP2Set().add(pag.makeAllocNode(src.getValue(), ccnType, ccn.getMethod()));
         }
 
       });
     }
     return ret;
   }
-
-  protected PAG pag;
 }

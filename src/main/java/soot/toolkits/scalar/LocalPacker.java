@@ -72,52 +72,44 @@ public class LocalPacker extends BodyTransformer {
     return G.v().soot_toolkits_scalar_LocalPacker();
   }
 
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     boolean isUnsplit = PhaseOptions.getBoolean(options, "unsplit-original-locals");
 
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Packing locals...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Packing locals...").toString());
     }
 
-    Map<Local, Object> localToGroup = new DeterministicHashMap<Local, Object>(body.getLocalCount() * 2 + 1, 0.7f);
+    Map<Local, Object> localToGroup = new DeterministicHashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
     // A group represents a bunch of locals which may potentially interfere
     // with each other
     // 2 separate groups can not possibly interfere with each other
     // (coloring say ints and doubles)
 
-    Map<Object, Integer> groupToColorCount = new HashMap<Object, Integer>(body.getLocalCount() * 2 + 1, 0.7f);
-    Map<Local, Integer> localToColor = new HashMap<Local, Integer>(body.getLocalCount() * 2 + 1, 0.7f);
+    Map<Object, Integer> groupToColorCount = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
+    Map<Local, Integer> localToColor = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
     Map<Local, Local> localToNewLocal;
 
     // Assign each local to a group, and set that group's color count to 0.
     {
-      for (Local l : body.getLocals()) {
+      body.getLocals().forEach(l -> {
         Type g = l.getType();
 
         localToGroup.put(l, g);
 
-        if (!groupToColorCount.containsKey(g)) {
-          groupToColorCount.put(g, 0);
-        }
-      }
+        groupToColorCount.putIfAbsent(g, 0);
+      });
     }
 
     // Assign colors to the parameter locals.
     {
-      for (Unit s : body.getUnits()) {
-        if (s instanceof IdentityUnit && ((IdentityUnit) s).getLeftOp() instanceof Local) {
-          Local l = (Local) ((IdentityUnit) s).getLeftOp();
-
-          Object group = localToGroup.get(l);
-          int count = groupToColorCount.get(group).intValue();
-
-          localToColor.put(l, new Integer(count));
-
-          count++;
-
-          groupToColorCount.put(group, new Integer(count));
-        }
-      }
+      body.getUnits().stream().filter(s -> s instanceof IdentityUnit && ((IdentityUnit) s).getLeftOp() instanceof Local).map(s -> (Local) ((IdentityUnit) s).getLeftOp()).forEach(l -> {
+		Object group = localToGroup.get(l);
+		int count = groupToColorCount.get(group).intValue();
+		localToColor.put(l, Integer.valueOf(count));
+		count++;
+		groupToColorCount.put(group, Integer.valueOf(count));
+	});
     }
 
     // Call the graph colorer.
@@ -129,14 +121,14 @@ public class LocalPacker extends BodyTransformer {
 
     // Map each local to a new local.
     {
-      List<Local> originalLocals = new ArrayList<Local>(body.getLocals());
-      localToNewLocal = new HashMap<Local, Local>(body.getLocalCount() * 2 + 1, 0.7f);
-      Map<GroupIntPair, Local> groupIntToLocal = new HashMap<GroupIntPair, Local>(body.getLocalCount() * 2 + 1, 0.7f);
+      List<Local> originalLocals = new ArrayList<>(body.getLocals());
+      localToNewLocal = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
+      Map<GroupIntPair, Local> groupIntToLocal = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
 
       body.getLocals().clear();
 
       Set<String> usedLocalNames = new HashSet<>();
-      for (Local original : originalLocals) {
+      originalLocals.forEach(original -> {
         Object group = localToGroup.get(original);
         int color = localToColor.get(original).intValue();
         GroupIntPair pair = new GroupIntPair(group, color);
@@ -180,25 +172,21 @@ public class LocalPacker extends BodyTransformer {
         }
 
         localToNewLocal.put(original, newLocal);
-      }
+      });
     }
 
     // Go through all valueBoxes of this method and perform changes
     {
-      for (Unit s : body.getUnits()) {
-        for (ValueBox box : s.getUseBoxes()) {
-          if (box.getValue() instanceof Local) {
+      body.getUnits().forEach(s -> {
+        s.getUseBoxes().stream().filter(box -> box.getValue() instanceof Local).forEach(box -> {
             Local l = (Local) box.getValue();
             box.setValue((Local) localToNewLocal.get(l));
-          }
-        }
-        for (ValueBox box : s.getDefBoxes()) {
-          if (box.getValue() instanceof Local) {
+          });
+        s.getDefBoxes().stream().filter(box -> box.getValue() instanceof Local).forEach(box -> {
             Local l = (Local) box.getValue();
             box.setValue((Local) localToNewLocal.get(l));
-          }
-        }
-      }
+          });
+      });
     }
   }
 }

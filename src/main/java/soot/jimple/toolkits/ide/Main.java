@@ -43,7 +43,8 @@ public class Main {
   public static void main(String[] args) {
 
     PackManager.v().getPack("wjtp").add(new Transform("wjtp.ifds", new SceneTransformer() {
-      protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+      @Override
+	protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 
         IFDSTabulationProblem<Unit, ?, SootMethod, InterproceduralCFG<Unit, SootMethod>> problem
             = new IFDSPossibleTypes(new JimpleBasedInterproceduralCFG());

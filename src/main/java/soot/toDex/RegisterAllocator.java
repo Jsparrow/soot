@@ -42,6 +42,8 @@ import soot.jimple.IntConstant;
 import soot.jimple.LongConstant;
 import soot.jimple.NullConstant;
 import soot.jimple.StringConstant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An allocator for registers. It keeps track of locals to re-use their registers.<br>
@@ -51,17 +53,15 @@ import soot.jimple.StringConstant;
  */
 public class RegisterAllocator {
 
-  private int nextRegNum;
+  private static final Logger logger = LoggerFactory.getLogger(RegisterAllocator.class);
+
+private int nextRegNum;
 
   private Map<Local, Integer> localToLastRegNum;
 
   private int paramRegCount;
 
-  public RegisterAllocator() {
-    localToLastRegNum = new HashMap<Local, Integer>();
-  }
-
-  //
+//
   // Keep the same register for immediate constants.
   // Tested on application uk.co.nickfines.RealCalc.apk, sha256:
   // 5386d024d135d270ecba3ac5c11b23609b8510184c440647a60690d6b2c957ab
@@ -97,28 +97,45 @@ public class RegisterAllocator {
   // - array reference in assignment (ex: a[1] = 2)
   // - multi-dimension array initialization (ex: a = new int[1][2][3])
   //
-  private List<Register> classConstantReg = new ArrayList<Register>();
-  private List<Register> nullConstantReg = new ArrayList<Register>();
-  private List<Register> floatConstantReg = new ArrayList<Register>();
-  private List<Register> intConstantReg = new ArrayList<Register>();
-  private List<Register> longConstantReg = new ArrayList<Register>();
-  private List<Register> doubleConstantReg = new ArrayList<Register>();
-  private List<Register> stringConstantReg = new ArrayList<Register>();
-  private AtomicInteger classI = new AtomicInteger(0);
-  private AtomicInteger nullI = new AtomicInteger(0);
-  private AtomicInteger floatI = new AtomicInteger(0);
-  private AtomicInteger intI = new AtomicInteger(0);
-  private AtomicInteger longI = new AtomicInteger(0);
-  private AtomicInteger doubleI = new AtomicInteger(0);
-  private AtomicInteger stringI = new AtomicInteger(0);
+  private List<Register> classConstantReg = new ArrayList<>();
 
-  private Set<Register> lockedRegisters = new HashSet<Register>();
+private List<Register> nullConstantReg = new ArrayList<>();
 
-  private int lastReg;
+private List<Register> floatConstantReg = new ArrayList<>();
 
-  private Register currentLocalRegister;
+private List<Register> intConstantReg = new ArrayList<>();
 
-  private Register asConstant(Constant c, ConstantVisitor constantV) {
+private List<Register> longConstantReg = new ArrayList<>();
+
+private List<Register> doubleConstantReg = new ArrayList<>();
+
+private List<Register> stringConstantReg = new ArrayList<>();
+
+private AtomicInteger classI = new AtomicInteger(0);
+
+private AtomicInteger nullI = new AtomicInteger(0);
+
+private AtomicInteger floatI = new AtomicInteger(0);
+
+private AtomicInteger intI = new AtomicInteger(0);
+
+private AtomicInteger longI = new AtomicInteger(0);
+
+private AtomicInteger doubleI = new AtomicInteger(0);
+
+private AtomicInteger stringI = new AtomicInteger(0);
+
+private Set<Register> lockedRegisters = new HashSet<>();
+
+private int lastReg;
+
+private Register currentLocalRegister;
+
+public RegisterAllocator() {
+    localToLastRegNum = new HashMap<>();
+  }
+
+private Register asConstant(Constant c, ConstantVisitor constantV) {
     Register constantRegister = null;
 
     List<Register> rArray = null;
@@ -145,7 +162,7 @@ public class RegisterAllocator {
       rArray = stringConstantReg;
       iI = stringI;
     } else {
-      throw new RuntimeException("Error. Unknown constant type: '" + c.getType() + "'");
+      throw new RuntimeException(new StringBuilder().append("Error. Unknown constant type: '").append(c.getType()).append("'").toString());
     }
 
     boolean inConflict = true;
@@ -166,7 +183,7 @@ public class RegisterAllocator {
     return constantRegister.clone();
   }
 
-  public void resetImmediateConstantsPool() {
+public void resetImmediateConstantsPool() {
     classI = new AtomicInteger(0);
     nullI = new AtomicInteger(0);
     floatI = new AtomicInteger(0);
@@ -176,11 +193,11 @@ public class RegisterAllocator {
     stringI = new AtomicInteger(0);
   }
 
-  public Map<Local, Integer> getLocalToRegisterMapping() {
+public Map<Local, Integer> getLocalToRegisterMapping() {
     return localToLastRegNum;
   }
 
-  public Register asLocal(Local local) {
+public Register asLocal(Local local) {
     Register localRegister;
     Integer oldRegNum = localToLastRegNum.get(local);
     if (oldRegNum != null) {
@@ -195,7 +212,7 @@ public class RegisterAllocator {
     return localRegister;
   }
 
-  public void asParameter(SootMethod sm, Local l) {
+public void asParameter(SootMethod sm, Local l) {
     // If we already have a register for this parameter, there is nothing
     // more to be done here.
     if (localToLastRegNum.containsKey(l)) {
@@ -216,6 +233,7 @@ public class RegisterAllocator {
           found = true;
         }
       } catch (RuntimeException e) {
+		logger.error(e.getMessage(), e);
         // ignore
       }
     }
@@ -245,7 +263,7 @@ public class RegisterAllocator {
     paramRegCount += wordsforParameters;
   }
 
-  public Register asImmediate(Value v, ConstantVisitor constantV) {
+public Register asImmediate(Value v, ConstantVisitor constantV) {
     if (v instanceof Constant) {
       return asConstant((Constant) v, constantV);
     } else if (v instanceof Local) {
@@ -255,7 +273,7 @@ public class RegisterAllocator {
     }
   }
 
-  public Register asTmpReg(Type regType) {
+public Register asTmpReg(Type regType) {
 
     int newRegCount = getRegCount();
     if (lastReg == newRegCount) {
@@ -266,19 +284,19 @@ public class RegisterAllocator {
     return currentLocalRegister;
   }
 
-  public void increaseRegCount(int amount) {
+public void increaseRegCount(int amount) {
     nextRegNum += amount;
   }
 
-  public int getParamRegCount() {
+public int getParamRegCount() {
     return paramRegCount;
   }
 
-  public int getRegCount() {
+public int getRegCount() {
     return nextRegNum;
   }
 
-  /**
+/**
    * Locks the given register. This prevents the register from being re-used for storing constants.
    *
    * @param reg

@@ -58,36 +58,38 @@ import org.slf4j.LoggerFactory;
  */
 class Instruction_Lookupswitch extends Instruction {
   private static final Logger logger = LoggerFactory.getLogger(Instruction_Lookupswitch.class);
+public byte pad; // number of bytes used for padding
+public int default_offset;
+public int npairs;
+public int match_offsets[];
+public Instruction default_inst;
+public Instruction match_insts[];
 
-  public Instruction_Lookupswitch() {
+public Instruction_Lookupswitch() {
     super((byte) ByteCode.LOOKUPSWITCH);
     name = "lookupswitch";
     branches = true;
   }
 
-  public byte pad; // number of bytes used for padding
-  public int default_offset;
-  public int npairs;
-  public int match_offsets[];
-  public Instruction default_inst;
-  public Instruction match_insts[];
-
-  public String toString(cp_info constant_pool[]) {
+@Override
+public String toString(cp_info constant_pool[]) {
     // first figure out padding to next 4-byte quantity
     String args;
     int i;
-    args = super.toString(constant_pool) + argsep + "(" + Integer.toString(pad) + ")";
-    args = args + argsep + Integer.toString(default_inst.label);
-    args = args + argsep + Integer.toString(npairs) + ": ";
+    args = new StringBuilder().append(super.toString(constant_pool)).append(argsep).append("(").append(Integer.toString(pad)).append(")").toString();
+    args = new StringBuilder().append(args).append(argsep).append(Integer.toString(default_inst.label)).toString();
+    args = new StringBuilder().append(args).append(argsep).append(Integer.toString(npairs)).append(": ").toString();
     for (i = 0; i < npairs; i++) {
-      args = args + "case " + Integer.toString(match_offsets[i * 2]) + ": label_" + Integer.toString(match_insts[i].label);
+      args = new StringBuilder().append(args).append("case ").append(Integer.toString(match_offsets[i * 2])).append(": label_").append(Integer.toString(match_insts[i].label)).toString();
     }
     return args;
   }
 
-  public int parse(byte bc[], int index) {
+@Override
+public int parse(byte bc[], int index) {
     // first figure out padding to next 4-byte quantity
-    int i, j;
+    int i;
+	int j;
     i = index % 4;
     if (i != 0) {
       pad = (byte) (4 - i);
@@ -114,8 +116,10 @@ class Instruction_Lookupswitch extends Instruction {
     return index;
   }
 
-  public int nextOffset(int curr) {
-    int i, siz = 0;
+@Override
+public int nextOffset(int curr) {
+    int i;
+	int siz = 0;
     i = (curr + 1) % 4;
     if (i != 0) {
       siz = (4 - i);
@@ -123,7 +127,8 @@ class Instruction_Lookupswitch extends Instruction {
     return (curr + siz + 9 + npairs * 8);
   }
 
-  public int compile(byte bc[], int index) {
+@Override
+public int compile(byte bc[], int index) {
     int i;
     bc[index++] = code;
     // insert padding so next instruction is on a 4-byte boundary
@@ -147,7 +152,8 @@ class Instruction_Lookupswitch extends Instruction {
     return index;
   }
 
-  public void offsetToPointer(ByteCode bc) {
+@Override
+public void offsetToPointer(ByteCode bc) {
     int i;
     default_inst = bc.locateInst(default_offset + label);
     if (default_inst == null) {
@@ -156,9 +162,11 @@ class Instruction_Lookupswitch extends Instruction {
     } else {
       default_inst.labelled = true;
     }
-    if (npairs > 0) {
-      match_insts = new Instruction[npairs];
-      for (i = 0; i < npairs; i++) {
+    if (npairs <= 0) {
+		return;
+	}
+	match_insts = new Instruction[npairs];
+	for (i = 0; i < npairs; i++) {
         match_insts[i] = bc.locateInst(match_offsets[i * 2 + 1] + label);
         if (match_insts[i] == null) {
           logger.warn("can't locate target of instruction");
@@ -167,10 +175,10 @@ class Instruction_Lookupswitch extends Instruction {
           match_insts[i].labelled = true;
         }
       }
-    }
   }
 
-  public Instruction[] branchpoints(Instruction next) {
+@Override
+public Instruction[] branchpoints(Instruction next) {
     Instruction i[] = new Instruction[npairs + 1];
     int j;
     i[0] = default_inst;

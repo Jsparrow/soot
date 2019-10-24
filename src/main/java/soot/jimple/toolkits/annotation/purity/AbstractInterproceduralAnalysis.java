@@ -90,13 +90,13 @@ public abstract class AbstractInterproceduralAnalysis<S> {
       boolean verbose) {
     this.cg = cg;
 
-    System.out.println("this.cg = " + System.identityHashCode(this.cg));
+    logger.info("this.cg = " + System.identityHashCode(this.cg));
     this.dg = new DirectedCallGraph(cg, filter, heads, verbose);
-    this.data = new HashMap<SootMethod, S>();
-    this.unanalysed = new HashMap<SootMethod, S>();
+    this.data = new HashMap<>();
+    this.unanalysed = new HashMap<>();
 
     // construct reverse pseudo topological order on filtered methods
-    this.order = new HashMap<SootMethod, Integer>();
+    this.order = new HashMap<>();
 
     int i = 0;
     for (SootMethod m : new PseudoTopologicalOrderer<SootMethod>().newList(dg, true)) {
@@ -202,20 +202,18 @@ public abstract class AbstractInterproceduralAnalysis<S> {
   public void analyseCall(S src, Stmt callStmt, S dst) {
     S accum = newInitialSummary();
     copy(accum, dst);
-    System.out.println("Edges out of " + callStmt + "...");
+    logger.info(new StringBuilder().append("Edges out of ").append(callStmt).append("...").toString());
     for (Iterator<Edge> it = cg.edgesOutOf(callStmt); it.hasNext();) {
       Edge edge = it.next();
       SootMethod m = edge.tgt();
-      System.out.println("\t-> " + m.getSignature());
+      logger.info("\t-> " + m.getSignature());
       S elem;
       if (data.containsKey(m)) {
         // analysed method
         elem = data.get(m);
       } else {
         // unanalysed method
-        if (!unanalysed.containsKey(m)) {
-          unanalysed.put(m, summaryOfUnanalysedMethod(m));
-        }
+		unanalysed.putIfAbsent(m, summaryOfUnanalysedMethod(m));
         elem = unanalysed.get(m);
       }
       applySummary(src, callStmt, elem, accum);
@@ -241,7 +239,7 @@ public abstract class AbstractInterproceduralAnalysis<S> {
     dot.setGraphAttribute("compound", "true");
     // dot.setGraphAttribute("rankdir","LR");
     int id = 0;
-    Map<SootMethod, Integer> idmap = new HashMap<SootMethod, Integer>();
+    Map<SootMethod, Integer> idmap = new HashMap<>();
 
     // draw sub-graph cluster
     // draw sub-graph cluster
@@ -250,7 +248,7 @@ public abstract class AbstractInterproceduralAnalysis<S> {
       DotGraphNode label = sub.drawNode("head" + id);
       idmap.put(m, id);
       sub.setGraphLabel("");
-      label.setLabel("(" + order.get(m) + ") " + m.toString());
+      label.setLabel(new StringBuilder().append("(").append(order.get(m)).append(") ").append(m.toString()).toString());
       label.setAttribute("fontsize", "18");
       label.setShape("box");
       if (data.containsKey(m)) {
@@ -261,11 +259,11 @@ public abstract class AbstractInterproceduralAnalysis<S> {
 
     // connect edges
     for (SootMethod m : dg) {
-      for (SootMethod mm : dg.getSuccsOf(m)) {
+      dg.getSuccsOf(m).forEach(mm -> {
         DotGraphEdge edge = dot.drawEdge("head" + idmap.get(m), "head" + idmap.get(mm));
         edge.setAttribute("ltail", "cluster" + idmap.get(m));
         edge.setAttribute("lhead", "cluster" + idmap.get(mm));
-      }
+      });
     }
 
     File f = new File(SourceLocator.v().getOutputDir(), name + DotGraph.DOT_EXTENSION);
@@ -283,22 +281,22 @@ public abstract class AbstractInterproceduralAnalysis<S> {
    * @see fillDotGraph
    */
   public void drawAsManyDot(String prefix, boolean drawUnanalysed) {
-    for (SootMethod m : data.keySet()) {
+    data.keySet().forEach(m -> {
       DotGraph dot = new DotGraph(m.toString());
       dot.setGraphLabel(m.toString());
       fillDotGraph("X", data.get(m), dot);
-      File f = new File(SourceLocator.v().getOutputDir(), prefix + m.toString() + DotGraph.DOT_EXTENSION);
+      File f = new File(SourceLocator.v().getOutputDir(), new StringBuilder().append(prefix).append(m.toString()).append(DotGraph.DOT_EXTENSION).toString());
       dot.plot(f.getPath());
-    }
+    });
 
     if (drawUnanalysed) {
-      for (SootMethod m : unanalysed.keySet()) {
+      unanalysed.keySet().forEach(m -> {
         DotGraph dot = new DotGraph(m.toString());
         dot.setGraphLabel(m.toString() + " (unanalysed)");
         fillDotGraph("X", unanalysed.get(m), dot);
-        File f = new File(SourceLocator.v().getOutputDir(), prefix + m.toString() + "_u" + DotGraph.DOT_EXTENSION);
+        File f = new File(SourceLocator.v().getOutputDir(), new StringBuilder().append(prefix).append(m.toString()).append("_u").append(DotGraph.DOT_EXTENSION).toString());
         dot.plot(f.getPath());
-      }
+      });
     }
   }
 
@@ -347,15 +345,15 @@ public abstract class AbstractInterproceduralAnalysis<S> {
       }
     }
 
-    SortedSet<SootMethod> queue = new TreeSet<SootMethod>(new IntComparator());
+    SortedSet<SootMethod> queue = new TreeSet<>(new IntComparator());
 
     // init
-    for (SootMethod o : order.keySet()) {
+	order.keySet().forEach(o -> {
       data.put(o, newInitialSummary());
       queue.add(o);
-    }
+    });
 
-    Map<SootMethod, Integer> nb = new HashMap<SootMethod, Integer>(); // only for debug pretty-printing
+    Map<SootMethod, Integer> nb = new HashMap<>(); // only for debug pretty-printing
 
     // fixpoint iterations
     while (!queue.isEmpty()) {
@@ -370,7 +368,7 @@ public abstract class AbstractInterproceduralAnalysis<S> {
         nb.put(m, 1);
       }
       if (verbose) {
-        logger.debug(" |- processing " + m.toString() + " (" + nb.get(m) + "-st time)");
+        logger.debug(new StringBuilder().append(" |- processing ").append(m.toString()).append(" (").append(nb.get(m)).append("-st time)").toString());
       }
 
       analyseMethod(m, newSummary);

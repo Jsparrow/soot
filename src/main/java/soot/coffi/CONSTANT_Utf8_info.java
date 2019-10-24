@@ -84,7 +84,8 @@ public class CONSTANT_Utf8_info extends cp_info {
    * @return number of bytes occupied by this object.
    * @see cp_info#size
    */
-  public int size() {
+  @Override
+public int size() {
     return length() + 3;
   }
 
@@ -102,7 +103,8 @@ public class CONSTANT_Utf8_info extends cp_info {
         sHashCode = buf.hashCode();
         return buf;
       } catch (IOException e) {
-        return "!!IOException!!";
+        logger.error(e.getMessage(), e);
+		return "!!IOException!!";
       }
     }
     return s;
@@ -130,7 +132,8 @@ public class CONSTANT_Utf8_info extends cp_info {
    * @return <i>true</i> if they are equal, <i>false</i> if they are not.
    */
   public boolean equals(CONSTANT_Utf8_info cu) {
-    int i, j;
+    int i;
+	int j;
     j = bytes.length;
     if (j != cu.bytes.length) {
       return false;
@@ -156,7 +159,8 @@ public class CONSTANT_Utf8_info extends cp_info {
    * @see cp_info#compareTo
    * @see CONSTANT_Utf8_info#compareTo(cp_info)
    */
-  public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
+  @Override
+public int compareTo(cp_info constant_pool[], cp_info cp, cp_info cp_constant_pool[]) {
     return compareTo(cp);
   }
 
@@ -210,7 +214,8 @@ public class CONSTANT_Utf8_info extends cp_info {
       d.writeUTF(s);
       return bs.toByteArray();
     } catch (IOException e) {
-      logger.debug("Some sort of IO exception in toUtf8 with " + s);
+      logger.error(e.getMessage(), e);
+	logger.debug("Some sort of IO exception in toUtf8 with " + s);
     }
     return null;
   }
@@ -223,7 +228,8 @@ public class CONSTANT_Utf8_info extends cp_info {
    * @return String representation of this entry.
    * @see cp_info#toString
    */
-  public String toString(cp_info constant_pool[]) {
+  @Override
+public String toString(cp_info constant_pool[]) {
     return convert();
   }
 
@@ -233,11 +239,13 @@ public class CONSTANT_Utf8_info extends cp_info {
    * @return the String "utf8".
    * @see cp_info#typeName
    */
-  public String typeName() {
+  @Override
+public String typeName() {
     return "utf8";
   }
 
-  public Value createJimpleConstantValue(cp_info[] constant_pool) {
+  @Override
+public Value createJimpleConstantValue(cp_info[] constant_pool) {
     return StringConstant.v(convert());
   }
 }

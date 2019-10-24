@@ -30,7 +30,7 @@ import polyglot.ext.jl.ast.Expr_c;
 import polyglot.util.Position;
 import polyglot.visit.CFGBuilder;
 
-public class JjComma_c extends Expr_c implements Expr {
+public class JjComma_c extends Expr_c {
 
   private Expr first;
   private Expr second;
@@ -49,11 +49,13 @@ public class JjComma_c extends Expr_c implements Expr {
     return second;
   }
 
-  public List acceptCFG(CFGBuilder v, List succs) {
+  @Override
+public List acceptCFG(CFGBuilder v, List succs) {
     return succs;
   }
 
-  public Term entry() {
+  @Override
+public Term entry() {
     return first.entry();
   }
 }

@@ -44,7 +44,10 @@ public class SmartLocalDefsPool {
 
   protected Map<Body, Pair<Long, SmartLocalDefs>> pool = Maps.newHashMap();
 
-  /**
+  public SmartLocalDefsPool(Singletons.Global g) {
+  }
+
+/**
    * This method returns a fresh instance of a {@link SmartLocalDefs} analysis, based on a freshly created
    * {@link ExceptionalUnitGraph} for b, with standard parameters. If the body b's modification count has not changed since
    * the last time such an analysis was requested for b, then the previously created analysis is returned instead.
@@ -58,23 +61,20 @@ public class SmartLocalDefsPool {
     } else {
       ExceptionalUnitGraph g = new ExceptionalUnitGraph(b);
       SmartLocalDefs newSLD = new SmartLocalDefs(g, new SimpleLiveLocals(g));
-      pool.put(b, new Pair<Long, SmartLocalDefs>(b.getModificationCount(), newSLD));
+      pool.put(b, new Pair<>(b.getModificationCount(), newSLD));
       return newSLD;
     }
   }
 
-  public void clear() {
+public void clear() {
     pool.clear();
   }
 
-  public static SmartLocalDefsPool v() {
+public static SmartLocalDefsPool v() {
     return G.v().soot_toolkits_scalar_SmartLocalDefsPool();
   }
 
-  public SmartLocalDefsPool(Singletons.Global g) {
-  }
-
-  public void invalidate(Body b) {
+public void invalidate(Body b) {
     pool.remove(b);
   }
 

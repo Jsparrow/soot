@@ -52,7 +52,7 @@ public class CallsiteContextVar extends ContextVar {
 
   @Override
   public String toString() {
-    return "<" + context.toString() + ", " + var.toString() + ">";
+    return new StringBuilder().append("<").append(context.toString()).append(", ").append(var.toString()).append(">").toString();
   }
 
   @Override

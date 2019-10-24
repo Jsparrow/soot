@@ -85,7 +85,7 @@ public class TypeDescriptor extends java.lang.Object {
     public List parameterList() {
       List list = new List();
       String s = descriptor;
-      while(!s.equals("")) {
+      while(!"".equals(s)) {
         s = typeList(s, list);
       }
       return list;
@@ -95,9 +95,11 @@ public class TypeDescriptor extends java.lang.Object {
     public List parameterListSkipFirst() {
       List list = new List();
       String s = descriptor;
-      if(!s.equals(""))
-        s = typeList(s, new List()); // skip first
-      while(!s.equals("")) {
+      if(!"".equals(s))
+	 {
+		s = typeList(s, new List()); // skip first
+	}
+      while(!"".equals(s)) {
         s = typeList(s, list);
       }
       return list;
@@ -150,15 +152,18 @@ public class TypeDescriptor extends java.lang.Object {
           return s2;
         case '[':
           int i = 1;
-          while(s.charAt(i) == '[') i++;
+          while(s.charAt(i) == '[') {
+			i++;
+		}
           ArrayTypeAccess bottom = new ArrayTypeAccess(new ParseName("")); // dummy name is replaced later
           ArrayTypeAccess top = bottom;
-          for(int j = 0; j < i - 1; j++)
-            top = new ArrayTypeAccess(top);
+          for(int j = 0; j < i - 1; j++) {
+			top = new ArrayTypeAccess(top);
+		}
           l.add(new ParameterDeclaration(new Modifiers(), top, "p" + l.getNumChild()));
           return arrayTypeList(s.substring(i), bottom);
         default:
-          this.p.println("Error: unknown Type \"" + c + "\" in TypeDescriptor");
+          this.p.println(new StringBuilder().append("Error: unknown Type \"").append(c).append("\" in TypeDescriptor").toString());
           throw new Error("Error: unknown Type in TypeDescriptor: " + s);
       }
       //return "";

@@ -40,23 +40,26 @@ public class BafLineNumberer extends BodyTransformer implements IJbcoTransform {
 
   public static String name = "bb.jbco_bln";
 
-  public void outputSummary() {
+  @Override
+public void outputSummary() {
   }
 
-  public String[] getDependencies() {
+  @Override
+public String[] getDependencies() {
     return new String[] { name };
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return name;
   }
 
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     int idx = 0;
     PatchingChain<Unit> units = b.getUnits();
-    Iterator<Unit> it = units.iterator();
-    while (it.hasNext()) {
-      Inst i = (Inst) it.next();
+    for (Unit unit : units) {
+      Inst i = (Inst) unit;
       List<Tag> tags = i.getTags();
       for (int k = 0; k < tags.size(); k++) {
         Tag t = (Tag) tags.get(k);

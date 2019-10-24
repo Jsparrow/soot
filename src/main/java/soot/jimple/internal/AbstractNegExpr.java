@@ -47,7 +47,8 @@ public abstract class AbstractNegExpr extends AbstractUnopExpr implements NegExp
   }
 
   /** Compares the specified object with this one for structural equality. */
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (o instanceof AbstractNegExpr) {
       return opBox.getValue().equivTo(((AbstractNegExpr) o).opBox.getValue());
     }
@@ -55,23 +56,28 @@ public abstract class AbstractNegExpr extends AbstractUnopExpr implements NegExp
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return opBox.getValue().equivHashCode();
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public String toString() {
-    return Jimple.NEG + " " + opBox.getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(Jimple.NEG).append(" ").append(opBox.getValue().toString()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.NEG);
     up.literal(" ");
     opBox.toString(up);
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     Value op = opBox.getValue();
 
     if (op.getType().equals(IntType.v()) || op.getType().equals(ByteType.v()) || op.getType().equals(ShortType.v())
@@ -88,7 +94,8 @@ public abstract class AbstractNegExpr extends AbstractUnopExpr implements NegExp
     }
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseNegExpr(this);
   }
 }

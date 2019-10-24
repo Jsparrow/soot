@@ -40,7 +40,8 @@ class ExtendedHashMutableDirectedGraph extends HashMutableDirectedGraph {
   /**
    * If nodes are not in the graph, add them into graph first.
    */
-  public void addEdge(Object from, Object to) {
+  @Override
+public void addEdge(Object from, Object to) {
     if (!super.containsNode(from)) {
       super.addNode(from);
     }
@@ -101,11 +102,7 @@ class ExtendedHashMutableDirectedGraph extends HashMutableDirectedGraph {
   public void mergeWith(ExtendedHashMutableDirectedGraph other) {
     List<Object> nodes = other.getNodes();
 
-    Iterator<Object> nodesIt = nodes.iterator();
-
-    while (nodesIt.hasNext()) {
-      Object node = nodesIt.next();
-
+    nodes.forEach(node -> {
       List succs = other.getSuccsOf(node);
 
       Iterator succsIt = succs.iterator();
@@ -115,10 +112,11 @@ class ExtendedHashMutableDirectedGraph extends HashMutableDirectedGraph {
 
         this.addEdge(node, succ);
       }
-    }
+    });
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     String rtn = "Graph:\n";
 
     List nodes = super.getNodes();
@@ -135,7 +133,7 @@ class ExtendedHashMutableDirectedGraph extends HashMutableDirectedGraph {
       while (succsIt.hasNext()) {
         Object succ = succsIt.next();
 
-        rtn = rtn + node + "\t --- \t" + succ + "\n";
+        rtn = new StringBuilder().append(rtn).append(node).append("\t --- \t").append(succ).append("\n").toString();
       }
     }
 

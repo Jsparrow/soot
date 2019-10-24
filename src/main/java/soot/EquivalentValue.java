@@ -41,7 +41,8 @@ public class EquivalentValue implements Value {
     this.e = e;
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     if (o instanceof EquivalentValue) {
       o = ((EquivalentValue) o).e;
     }
@@ -71,11 +72,13 @@ public class EquivalentValue implements Value {
     return getValue();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return e.equivHashCode();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return e.toString();
   }
 
@@ -86,32 +89,39 @@ public class EquivalentValue implements Value {
   /*********************************/
   /* implement the Value-interface */
   /*********************************/
-  public List<ValueBox> getUseBoxes() {
+  @Override
+public List<ValueBox> getUseBoxes() {
     return e.getUseBoxes();
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return e.getType();
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     EquivalentValue equiVal = new EquivalentValue((Value) e.clone());
     return equiVal;
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     return e.equivTo(o);
   }
 
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return e.equivHashCode();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     e.apply(sw);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     e.toString(up);
   }
 }

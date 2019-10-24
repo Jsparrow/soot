@@ -113,52 +113,52 @@ public class StrengthenByIfElse {
           SETNodeLabel label = abStmt.getLabel();
           String labelBroken = label.toString();
           String loopLabel = ((ASTLabeledNode) loopNode).get_Label().toString();
-          if (labelBroken != null && loopLabel != null) {
-            // stmt
-            // breaks
-            // some
-            // label
-            if (labelBroken.compareTo(loopLabel) == 0) {
-              // we have found a break breaking this label
+          boolean condition = labelBroken != null && loopLabel != null && labelBroken.compareTo(loopLabel) == 0;
+		// stmt
+		// breaks
+		// some
+		// label
+		// non null labels
+		if (condition)
+		 {
+		  // we have found a break breaking this label
 
-              // make sure that if the orignal was an ASTWhileNode
-              // then there was
-              // ONLY a break statement
-              if (loopNode instanceof ASTWhileNode) {
-                if (statements.size() != 1) {
-                  // more than 1 statement
-                  return null;
-                }
-              }
+		  boolean condition1 = loopNode instanceof ASTWhileNode && statements.size() != 1;
+		// make sure that if the orignal was an ASTWhileNode
+		  // then there was
+		  // ONLY a break statement
+		  if (condition1) {
+		  // more than 1 statement
+		  return null;
+		}
 
-              // pattern matched
-              ASTWhileNode newWhileNode = makeWhileNode(ifElseNode, loopNode);
-              if (newWhileNode == null) {
-                return null;
-              }
-              List<ASTNode> toReturn = new ArrayList<ASTNode>();
-              toReturn.add(newWhileNode);
+		  // pattern matched
+		  ASTWhileNode newWhileNode = makeWhileNode(ifElseNode, loopNode);
+		  if (newWhileNode == null) {
+		    return null;
+		  }
+		  List<ASTNode> toReturn = new ArrayList<>();
+		  toReturn.add(newWhileNode);
 
-              // Add the statementSequenceNode AFTER the whileNode
-              // except for the laststmt
-              if (statements.size() != 1) {
-                // size 1 means that the only stmt is a break
-                // stmt
+		  // Add the statementSequenceNode AFTER the whileNode
+		  // except for the laststmt
+		  if (statements.size() != 1) {
+		    // size 1 means that the only stmt is a break
+		    // stmt
 
-                Iterator<AugmentedStmt> tempIt = statements.iterator();
-                List<AugmentedStmt> newStmts = new ArrayList<AugmentedStmt>();
-                while (tempIt.hasNext()) {
-                  AugmentedStmt tempStmt = tempIt.next();
-                  if (tempIt.hasNext()) {
-                    newStmts.add(tempStmt);
-                  }
-                }
-                toReturn.add(new ASTStatementSequenceNode(newStmts));
-              }
-              return toReturn;
+		    Iterator<AugmentedStmt> tempIt = statements.iterator();
+		    List<AugmentedStmt> newStmts = new ArrayList<>();
+		    while (tempIt.hasNext()) {
+		      AugmentedStmt tempStmt = tempIt.next();
+		      if (tempIt.hasNext()) {
+		        newStmts.add(tempStmt);
+		      }
+		    }
+		    toReturn.add(new ASTStatementSequenceNode(newStmts));
+		  }
+		  return toReturn;
 
-            } // labels matched
-          } // non null labels
+		} // labels matched
         } // end of break stmt
       } // stmt is an abrupt stmt
       else if (stmt instanceof ReturnStmt || stmt instanceof ReturnVoidStmt) {
@@ -177,11 +177,11 @@ public class StrengthenByIfElse {
         if (newWhileNode == null) {
           return null;
         }
-        List<ASTNode> toReturn = new ArrayList<ASTNode>();
+        List<ASTNode> toReturn = new ArrayList<>();
         toReturn.add(newWhileNode);
 
         // Add the statementSequenceNode AFTER the whileNode
-        List<AugmentedStmt> newStmts = new ArrayList<AugmentedStmt>(statements);
+        List<AugmentedStmt> newStmts = new ArrayList<>(statements);
         toReturn.add(new ASTStatementSequenceNode(newStmts));
         return toReturn;
       } // if stmt was a return stmt

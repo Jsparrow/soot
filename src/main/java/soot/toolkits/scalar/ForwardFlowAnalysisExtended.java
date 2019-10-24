@@ -59,8 +59,8 @@ public abstract class ForwardFlowAnalysisExtended<N, A> {
    */
   public ForwardFlowAnalysisExtended(DirectedGraph<N> graph) {
     this.graph = graph;
-    this.unitToBeforeFlow = new IdentityHashMap<N, Map<N, A>>(graph.size() * 2 + 1);
-    this.unitToAfterFlow = new IdentityHashMap<N, Map<N, A>>(graph.size() * 2 + 1);
+    this.unitToBeforeFlow = new IdentityHashMap<>(graph.size() * 2 + 1);
+    this.unitToAfterFlow = new IdentityHashMap<>(graph.size() * 2 + 1);
   }
 
   /**
@@ -69,7 +69,7 @@ public abstract class ForwardFlowAnalysisExtended<N, A> {
    * @return an Orderer to order the nodes for the fixed-point iteration
    */
   protected Orderer<N> constructOrderer() {
-    return new PseudoTopologicalOrderer<N>();
+    return new PseudoTopologicalOrderer<>();
   }
 
   /**
@@ -120,7 +120,7 @@ public abstract class ForwardFlowAnalysisExtended<N, A> {
   public void putToMap(Map<N, Map<N, A>> map, N s, N t, A val) {
     Map<N, A> m = map.get(s);
     if (m == null) {
-      m = new IdentityHashMap<N, A>();
+      m = new IdentityHashMap<>();
       map.put(s, m);
     }
     m.put(t, val);
@@ -134,30 +134,28 @@ public abstract class ForwardFlowAnalysisExtended<N, A> {
     BitSet work = new BitSet(n);
     work.set(0, n);
 
-    final Map<N, Integer> index = new IdentityHashMap<N, Integer>(n * 2 + 1);
+    final Map<N, Integer> index = new IdentityHashMap<>(n * 2 + 1);
     {
       int i = 0;
       for (N s : orderedUnits) {
         index.put(s, i++);
 
         // Set initial Flows
-        for (N v : graph.getSuccsOf(s)) {
+		graph.getSuccsOf(s).forEach(v -> {
           putToMap(unitToBeforeFlow, s, v, newInitialFlow());
           putToMap(unitToAfterFlow, s, v, newInitialFlow());
-        }
+        });
       }
     }
 
     // Feng Qian: March 07, 2002
-    // Set initial values for entry points
-    for (N s : graph.getHeads()) {
+	// Set initial values for entry points
+	graph.getHeads().forEach(s -> {
       head.set(index.get(s));
 
       // this is a forward flow analysis
-      for (N v : graph.getSuccsOf(s)) {
-        putToMap(unitToBeforeFlow, s, v, entryInitialFlow());
-      }
-    }
+	graph.getSuccsOf(s).forEach(v -> putToMap(unitToBeforeFlow, s, v, entryInitialFlow()));
+    });
 
     int numComputations = 0;
 

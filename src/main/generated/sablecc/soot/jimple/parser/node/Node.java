@@ -42,7 +42,7 @@ public abstract class Node implements Switchable, Cloneable
 
     protected String toString(List<?> list)
     {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
 
         for(Iterator<?> i = list.iterator(); i.hasNext();)
         {
@@ -66,12 +66,9 @@ public abstract class Node implements Switchable, Cloneable
     @SuppressWarnings("unchecked")
     protected <T extends Node> List<T> cloneList(List<T> list)
     {
-        List<T> clone = new LinkedList<T>();
+        List<T> clone = new LinkedList<>();
 
-        for(T n : list)
-        {
-            clone.add((T) n.clone());
-        }
+        list.forEach(n -> clone.add((T) n.clone()));
 
         return clone;
     }

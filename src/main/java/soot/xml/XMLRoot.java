@@ -34,8 +34,9 @@ public class XMLRoot {
   XMLRoot() {
   }
 
-  public String toString() {
-    return XMLPrinter.xmlHeader + XMLPrinter.dtdHeader + this.child.toPostString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(XMLPrinter.xmlHeader).append(XMLPrinter.dtdHeader).append(this.child.toPostString()).toString();
   }
 
   // add element to end of tree

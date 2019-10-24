@@ -80,10 +80,11 @@ public class NewArrayInstruction extends DexlibAbstractInstruction {
     addTags(assign);
     body.add(assign);
 
-    if (IDalvikTyper.ENABLE_DVKTYPER) {
-      DalvikTyper.v().setType(newArrayExpr.getSizeBox(), IntType.v(), true);
-      DalvikTyper.v().setType(assign.getLeftOpBox(), newArrayExpr.getType(), false);
-    }
+    if (!(IDalvikTyper.ENABLE_DVKTYPER)) {
+		return;
+	}
+	DalvikTyper.v().setType(newArrayExpr.getSizeBox(), IntType.v(), true);
+	DalvikTyper.v().setType(assign.getLeftOpBox(), newArrayExpr.getType(), false);
   }
 
   @Override
@@ -97,7 +98,7 @@ public class NewArrayInstruction extends DexlibAbstractInstruction {
   public Set<Type> introducedTypes() {
     ReferenceInstruction i = (ReferenceInstruction) instruction;
 
-    Set<Type> types = new HashSet<Type>();
+    Set<Type> types = new HashSet<>();
     types.add(DexType.toSoot((TypeReference) i.getReference()));
     return types;
   }

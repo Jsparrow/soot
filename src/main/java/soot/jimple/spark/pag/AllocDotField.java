@@ -28,35 +28,36 @@ package soot.jimple.spark.pag;
  * @author Ondrej Lhotak
  */
 public class AllocDotField extends Node {
-  /** Returns the base AllocNode. */
-  public AllocNode getBase() {
-    return base;
-  }
-
-  /** Returns the field of this node. */
-  public SparkField getField() {
-    return field;
-  }
-
-  public String toString() {
-    return "AllocDotField " + getNumber() + " " + base + "." + field;
-  }
-
-  /* End of public methods. */
-
-  AllocDotField(PAG pag, AllocNode base, SparkField field) {
-    super(pag, null);
-    if (field == null) {
-      throw new RuntimeException("null field");
-    }
-    this.base = base;
-    this.field = field;
-    base.addField(this, field);
-    pag.getAllocDotFieldNodeNumberer().add(this);
-  }
-
   /* End of package methods. */
+	
+	  protected AllocNode base;
+	protected SparkField field;
+	/* End of public methods. */
+	
+	  AllocDotField(PAG pag, AllocNode base, SparkField field) {
+	    super(pag, null);
+	    if (field == null) {
+	      throw new RuntimeException("null field");
+	    }
+	    this.base = base;
+	    this.field = field;
+	    base.addField(this, field);
+	    pag.getAllocDotFieldNodeNumberer().add(this);
+	  }
 
-  protected AllocNode base;
-  protected SparkField field;
+	/** Returns the base AllocNode. */
+	  public AllocNode getBase() {
+	    return base;
+	  }
+
+	/** Returns the field of this node. */
+	  public SparkField getField() {
+	    return field;
+	  }
+
+	@Override
+	public String toString() {
+	    return new StringBuilder().append("AllocDotField ").append(getNumber()).append(" ").append(base).append(".").append(field)
+				.toString();
+	  }
 }

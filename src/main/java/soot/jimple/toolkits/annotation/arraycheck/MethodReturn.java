@@ -40,11 +40,13 @@ class MethodReturn {
     return m.getReturnType();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return m.hashCode() + m.getParameterCount();
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     if (other instanceof MethodReturn) {
       return m.equals(((MethodReturn) other).getMethod());
     }
@@ -52,7 +54,8 @@ class MethodReturn {
     return false;
   }
 
-  public String toString() {
-    return "[" + m.getSignature() + " : R]";
+  @Override
+public String toString() {
+    return new StringBuilder().append("[").append(m.getSignature()).append(" : R]").toString();
   }
 }

@@ -64,29 +64,30 @@ public class GotoInstrumenter extends BodyTransformer implements IJbcoTransform 
   public static final String name = "jtp.jbco_gia";
   public static final String dependencies[] = new String[] { GotoInstrumenter.name };
 
-  private int trapsAdded = 0;
-  private int gotosInstrumented = 0;
+private static final UnitBox[] EMPTY_UNIT_BOX_ARRAY = new UnitBox[0];
 
-  private static final UnitBox[] EMPTY_UNIT_BOX_ARRAY = new UnitBox[0];
+private static final int MAX_TRIES_TO_GET_REORDER_COUNT = 10;
 
-  private static final int MAX_TRIES_TO_GET_REORDER_COUNT = 10;
+private int trapsAdded = 0;
 
-  @Override
+private int gotosInstrumented = 0;
+
+@Override
   public String getName() {
     return name;
   }
 
-  @Override
+@Override
   public String[] getDependencies() {
     return Arrays.copyOf(dependencies, dependencies.length);
   }
 
-  @Override
+@Override
   public void outputSummary() {
     logger.info("Instrumented {} GOTOs, added {} traps.", gotosInstrumented, trapsAdded);
   }
 
-  @Override
+@Override
   protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     if (SootMethod.constructorName.equals(body.getMethod().getName())
         || SootMethod.staticInitializerName.equals(body.getMethod().getName())) {
@@ -227,7 +228,7 @@ public class GotoInstrumenter extends BodyTransformer implements IJbcoTransform 
     trapsAdded++;
   }
 
-  private static boolean isExceptionCaught(Unit unit, Chain<Unit> units, Chain<Trap> traps) {
+private static boolean isExceptionCaught(Unit unit, Chain<Unit> units, Chain<Trap> traps) {
     for (Trap trap : traps) {
       final Unit end = trap.getEndUnit();
       if (end.equals(unit)) {

@@ -63,7 +63,8 @@ public class PedanticThrowAnalysis extends AbstractThrowAnalysis {
    *
    * @return the set of all <code>Throwable</code>s.
    */
-  public ThrowableSet mightThrow(Unit u) {
+  @Override
+public ThrowableSet mightThrow(Unit u) {
     return ThrowableSet.Manager.v().ALL_THROWABLES;
   }
 
@@ -77,7 +78,8 @@ public class PedanticThrowAnalysis extends AbstractThrowAnalysis {
    *
    * @return the set of all <code>Throwable</code>s.
    */
-  public ThrowableSet mightThrowImplicitly(ThrowInst t) {
+  @Override
+public ThrowableSet mightThrowImplicitly(ThrowInst t) {
     return ThrowableSet.Manager.v().ALL_THROWABLES;
   }
 
@@ -91,7 +93,8 @@ public class PedanticThrowAnalysis extends AbstractThrowAnalysis {
    *
    * @return the set of all <code>Throwable</code>s.
    */
-  public ThrowableSet mightThrowImplicitly(ThrowStmt t) {
+  @Override
+public ThrowableSet mightThrowImplicitly(ThrowStmt t) {
     return ThrowableSet.Manager.v().ALL_THROWABLES;
   }
 }

@@ -8,8 +8,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AQuotedNonvoidType extends PNonvoidType
 {
-    private TQuotedName _quotedName_;
-    private final LinkedList<PArrayBrackets> _arrayBrackets_ = new LinkedList<PArrayBrackets>();
+    private TQuotedName quotedName;
+    private final LinkedList<PArrayBrackets> arrayBrackets = new LinkedList<>();
 
     public AQuotedNonvoidType()
     {
@@ -31,8 +31,8 @@ public final class AQuotedNonvoidType extends PNonvoidType
     public Object clone()
     {
         return new AQuotedNonvoidType(
-            cloneNode(this._quotedName_),
-            cloneList(this._arrayBrackets_));
+            cloneNode(this.quotedName),
+            cloneList(this.arrayBrackets));
     }
 
     @Override
@@ -43,14 +43,14 @@ public final class AQuotedNonvoidType extends PNonvoidType
 
     public TQuotedName getQuotedName()
     {
-        return this._quotedName_;
+        return this.quotedName;
     }
 
     public void setQuotedName(TQuotedName node)
     {
-        if(this._quotedName_ != null)
+        if(this.quotedName != null)
         {
-            this._quotedName_.parent(null);
+            this.quotedName.parent(null);
         }
 
         if(node != null)
@@ -63,54 +63,46 @@ public final class AQuotedNonvoidType extends PNonvoidType
             node.parent(this);
         }
 
-        this._quotedName_ = node;
+        this.quotedName = node;
     }
 
     public LinkedList<PArrayBrackets> getArrayBrackets()
     {
-        return this._arrayBrackets_;
+        return this.arrayBrackets;
     }
 
     public void setArrayBrackets(List<?> list)
     {
-        for(PArrayBrackets e : this._arrayBrackets_)
-        {
-            e.parent(null);
-        }
-        this._arrayBrackets_.clear();
+        this.arrayBrackets.forEach(e -> e.parent(null));
+        this.arrayBrackets.clear();
 
-        for(Object obj_e : list)
-        {
-            PArrayBrackets e = (PArrayBrackets) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PArrayBrackets) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._arrayBrackets_.add(e);
-        }
+			e.parent(this);
+			this.arrayBrackets.add(e);
+		});
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._quotedName_)
-            + toString(this._arrayBrackets_);
+        return new StringBuilder().append("").append(toString(this.quotedName)).append(toString(this.arrayBrackets)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._quotedName_ == child)
+        if(this.quotedName == child)
         {
-            this._quotedName_ = null;
+            this.quotedName = null;
             return;
         }
 
-        if(this._arrayBrackets_.remove(child))
+        if(this.arrayBrackets.remove(child))
         {
             return;
         }
@@ -122,13 +114,13 @@ public final class AQuotedNonvoidType extends PNonvoidType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._quotedName_ == oldChild)
+        if(this.quotedName == oldChild)
         {
             setQuotedName((TQuotedName) newChild);
             return;
         }
 
-        for(ListIterator<PArrayBrackets> i = this._arrayBrackets_.listIterator(); i.hasNext();)
+        for(ListIterator<PArrayBrackets> i = this.arrayBrackets.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {

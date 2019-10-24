@@ -48,11 +48,13 @@ class IntContainer {
     return new IntContainer(value);
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return value;
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     if (other instanceof IntContainer) {
       return ((IntContainer) other).value == this.value;
     }
@@ -60,8 +62,9 @@ class IntContainer {
     return false;
   }
 
-  public String toString() {
-    return "" + value;
+  @Override
+public String toString() {
+    return Integer.toString(value);
   }
 
 }

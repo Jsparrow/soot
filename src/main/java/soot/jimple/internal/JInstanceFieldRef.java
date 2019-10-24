@@ -32,7 +32,8 @@ public class JInstanceFieldRef extends AbstractInstanceFieldRef {
     super(Jimple.v().newLocalBox(base), fieldRef);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JInstanceFieldRef(Jimple.cloneIfNecessary(getBase()), fieldRef);
   }
 }

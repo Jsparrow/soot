@@ -16,12 +16,8 @@ public class ZipFilePart extends PathPart {
 	private Set<String> set;
 	private File file;
 
-	public boolean hasPackage(String name) {
-		return set.contains(name);
-	}
-	
 	public ZipFilePart(File file) throws IOException {
-		this.set = new HashSet<String>();
+		this.set = new HashSet<>();
 		this.file = file;
 		ZipFile zipFile = null;
 		try{
@@ -30,8 +26,9 @@ public class ZipFilePart extends PathPart {
 			for (Enumeration<? extends ZipEntry> e = zipFile.entries() ; e.hasMoreElements() ;) {
 				ZipEntry entry = (ZipEntry)e.nextElement();
 				String pathName = new File(entry.getName()).getParent();
-				if(pathName != null)
+				if(pathName != null) {
 					pathName = pathName.replace(File.separatorChar, '.');
+				}
 				if(!set.contains(pathName)) {
 					int pos = 0;
 					while(pathName != null && -1 != (pos = pathName.indexOf('.', pos + 1))) {
@@ -45,11 +42,18 @@ public class ZipFilePart extends PathPart {
 				set.add(entry.getName());
 			}
 		} finally {
-			if(zipFile != null)
+			if(zipFile != null) {
 				zipFile.close();
+			}
 		}
 	}
 
+	@Override
+	public boolean hasPackage(String name) {
+		return set.contains(name);
+	}
+
+	@Override
 	public boolean selectCompilationUnit(String canonicalName) throws IOException {
 		ZipFile zipFile = null;
 		boolean success = false;
@@ -69,12 +73,13 @@ public class ZipFilePart extends PathPart {
 				}
 			}
 		} finally {
-			if(zipFile != null && !success)
+			if(zipFile != null && !success) {
 				zipFile.close();
+			}
 		}
 		return success;
 	}
-	
+
 	/** Wrapper class for the input stream of a ZipFile entry. All methods are passed through
 	 * to the underlining ZipFile entry input stream. However, close has the additional 
 	 * functionality of ensuring that the ZipFile is closed along with the input stream

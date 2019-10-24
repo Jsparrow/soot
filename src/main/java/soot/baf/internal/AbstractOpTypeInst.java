@@ -53,18 +53,21 @@ public abstract class AbstractOpTypeInst extends AbstractInst {
   }
 
   /* override AbstractInst's toString with our own, including types */
-  public String toString() {
-    return getName() + "." + Baf.bafDescriptorOf(opType) + getParameters();
+  @Override
+public String toString() {
+    return new StringBuilder().append(getName()).append(".").append(Baf.bafDescriptorOf(opType)).append(getParameters()).toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(getName());
     up.literal(".");
     up.literal(Baf.bafDescriptorOf(opType));
     getParameters(up);
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return AbstractJasminClass.sizeOfType(getOpType());
   }
 

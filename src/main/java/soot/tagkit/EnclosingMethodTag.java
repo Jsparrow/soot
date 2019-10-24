@@ -39,12 +39,14 @@ public class EnclosingMethodTag implements Tag {
     this.enclosingMethodSig = s;
   }
 
-  public String toString() {
-    return "Enclosing Class: " + enclosingClass + " Enclosing Method: " + enclosingMethod + " Sig: " + enclosingMethodSig;
+  @Override
+public String toString() {
+    return new StringBuilder().append("Enclosing Class: ").append(enclosingClass).append(" Enclosing Method: ").append(enclosingMethod).append(" Sig: ").append(enclosingMethodSig).toString();
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "EnclosingMethodTag";
   }
 
@@ -65,7 +67,8 @@ public class EnclosingMethodTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("EnclosingMethodTag has no value for bytecode");
   }
 }

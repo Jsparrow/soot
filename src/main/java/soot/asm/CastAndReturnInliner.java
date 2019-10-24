@@ -70,13 +70,8 @@ public class CastAndReturnInliner extends BodyTransformer {
                 ReturnStmt newStmt = (ReturnStmt) retStmt.clone();
                 newStmt.setOp(ce.getOp());
 
-                for (Trap t : body.getTraps()) {
-                  for (UnitBox ubox : t.getUnitBoxes()) {
-                    if (ubox.getUnit() == gtStmt) {
-                      ubox.setUnit(newStmt);
-                    }
-                  }
-                }
+                body.getTraps().forEach(t -> t.getUnitBoxes().stream().filter(ubox -> ubox.getUnit() == gtStmt)
+						.forEach(ubox -> ubox.setUnit(newStmt)));
 
                 while (!gtStmt.getBoxesPointingToThis().isEmpty()) {
                   gtStmt.getBoxesPointingToThis().get(0).setUnit(newStmt);

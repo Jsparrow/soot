@@ -80,7 +80,7 @@ public class DavaStaticBlockCleaner {
 
     // retireve the active body
     if (!clinit.hasActiveBody()) {
-      throw new RuntimeException("method " + clinit.getName() + " has no active body!");
+      throw new RuntimeException(new StringBuilder().append("method ").append(clinit.getName()).append(" has no active body!").toString());
     }
 
     Body clinitBody = clinit.getActiveBody();
@@ -108,46 +108,42 @@ public class DavaStaticBlockCleaner {
   public ASTMethodNode inline(SootMethod maybeInline) {
     // check if this method should be inlined
 
-    if (sootClass != null) {
-      // 1, method should belong to the same class as the clinit method
-      if (sootClass.declaresMethod(maybeInline.getSubSignature())) {
-        // System.out.println("The method invoked is from the same class");
-        // 2, method should be static
+    boolean condition = sootClass != null && sootClass.declaresMethod(maybeInline.getSubSignature()) && Modifier.isStatic(maybeInline.getModifiers());
+	// 1, method should belong to the same class as the clinit method
+	// System.out.println("The method invoked is from the same class");
+	// 2, method should be static
+	if (condition) {
+	  // decided to inline
+	  // send the ASTMethod node of the TO BE INLINED METHOD
 
-        if (Modifier.isStatic(maybeInline.getModifiers())) {
-          // decided to inline
-          // send the ASTMethod node of the TO BE INLINED METHOD
+	  // retireve the active body
+	  if (!maybeInline.hasActiveBody()) {
+	    throw new RuntimeException(new StringBuilder().append("method ").append(maybeInline.getName()).append(" has no active body!").toString());
+	  }
 
-          // retireve the active body
-          if (!maybeInline.hasActiveBody()) {
-            throw new RuntimeException("method " + maybeInline.getName() + " has no active body!");
-          }
+	  Body bod = maybeInline.getActiveBody();
 
-          Body bod = maybeInline.getActiveBody();
+	  Chain units = ((DavaBody) bod).getUnits();
 
-          Chain units = ((DavaBody) bod).getUnits();
+	  if (units.size() != 1) {
+	    throw new RuntimeException("DavaBody AST doesn't have single root.");
+	  }
 
-          if (units.size() != 1) {
-            throw new RuntimeException("DavaBody AST doesn't have single root.");
-          }
+	  ASTNode ASTtemp = (ASTNode) units.getFirst();
+	  if (!(ASTtemp instanceof ASTMethodNode)) {
+	    throw new RuntimeException("Starting node of DavaBody AST is not an ASTMethodNode");
+	  }
 
-          ASTNode ASTtemp = (ASTNode) units.getFirst();
-          if (!(ASTtemp instanceof ASTMethodNode)) {
-            throw new RuntimeException("Starting node of DavaBody AST is not an ASTMethodNode");
-          }
+	  // restricting to methods which do not have any variables declared
+	  ASTMethodNode toReturn = (ASTMethodNode) ASTtemp;
 
-          // restricting to methods which do not have any variables declared
-          ASTMethodNode toReturn = (ASTMethodNode) ASTtemp;
-
-          ASTStatementSequenceNode declarations = toReturn.getDeclarations();
-          if (declarations.getStatements().size() == 0) {
-            // inline only if there are no declarations in the method inlined
-            // System.out.println("No declarations in the method. we can inline this method");
-            return toReturn;
-          }
-        }
-      }
-    }
+	  ASTStatementSequenceNode declarations = toReturn.getDeclarations();
+	  if (declarations.getStatements().size() == 0) {
+	    // inline only if there are no declarations in the method inlined
+	    // System.out.println("No declarations in the method. we can inline this method");
+	    return toReturn;
+	  }
+	}
     return null;// meaning dont inline
   }
 

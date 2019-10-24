@@ -62,13 +62,9 @@ public class LocalCreation {
    *          prefix overrides the DEFAULT-PREFIX
    */
   public LocalCreation(Collection<Local> locals, String prefix) {
-    this.locals = new HashSet<String>(locals.size());
+    this.locals = new HashSet<>(locals.size());
     localChain = locals;
-    Iterator<Local> it = locals.iterator();
-    while (it.hasNext()) {
-      Local l = (Local) it.next();
-      this.locals.add(l.getName());
-    }
+    locals.stream().map(local -> (Local) local).forEach(l -> this.locals.add(l.getName()));
     this.prefix = prefix;
     counter = 0; // try the first one with suffix 0.
   }
@@ -101,7 +97,7 @@ public class LocalCreation {
    */
   public Local newLocal(String prefix, Type type) {
     int suffix = 0;
-    if (prefix == this.prefix || prefix.equals(this.prefix)) {
+    if (prefix.equals(this.prefix) || prefix.equals(this.prefix)) {
       suffix = counter;
     }
 
@@ -109,7 +105,7 @@ public class LocalCreation {
       suffix++;
     }
 
-    if (prefix == this.prefix || prefix.equals(this.prefix)) {
+    if (prefix.equals(this.prefix) || prefix.equals(this.prefix)) {
       counter = suffix + 1;
     }
     String newName = prefix + suffix;

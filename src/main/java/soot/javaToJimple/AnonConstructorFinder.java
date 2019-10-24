@@ -38,10 +38,11 @@ public class AnonConstructorFinder extends polyglot.visit.ContextVisitor {
     super(job, ts, nf);
   }
 
-  public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
+  @Override
+public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
     if (n instanceof polyglot.ast.New && ((polyglot.ast.New) n).anonType() != null) {
       try {
-        List<Type> argTypes = new ArrayList<Type>();
+        List<Type> argTypes = new ArrayList<>();
         for (Iterator it = ((polyglot.ast.New) n).arguments().iterator(); it.hasNext();) {
           argTypes.add(((polyglot.ast.Expr) it.next()).type());
         }
@@ -50,7 +51,7 @@ public class AnonConstructorFinder extends polyglot.visit.ContextVisitor {
                 ((polyglot.ast.New) n).anonType().superType().toClass());
         InitialResolver.v().addToAnonConstructorMap((polyglot.ast.New) n, ci);
       } catch (polyglot.types.SemanticException e) {
-        System.out.println(e.getMessage());
+        logger.info(e.getMessage(), e);
         logger.error(e.getMessage(), e);
       }
     }

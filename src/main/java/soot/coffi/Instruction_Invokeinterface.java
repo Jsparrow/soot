@@ -54,39 +54,44 @@ package soot.coffi;
  * @see Instruction_Unknown
  */
 class Instruction_Invokeinterface extends Instruction_intindex {
-  public Instruction_Invokeinterface() {
-    super((byte) ByteCode.INVOKEINTERFACE);
-    name = "invokeinterface";
-    // branches = true;
-    calls = true;
-  }
-
   public byte nargs;
-  public byte reserved;
+	public byte reserved;
 
-  public String toString(cp_info constant_pool[]) {
-    return super.toString(constant_pool) + argsep + nargs + argsep + "(reserved " + reserved + ")";
-  }
+	public Instruction_Invokeinterface() {
+	    super((byte) ByteCode.INVOKEINTERFACE);
+	    name = "invokeinterface";
+	    // branches = true;
+	    calls = true;
+	  }
 
-  public int nextOffset(int curr) {
-    return super.nextOffset(curr) + 2;
-  }
+	@Override
+	public String toString(cp_info constant_pool[]) {
+	    return new StringBuilder().append(super.toString(constant_pool)).append(argsep).append(nargs).append(argsep).append("(reserved ")
+				.append(reserved).append(")").toString();
+	  }
 
-  public int parse(byte bc[], int index) {
-    index = super.parse(bc, index);
-    nargs = bc[index];
-    index++;
-    reserved = bc[index];
-    return index + 1;
-  }
+	@Override
+	public int nextOffset(int curr) {
+	    return super.nextOffset(curr) + 2;
+	  }
 
-  public int compile(byte bc[], int index) {
-    index = super.compile(bc, index);
-    bc[index++] = nargs;
-    bc[index++] = reserved;
-    return index;
-  }
-  /*
-   * Instruction[] branchpoints(Instruction next) { public Instruction i[] = new Instruction[1]; i[0] = null; return i; }
-   */
+	@Override
+	public int parse(byte bc[], int index) {
+	    index = super.parse(bc, index);
+	    nargs = bc[index];
+	    index++;
+	    reserved = bc[index];
+	    return index + 1;
+	  }
+
+	@Override
+	public int compile(byte bc[], int index) {
+	    index = super.compile(bc, index);
+	    bc[index++] = nargs;
+	    bc[index++] = reserved;
+	    return index;
+	  }
+	  /*
+	   * Instruction[] branchpoints(Instruction next) { public Instruction i[] = new Instruction[1]; i[0] = null; return i; }
+	   */
 }

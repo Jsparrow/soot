@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AArrayDescriptor extends PArrayDescriptor
 {
-    private TLBracket _lBracket_;
-    private PImmediate _immediate_;
-    private TRBracket _rBracket_;
+    private TLBracket lBracket;
+    private PImmediate immediate;
+    private TRBracket rBracket;
 
     public AArrayDescriptor()
     {
@@ -34,9 +34,9 @@ public final class AArrayDescriptor extends PArrayDescriptor
     public Object clone()
     {
         return new AArrayDescriptor(
-            cloneNode(this._lBracket_),
-            cloneNode(this._immediate_),
-            cloneNode(this._rBracket_));
+            cloneNode(this.lBracket),
+            cloneNode(this.immediate),
+            cloneNode(this.rBracket));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class AArrayDescriptor extends PArrayDescriptor
 
     public TLBracket getLBracket()
     {
-        return this._lBracket_;
+        return this.lBracket;
     }
 
     public void setLBracket(TLBracket node)
     {
-        if(this._lBracket_ != null)
+        if(this.lBracket != null)
         {
-            this._lBracket_.parent(null);
+            this.lBracket.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class AArrayDescriptor extends PArrayDescriptor
             node.parent(this);
         }
 
-        this._lBracket_ = node;
+        this.lBracket = node;
     }
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AArrayDescriptor extends PArrayDescriptor
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     public TRBracket getRBracket()
     {
-        return this._rBracket_;
+        return this.rBracket;
     }
 
     public void setRBracket(TRBracket node)
     {
-        if(this._rBracket_ != null)
+        if(this.rBracket != null)
         {
-            this._rBracket_.parent(null);
+            this.rBracket.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class AArrayDescriptor extends PArrayDescriptor
             node.parent(this);
         }
 
-        this._rBracket_ = node;
+        this.rBracket = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._lBracket_)
-            + toString(this._immediate_)
-            + toString(this._rBracket_);
+        return new StringBuilder().append("").append(toString(this.lBracket)).append(toString(this.immediate)).append(toString(this.rBracket)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._lBracket_ == child)
+        if(this.lBracket == child)
         {
-            this._lBracket_ = null;
+            this.lBracket = null;
             return;
         }
 
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
-        if(this._rBracket_ == child)
+        if(this.rBracket == child)
         {
-            this._rBracket_ = null;
+            this.rBracket = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class AArrayDescriptor extends PArrayDescriptor
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._lBracket_ == oldChild)
+        if(this.lBracket == oldChild)
         {
             setLBracket((TLBracket) newChild);
             return;
         }
 
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;
         }
 
-        if(this._rBracket_ == oldChild)
+        if(this.rBracket == oldChild)
         {
             setRBracket((TRBracket) newChild);
             return;

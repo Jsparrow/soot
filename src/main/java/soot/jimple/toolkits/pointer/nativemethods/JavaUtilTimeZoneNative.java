@@ -35,12 +35,13 @@ public class JavaUtilTimeZoneNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.String getSystemTimeZoneID(java.lang.String,java.lang.String)")) {
+    if ("java.lang.String getSystemTimeZoneID(java.lang.String,java.lang.String)".equals(subSignature)) {
       java_util_TimeZone_getSystemTimeZoneID(method, thisVar, returnVar, params);
       return;
 

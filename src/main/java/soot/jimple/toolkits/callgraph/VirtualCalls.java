@@ -59,28 +59,33 @@ import soot.util.queue.ChunkedQueue;
  */
 public class VirtualCalls {
   private CGOptions options = new CGOptions(PhaseOptions.v().getPhaseOptions("cg"));
+private final LargeNumberedMap<Type, SmallNumberedMap<SootMethod>> typeToVtbl
+      = new LargeNumberedMap<>(Scene.v().getTypeNumberer());
+protected MultiMap<Type, Type> baseToSubTypes = new HashMultiMap<>();
+protected MultiMap<Pair<Type, NumberedString>, Pair<Type, NumberedString>> baseToPossibleSubTypes
+      = new HashMultiMap<>();
+public final NumberedString sigClinit = Scene.v().getSubSigNumberer().findOrAdd("void <clinit>()");
+public final NumberedString sigStart = Scene.v().getSubSigNumberer().findOrAdd("void start()");
+public final NumberedString sigRun = Scene.v().getSubSigNumberer().findOrAdd("void run()");
 
-  public VirtualCalls(Singletons.Global g) {
+public VirtualCalls(Singletons.Global g) {
   }
 
-  public static VirtualCalls v() {
+public static VirtualCalls v() {
     return G.v().soot_jimple_toolkits_callgraph_VirtualCalls();
   }
 
-  private final LargeNumberedMap<Type, SmallNumberedMap<SootMethod>> typeToVtbl
-      = new LargeNumberedMap<Type, SmallNumberedMap<SootMethod>>(Scene.v().getTypeNumberer());
-
-  public SootMethod resolveSpecial(SpecialInvokeExpr iie, NumberedString subSig, SootMethod container) {
+public SootMethod resolveSpecial(SpecialInvokeExpr iie, NumberedString subSig, SootMethod container) {
     return resolveSpecial(iie, subSig, container, false);
   }
 
-  public SootMethod resolveSpecial(SpecialInvokeExpr iie, NumberedString subSig, SootMethod container, boolean appOnly) {
+public SootMethod resolveSpecial(SpecialInvokeExpr iie, NumberedString subSig, SootMethod container, boolean appOnly) {
     SootMethod target = iie.getMethod();
     /* cf. JVM spec, invokespecial instruction */
     if (Scene.v().getOrMakeFastHierarchy().canStoreType(container.getDeclaringClass().getType(),
         target.getDeclaringClass().getType())
         && container.getDeclaringClass().getType() != target.getDeclaringClass().getType()
-        && !target.getName().equals("<init>") && subSig != sigClinit) {
+        && !"<init>".equals(target.getName()) && subSig != sigClinit) {
 
       return resolveNonSpecial(container.getDeclaringClass().getSuperclass().getType(), subSig, appOnly);
     } else {
@@ -88,14 +93,14 @@ public class VirtualCalls {
     }
   }
 
-  public SootMethod resolveNonSpecial(RefType t, NumberedString subSig) {
+public SootMethod resolveNonSpecial(RefType t, NumberedString subSig) {
     return resolveNonSpecial(t, subSig, false);
   }
 
-  public SootMethod resolveNonSpecial(RefType t, NumberedString subSig, boolean appOnly) {
+public SootMethod resolveNonSpecial(RefType t, NumberedString subSig, boolean appOnly) {
     SmallNumberedMap<SootMethod> vtbl = typeToVtbl.get(t);
     if (vtbl == null) {
-      typeToVtbl.put(t, vtbl = new SmallNumberedMap<SootMethod>());
+      typeToVtbl.put(t, vtbl = new SmallNumberedMap<>());
     }
     SootMethod ret = vtbl.get(subSig);
     if (ret != null) {
@@ -121,26 +126,22 @@ public class VirtualCalls {
     return ret;
   }
 
-  protected MultiMap<Type, Type> baseToSubTypes = new HashMultiMap<Type, Type>();
-  protected MultiMap<Pair<Type, NumberedString>, Pair<Type, NumberedString>> baseToPossibleSubTypes
-      = new HashMultiMap<Pair<Type, NumberedString>, Pair<Type, NumberedString>>();
-
-  public void resolve(Type t, Type declaredType, NumberedString subSig, SootMethod container,
+public void resolve(Type t, Type declaredType, NumberedString subSig, SootMethod container,
       ChunkedQueue<SootMethod> targets) {
     resolve(t, declaredType, null, subSig, container, targets);
   }
 
-  public void resolve(Type t, Type declaredType, NumberedString subSig, SootMethod container,
+public void resolve(Type t, Type declaredType, NumberedString subSig, SootMethod container,
       ChunkedQueue<SootMethod> targets, boolean appOnly) {
     resolve(t, declaredType, null, subSig, container, targets, appOnly);
   }
 
-  public void resolve(Type t, Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
+public void resolve(Type t, Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
       ChunkedQueue<SootMethod> targets) {
     resolve(t, declaredType, sigType, subSig, container, targets, false);
   }
 
-  public void resolve(Type t, Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
+public void resolve(Type t, Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
       ChunkedQueue<SootMethod> targets, boolean appOnly) {
     if (declaredType instanceof ArrayType) {
       declaredType = RefType.v("java.lang.Object");
@@ -188,7 +189,7 @@ public class VirtualCalls {
     }
   }
 
-  public void resolveSuperType(Type t, Type declaredType, NumberedString subSig, ChunkedQueue<SootMethod> targets, 
+public void resolveSuperType(Type t, Type declaredType, NumberedString subSig, ChunkedQueue<SootMethod> targets, 
       boolean appOnly) {
     if (declaredType == null) {
       return;
@@ -202,39 +203,38 @@ public class VirtualCalls {
     if (t instanceof ArrayType) {
       t = RefType.v("java.lang.Object");
     }
-    if (declaredType instanceof RefType) {
-      RefType parent = (RefType)declaredType;
-      SootClass parentClass = parent.getSootClass();
-      RefType child;
-      SootClass childClass;
-      if (t instanceof AnySubType) {
+    if (!(declaredType instanceof RefType)) {
+		return;
+	}
+	RefType parent = (RefType)declaredType;
+	SootClass parentClass = parent.getSootClass();
+	RefType child;
+	SootClass childClass;
+	if (t instanceof AnySubType) {
         child = ((AnySubType) t).getBase();
       } else if (t instanceof RefType) {
         child = (RefType)t;
       } else {
         return;
       }
-      childClass = child.getSootClass();
-      FastHierarchy fastHierachy = Scene.v().getOrMakeFastHierarchy();
-      if (fastHierachy.canStoreClass(childClass,parentClass)) {
+	childClass = child.getSootClass();
+	FastHierarchy fastHierachy = Scene.v().getOrMakeFastHierarchy();
+	if (fastHierachy.canStoreClass(childClass,parentClass)) {
         SootMethod target = resolveNonSpecial(child, subSig, appOnly);
         if (target != null) {
           targets.add(target);
         }
       }
-    }
   }
 
-  protected void resolveAnySubType(Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
+protected void resolveAnySubType(Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
       ChunkedQueue<SootMethod> targets, boolean appOnly, RefType base) {
     FastHierarchy fastHierachy = Scene.v().getOrMakeFastHierarchy();
 
     {
       Set<Type> subTypes = baseToSubTypes.get(base);
       if (subTypes != null && !subTypes.isEmpty()) {
-        for (final Type st : subTypes) {
-          resolve(st, declaredType, sigType, subSig, container, targets, appOnly);
-        }
+        subTypes.forEach((final Type st) -> resolve(st, declaredType, sigType, subSig, container, targets, appOnly));
         return;
       }
     }
@@ -242,8 +242,8 @@ public class VirtualCalls {
     Set<Type> newSubTypes = new HashSet<>();
     newSubTypes.add(base);
 
-    LinkedList<SootClass> worklist = new LinkedList<SootClass>();
-    HashSet<SootClass> workset = new HashSet<SootClass>();
+    LinkedList<SootClass> worklist = new LinkedList<>();
+    HashSet<SootClass> workset = new HashSet<>();
     FastHierarchy fh = fastHierachy;
     SootClass cl = base.getSootClass();
 
@@ -276,37 +276,36 @@ public class VirtualCalls {
     baseToSubTypes.putAll(base, newSubTypes);
   }
 
-  protected void resolveLibrarySignature(Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
+protected void resolveLibrarySignature(Type declaredType, Type sigType, NumberedString subSig, SootMethod container,
       ChunkedQueue<SootMethod> targets, boolean appOnly, RefType base) {
     FastHierarchy fastHierachy = Scene.v().getOrMakeFastHierarchy();
 
     assert (declaredType instanceof RefType);
-    Pair<Type, NumberedString> pair = new Pair<Type, NumberedString>(base, subSig);
+    Pair<Type, NumberedString> pair = new Pair<>(base, subSig);
     {
       Set<Pair<Type, NumberedString>> types = baseToPossibleSubTypes.get(pair);
       // if this type and method has been resolved earlier we can
       // just retrieve the previous result.
       if (types != null) {
-        for (Pair<Type, NumberedString> tuple : types) {
-          Type st = tuple.getO1();
-          if (!fastHierachy.canStoreType(st, declaredType)) {
-            resolve(st, st, sigType, subSig, container, targets, appOnly);
-          } else {
-            resolve(st, declaredType, sigType, subSig, container, targets, appOnly);
-          }
-        }
+        types.stream().map(Pair::getO1).forEach(st -> {
+			if (!fastHierachy.canStoreType(st, declaredType)) {
+			    resolve(st, st, sigType, subSig, container, targets, appOnly);
+			  } else {
+			    resolve(st, declaredType, sigType, subSig, container, targets, appOnly);
+			  }
+		});
         return;
       }
     }
 
-    Set<Pair<Type, NumberedString>> types = new HashSet<Pair<Type, NumberedString>>();
+    Set<Pair<Type, NumberedString>> types = new HashSet<>();
 
     // get return type; method name; parameter types
     String[] split = subSig.getString().replaceAll("(.*) (.*)\\((.*)\\)", "$1;$2;$3").split(";");
 
     Type declaredReturnType = Scene.v().getType(split[0]);
     String declaredName = split[1];
-    List<Type> declaredParamTypes = new ArrayList<Type>();
+    List<Type> declaredParamTypes = new ArrayList<>();
 
     // separate the parameter types
     if (split.length == 3) {
@@ -365,8 +364,4 @@ public class VirtualCalls {
     }
     baseToPossibleSubTypes.putAll(pair, types);
   }
-
-  public final NumberedString sigClinit = Scene.v().getSubSigNumberer().findOrAdd("void <clinit>()");
-  public final NumberedString sigStart = Scene.v().getSubSigNumberer().findOrAdd("void start()");
-  public final NumberedString sigRun = Scene.v().getSubSigNumberer().findOrAdd("void run()");
 }

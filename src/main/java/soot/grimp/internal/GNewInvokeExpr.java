@@ -61,26 +61,31 @@ public class GNewInvokeExpr extends AbstractInvokeExpr implements NewInvokeExpr,
    * protected GNewInvokeExpr(RefType type, ExprBox[] argBoxes) { this.type = type; this.argBoxes = argBoxes; }
    */
 
-  public RefType getBaseType() {
+  @Override
+public RefType getBaseType() {
     return type;
   }
 
-  public void setBaseType(RefType type) {
+  @Override
+public void setBaseType(RefType type) {
     this.type = type;
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return type;
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 850;
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
-    buffer.append("new " + type.toString() + "(");
+    buffer.append(new StringBuilder().append("new ").append(type.toString()).append("(").toString());
 
     if (argBoxes != null) {
       for (int i = 0; i < argBoxes.length; i++) {
@@ -97,7 +102,8 @@ public class GNewInvokeExpr extends AbstractInvokeExpr implements NewInvokeExpr,
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal("new");
     up.literal(" ");
     up.type(type);
@@ -116,11 +122,13 @@ public class GNewInvokeExpr extends AbstractInvokeExpr implements NewInvokeExpr,
     up.literal(")");
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((GrimpValueSwitch) sw).caseNewInvokeExpr(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     ArrayList clonedArgs = new ArrayList(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {
@@ -131,30 +139,32 @@ public class GNewInvokeExpr extends AbstractInvokeExpr implements NewInvokeExpr,
     return new GNewInvokeExpr(getBaseType(), methodRef, clonedArgs);
   }
 
-  public boolean equivTo(Object o) {
-    if (o instanceof GNewInvokeExpr) {
-      GNewInvokeExpr ie = (GNewInvokeExpr) o;
-      if (!(getMethod().equals(ie.getMethod())
+  @Override
+public boolean equivTo(Object o) {
+    if (!(o instanceof GNewInvokeExpr)) {
+		return false;
+	}
+	GNewInvokeExpr ie = (GNewInvokeExpr) o;
+	if (!(getMethod().equals(ie.getMethod())
           && (argBoxes == null ? 0 : argBoxes.length) == (ie.argBoxes == null ? 0 : ie.argBoxes.length))) {
         return false;
       }
-      if (argBoxes != null) {
+	if (argBoxes != null) {
         for (ValueBox element : argBoxes) {
           if (!(element.getValue().equivTo(element.getValue()))) {
             return false;
           }
         }
       }
-      if (!type.equals(ie.type)) {
+	if (!type.equals(ie.type)) {
         return false;
       }
-      return true;
-    }
-    return false;
+	return true;
   }
 
   /** Returns a hash code for this object, consistent with structural equality. */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return getMethod().equivHashCode();
   }
 }

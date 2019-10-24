@@ -41,7 +41,7 @@ public interface MutableEdgeLabelledDirectedGraph<N, L> extends EdgeLabelledDire
    * @param label
    *          label for the edge.
    */
-  public void addEdge(N from, N to, L label);
+  void addEdge(N from, N to, L label);
 
   /**
    * Removes an edge between 2 nodes in the graph. If the edge is not present no change is made.
@@ -53,7 +53,7 @@ public interface MutableEdgeLabelledDirectedGraph<N, L> extends EdgeLabelledDire
    * @param label
    *          label for the edge to remove.
    */
-  public void removeEdge(N from, N to, L label);
+  void removeEdge(N from, N to, L label);
 
   /**
    * Removes all edges between 2 nodes in the graph. If no edges are present, no change is made.
@@ -63,7 +63,7 @@ public interface MutableEdgeLabelledDirectedGraph<N, L> extends EdgeLabelledDire
    * @param to
    *          in node for the edges to remove.
    */
-  public void removeAllEdges(N from, N to);
+  void removeAllEdges(N from, N to);
 
   /**
    * Removes all edges with the given label in the graph. If no edges are present, no change is made.
@@ -71,7 +71,7 @@ public interface MutableEdgeLabelledDirectedGraph<N, L> extends EdgeLabelledDire
    * @param label
    *          label for the edge to remove.
    */
-  public void removeAllEdges(L label);
+  void removeAllEdges(L label);
 
   /**
    * Adds a node to the graph. Initially the added node has no successors or predecessors. ; as a consequence it is
@@ -83,7 +83,7 @@ public interface MutableEdgeLabelledDirectedGraph<N, L> extends EdgeLabelledDire
    * @see #getHeads
    * @see #getTails
    */
-  public void addNode(N node);
+  void addNode(N node);
 
   /**
    * Removes a node from the graph. If the node is not found in the graph, no change is made.
@@ -91,5 +91,5 @@ public interface MutableEdgeLabelledDirectedGraph<N, L> extends EdgeLabelledDire
    * @param node
    *          the node to be removed.
    */
-  public void removeNode(N node);
+  void removeNode(N node);
 }

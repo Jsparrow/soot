@@ -56,8 +56,9 @@ public class AnonLocalClassInfo {
     finalLocalsUsed = list;
   }
 
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
     sb.append("static: ");
     sb.append(inStaticMethod);
     sb.append(" finalLocalsAvail: ");

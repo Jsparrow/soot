@@ -60,13 +60,12 @@ public class PackedSwitchInstruction extends SwitchInstruction {
     int defaultTargetAddress = codeAddress + instruction.getCodeUnits();
     Unit defaultTarget = body.instructionAtAddress(defaultTargetAddress).getUnit();
 
-    List<IntConstant> lookupValues = new ArrayList<IntConstant>();
-    List<Unit> targets = new ArrayList<Unit>();
-    for (SwitchElement se : seList) {
-      lookupValues.add(IntConstant.v(se.getKey()));
-      int offset = se.getOffset();
-      targets.add(body.instructionAtAddress(codeAddress + offset).getUnit());
-    }
+    List<IntConstant> lookupValues = new ArrayList<>();
+    List<Unit> targets = new ArrayList<>();
+    seList.stream().mapToInt(se -> {
+		lookupValues.add(IntConstant.v(se.getKey()));
+		return se.getOffset();
+	}).forEach(offset -> targets.add(body.instructionAtAddress(codeAddress + offset).getUnit()));
     LookupSwitchStmt switchStmt = Jimple.v().newLookupSwitchStmt(key, lookupValues, targets, defaultTarget);
     setUnit(switchStmt);
 

@@ -72,15 +72,15 @@ public class IFDSUninitializedVariables
 
             @Override
             public Set<Local> computeTargets(Local source) {
-              if (source == zeroValue()) {
-                Set<Local> res = new LinkedHashSet<Local>();
-                res.addAll(m.getActiveBody().getLocals());
-                for (int i = 0; i < m.getParameterCount(); i++) {
-                  res.remove(m.getActiveBody().getParameterLocal(i));
-                }
-                return res;
-              }
-              return Collections.emptySet();
+              if (source != zeroValue()) {
+				return Collections.emptySet();
+			}
+			Set<Local> res = new LinkedHashSet<>();
+			res.addAll(m.getActiveBody().getLocals());
+			for (int i = 0; i < m.getParameterCount(); i++) {
+			  res.remove(m.getActiveBody().getParameterLocal(i));
+			}
+			return res;
             }
           };
         }
@@ -97,7 +97,7 @@ public class IFDSUninitializedVariables
                 List<ValueBox> useBoxes = definition.getUseBoxes();
                 for (ValueBox valueBox : useBoxes) {
                   if (valueBox.getValue().equivTo(source)) {
-                    LinkedHashSet<Local> res = new LinkedHashSet<Local>();
+                    LinkedHashSet<Local> res = new LinkedHashSet<>();
                     res.add(source);
                     res.add(leftOpLocal);
                     return res;
@@ -124,19 +124,15 @@ public class IFDSUninitializedVariables
         InvokeExpr invokeExpr = stmt.getInvokeExpr();
         final List<Value> args = invokeExpr.getArgs();
 
-        final List<Local> localArguments = new ArrayList<Local>();
-        for (Value value : args) {
-          if (value instanceof Local) {
-            localArguments.add((Local) value);
-          }
-        }
+        final List<Local> localArguments = new ArrayList<>();
+        args.stream().filter(value -> value instanceof Local).forEach(value -> localArguments.add((Local) value));
 
         return new FlowFunction<Local>() {
 
           @Override
           public Set<Local> computeTargets(final Local source) {
             // Do not map parameters for <clinit> edges
-            if (destinationMethod.getName().equals("<clinit>") || destinationMethod.getSubSignature().equals("void run()")) {
+            if ("<clinit>".equals(destinationMethod.getName()) || "void run()".equals(destinationMethod.getSubSignature())) {
               return Collections.emptySet();
             }
 
@@ -147,17 +143,16 @@ public class IFDSUninitializedVariables
               }
             }
 
-            if (source == zeroValue()) {
-              // gen all locals that are not parameter locals
+            if (source != zeroValue()) {
+				return Collections.emptySet();
+			}
+			// gen all locals that are not parameter locals
               Collection<Local> locals = destinationMethod.getActiveBody().getLocals();
-              LinkedHashSet<Local> uninitializedLocals = new LinkedHashSet<Local>(locals);
-              for (int i = 0; i < destinationMethod.getParameterCount(); i++) {
+			LinkedHashSet<Local> uninitializedLocals = new LinkedHashSet<>(locals);
+			for (int i = 0; i < destinationMethod.getParameterCount(); i++) {
                 uninitializedLocals.remove(destinationMethod.getActiveBody().getParameterLocal(i));
               }
-              return uninitializedLocals;
-            }
-
-            return Collections.emptySet();
+			return uninitializedLocals;
           }
 
         };
@@ -210,7 +205,7 @@ public class IFDSUninitializedVariables
           DefinitionStmt definition = (DefinitionStmt) callSite;
           if (definition.getLeftOp() instanceof Local) {
             final Local leftOpLocal = (Local) definition.getLeftOp();
-            return new Kill<Local>(leftOpLocal);
+            return new Kill<>(leftOpLocal);
           }
         }
         return Identity.v();
@@ -218,7 +213,8 @@ public class IFDSUninitializedVariables
     };
   }
 
-  public Map<Unit, Set<Local>> initialSeeds() {
+  @Override
+public Map<Unit, Set<Local>> initialSeeds() {
     return DefaultSeeds.make(Collections.singleton(Scene.v().getMainMethod().getActiveBody().getUnits().getFirst()),
         zeroValue());
   }

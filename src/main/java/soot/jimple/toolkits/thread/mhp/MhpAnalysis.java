@@ -48,6 +48,8 @@ import soot.tagkit.Tag;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -66,7 +68,8 @@ import soot.util.Chain;
  */
 class MhpAnalysis {
 
-  private PegGraph g;
+  private static final Logger logger = LoggerFactory.getLogger(MhpAnalysis.class);
+private PegGraph g;
   private final Map<Object, FlowSet> unitToGen;
   private final Map<Object, FlowSet> unitToKill;
   private final Map<Object, FlowSet> unitToM;
@@ -76,21 +79,21 @@ class MhpAnalysis {
   private final Map<String, FlowSet> monitor;
   private final Map<JPegStmt, Set<JPegStmt>> notifyPred;
   FlowSet fullSet = new ArraySparseSet();
-  LinkedList<Object> workList = new LinkedList<Object>();
+  LinkedList<Object> workList = new LinkedList<>();
 
   MhpAnalysis(PegGraph g) {
     // System.out.println("******entering MhpAnalysis");
     this.g = g;
     int size = g.size();
     Map startToThread = g.getStartToThread();
-    unitToGen = new HashMap<Object, FlowSet>(size * 2 + 1, 0.7f);
-    unitToKill = new HashMap<Object, FlowSet>(size * 2 + 1, 0.7f);
-    unitToM = new HashMap<Object, FlowSet>(size * 2 + 1, 0.7f);
+    unitToGen = new HashMap<>(size * 2 + 1, 0.7f);
+    unitToKill = new HashMap<>(size * 2 + 1, 0.7f);
+    unitToM = new HashMap<>(size * 2 + 1, 0.7f);
     // unitToMSym = new HashMap(size*2+1, 0.7f);
-    unitToOut = new HashMap<Object, FlowSet>(size * 2 + 1, 0.7f);
-    notifySucc = new HashMap<Object, FlowSet>(size * 2 + 1, 0.7f);
+    unitToOut = new HashMap<>(size * 2 + 1, 0.7f);
+    notifySucc = new HashMap<>(size * 2 + 1, 0.7f);
     // notifyEdge = new HashMap(size*2+1,0.7f);
-    notifyPred = new HashMap<JPegStmt, Set<JPegStmt>>(size * 2 + 1, 0.7f);
+    notifyPred = new HashMap<>(size * 2 + 1, 0.7f);
     // monitor = new HashMap(size*2+1,0.7f);
     monitor = g.getMonitor();
 
@@ -257,7 +260,7 @@ class MhpAnalysis {
     computeMPairs();
     computeMSet();
     long buildPegDuration = (System.currentTimeMillis() - beginTime);
-    System.err.println("compute parir + mset: " + buildPegDuration);
+    logger.error("compute parir + mset: " + buildPegDuration);
     // ------------
   }
 
@@ -505,7 +508,7 @@ class MhpAnalysis {
                       notifyPredSet.add(currentNode);
                       notifyPred.put(waitingSucc, notifyPredSet);
                     } else {
-                      Set<JPegStmt> notifyPredSet = new HashSet<JPegStmt>();
+                      Set<JPegStmt> notifyPredSet = new HashSet<>();
                       notifyPredSet.add(currentNode);
                       // notifyPredSet.add(waitingSucc);
                       notifyPred.put(waitingSucc, notifyPredSet);
@@ -666,9 +669,7 @@ class MhpAnalysis {
           mSet = new ArraySparseSet();
           Map<JPegStmt, List> startToThread = g.getStartToThread();
           Set<JPegStmt> keySet = startToThread.keySet();
-          Iterator<JPegStmt> it = keySet.iterator();
-          while (it.hasNext()) {
-            JPegStmt tempStmt = it.next();
+          for (JPegStmt tempStmt : keySet) {
             Iterator chainListIt = startToThread.get(tempStmt).iterator();
             while (chainListIt.hasNext()) {
 
@@ -896,15 +897,13 @@ class MhpAnalysis {
                 while (chainIt.hasNext()) {
                   // JPegStmt tempStmt = (JPegStmt)chainIt.next();
                   Object tempStmt = chainIt.next();
-                  if (tempStmt instanceof JPegStmt) {
-                    if ((JPegStmt) tempStmt instanceof BeginStmt) {
-                      // if (((JPegStmt)tempStmt).getName().equals("begin")){
-                      if (!workList.contains(tempStmt)) {
-                        workList.addLast(tempStmt);
-                      }
-                      break;
-                    }
-                  }
+                  if (tempStmt instanceof JPegStmt && (JPegStmt) tempStmt instanceof BeginStmt) {
+				  // if (((JPegStmt)tempStmt).getName().equals("begin")){
+				  if (!workList.contains(tempStmt)) {
+				    workList.addLast(tempStmt);
+				  }
+				  break;
+				}
                 }
               }
             }
@@ -943,7 +942,7 @@ class MhpAnalysis {
   // end add for debug
 
   private void computeMPairs() {
-    Set<Set<Object>> mSetPairs = new HashSet<Set<Object>>();
+    Set<Set<Object>> mSetPairs = new HashSet<>();
     Set maps = unitToM.entrySet();
     for (Iterator iter = maps.iterator(); iter.hasNext();) {
       Map.Entry entry = (Map.Entry) iter.next();
@@ -959,7 +958,7 @@ class MhpAnalysis {
          */
 
         Object m = it.next();
-        Set<Object> pair = new HashSet<Object>();
+        Set<Object> pair = new HashSet<>();
         pair.add(obj);
         pair.add(m);
         if (!mSetPairs.contains(pair)) {
@@ -968,7 +967,7 @@ class MhpAnalysis {
 
       }
     }
-    System.err.println("Number of pairs: " + mSetPairs.size());
+    logger.error("Number of pairs: " + mSetPairs.size());
 
   }
 
@@ -1002,9 +1001,9 @@ class MhpAnalysis {
 
     }
 
-    System.err.println("average: " + totalNodes / nodes);
-    System.err.println("min: " + min);
-    System.err.println("max: " + max);
+    logger.error("average: " + totalNodes / nodes);
+    logger.error("min: " + min);
+    logger.error("max: " + max);
 
   }
 

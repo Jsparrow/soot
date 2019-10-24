@@ -28,8 +28,8 @@ import soot.SootMethod;
 
 public class CallGraphInfo {
 
-  private ArrayList<MethInfo> inputs = new ArrayList<MethInfo>();
-  private ArrayList<MethInfo> outputs = new ArrayList<MethInfo>();
+  private ArrayList<MethInfo> inputs = new ArrayList<>();
+  private ArrayList<MethInfo> outputs = new ArrayList<>();
   private SootMethod center;
 
   public CallGraphInfo(SootMethod sm, ArrayList<MethInfo> outputs, ArrayList<MethInfo> inputs) {

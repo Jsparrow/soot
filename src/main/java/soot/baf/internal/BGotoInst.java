@@ -33,39 +33,48 @@ public class BGotoInst extends AbstractBranchInst implements GotoInst {
     super(Baf.v().newInstBox(target));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BGotoInst(getTarget());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return true;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 0;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 0;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "goto";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseGotoInst(this);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 }

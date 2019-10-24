@@ -89,7 +89,7 @@ public class LocalSplitter extends BodyTransformer {
   @Override
   protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Splitting locals...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Splitting locals...").toString());
     }
 
     if (Options.v().time()) {
@@ -127,7 +127,7 @@ public class LocalSplitter extends BodyTransformer {
       Timers.v().splitPhase2Timer.start();
     }
 
-    Set<Unit> visited = new HashSet<Unit>();
+    Set<Unit> visited = new HashSet<>();
 
     // Collect the set of locals that we need to split^
     BitSet localsToSplit = new BitSet(localPacker.getLocalCount());
@@ -178,10 +178,10 @@ public class LocalSplitter extends BodyTransformer {
       }
       Local newLocal = (Local) oldLocal.clone();
 
-      newLocal.setName(newLocal.getName() + '#' + ++w); // renaming should not be done here
+      newLocal.setName(new StringBuilder().append(newLocal.getName()).append('#').append(++w).toString()); // renaming should not be done here
       body.getLocals().add(newLocal);
 
-      Deque<Unit> queue = new ArrayDeque<Unit>();
+      Deque<Unit> queue = new ArrayDeque<>();
       queue.addFirst(s);
       do {
         final Unit head = queue.removeFirst();
@@ -202,12 +202,12 @@ public class LocalSplitter extends BodyTransformer {
             }
           }
 
-          for (ValueBox vb : head.getDefBoxes()) {
+          head.getDefBoxes().forEach(vb -> {
             Value v = vb.getValue();
             if (v instanceof Local) {
               vb.setValue(newLocal);
             }
-          }
+          });
         }
       } while (!queue.isEmpty());
 

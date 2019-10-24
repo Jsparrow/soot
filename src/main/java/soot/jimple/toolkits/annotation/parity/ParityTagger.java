@@ -59,7 +59,8 @@ public class ParityTagger extends BodyTransformer {
     return G.v().soot_jimple_toolkits_annotation_parity_ParityTagger();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
 
     // System.out.println("parity tagger for method: "+b.getMethod().getName());
     boolean isInteractive = Options.v().interactive_mode();
@@ -89,7 +90,7 @@ public class ParityTagger extends BodyTransformer {
         if ((variable instanceof IntConstant) || (variable instanceof LongConstant)) {
           // don't add string tags (just color tags)
         } else {
-          StringTag t = new StringTag("Parity variable: " + variable + " " + parityVars.get(variable), "Parity Analysis");
+          StringTag t = new StringTag(new StringBuilder().append("Parity variable: ").append(variable).append(" ").append(parityVars.get(variable)).toString(), "Parity Analysis");
           s.addTag(t);
         }
       }
@@ -129,31 +130,30 @@ public class ParityTagger extends BodyTransformer {
     boolean keysAdded = false;
     while (keyIt.hasNext()) {
       Object next = keyIt.next();
-      if (next instanceof KeyTag) {
-        if (((KeyTag) next).analysisType().equals("Parity Analysis")) {
-          keysAdded = true;
-        }
-      }
+      if (next instanceof KeyTag && "Parity Analysis".equals(((KeyTag) next).analysisType())) {
+	  keysAdded = true;
+	}
     }
-    if (!keysAdded) {
-      b.getMethod().getDeclaringClass().addTag(new KeyTag(255, 0, 0, "Parity: Top", "Parity Analysis"));
-      b.getMethod().getDeclaringClass().addTag(new KeyTag(45, 255, 84, "Parity: Bottom", "Parity Analysis"));
-      b.getMethod().getDeclaringClass().addTag(new KeyTag(255, 248, 35, "Parity: Even", "Parity Analysis"));
-      b.getMethod().getDeclaringClass().addTag(new KeyTag(174, 210, 255, "Parity: Odd", "Parity Analysis"));
-    }
+    if (keysAdded) {
+		return;
+	}
+	b.getMethod().getDeclaringClass().addTag(new KeyTag(255, 0, 0, "Parity: Top", "Parity Analysis"));
+	b.getMethod().getDeclaringClass().addTag(new KeyTag(45, 255, 84, "Parity: Bottom", "Parity Analysis"));
+	b.getMethod().getDeclaringClass().addTag(new KeyTag(255, 248, 35, "Parity: Even", "Parity Analysis"));
+	b.getMethod().getDeclaringClass().addTag(new KeyTag(174, 210, 255, "Parity: Odd", "Parity Analysis"));
   }
 
   private void addColorTag(ValueBox vb, String type) {
-    if (type.equals("bottom")) {
+    if ("bottom".equals(type)) {
       // green
       vb.addTag(new ColorTag(ColorTag.GREEN, "Parity Analysis"));
-    } else if (type.equals("top")) {
+    } else if ("top".equals(type)) {
       // red
       vb.addTag(new ColorTag(ColorTag.RED, "Parity Analysis"));
-    } else if (type.equals("even")) {
+    } else if ("even".equals(type)) {
       // yellow
       vb.addTag(new ColorTag(ColorTag.YELLOW, "Parity Analysis"));
-    } else if (type.equals("odd")) {
+    } else if ("odd".equals(type)) {
       // blue
       vb.addTag(new ColorTag(ColorTag.BLUE, "Parity Analysis"));
     }

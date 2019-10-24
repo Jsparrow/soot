@@ -32,7 +32,8 @@ import soot.util.Switch;
 
 public class BSwapInst extends AbstractInst implements SwapInst {
 
-  protected Type mFromType, mToType;
+  protected Type mFromType;
+protected Type mToType;
 
   public BSwapInst(Type fromType, Type toType) {
 
@@ -47,47 +48,58 @@ public class BSwapInst extends AbstractInst implements SwapInst {
     mToType = Baf.getDescriptorTypeOf(toType);
   }
 
-  public Type getFromType() {
+  @Override
+public Type getFromType() {
     return mFromType;
   }
 
-  public void setFromType(Type fromType) {
+  @Override
+public void setFromType(Type fromType) {
     mFromType = fromType;
   }
 
-  public Type getToType() {
+  @Override
+public Type getToType() {
     return mToType;
   }
 
-  public void setToType(Type toType) {
+  @Override
+public void setToType(Type toType) {
     mToType = toType;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 2;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 2;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 2;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 2;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseSwapInst(this);
   }
 
-  public String toString() {
-    return "swap." + Baf.bafDescriptorOf(mFromType) + Baf.bafDescriptorOf(mToType);
+  @Override
+public String toString() {
+    return new StringBuilder().append("swap.").append(Baf.bafDescriptorOf(mFromType)).append(Baf.bafDescriptorOf(mToType)).toString();
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "swap";
   }
 

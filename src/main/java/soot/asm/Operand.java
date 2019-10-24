@@ -88,7 +88,7 @@ final class Operand {
       list.add(vb);
     } else if (boxes instanceof ValueBox) {
       ValueBox ovb = (ValueBox) boxes;
-      List<ValueBox> list = new ArrayList<ValueBox>();
+      List<ValueBox> list = new ArrayList<>();
       list.add(ovb);
       list.add(vb);
       boxes = list;
@@ -104,9 +104,7 @@ final class Operand {
   void updateBoxes() {
     Value val = stackOrValue();
     if (boxes instanceof List) {
-      for (ValueBox vb : (List<ValueBox>) boxes) {
-        vb.setValue(val);
-      }
+      ((List<ValueBox>) boxes).forEach(vb -> vb.setValue(val));
     } else if (boxes instanceof ValueBox) {
       ((ValueBox) boxes).setValue(val);
     }

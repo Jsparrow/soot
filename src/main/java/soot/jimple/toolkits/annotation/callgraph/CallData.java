@@ -27,13 +27,14 @@ import java.util.HashMap;
 
 public class CallData {
 
-  private final HashMap<Object, CallData> map = new HashMap<Object, CallData>();
-  private final ArrayList<CallData> children = new ArrayList<CallData>();
-  private final ArrayList<CallData> outputs = new ArrayList<CallData>();
+  private final HashMap<Object, CallData> map = new HashMap<>();
+  private final ArrayList<CallData> children = new ArrayList<>();
+  private final ArrayList<CallData> outputs = new ArrayList<>();
   private String data;
 
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
     sb.append("Data: ");
     sb.append(data);
     // sb.append(" Children: ");

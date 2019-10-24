@@ -34,13 +34,15 @@ public class CONSTANT_Utf8_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
+    @Override
+	public String toString() {
       return "Utf8Info: " + string;
     }
 
 
 
-    public Expr expr() {
+    @Override
+	public Expr expr() {
       return Literal.buildStringLiteral(string);
     }
 

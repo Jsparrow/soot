@@ -63,11 +63,11 @@ public class FastColorer {
 
     UnitInterferenceGraph intGraph = new UnitInterferenceGraph(unitBody, localToGroup, liveLocals, unitGraph);
 
-    Map<Local, String> localToOriginalName = new HashMap<Local, String>();
+    Map<Local, String> localToOriginalName = new HashMap<>();
 
     // Map each local variable to its original name
     {
-      for (Local local : intGraph.getLocals()) {
+      intGraph.getLocals().forEach(local -> {
         int signIndex;
 
         signIndex = local.getName().indexOf("#");
@@ -78,10 +78,10 @@ public class FastColorer {
           localToOriginalName.put(local, local.getName());
         }
 
-      }
+      });
     }
 
-    Map<StringGroupPair, List<Integer>> originalNameAndGroupToColors = new HashMap<StringGroupPair, List<Integer>>();
+    Map<StringGroupPair, List<Integer>> originalNameAndGroupToColors = new HashMap<>();
     // maps an original name to the colors being used for it
 
     // Assign a color for each local.
@@ -128,7 +128,7 @@ public class FastColorer {
           List<Integer> originalNameColors = originalNameAndGroupToColors.get(new StringGroupPair(originalName, group));
 
           if (originalNameColors == null) {
-            originalNameColors = new ArrayList<Integer>();
+            originalNameColors = new ArrayList<>();
             originalNameAndGroupToColors.put(new StringGroupPair(originalName, group), originalNameColors);
           }
 
@@ -138,11 +138,7 @@ public class FastColorer {
           // Check if the colors assigned to this
           // original name is already free
           {
-            Iterator<Integer> colorIt = originalNameColors.iterator();
-
-            while (colorIt.hasNext()) {
-              Integer color = colorIt.next();
-
+            for (Integer color : originalNameColors) {
               if (freeColors[color.intValue()] == 1) {
                 found = true;
                 assignedColor = color.intValue();
@@ -152,11 +148,11 @@ public class FastColorer {
 
           if (!found) {
             assignedColor = colorCount++;
-            groupToColorCount.put(group, new Integer(colorCount));
-            originalNameColors.add(new Integer(assignedColor));
+            groupToColorCount.put(group, Integer.valueOf(colorCount));
+            originalNameColors.add(Integer.valueOf(assignedColor));
           }
 
-          localToColor.put(local, new Integer(assignedColor));
+          localToColor.put(local, Integer.valueOf(assignedColor));
         }
       }
     }
@@ -182,8 +178,8 @@ public class FastColorer {
       // Sort the locals first to maximize the locals per color. We first
       // assign those locals that have many conflicts and then assign the
       // easier ones to those color groups.
-      List<Local> sortedLocals = new ArrayList<Local>(intGraph.getLocals());
-      Collections.sort(sortedLocals, new Comparator<Local>() {
+      List<Local> sortedLocals = new ArrayList<>(intGraph.getLocals());
+      sortedLocals.sort(new Comparator<Local>() {
 
         @Override
         public int compare(Local o1, Local o2) {
@@ -233,10 +229,10 @@ public class FastColorer {
 
           if (assignedColor < 0) {
             assignedColor = colorCount++;
-            groupToColorCount.put(group, new Integer(colorCount));
+            groupToColorCount.put(group, Integer.valueOf(colorCount));
           }
 
-          localToColor.put(local, new Integer(assignedColor));
+          localToColor.put(local, Integer.valueOf(assignedColor));
         }
       }
     }
@@ -249,18 +245,14 @@ public class FastColorer {
     // locals.
     List<Local> locals;
 
-    public List<Local> getLocals() {
-      return locals;
-    }
-
     public UnitInterferenceGraph(Body body, Map<Local, Object> localToGroup, LiveLocals liveLocals,
         ExceptionalUnitGraph unitGraph) {
-      locals = new ArrayList<Local>();
+      locals = new ArrayList<>();
       locals.addAll(body.getLocals());
 
       // Initialize localToLocals
       {
-        localToLocals = new HashMap<Local, Set<Local>>(body.getLocalCount() * 2 + 1, 0.7f);
+        localToLocals = new HashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
       }
 
       // Go through code, noting interferences
@@ -298,32 +290,29 @@ public class FastColorer {
             // throw the exception). We may want to have a more complex
             // reasoning here some day, but I'll leave it as is for now.
 
-            Set<Local> liveLocalsAtUnit = new HashSet<Local>();
-            for (Unit succ : unitGraph.getSuccsOf(unit)) {
-              List<Local> beforeSucc = liveLocals.getLiveLocalsBefore(succ);
-              liveLocalsAtUnit.addAll(beforeSucc);
-            }
+            Set<Local> liveLocalsAtUnit = new HashSet<>();
+            unitGraph.getSuccsOf(unit).stream().map(liveLocals::getLiveLocalsBefore).forEach(liveLocalsAtUnit::addAll);
 
             Value defValue = defBoxes.get(0).getValue();
             if (defValue instanceof Local) {
               Local defLocal = (Local) defValue;
-              for (Local otherLocal : liveLocalsAtUnit) {
-                if (localToGroup.get(otherLocal).equals(localToGroup.get(defLocal))) {
-                  setInterference(defLocal, otherLocal);
-                }
-              }
+              liveLocalsAtUnit.stream().filter(otherLocal -> localToGroup.get(otherLocal).equals(localToGroup.get(defLocal))).forEach(otherLocal -> setInterference(defLocal, otherLocal));
             }
           }
         }
       }
     }
 
-    public void setInterference(Local l1, Local l2) {
+	public List<Local> getLocals() {
+      return locals;
+    }
+
+	public void setInterference(Local l1, Local l2) {
       // We need the mapping in both directions
       // l1 -> l2
       Set<Local> locals = localToLocals.get(l1);
       if (locals == null) {
-        locals = new ArraySet<Local>();
+        locals = new ArraySet<>();
         localToLocals.put(l1, locals);
       }
       locals.add(l2);
@@ -331,18 +320,18 @@ public class FastColorer {
       // l2 -> l1
       locals = localToLocals.get(l2);
       if (locals == null) {
-        locals = new ArraySet<Local>();
+        locals = new ArraySet<>();
         localToLocals.put(l2, locals);
       }
       locals.add(l1);
     }
 
-    int getInterferenceCount(Local l) {
+	int getInterferenceCount(Local l) {
       Set<Local> localSet = localToLocals.get(l);
       return localSet == null ? 0 : localSet.size();
     }
 
-    Local[] getInterferencesOf(Local l) {
+	Local[] getInterferencesOf(Local l) {
       Set<Local> localSet = localToLocals.get(l);
       if (localSet == null) {
         return null;

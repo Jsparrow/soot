@@ -42,7 +42,8 @@ public class InvokeStaticInstruction extends MethodInvocationInstruction {
   // tagWithLineNumber(nop);
   // body.add(nop);
   // beginUnit = nop;
-  public void jimplify(DexBody body) {
+  @Override
+public void jimplify(DexBody body) {
     jimplifyStatic(body);
   }
 

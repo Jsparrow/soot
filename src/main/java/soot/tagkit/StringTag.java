@@ -39,7 +39,8 @@ public class StringTag implements Tag {
     this.s = s;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return s;
   }
 
@@ -48,7 +49,8 @@ public class StringTag implements Tag {
   }
 
   /** Returns the tag name. */
-  public String getName() {
+  @Override
+public String getName() {
     return "StringTag";
   }
 
@@ -57,7 +59,8 @@ public class StringTag implements Tag {
   }
 
   /** Returns the tag raw data. */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     throw new RuntimeException("StringTag has no value for bytecode");
   }
 }

@@ -32,13 +32,14 @@ import java.io.OutputStream;
  * written to the original output stream. (Write Jasmin into this stream, and .class will come out.)
  */
 public class JasminOutputStream extends ByteArrayOutputStream {
-  final private OutputStream out;
+  private final OutputStream out;
 
   public JasminOutputStream(OutputStream out) {
     this.out = out;
   }
 
-  public void flush() {
+  @Override
+public void flush() {
     ByteArrayInputStream bais = new ByteArrayInputStream(this.toByteArray());
     jasmin.Main.assemble(bais, out, false);
   }

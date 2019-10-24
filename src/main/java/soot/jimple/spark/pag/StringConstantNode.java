@@ -30,17 +30,18 @@ import soot.RefType;
  * @author Ondrej Lhotak
  */
 public class StringConstantNode extends AllocNode {
-  public String toString() {
-    return "StringConstantNode " + getNumber() + " " + newExpr;
-  }
-
-  public String getString() {
-    return (String) newExpr;
-  }
-
   /* End of public methods. */
+	
+	  StringConstantNode(PAG pag, String sc) {
+	    super(pag, sc, RefType.v("java.lang.String"), null);
+	  }
 
-  StringConstantNode(PAG pag, String sc) {
-    super(pag, sc, RefType.v("java.lang.String"), null);
-  }
+	@Override
+	public String toString() {
+	    return new StringBuilder().append("StringConstantNode ").append(getNumber()).append(" ").append(newExpr).toString();
+	  }
+
+	public String getString() {
+	    return (String) newExpr;
+	  }
 }

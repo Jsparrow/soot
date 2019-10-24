@@ -45,12 +45,13 @@ public class CHATransformer extends SceneTransformer {
     return G.v().soot_jimple_toolkits_callgraph_CHATransformer();
   }
 
-  protected void internalTransform(String phaseName, Map<String, String> opts) {
+  @Override
+protected void internalTransform(String phaseName, Map<String, String> opts) {
     CHAOptions options = new CHAOptions(opts);
     CallGraphBuilder cg = options.apponly() ? new CallGraphBuilder() : new CallGraphBuilder(DumbPointerAnalysis.v());
     cg.build();
     if (options.verbose()) {
-      logger.debug("" + "Number of reachable methods: " + Scene.v().getReachableMethods().size());
+      logger.debug(new StringBuilder().append("").append("Number of reachable methods: ").append(Scene.v().getReachableMethods().size()).toString());
     }
   }
 }

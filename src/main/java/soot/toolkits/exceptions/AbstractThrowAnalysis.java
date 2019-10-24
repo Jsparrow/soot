@@ -41,14 +41,17 @@ import soot.jimple.ThrowStmt;
  */
 public abstract class AbstractThrowAnalysis implements ThrowAnalysis {
 
-  abstract public ThrowableSet mightThrow(Unit u);
+  @Override
+public abstract ThrowableSet mightThrow(Unit u);
 
-  public ThrowableSet mightThrowExplicitly(ThrowInst t) {
+  @Override
+public ThrowableSet mightThrowExplicitly(ThrowInst t) {
     // Deducing the type at the top of the Baf stack is beyond me, so...
     return ThrowableSet.Manager.v().ALL_THROWABLES;
   }
 
-  public ThrowableSet mightThrowExplicitly(ThrowStmt t) {
+  @Override
+public ThrowableSet mightThrowExplicitly(ThrowStmt t) {
     Value thrownExpression = t.getOp();
     Type thrownType = thrownExpression.getType();
     if (thrownType == null || thrownType instanceof UnknownType) {
@@ -73,7 +76,9 @@ public abstract class AbstractThrowAnalysis implements ThrowAnalysis {
     }
   }
 
-  abstract public ThrowableSet mightThrowImplicitly(ThrowInst t);
+  @Override
+public abstract ThrowableSet mightThrowImplicitly(ThrowInst t);
 
-  abstract public ThrowableSet mightThrowImplicitly(ThrowStmt t);
+  @Override
+public abstract ThrowableSet mightThrowImplicitly(ThrowStmt t);
 }

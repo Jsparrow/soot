@@ -116,7 +116,7 @@ public class Util {
         String typeSt = getSootType(arrType).toString();
         typeSt = typeSt.replaceAll(".", "$");
 
-        fieldName = fieldName + "L" + typeSt;
+        fieldName = new StringBuilder().append(fieldName).append("L").append(typeSt).toString();
       }
     } else {
       fieldName = "class$";
@@ -140,8 +140,8 @@ public class Util {
   }
 
   public static void addLnPosTags(soot.tagkit.Host host, polyglot.util.Position pos) {
-    if (pos != null) {
-      if (soot.options.Options.v().keep_line_number()) {
+    boolean condition = pos != null && soot.options.Options.v().keep_line_number();
+	if (condition) {
         if (pos.file() != null) {
           host.addTag(
               new soot.tagkit.SourceLnNamePosTag(pos.file(), pos.line(), pos.endLine(), pos.column(), pos.endColumn()));
@@ -149,7 +149,6 @@ public class Util {
           host.addTag(new soot.tagkit.SourceLnPosTag(pos.line(), pos.endLine(), pos.column(), pos.endColumn()));
         }
       }
-    }
   }
 
   public static void addLnPosTags(soot.tagkit.Host host, int sline, int eline, int spos, int epos) {
@@ -191,12 +190,11 @@ public class Util {
    */
   public static void addLineTag(soot.tagkit.Host host, polyglot.ast.Node node) {
 
-    if (soot.options.Options.v().keep_line_number()) {
-      if (node.position() != null) {
+    boolean condition = soot.options.Options.v().keep_line_number() && node.position() != null;
+	if (condition) {
         host.addTag(new soot.tagkit.SourceLineNumberTag(node.position().line(), node.position().line()));
 
       }
-    }
   }
 
   /**
@@ -342,7 +340,7 @@ public class Util {
   }
 
   private static soot.SootMethod makeOuterThisAccessMethod(soot.SootClass classToInvoke) {
-    String name = "access$" + soot.javaToJimple.InitialResolver.v().getNextPrivateAccessCounter() + "00";
+    String name = new StringBuilder().append("access$").append(soot.javaToJimple.InitialResolver.v().getNextPrivateAccessCounter()).append("00").toString();
     ArrayList paramTypes = new ArrayList();
     paramTypes.add(classToInvoke.getType());
 
@@ -440,15 +438,15 @@ public class Util {
           className = classType.name();
 
           if (classType.outer().isAnonymous() || classType.outer().isLocal()) {
-            className = getSootType(classType.outer()).toString() + "$" + className;
+            className = new StringBuilder().append(getSootType(classType.outer()).toString()).append("$").append(className).toString();
           } else {
             while (classType.outer() != null) {
-              className = classType.outer().name() + "$" + className;
+              className = new StringBuilder().append(classType.outer().name()).append("$").append(className).toString();
               classType = classType.outer();
             }
 
-            if (!pkgName.equals("")) {
-              className = pkgName + "." + className;
+            if (!"".equals(pkgName)) {
+              className = new StringBuilder().append(pkgName).append(".").append(className).toString();
             }
           }
         }

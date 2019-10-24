@@ -62,14 +62,18 @@ import soot.util.queue.QueueReader;
  */
 public final class TypeManager {
 
-  private Map<SootClass, List<AllocNode>> class2allocs = new HashMap<SootClass, List<AllocNode>>(1024);
-  private List<AllocNode> anySubtypeAllocs = new LinkedList<AllocNode>();
+  private Map<SootClass, List<AllocNode>> class2allocs = new HashMap<>(1024);
+  private List<AllocNode> anySubtypeAllocs = new LinkedList<>();
 
   protected final RefType rtObject;
   protected final RefType rtSerializable;
   protected final RefType rtCloneable;
+private LargeNumberedMap<Type, BitVector> typeMask = null;
+protected Supplier<FastHierarchy> fh = null;
+protected PAG pag;
+protected QueueReader<AllocNode> allocNodeListener = null;
 
-  public TypeManager(PAG pag) {
+public TypeManager(PAG pag) {
     this.pag = pag;
 
     this.rtObject = RefType.v("java.lang.Object");
@@ -77,7 +81,7 @@ public final class TypeManager {
     this.rtCloneable = RefType.v("java.lang.Cloneable");
   }
 
-  public static boolean isUnresolved(Type type) {
+public static boolean isUnresolved(Type type) {
     if (type instanceof ArrayType) {
       ArrayType at = (ArrayType) type;
       type = at.getArrayElementType();
@@ -93,7 +97,7 @@ public final class TypeManager {
     return cl.resolvingLevel() < SootClass.HIERARCHY;
   }
 
-  final public BitVector get(Type type) {
+public final BitVector get(Type type) {
     if (type == null) {
       return null;
     }
@@ -146,13 +150,13 @@ public final class TypeManager {
     return ret;
   }
 
-  final public void clearTypeMask() {
+public final void clearTypeMask() {
     typeMask = null;
   }
 
-  final public void makeTypeMask() {
+public final void makeTypeMask() {
     RefType.v("java.lang.Class");
-    typeMask = new LargeNumberedMap<Type, BitVector>(Scene.v().getTypeNumberer());
+    typeMask = new LargeNumberedMap<>(Scene.v().getTypeNumberer());
     if (fh == null) {
       return;
     }
@@ -205,9 +209,7 @@ public final class TypeManager {
     allocNodeListener = pag.allocNodeListener();
   }
 
-  private LargeNumberedMap<Type, BitVector> typeMask = null;
-
-  final public boolean castNeverFails(Type src, Type dst) {
+public final boolean castNeverFails(Type src, Type dst) {
     if (fh == null) {
       return true;
     } else if (dst == null) {
@@ -223,50 +225,48 @@ public final class TypeManager {
     } else if (dst instanceof NullType) {
       return false;
     } else if (dst instanceof AnySubType) {
-      throw new RuntimeException("oops src=" + src + " dst=" + dst);
+      throw new RuntimeException(new StringBuilder().append("oops src=").append(src).append(" dst=").append(dst).toString());
     } else {
       return getFastHierarchy().canStoreType(src, dst);
     }
   }
 
-  public void setFastHierarchy(Supplier<FastHierarchy> fh) {
+public void setFastHierarchy(Supplier<FastHierarchy> fh) {
     this.fh = fh;
   }
 
-  public FastHierarchy getFastHierarchy() {
+public FastHierarchy getFastHierarchy() {
     return fh == null ? null : fh.get();
   }
 
-  protected Supplier<FastHierarchy> fh = null;
-  protected PAG pag;
-  protected QueueReader<AllocNode> allocNodeListener = null;
-
-  // ** new methods
+// ** new methods
   private void initClass2allocs() {
     for (AllocNode an : pag.getAllocNodeNumberer()) {
       addAllocNode(an);
     }
   }
 
-  final private void addAllocNode(final AllocNode alloc) {
+private final void addAllocNode(final AllocNode alloc) {
     alloc.getType().apply(new TypeSwitch() {
-      final public void caseRefType(RefType t) {
+      @Override
+	public final void caseRefType(RefType t) {
         SootClass cl = t.getSootClass();
         List<AllocNode> list;
         if ((list = class2allocs.get(cl)) == null) {
-          list = new LinkedList<AllocNode>();
+          list = new LinkedList<>();
           class2allocs.put(cl, list);
         }
         list.add(alloc);
       }
 
-      final public void caseAnySubType(AnySubType t) {
+      @Override
+	public final void caseAnySubType(AnySubType t) {
         anySubtypeAllocs.add(alloc);
       }
     });
   }
 
-  final private BitVector makeClassTypeMask(SootClass clazz) {
+private final BitVector makeClassTypeMask(SootClass clazz) {
     {
       BitVector cachedMask = typeMask.get(clazz.getType());
       if (cachedMask != null) {
@@ -282,29 +282,23 @@ public final class TypeManager {
       allocs = class2allocs.get(clazz);
     }
     if (allocs != null) {
-      for (AllocNode an : allocs) {
-        mask.set(an.getNumber());
-      }
+      allocs.forEach(an -> mask.set(an.getNumber()));
     }
 
     Collection<SootClass> subclasses = fh.get().getSubclassesOf(clazz);
     if (subclasses == Collections.EMPTY_LIST) {
-      for (AllocNode an : anySubtypeAllocs) {
-        mask.set(an.getNumber());
-      }
+      anySubtypeAllocs.forEach(an -> mask.set(an.getNumber()));
       typeMask.put(clazz.getType(), mask);
       return mask;
     }
 
-    for (SootClass subcl : subclasses) {
-      mask.or(makeClassTypeMask(subcl));
-    }
+    subclasses.forEach(subcl -> mask.or(makeClassTypeMask(subcl)));
 
     typeMask.put(clazz.getType(), mask);
     return mask;
   }
 
-  final private BitVector makeMaskOfInterface(SootClass interf) {
+private final BitVector makeMaskOfInterface(SootClass interf) {
     if (!(interf.isInterface())) {
       throw new RuntimeException();
     }
@@ -313,19 +307,17 @@ public final class TypeManager {
     typeMask.put(interf.getType(), ret);
     Collection<SootClass> implementers = getFastHierarchy().getAllImplementersOfInterface(interf);
 
-    for (SootClass impl : implementers) {
+    implementers.forEach(impl -> {
       BitVector other = typeMask.get(impl.getType());
       if (other == null) {
         other = makeClassTypeMask(impl);
       }
       ret.or(other);
-    }
+    });
     // I think, the following can be eliminated. It is added to make
     // type-masks exactly the same as the original type-masks
-    if (implementers.size() == 0) {
-      for (AllocNode an : anySubtypeAllocs) {
-        ret.set(an.getNumber());
-      }
+    if (implementers.isEmpty()) {
+      anySubtypeAllocs.forEach(an -> ret.set(an.getNumber()));
     }
     return ret;
   }

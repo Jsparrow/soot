@@ -31,7 +31,8 @@ public class StmtBox extends AbstractUnitBox {
     setUnit(s);
   }
 
-  public boolean canContainUnit(Unit u) {
+  @Override
+public boolean canContainUnit(Unit u) {
     return u instanceof Stmt || u == null;
   }
 }

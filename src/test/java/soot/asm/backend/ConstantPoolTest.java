@@ -95,7 +95,7 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 		}
 		{
 			fv = cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "i1", "I",
-					null, new Integer(123));
+					null, Integer.valueOf(123));
 			fv.visitEnd();
 		}
 		{
@@ -105,12 +105,12 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 		}
 		{
 			fv = cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "l1", "J",
-					null, new Long(12233L));
+					null, Long.valueOf(12233L));
 			fv.visitEnd();
 		}
 		{
 			fv = cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "l2", "J",
-					null, new Long(123L));
+					null, Long.valueOf(123L));
 			fv.visitEnd();
 		}
 		{
@@ -120,12 +120,12 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 		}
 		{
 			fv = cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "d1", "D",
-					null, new Double("123.142"));
+					null, Double.valueOf("123.142"));
 			fv.visitEnd();
 		}
 		{
 			fv = cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "d2", "D",
-					null, new Double("1234.123046875"));
+					null, Double.valueOf("1234.123046875"));
 			fv.visitEnd();
 		}
 		{
@@ -150,12 +150,12 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 					"(I)Ljava/lang/Integer;", false);
 			mv.visitFieldInsn(PUTSTATIC, "soot/asm/backend/targets/ConstantPool", "o3",
 					"Ljava/lang/Object;");
-			mv.visitLdcInsn(new Long(1234L));
+			mv.visitLdcInsn(Long.valueOf(1234L));
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf",
 					"(J)Ljava/lang/Long;", false);
 			mv.visitFieldInsn(PUTSTATIC, "soot/asm/backend/targets/ConstantPool", "o4",
 					"Ljava/lang/Object;");
-			mv.visitLdcInsn(new Double("123.3"));
+			mv.visitLdcInsn(Double.valueOf("123.3"));
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf",
 					"(D)Ljava/lang/Double;", false);
 			mv.visitFieldInsn(PUTSTATIC, "soot/asm/backend/targets/ConstantPool", "o5",
@@ -170,7 +170,7 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 			mv.visitFieldInsn(PUTSTATIC, "soot/asm/backend/targets/ConstantPool", "i2", "I");
 			mv.visitTypeInsn(NEW, "java/lang/Long");
 			mv.visitInsn(DUP);
-			mv.visitLdcInsn(new Long(12341L));
+			mv.visitLdcInsn(Long.valueOf(12341L));
 			mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Long", "<init>",
 					"(J)V", false);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "longValue",
@@ -178,7 +178,7 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 			mv.visitFieldInsn(PUTSTATIC, "soot/asm/backend/targets/ConstantPool", "l3", "J");
 			mv.visitTypeInsn(NEW, "java/lang/Double");
 			mv.visitInsn(DUP);
-			mv.visitLdcInsn(new Double("1234.123"));
+			mv.visitLdcInsn(Double.valueOf("1234.123"));
 			mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Double", "<init>",
 					"(D)V", false);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Double",
@@ -205,12 +205,12 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 	public void loadClass() {
 		G.reset();
 		// Location of the rt.jar
-		String rtJar = System.getProperty("java.home") + File.separator + "lib"
-				+ File.separator + "rt.jar";
+		String rtJar = new StringBuilder().append(System.getProperty("java.home")).append(File.separator).append("lib").append(File.separator).append("rt.jar")
+				.toString();
 
 		// Run Soot and print output to .asm-files.
 		Main.main(new String[] { "-cp",
-				getClassPathFolder() + File.pathSeparator + rtJar,
+				new StringBuilder().append(getClassPathFolder()).append(File.pathSeparator).append(rtJar).toString(),
 				"-process-dir", getTargetFolder(), "-src-prec", "only-class",
 				"-output-format", "class", "-asm-backend",
 				"-allow-phantom-refs", "-java-version",
@@ -229,19 +229,18 @@ public class ConstantPoolTest extends AbstractASMBackendTest {
 			// Java 6 backwards compatibility hack
 			try {
 				for (Method m : URLClassLoader.class.getDeclaredMethods()) {
-					if (m.getName().equals("close")) {
+					if ("close".equals(m.getName())) {
 						m.invoke(cl);
 						break;
 					}
 				}
 			}
 			catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 			return;
 
-		} catch (MalformedURLException e) {
-			logger.error(e.getMessage(), e);
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | MalformedURLException e) {
 			logger.error(e.getMessage(), e);
 		}
 

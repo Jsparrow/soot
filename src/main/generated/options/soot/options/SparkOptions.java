@@ -30,20 +30,50 @@ import java.util.*;
 @javax.annotation.Generated(value = "Saxonica v3.0", comments = "from soot_options.xml")
 public class SparkOptions {
 
-    private Map<String, String> options;
+    public static final int propagator_iter = 1;
+	public static final int propagator_worklist = 2;
+	public static final int propagator_cycle = 3;
+	public static final int propagator_merge = 4;
+	public static final int propagator_alias = 5;
+	public static final int propagator_none = 6;
+	public static final int set_impl_hash = 1;
+	public static final int set_impl_bit = 2;
+	public static final int set_impl_hybrid = 3;
+	public static final int set_impl_array = 4;
+	public static final int set_impl_heintze = 5;
+	public static final int set_impl_sharedlist = 6;
+	public static final int set_impl_double = 7;
+	public static final int double_set_old_hash = 1;
+	public static final int double_set_old_bit = 2;
+	public static final int double_set_old_hybrid = 3;
+	public static final int double_set_old_array = 4;
+	public static final int double_set_old_heintze = 5;
+	public static final int double_set_old_sharedlist = 6;
+	public static final int double_set_new_hash = 1;
+	public static final int double_set_new_bit = 2;
+	public static final int double_set_new_hybrid = 3;
+	public static final int double_set_new_array = 4;
+	public static final int double_set_new_heintze = 5;
+	public static final int double_set_new_sharedlist = 6;
+	public static final int geom_encoding_Geom = 1;
+	public static final int geom_encoding_HeapIns = 2;
+	public static final int geom_encoding_PtIns = 3;
+	public static final int geom_worklist_PQ = 1;
+	public static final int geom_worklist_FIFO = 2;
+	private Map<String, String> options;
 
-    public SparkOptions(Map<String, String> options) {
+	public SparkOptions(Map<String, String> options) {
         this.options = options;
     }
 
-    /**
+	/**
      * Enabled
      */
     public boolean enabled() {
         return soot.PhaseOptions.getBoolean(options, "enabled");
     }
 
-    /**
+	/**
      * Verbose --
      * Print detailed information about the execution of Spark.
      *
@@ -54,7 +84,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "verbose");
     }
 
-    /**
+	/**
      * Ignore Types Entirely --
      * Make Spark completely ignore declared types of variables.
      *
@@ -65,7 +95,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "ignore-types");
     }
 
-    /**
+	/**
      * Force Garbage Collections --
      * Force garbage collection for measuring memory usage.
      *
@@ -76,7 +106,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "force-gc");
     }
 
-    /**
+	/**
      * Pre Jimplify --
      * Jimplify all methods before starting Spark.
      *
@@ -91,7 +121,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "pre-jimplify");
     }
 
-    /**
+	/**
      * AppOnly --
      * Consider only application classes.
      *
@@ -105,7 +135,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "apponly");
     }
 
-    /**
+	/**
      * VTA --
      * Emulate Variable Type Analysis.
      *
@@ -119,7 +149,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "vta");
     }
 
-    /**
+	/**
      * RTA --
      * Emulate Rapid Type Analysis.
      *
@@ -131,7 +161,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "rta");
     }
 
-    /**
+	/**
      * Field Based --
      * Use a field-based rather than field-sensitive representation.
      *
@@ -146,7 +176,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "field-based");
     }
 
-    /**
+	/**
      * Types For Sites --
      * Represent objects by their actual type rather than allocation 
      * site.
@@ -158,7 +188,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "types-for-sites");
     }
 
-    /**
+	/**
      * Merge String Buffer --
      * Represent all StringBuffers as one object.
      *
@@ -170,7 +200,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "merge-stringbuffer");
     }
 
-    /**
+	/**
      * Propagate All String Constants --
      * Propagate all string constants, not just class names.
      *
@@ -185,7 +215,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "string-constants");
     }
 
-    /**
+	/**
      * Simulate Natives --
      * Simulate effects of native methods in standard class library.
      *
@@ -196,7 +226,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "simulate-natives");
     }
 
-    /**
+	/**
      * Treat EMPTY as Alloc --
      * Treat singletons for empty sets etc. as allocation sites.
      *
@@ -212,7 +242,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "empties-as-allocs");
     }
 
-    /**
+	/**
      * Simple Edges Bidirectional --
      * Equality-based analysis between variable nodes.
      *
@@ -224,7 +254,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "simple-edges-bidirectional");
     }
 
-    /**
+	/**
      * On Fly Call Graph --
      * Build call graph as receiver types become known.
      *
@@ -236,7 +266,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "on-fly-cg");
     }
 
-    /**
+	/**
      * Simplify Offline --
      * Collapse single-entry subgraphs of the PAG.
      *
@@ -248,7 +278,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "simplify-offline");
     }
 
-    /**
+	/**
      * Simplify SCCs --
      * Collapse strongly-connected components of the PAG.
      *
@@ -260,7 +290,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "simplify-sccs");
     }
 
-    /**
+	/**
      * Ignore Types For SCCs --
      * Ignore declared types when determining node equivalence for SCCs.
      *
@@ -276,7 +306,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "ignore-types-for-sccs");
     }
 
-    /**
+	/**
      * Dump HTML --
      * Dump pointer assignment graph to HTML for debugging.
      *
@@ -289,7 +319,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "dump-html");
     }
 
-    /**
+	/**
      * Dump PAG --
      * Dump pointer assignment graph for other solvers.
      *
@@ -302,7 +332,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "dump-pag");
     }
 
-    /**
+	/**
      * Dump Solution --
      * Dump final solution for comparison with other solvers.
      *
@@ -315,7 +345,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "dump-solution");
     }
 
-    /**
+	/**
      * Topological Sort --
      * Sort variable nodes in dump.
      *
@@ -328,7 +358,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "topo-sort");
     }
 
-    /**
+	/**
      * Dump Types --
      * Include declared types in dump.
      *
@@ -340,7 +370,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "dump-types");
     }
 
-    /**
+	/**
      * Class Method Var --
      * In dump, label variables by class and method.
      *
@@ -355,7 +385,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "class-method-var");
     }
 
-    /**
+	/**
      * Dump Answer --
      * Dump computed reaching types for comparison with other solvers.
      *
@@ -367,7 +397,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "dump-answer");
     }
 
-    /**
+	/**
      * Add Tags --
      * Output points-to results in tags for viewing with the Jimple.
      *
@@ -378,7 +408,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "add-tags");
     }
 
-    /**
+	/**
      * Calculate Set Mass --
      * Calculate statistics about points-to set sizes.
      *
@@ -390,7 +420,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "set-mass");
     }
 
-    /**
+	/**
      * Demand-driven refinement-based context-sensitive points-to analysis --
      * After running Spark, refine points-to sets on demand with 
      * context information.
@@ -403,7 +433,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "cs-demand");
     }
 
-    /**
+	/**
      * Create lazy points-to sets --
      * Create lazy points-to sets that create context information only 
      * when needed..
@@ -421,7 +451,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "lazy-pts");
     }
 
-    /**
+	/**
      * Geometric, context-sensitive points-to analysis --
      * This switch enables/disables the geometric analysis.
      *
@@ -431,7 +461,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "geom-pta");
     }
 
-    /**
+	/**
      * Transform to context-insensitive result --
      * Transform to context-insensitive result.
      *
@@ -444,7 +474,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "geom-trans");
     }
 
-    /**
+	/**
      * Blocking strategy for recursive calls --
      * Enable blocking strategy for recursive calls.
      *
@@ -455,7 +485,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "geom-blocking");
     }
 
-    /**
+	/**
      * Pointers processed by geomPTA --
      * Processing pointers that impact pointers in application code 
      * only.
@@ -470,7 +500,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getBoolean(options, "geom-app-only");
     }
 
-    /**
+	/**
      * Maximal traversal --
      * Make the analysis traverse at most this number of nodes per 
      * query.
@@ -483,7 +513,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getInt(options, "traversal");
     }
 
-    /**
+	/**
      * Maximal number of passes --
      * Perform at most this number of refinement iterations.
      *
@@ -494,7 +524,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getInt(options, "passes");
     }
 
-    /**
+	/**
      * Precision evaluation methodologies --
      * Precision evaluation methodologies.
      *
@@ -509,7 +539,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getInt(options, "geom-eval");
     }
 
-    /**
+	/**
      * Fractional parameter --
      * Fractional parameter for precision/performance trade-off.
      *
@@ -521,7 +551,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getInt(options, "geom-frac-base");
     }
 
-    /**
+	/**
      * Iterations --
      * Iterations of analysis.
      *
@@ -532,7 +562,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getInt(options, "geom-runs");
     }
 
-    /**
+	/**
      * Verbose dump file --
      * Filename for detailed execution log.
      *
@@ -543,7 +573,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getString(options, "geom-dump-verbose");
     }
 
-    /**
+	/**
      * Verification file --
      * Filename for verification file.
      *
@@ -558,14 +588,7 @@ public class SparkOptions {
         return soot.PhaseOptions.getString(options, "geom-verify-name");
     }
 
-    public static final int propagator_iter = 1;
-    public static final int propagator_worklist = 2;
-    public static final int propagator_cycle = 3;
-    public static final int propagator_merge = 4;
-    public static final int propagator_alias = 5;
-    public static final int propagator_none = 6;
-
-    /**
+	/**
      * Propagator --
      * Select propagation algorithm.
      *
@@ -573,34 +596,33 @@ public class SparkOptions {
      */
     public int propagator() {
         String s = soot.PhaseOptions.getString(options, "propagator");
-        if (s == null || s.isEmpty())
-        	return propagator_worklist;
+        if (s == null || s.isEmpty()) {
+			return propagator_worklist;
+		}
 	
-        if (s.equalsIgnoreCase("iter"))
-            return propagator_iter;
-        if (s.equalsIgnoreCase("worklist"))
-            return propagator_worklist;
-        if (s.equalsIgnoreCase("cycle"))
-            return propagator_cycle;
-        if (s.equalsIgnoreCase("merge"))
-            return propagator_merge;
-        if (s.equalsIgnoreCase("alias"))
-            return propagator_alias;
-        if (s.equalsIgnoreCase("none"))
-            return propagator_none;
+        if ("iter".equalsIgnoreCase(s)) {
+			return propagator_iter;
+		}
+        if ("worklist".equalsIgnoreCase(s)) {
+			return propagator_worklist;
+		}
+        if ("cycle".equalsIgnoreCase(s)) {
+			return propagator_cycle;
+		}
+        if ("merge".equalsIgnoreCase(s)) {
+			return propagator_merge;
+		}
+        if ("alias".equalsIgnoreCase(s)) {
+			return propagator_alias;
+		}
+        if ("none".equalsIgnoreCase(s)) {
+			return propagator_none;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option propagator", s));
     }
 
-    public static final int set_impl_hash = 1;
-    public static final int set_impl_bit = 2;
-    public static final int set_impl_hybrid = 3;
-    public static final int set_impl_array = 4;
-    public static final int set_impl_heintze = 5;
-    public static final int set_impl_sharedlist = 6;
-    public static final int set_impl_double = 7;
-
-    /**
+	/**
      * Set Implementation --
      * Select points-to set implementation.
      *
@@ -608,35 +630,36 @@ public class SparkOptions {
      */
     public int set_impl() {
         String s = soot.PhaseOptions.getString(options, "set-impl");
-        if (s == null || s.isEmpty())
-        	return set_impl_double;
+        if (s == null || s.isEmpty()) {
+			return set_impl_double;
+		}
 	
-        if (s.equalsIgnoreCase("hash"))
-            return set_impl_hash;
-        if (s.equalsIgnoreCase("bit"))
-            return set_impl_bit;
-        if (s.equalsIgnoreCase("hybrid"))
-            return set_impl_hybrid;
-        if (s.equalsIgnoreCase("array"))
-            return set_impl_array;
-        if (s.equalsIgnoreCase("heintze"))
-            return set_impl_heintze;
-        if (s.equalsIgnoreCase("sharedlist"))
-            return set_impl_sharedlist;
-        if (s.equalsIgnoreCase("double"))
-            return set_impl_double;
+        if ("hash".equalsIgnoreCase(s)) {
+			return set_impl_hash;
+		}
+        if ("bit".equalsIgnoreCase(s)) {
+			return set_impl_bit;
+		}
+        if ("hybrid".equalsIgnoreCase(s)) {
+			return set_impl_hybrid;
+		}
+        if ("array".equalsIgnoreCase(s)) {
+			return set_impl_array;
+		}
+        if ("heintze".equalsIgnoreCase(s)) {
+			return set_impl_heintze;
+		}
+        if ("sharedlist".equalsIgnoreCase(s)) {
+			return set_impl_sharedlist;
+		}
+        if ("double".equalsIgnoreCase(s)) {
+			return set_impl_double;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option set-impl", s));
     }
 
-    public static final int double_set_old_hash = 1;
-    public static final int double_set_old_bit = 2;
-    public static final int double_set_old_hybrid = 3;
-    public static final int double_set_old_array = 4;
-    public static final int double_set_old_heintze = 5;
-    public static final int double_set_old_sharedlist = 6;
-
-    /**
+	/**
      * Double Set Old --
      * Select implementation of points-to set for old part of double 
      * set.
@@ -647,33 +670,33 @@ public class SparkOptions {
      */
     public int double_set_old() {
         String s = soot.PhaseOptions.getString(options, "double-set-old");
-        if (s == null || s.isEmpty())
-        	return double_set_old_hybrid;
+        if (s == null || s.isEmpty()) {
+			return double_set_old_hybrid;
+		}
 	
-        if (s.equalsIgnoreCase("hash"))
-            return double_set_old_hash;
-        if (s.equalsIgnoreCase("bit"))
-            return double_set_old_bit;
-        if (s.equalsIgnoreCase("hybrid"))
-            return double_set_old_hybrid;
-        if (s.equalsIgnoreCase("array"))
-            return double_set_old_array;
-        if (s.equalsIgnoreCase("heintze"))
-            return double_set_old_heintze;
-        if (s.equalsIgnoreCase("sharedlist"))
-            return double_set_old_sharedlist;
+        if ("hash".equalsIgnoreCase(s)) {
+			return double_set_old_hash;
+		}
+        if ("bit".equalsIgnoreCase(s)) {
+			return double_set_old_bit;
+		}
+        if ("hybrid".equalsIgnoreCase(s)) {
+			return double_set_old_hybrid;
+		}
+        if ("array".equalsIgnoreCase(s)) {
+			return double_set_old_array;
+		}
+        if ("heintze".equalsIgnoreCase(s)) {
+			return double_set_old_heintze;
+		}
+        if ("sharedlist".equalsIgnoreCase(s)) {
+			return double_set_old_sharedlist;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option double-set-old", s));
     }
 
-    public static final int double_set_new_hash = 1;
-    public static final int double_set_new_bit = 2;
-    public static final int double_set_new_hybrid = 3;
-    public static final int double_set_new_array = 4;
-    public static final int double_set_new_heintze = 5;
-    public static final int double_set_new_sharedlist = 6;
-
-    /**
+	/**
      * Double Set New --
      * Select implementation of points-to set for new part of double 
      * set.
@@ -684,30 +707,33 @@ public class SparkOptions {
      */
     public int double_set_new() {
         String s = soot.PhaseOptions.getString(options, "double-set-new");
-        if (s == null || s.isEmpty())
-        	return double_set_new_hybrid;
+        if (s == null || s.isEmpty()) {
+			return double_set_new_hybrid;
+		}
 	
-        if (s.equalsIgnoreCase("hash"))
-            return double_set_new_hash;
-        if (s.equalsIgnoreCase("bit"))
-            return double_set_new_bit;
-        if (s.equalsIgnoreCase("hybrid"))
-            return double_set_new_hybrid;
-        if (s.equalsIgnoreCase("array"))
-            return double_set_new_array;
-        if (s.equalsIgnoreCase("heintze"))
-            return double_set_new_heintze;
-        if (s.equalsIgnoreCase("sharedlist"))
-            return double_set_new_sharedlist;
+        if ("hash".equalsIgnoreCase(s)) {
+			return double_set_new_hash;
+		}
+        if ("bit".equalsIgnoreCase(s)) {
+			return double_set_new_bit;
+		}
+        if ("hybrid".equalsIgnoreCase(s)) {
+			return double_set_new_hybrid;
+		}
+        if ("array".equalsIgnoreCase(s)) {
+			return double_set_new_array;
+		}
+        if ("heintze".equalsIgnoreCase(s)) {
+			return double_set_new_heintze;
+		}
+        if ("sharedlist".equalsIgnoreCase(s)) {
+			return double_set_new_sharedlist;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option double-set-new", s));
     }
 
-    public static final int geom_encoding_Geom = 1;
-    public static final int geom_encoding_HeapIns = 2;
-    public static final int geom_encoding_PtIns = 3;
-
-    /**
+	/**
      * Encoding methodology used --
      * Encoding methodology.
      *
@@ -718,23 +744,24 @@ public class SparkOptions {
      */
     public int geom_encoding() {
         String s = soot.PhaseOptions.getString(options, "geom-encoding");
-        if (s == null || s.isEmpty())
-        	return geom_encoding_Geom;
+        if (s == null || s.isEmpty()) {
+			return geom_encoding_Geom;
+		}
 	
-        if (s.equalsIgnoreCase("Geom"))
-            return geom_encoding_Geom;
-        if (s.equalsIgnoreCase("HeapIns"))
-            return geom_encoding_HeapIns;
-        if (s.equalsIgnoreCase("PtIns"))
-            return geom_encoding_PtIns;
+        if ("Geom".equalsIgnoreCase(s)) {
+			return geom_encoding_Geom;
+		}
+        if ("HeapIns".equalsIgnoreCase(s)) {
+			return geom_encoding_HeapIns;
+		}
+        if ("PtIns".equalsIgnoreCase(s)) {
+			return geom_encoding_PtIns;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option geom-encoding", s));
     }
 
-    public static final int geom_worklist_PQ = 1;
-    public static final int geom_worklist_FIFO = 2;
-
-    /**
+	/**
      * Worklist type --
      * Worklist type.
      *
@@ -745,13 +772,16 @@ public class SparkOptions {
      */
     public int geom_worklist() {
         String s = soot.PhaseOptions.getString(options, "geom-worklist");
-        if (s == null || s.isEmpty())
-        	return geom_worklist_PQ;
+        if (s == null || s.isEmpty()) {
+			return geom_worklist_PQ;
+		}
 	
-        if (s.equalsIgnoreCase("PQ"))
-            return geom_worklist_PQ;
-        if (s.equalsIgnoreCase("FIFO"))
-            return geom_worklist_FIFO;
+        if ("PQ".equalsIgnoreCase(s)) {
+			return geom_worklist_PQ;
+		}
+        if ("FIFO".equalsIgnoreCase(s)) {
+			return geom_worklist_FIFO;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option geom-worklist", s));
     }

@@ -23,6 +23,8 @@ package soot.jimple.spark.ondemand.genericutil;
  */
 
 import java.util.Collection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author manu_s
@@ -30,7 +32,9 @@ import java.util.Collection;
  */
 public final class Stack<T> implements Cloneable {
 
-  private T[] elems;
+  private static final Logger logger = LoggerFactory.getLogger(Stack.class);
+
+private T[] elems;
 
   private int size = 0;
 
@@ -57,9 +61,7 @@ public final class Stack<T> implements Cloneable {
   }
 
   public void pushAll(Collection<T> c) {
-    for (T t : c) {
-      push(t);
-    }
+    c.forEach(t -> push(t));
   }
 
   public T pop() {
@@ -91,7 +93,8 @@ public final class Stack<T> implements Cloneable {
     size = 0;
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+@SuppressWarnings("unchecked")
   public Stack<T> clone() {
     Stack<T> ret = null;
     try {
@@ -100,7 +103,8 @@ public final class Stack<T> implements Cloneable {
       System.arraycopy(elems, 0, ret.elems, 0, size);
       return ret;
     } catch (CloneNotSupportedException e) {
-      // should not happen
+      logger.error(e.getMessage(), e);
+	// should not happen
       throw new InternalError();
     }
   }
@@ -128,8 +132,9 @@ public final class Stack<T> implements Cloneable {
     return -1;
   }
 
-  public String toString() {
-    StringBuffer s = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder s = new StringBuilder();
     s.append("[");
     for (int i = 0; i < size && elems[i] != null; i++) {
       if (i > 0) {

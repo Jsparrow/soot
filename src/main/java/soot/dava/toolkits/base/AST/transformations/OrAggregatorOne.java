@@ -71,10 +71,12 @@ public class OrAggregatorOne extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
-  public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
+  @Override
+public void outASTLabeledBlockNode(ASTLabeledBlockNode node) {
     String outerLabel = node.get_Label().toString();
     if (outerLabel == null) {
       return;
@@ -109,12 +111,8 @@ public class OrAggregatorOne extends DepthFirstAdapter {
     // remembering that the last ones condition is to be flipped
     List<ASTCondition> conditions = getConditions(secondLabelsBodies.iterator());
 
-    // create an aggregated condition
-    Iterator<ASTCondition> condIt = conditions.iterator();
     ASTCondition newCond = null;
-    ;
-    while (condIt.hasNext()) {
-      ASTCondition next = condIt.next();
+    for (ASTCondition next : conditions) {
       if (newCond == null) {
         newCond = next;
       } else {
@@ -123,7 +121,7 @@ public class OrAggregatorOne extends DepthFirstAdapter {
     }
 
     // will contain the Body of the ASTIfNode
-    List<Object> newIfBody = new ArrayList<Object>();
+    List<Object> newIfBody = new ArrayList<>();
 
     // get_SubBodies of upper labeled block
     List<Object> subBodies = node.get_SubBodies();
@@ -141,7 +139,7 @@ public class OrAggregatorOne extends DepthFirstAdapter {
 
     ASTIfNode newNode = new ASTIfNode(new SETNodeLabel(), newCond, newIfBody);
 
-    List<Object> newLabeledBlockBody = new ArrayList<Object>();
+    List<Object> newLabeledBlockBody = new ArrayList<>();
     newLabeledBlockBody.add(newNode);
 
     G.v().ASTTransformations_modified = true;
@@ -306,7 +304,7 @@ public class OrAggregatorOne extends DepthFirstAdapter {
    * it knows the following: 1, All nodes are ASTIFNodes
    */
   private List<ASTCondition> getConditions(Iterator it) {
-    List<ASTCondition> toReturn = new ArrayList<ASTCondition>();
+    List<ASTCondition> toReturn = new ArrayList<>();
     while (it.hasNext()) {
       // safe cast since we know these are all ASTIfNodes
       ASTIfNode node = (ASTIfNode) it.next();

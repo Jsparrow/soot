@@ -43,48 +43,59 @@ public class BLoadInst extends AbstractOpTypeInst implements LoadInst {
     useBoxes = Collections.singletonList(localBox);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 0;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BLoadInst(getOpType(), getLocal());
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "load";
   }
 
-  final String getParameters() {
+  @Override
+final String getParameters() {
     return " " + localBox.getValue().toString();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     localBox.toString(up);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseLoadInst(this);
   }
 
-  public void setLocal(Local l) {
+  @Override
+public void setLocal(Local l) {
     localBox.setValue(l);
   }
 
-  public Local getLocal() {
+  @Override
+public Local getLocal() {
     return (Local) localBox.getValue();
   }
 
-  public List getUseBoxes() {
+  @Override
+public List getUseBoxes() {
     return useBoxes;
   }
 

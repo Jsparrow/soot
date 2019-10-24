@@ -35,11 +35,11 @@ import org.slf4j.LoggerFactory;
 public class SootSig {
   private static final Logger logger = LoggerFactory.getLogger(SootSig.class);
 
-  private static Map<Constructor<?>, String> constrCache = new ConcurrentHashMap<Constructor<?>, String>(); // TODO should be
+  private static Map<Constructor<?>, String> constrCache = new ConcurrentHashMap<>(); // TODO should be
                                                                                                             // a map with
                                                                                                             // soft keys,
                                                                                                             // actually
-  private static Map<Method, String> methodCache = new ConcurrentHashMap<Method, String>(); // TODO should be a map with soft
+  private static Map<Method, String> methodCache = new ConcurrentHashMap<>(); // TODO should be a map with soft
                                                                                             // keys, actually
 
   public static String sootSignature(Constructor<?> c) {
@@ -62,11 +62,12 @@ public class SootSig {
         try {
           resolved = c.getDeclaredMethod(m.getName(), m.getParameterTypes());
         } catch (NoSuchMethodException e) {
-          c = c.getSuperclass();
+          logger.error(e.getMessage(), e);
+		c = c.getSuperclass();
         }
       } while (resolved == null && c != null);
       if (resolved == null) {
-        Error error = new Error("Method not found : " + m + " in class " + receiverClass + " and super classes.");
+        Error error = new Error(new StringBuilder().append("Method not found : ").append(m).append(" in class ").append(receiverClass).append(" and super classes.").toString());
         logger.error(error.getMessage(), error);
       }
 
@@ -103,13 +104,14 @@ public class SootSig {
           dimensions++;
           cl = cl.getComponentType();
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(cl.getName());
         for (int i = 0; i < dimensions; i++) {
           sb.append("[]");
         }
         return sb.toString();
       } catch (Throwable e) {
+		logger.error(e.getMessage(), e);
         /* FALLTHRU */ }
     }
     return type.getName();

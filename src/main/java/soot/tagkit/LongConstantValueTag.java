@@ -38,7 +38,8 @@ public class LongConstantValueTag extends ConstantValueTag {
     return value;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "ConstantValue: " + Long.toString(value);
   }
 

@@ -48,57 +48,52 @@ import soot.util.IterableSet;
 public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
   private HashMap<Stmt, AugmentedStmt> binding;
   private HashMap<AugmentedStmt, AugmentedStmt> original2clone;
-  private IterableSet<AugmentedStmt> aug_list;
-  private IterableSet<Stmt> stmt_list;
-  private List<AugmentedStmt> bheads, btails, cheads, ctails;
+  private IterableSet<AugmentedStmt> augList;
+  private IterableSet<Stmt> stmtList;
+  private List<AugmentedStmt> bheads;
+private List<AugmentedStmt> btails;
+private List<AugmentedStmt> cheads;
+private List<AugmentedStmt> ctails;
 
   public AugmentedStmtGraph(AugmentedStmtGraph other) {
     this();
 
-    HashMap<AugmentedStmt, AugmentedStmt> old2new = new HashMap<AugmentedStmt, AugmentedStmt>();
+    HashMap<AugmentedStmt, AugmentedStmt> old2new = new HashMap<>();
 
-    for (AugmentedStmt oas : other.aug_list) {
+    other.augList.forEach(oas -> {
       Stmt s = oas.get_Stmt();
 
       AugmentedStmt nas = new AugmentedStmt(s);
-      aug_list.add(nas);
-      stmt_list.add(s);
+      augList.add(nas);
+      stmtList.add(s);
       binding.put(s, nas);
 
       old2new.put(oas, nas);
-    }
+    });
 
-    for (AugmentedStmt oas : other.aug_list) {
+    other.augList.forEach(oas -> {
       AugmentedStmt nas = (AugmentedStmt) old2new.get(oas);
 
-      for (AugmentedStmt aug : oas.bpreds) {
-        nas.bpreds.add(old2new.get(aug));
-      }
+      oas.bpreds.forEach(aug -> nas.bpreds.add(old2new.get(aug)));
       if (nas.bpreds.isEmpty()) {
         bheads.add(nas);
       }
 
-      for (AugmentedStmt aug : oas.cpreds) {
-        nas.cpreds.add(old2new.get(aug));
-      }
+      oas.cpreds.forEach(aug -> nas.cpreds.add(old2new.get(aug)));
       if (nas.cpreds.isEmpty()) {
         cheads.add(nas);
       }
 
-      for (AugmentedStmt aug : oas.bsuccs) {
-        nas.bsuccs.add(old2new.get(aug));
-      }
+      oas.bsuccs.forEach(aug -> nas.bsuccs.add(old2new.get(aug)));
       if (nas.bsuccs.isEmpty()) {
         btails.add(nas);
       }
 
-      for (AugmentedStmt aug : oas.csuccs) {
-        nas.csuccs.add(old2new.get(aug));
-      }
+      oas.csuccs.forEach(aug -> nas.csuccs.add(old2new.get(aug)));
       if (nas.csuccs.isEmpty()) {
         ctails.add(nas);
       }
-    }
+    });
 
     find_Dominators();
   }
@@ -116,39 +111,38 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
 
     // make the list of augmented statements in pseudo topological order!
     List<Unit> cugList = (new PseudoTopologicalOrderer<Unit>()).newList(cug, false);
-    for (Unit u : cugList) {
-      Stmt s = (Stmt) u;
-      aug_list.add(get_AugStmt(s));
-      stmt_list.add(s);
-    }
+    cugList.stream().map(u -> (Stmt) u).forEach(s -> {
+		augList.add(get_AugStmt(s));
+		stmtList.add(s);
+	});
 
     // now that we've got all the augmented statements, mirror the statement
-    // graph
-    for (AugmentedStmt as : aug_list) {
+	// graph
+	augList.forEach(as -> {
       mirror_PredsSuccs(as, bug);
       mirror_PredsSuccs(as, cug);
-    }
+    });
 
     find_Dominators();
   }
 
   public AugmentedStmtGraph() {
-    binding = new HashMap<Stmt, AugmentedStmt>();
-    original2clone = new HashMap<AugmentedStmt, AugmentedStmt>();
-    aug_list = new IterableSet<AugmentedStmt>();
-    stmt_list = new IterableSet<Stmt>();
+    binding = new HashMap<>();
+    original2clone = new HashMap<>();
+    augList = new IterableSet<>();
+    stmtList = new IterableSet<>();
 
-    bheads = new LinkedList<AugmentedStmt>();
-    btails = new LinkedList<AugmentedStmt>();
-    cheads = new LinkedList<AugmentedStmt>();
-    ctails = new LinkedList<AugmentedStmt>();
+    bheads = new LinkedList<>();
+    btails = new LinkedList<>();
+    cheads = new LinkedList<>();
+    ctails = new LinkedList<>();
   }
 
   public void add_AugmentedStmt(AugmentedStmt as) {
     Stmt s = as.get_Stmt();
 
-    aug_list.add(as);
-    stmt_list.add(s);
+    augList.add(as);
+    stmtList.add(s);
 
     add_StmtBinding(s, as);
 
@@ -175,23 +169,20 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
   }
 
   public boolean contains(Object o) {
-    return aug_list.contains(o);
+    return augList.contains(o);
   }
 
   public AugmentedStmt get_CloneOf(AugmentedStmt as) {
     return original2clone.get(as);
   }
 
-  public int size() {
-    return aug_list.size();
+  @Override
+public int size() {
+    return augList.size();
   }
 
   private <T> void check_List(List<T> psList, List<T> htList) {
-    for (T t : psList) {
-      if (htList.contains(t)) {
-        htList.remove(t);
-      }
-    }
+    psList.stream().filter(htList::contains).forEach(htList::remove);
   }
 
   public void calculate_Reachability(AugmentedStmt source, Set<AugmentedStmt> blockers, AugmentedStmt dominator) {
@@ -203,8 +194,8 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
       return;
     }
 
-    LinkedList<AugmentedStmt> worklist = new LinkedList<AugmentedStmt>();
-    HashSet<AugmentedStmt> touchSet = new HashSet<AugmentedStmt>();
+    LinkedList<AugmentedStmt> worklist = new LinkedList<>();
+    HashSet<AugmentedStmt> touchSet = new HashSet<>();
 
     worklist.addLast(source);
     touchSet.add(source);
@@ -234,14 +225,11 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
 
   public void calculate_Reachability(Collection<AugmentedStmt> sources, Set<AugmentedStmt> blockers,
       AugmentedStmt dominator) {
-    Iterator<AugmentedStmt> srcIt = sources.iterator();
-    while (srcIt.hasNext()) {
-      calculate_Reachability(srcIt.next(), blockers, dominator);
-    }
+    sources.forEach(source -> calculate_Reachability(source, blockers, dominator));
   }
 
   public void calculate_Reachability(AugmentedStmt source, AugmentedStmt blocker, AugmentedStmt dominator) {
-    HashSet<AugmentedStmt> h = new HashSet<AugmentedStmt>();
+    HashSet<AugmentedStmt> h = new HashSet<>();
 
     h.add(blocker);
 
@@ -249,7 +237,7 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
   }
 
   public void calculate_Reachability(Collection<AugmentedStmt> sources, AugmentedStmt blocker, AugmentedStmt dominator) {
-    HashSet<AugmentedStmt> h = new HashSet<AugmentedStmt>();
+    HashSet<AugmentedStmt> h = new HashSet<>();
 
     h.add(blocker);
 
@@ -299,7 +287,7 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
 
   @Override
   public Iterator<AugmentedStmt> iterator() {
-    return aug_list.iterator();
+    return augList.iterator();
   }
 
   @Override
@@ -331,44 +319,29 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
   }
 
   public IterableSet<AugmentedStmt> get_ChainView() {
-    return new IterableSet<AugmentedStmt>(aug_list);
+    return new IterableSet<>(augList);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new AugmentedStmtGraph(this);
   }
 
   public boolean remove_AugmentedStmt(AugmentedStmt toRemove) {
-    if (aug_list.contains(toRemove) == false) {
+    if (augList.contains(toRemove) == false) {
       return false;
     }
 
-    for (AugmentedStmt pas : toRemove.bpreds) {
-      if (pas.bsuccs.contains(toRemove)) {
-        pas.bsuccs.remove(toRemove);
-      }
-    }
+    toRemove.bpreds.stream().filter(pas -> pas.bsuccs.contains(toRemove)).forEach(pas -> pas.bsuccs.remove(toRemove));
 
-    for (AugmentedStmt pas : toRemove.cpreds) {
-      if (pas.csuccs.contains(toRemove)) {
-        pas.csuccs.remove(toRemove);
-      }
-    }
+    toRemove.cpreds.stream().filter(pas -> pas.csuccs.contains(toRemove)).forEach(pas -> pas.csuccs.remove(toRemove));
 
-    for (AugmentedStmt sas : toRemove.bsuccs) {
-      if (sas.bpreds.contains(toRemove)) {
-        sas.bpreds.remove(toRemove);
-      }
-    }
+    toRemove.bsuccs.stream().filter(sas -> sas.bpreds.contains(toRemove)).forEach(sas -> sas.bpreds.remove(toRemove));
 
-    for (AugmentedStmt sas : toRemove.csuccs) {
-      if (sas.cpreds.contains(toRemove)) {
-        sas.cpreds.remove(toRemove);
-      }
-    }
+    toRemove.csuccs.stream().filter(sas -> sas.cpreds.contains(toRemove)).forEach(sas -> sas.cpreds.remove(toRemove));
 
-    aug_list.remove(toRemove);
-    stmt_list.remove(toRemove.get_Stmt());
+    augList.remove(toRemove);
+    stmtList.remove(toRemove.get_Stmt());
 
     bheads.remove(toRemove);
     btails.remove(toRemove);
@@ -382,31 +355,27 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
     // NOTE: we do *NOT* touch the underlying unit graphs.
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     String cr = "\n";
 
-    b.append("AugmentedStmtGraph (size: " + size() + " stmts)" + cr);
+    b.append(new StringBuilder().append("AugmentedStmtGraph (size: ").append(size()).append(" stmts)").append(cr).toString());
 
-    for (AugmentedStmt as : aug_list) {
-      b.append("| .---" + cr + "| | AugmentedStmt " + as.toString() + cr + "| |" + cr + "| |  preds:");
+    augList.forEach(as -> {
+      b.append(new StringBuilder().append("| .---").append(cr).append("| | AugmentedStmt ").append(as.toString()).append(cr).append("| |")
+			.append(cr).append("| |  preds:").toString());
 
-      for (AugmentedStmt pas : as.cpreds) {
-        b.append(" " + pas.toString());
-      }
+      as.cpreds.forEach(pas -> b.append(" " + pas.toString()));
 
-      b.append(cr + "| |" + cr + "| |  succs:");
-      for (AugmentedStmt sas : as.csuccs) {
-        b.append(" " + sas.toString());
-      }
+      b.append(new StringBuilder().append(cr).append("| |").append(cr).append("| |  succs:").toString());
+      as.csuccs.forEach(sas -> b.append(" " + sas.toString()));
 
-      b.append(cr + "| |" + cr + "| |  doms:");
-      for (AugmentedStmt das : as.get_Dominators()) {
-        b.append(" " + das.toString());
-      }
+      b.append(new StringBuilder().append(cr).append("| |").append(cr).append("| |  doms:").toString());
+      as.get_Dominators().forEach(das -> b.append(" " + das.toString()));
 
-      b.append(cr + "| `---" + cr);
-    }
+      b.append(new StringBuilder().append(cr).append("| `---").append(cr).toString());
+    });
 
     b.append("-" + cr);
     return b.toString();
@@ -415,23 +384,22 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
   private void mirror_PredsSuccs(AugmentedStmt as, UnitGraph ug) {
     Stmt s = as.get_Stmt();
 
-    LinkedList<AugmentedStmt> preds = new LinkedList<AugmentedStmt>(), succs = new LinkedList<AugmentedStmt>();
+    LinkedList<AugmentedStmt> preds = new LinkedList<>();
+	LinkedList<AugmentedStmt> succs = new LinkedList<>();
 
     // mirror the predecessors
-    for (Unit u : ug.getPredsOf(s)) {
-      AugmentedStmt po = get_AugStmt((Stmt) u);
-      if (preds.contains(po) == false) {
-        preds.add(po);
-      }
-    }
+	ug.getPredsOf(s).stream().map(u -> get_AugStmt((Stmt) u)).forEach(po -> {
+		if (preds.contains(po) == false) {
+		    preds.add(po);
+		  }
+	});
 
     // mirror the successors
-    for (Unit u : ug.getSuccsOf(s)) {
-      AugmentedStmt so = get_AugStmt((Stmt) u);
-      if (succs.contains(so) == false) {
-        succs.add(so);
-      }
-    }
+	ug.getSuccsOf(s).stream().map(u -> get_AugStmt((Stmt) u)).forEach(so -> {
+		if (succs.contains(so) == false) {
+		    succs.add(so);
+		  }
+	});
 
     // attach the mirrors properly to the AugmentedStmt
     if (ug instanceof BriefUnitGraph) {
@@ -460,12 +428,12 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
   }
 
   public IterableSet<AugmentedStmt> clone_Body(IterableSet<AugmentedStmt> oldBody) {
-    HashMap<AugmentedStmt, AugmentedStmt> old2new = new HashMap<AugmentedStmt, AugmentedStmt>(),
-        new2old = new HashMap<AugmentedStmt, AugmentedStmt>();
+    HashMap<AugmentedStmt, AugmentedStmt> old2new = new HashMap<>();
+	HashMap<AugmentedStmt, AugmentedStmt> new2old = new HashMap<>();
 
-    IterableSet<AugmentedStmt> newBody = new IterableSet<AugmentedStmt>();
+    IterableSet<AugmentedStmt> newBody = new IterableSet<>();
 
-    for (AugmentedStmt as : oldBody) {
+    oldBody.forEach(as -> {
       AugmentedStmt clone = (AugmentedStmt) as.clone();
 
       original2clone.put(as, clone);
@@ -473,37 +441,37 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
       old2new.put(as, clone);
       new2old.put(clone, as);
       newBody.add(clone);
-    }
+    });
 
-    for (AugmentedStmt newAs : newBody) {
+    newBody.forEach(newAs -> {
       AugmentedStmt oldAs = (AugmentedStmt) new2old.get(newAs);
 
       mirror_PredsSuccs(oldAs, oldAs.bpreds, newAs.bpreds, old2new);
       mirror_PredsSuccs(oldAs, oldAs.cpreds, newAs.cpreds, old2new);
       mirror_PredsSuccs(oldAs, oldAs.bsuccs, newAs.bsuccs, old2new);
       mirror_PredsSuccs(oldAs, oldAs.csuccs, newAs.csuccs, old2new);
-    }
+    });
 
-    for (AugmentedStmt au : newBody) {
-      add_AugmentedStmt(au);
-    }
+    newBody.forEach(this::add_AugmentedStmt);
 
-    HashMap<Stmt, Stmt> so2n = new HashMap<Stmt, Stmt>();
+    HashMap<Stmt, Stmt> so2n = new HashMap<>();
 
-    for (AugmentedStmt as : oldBody) {
+    oldBody.forEach(as -> {
       Stmt os = as.get_Stmt();
       Stmt ns = old2new.get(as).get_Stmt();
 
       so2n.put(os, ns);
-    }
+    });
 
-    for (AugmentedStmt nas : newBody) {
+    newBody.forEach(nas -> {
       AugmentedStmt oas = (AugmentedStmt) new2old.get(nas);
 
-      Stmt ns = nas.get_Stmt(), os = oas.get_Stmt();
+      Stmt ns = nas.get_Stmt();
+	Stmt os = oas.get_Stmt();
 
       if (os instanceof IfStmt) {
-        Unit target = ((IfStmt) os).getTarget(), newTgt = null;
+        Unit target = ((IfStmt) os).getTarget();
+		Unit newTgt = null;
 
         if ((newTgt = so2n.get(target)) != null) {
           ((IfStmt) ns).setTarget(newTgt);
@@ -513,9 +481,11 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
       }
 
       else if (os instanceof TableSwitchStmt) {
-        TableSwitchStmt otss = (TableSwitchStmt) os, ntss = (TableSwitchStmt) ns;
+        TableSwitchStmt otss = (TableSwitchStmt) os;
+		TableSwitchStmt ntss = (TableSwitchStmt) ns;
 
-        Unit target = otss.getDefaultTarget(), newTgt = null;
+        Unit target = otss.getDefaultTarget();
+		Unit newTgt = null;
 
         if ((newTgt = so2n.get(target)) != null) {
           ntss.setDefaultTarget(newTgt);
@@ -523,7 +493,7 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
           ntss.setDefaultTarget(target);
         }
 
-        LinkedList<Unit> new_target_list = new LinkedList<Unit>();
+        LinkedList<Unit> new_target_list = new LinkedList<>();
 
         int target_count = otss.getHighIndex() - otss.getLowIndex() + 1;
         for (int i = 0; i < target_count; i++) {
@@ -540,9 +510,11 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
       }
 
       else if (os instanceof LookupSwitchStmt) {
-        LookupSwitchStmt olss = (LookupSwitchStmt) os, nlss = (LookupSwitchStmt) ns;
+        LookupSwitchStmt olss = (LookupSwitchStmt) os;
+		LookupSwitchStmt nlss = (LookupSwitchStmt) ns;
 
-        Unit target = olss.getDefaultTarget(), newTgt = null;
+        Unit target = olss.getDefaultTarget();
+		Unit newTgt = null;
 
         if ((newTgt = so2n.get(target)) != null) {
           nlss.setDefaultTarget(newTgt);
@@ -565,7 +537,7 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
         nlss.setTargets(new_target_list);
         nlss.setLookupValues(olss.getLookupValues());
       }
-    }
+    });
 
     return newBody;
   }
@@ -599,7 +571,7 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
 
   public void find_Dominators() {
     // set up the dominator sets for all the nodes in the graph
-    for (AugmentedStmt as : aug_list) {
+	augList.forEach(as -> {
       // Dominators:
       // safe starting approximation for S(0) ... empty set
       // unsafe starting approximation for S(i) .. full set
@@ -609,22 +581,22 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
           as.get_Dominators().clear();
         }
 
-        as.get_Dominators().addAll(aug_list);
+        as.get_Dominators().addAll(augList);
       } else {
         as.get_Dominators().clear();
       }
-    }
+    });
 
     // build the worklist
-    IterableSet<AugmentedStmt> worklist = new IterableSet<AugmentedStmt>();
-    worklist.addAll(aug_list);
+    IterableSet<AugmentedStmt> worklist = new IterableSet<>();
+    worklist.addAll(augList);
 
     // keep going until the worklist is empty
     while (!worklist.isEmpty()) {
       AugmentedStmt as = worklist.getFirst();
       worklist.removeFirst();
 
-      IterableSet<AugmentedStmt> pred_intersection = new IterableSet<AugmentedStmt>();
+      IterableSet<AugmentedStmt> pred_intersection = new IterableSet<>();
       boolean first_pred = true;
 
       // run through all the predecessors and get their dominance
@@ -655,11 +627,7 @@ public class AugmentedStmtGraph implements DirectedGraph<AugmentedStmt> {
 
       // update dominance if we have a change
       if (as.get_Dominators().equals(pred_intersection) == false) {
-        for (AugmentedStmt o : as.csuccs) {
-          if (worklist.contains(o) == false) {
-            worklist.add(o);
-          }
-        }
+        as.csuccs.stream().filter(o -> worklist.contains(o) == false).forEach(worklist::add);
 
         as.get_Dominators().clear();
         as.get_Dominators().addAll(pred_intersection);

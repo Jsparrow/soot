@@ -13,16 +13,18 @@ package beaver;
  */
 public abstract class Action
 {
-	static public final Action NONE = new Action()
+	public static final Action NONE = new Action()
 	{
+		@Override
 		public Symbol reduce(Symbol[] args, int offset)
 		{
 			return new Symbol(null);
 		}
 	};
 	
-	static public final Action RETURN = new Action()
+	public static final Action RETURN = new Action()
 	{
+		@Override
 		public Symbol reduce(Symbol[] args, int offset)
 		{
 			return args[offset + 1];

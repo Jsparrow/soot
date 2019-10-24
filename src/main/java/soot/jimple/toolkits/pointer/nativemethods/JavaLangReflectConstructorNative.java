@@ -34,12 +34,13 @@ public class JavaLangReflectConstructorNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.Object newInstance(java.lang.Object[])")) {
+    if ("java.lang.Object newInstance(java.lang.Object[])".equals(subSignature)) {
       java_lang_reflect_Constructor_newInstance(method, thisVar, returnVar, params);
       return;
 

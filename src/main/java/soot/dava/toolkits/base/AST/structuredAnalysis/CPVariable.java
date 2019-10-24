@@ -83,24 +83,23 @@ public class CPVariable {
    * intersection method of CPFlowSet
    */
   public boolean equals(CPVariable var) {
-    // check they have the same type Local or SootField
-    if (this.containsLocal() && var.containsLocal()) {
-      // both locals and same name
-      if (this.getLocal().getName().equals(var.getLocal().getName())) {
+    boolean condition = this.containsLocal() && var.containsLocal() && this.getLocal().getName().equals(var.getLocal().getName());
+	// both locals and same name
+	// check they have the same type Local or SootField
+    if (condition) {
         return true;
       }
-    }
-    if (this.containsSootField() && var.containsSootField()) {
-      // both SootFields check they have same name
-      if (this.getSootField().getName().equals(var.getSootField().getName())) {
+    boolean condition1 = this.containsSootField() && var.containsSootField() && this.getSootField().getName().equals(var.getSootField().getName());
+	// both SootFields check they have same name
+	if (condition1) {
         return true;
       }
-    }
 
     return false;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (containsLocal()) {
       return "Local: " + getLocal().getName();
     } else if (containsSootField()) {

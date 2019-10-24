@@ -27,7 +27,7 @@ import soot.SootField;
 import soot.SootFieldRef;
 
 public interface FieldArgInst extends Inst {
-  public SootFieldRef getFieldRef();
+  SootFieldRef getFieldRef();
 
-  public SootField getField();
+  SootField getField();
 }

@@ -47,11 +47,8 @@ public class DexClassProvider implements ClassProvider {
   private static final Logger logger = LoggerFactory.getLogger(DexClassProvider.class);
 
   public static Set<String> classesOfDex(DexBackedDexFile dexFile) {
-    Set<String> classes = new HashSet<String>();
-    for (ClassDef c : dexFile.getClasses()) {
-      String name = Util.dottedClassName(c.getType());
-      classes.add(name);
-    }
+    Set<String> classes = new HashSet<>();
+    dexFile.getClasses().stream().map(c -> Util.dottedClassName(c.getType())).forEach(classes::add);
     return classes;
   }
 
@@ -62,7 +59,8 @@ public class DexClassProvider implements ClassProvider {
    *          class to provide.
    * @return a DexClassSource that defines the className named class.
    */
-  public ClassSource find(String className) {
+  @Override
+public ClassSource find(String className) {
     ensureDexIndex();
 
     Map<String, File> index = SourceLocator.v().dexClassIndex();
@@ -80,16 +78,17 @@ public class DexClassProvider implements ClassProvider {
   protected void ensureDexIndex() {
     Map<String, File> index = SourceLocator.v().dexClassIndex();
     if (index == null) {
-      index = new HashMap<String, File>();
+      index = new HashMap<>();
       buildDexIndex(index, SourceLocator.v().classPath());
       SourceLocator.v().setDexClassIndex(index);
     }
 
     // Process the classpath extensions
-    if (SourceLocator.v().getDexClassPathExtensions() != null) {
-      buildDexIndex(SourceLocator.v().dexClassIndex(), new ArrayList<>(SourceLocator.v().getDexClassPathExtensions()));
-      SourceLocator.v().clearDexClassPathExtensions();
-    }
+	if (SourceLocator.v().getDexClassPathExtensions() == null) {
+		return;
+	}
+	buildDexIndex(SourceLocator.v().dexClassIndex(), new ArrayList<>(SourceLocator.v().getDexClassPathExtensions()));
+	SourceLocator.v().clearDexClassPathExtensions();
   }
 
   /**
@@ -101,7 +100,7 @@ public class DexClassProvider implements ClassProvider {
    *          paths to index
    */
   private void buildDexIndex(Map<String, File> index, List<String> classPath) {
-    for (String path : classPath) {
+    classPath.forEach(path -> {
       try {
         File dexFile = new File(path);
         if (dexFile.exists()) {
@@ -118,13 +117,13 @@ public class DexClassProvider implements ClassProvider {
           }
         }
       } catch (IOException e) {
-        logger.warn("IO error while processing dex file '" + path + "'");
+        logger.warn(new StringBuilder().append("IO error while processing dex file '").append(path).append("'").toString());
         logger.debug("Exception: " + e);
       } catch (Exception e) {
-        logger.warn("exception while processing dex file '" + path + "'");
+        logger.warn(new StringBuilder().append("exception while processing dex file '").append(path).append("'").toString());
         logger.debug("Exception: " + e);
       }
-    }
+    });
 
   }
 }

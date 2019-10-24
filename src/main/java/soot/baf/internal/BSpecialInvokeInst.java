@@ -36,23 +36,28 @@ public class BSpecialInvokeInst extends AbstractInvokeInst implements SpecialInv
     this.methodRef = methodRef;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return super.getInCount() + 1;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return super.getInMachineCount() + 1;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BSpecialInvokeInst(methodRef);
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "specialinvoke";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseSpecialInvokeInst(this);
   }
 }

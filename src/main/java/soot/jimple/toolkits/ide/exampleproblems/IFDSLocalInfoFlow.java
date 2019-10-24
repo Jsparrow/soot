@@ -61,7 +61,8 @@ public class IFDSLocalInfoFlow extends DefaultJimpleIFDSTabulationProblem<Local,
     super(icfg);
   }
 
-  public FlowFunctions<Unit, Local, SootMethod> createFlowFunctionsFactory() {
+  @Override
+public FlowFunctions<Unit, Local, SootMethod> createFlowFunctionsFactory() {
     return new FlowFunctions<Unit, Local, SootMethod>() {
 
       @Override
@@ -71,7 +72,7 @@ public class IFDSLocalInfoFlow extends DefaultJimpleIFDSTabulationProblem<Local,
           Local leftLocal = (Local) is.getLeftOp();
           Value right = is.getRightOp();
           if (right instanceof ParameterRef) {
-            return new Gen<Local>(leftLocal, zeroValue());
+            return new Gen<>(leftLocal, zeroValue());
           }
         }
 
@@ -82,9 +83,9 @@ public class IFDSLocalInfoFlow extends DefaultJimpleIFDSTabulationProblem<Local,
             final Local leftLocal = (Local) assignStmt.getLeftOp();
             if (right instanceof Local) {
               final Local rightLocal = (Local) right;
-              return new Transfer<Local>(leftLocal, rightLocal);
+              return new Transfer<>(leftLocal, rightLocal);
             } else {
-              return new Kill<Local>(leftLocal);
+              return new Kill<>(leftLocal);
             }
           }
         }
@@ -96,18 +97,19 @@ public class IFDSLocalInfoFlow extends DefaultJimpleIFDSTabulationProblem<Local,
         Stmt s = (Stmt) src;
         InvokeExpr ie = s.getInvokeExpr();
         final List<Value> callArgs = ie.getArgs();
-        final List<Local> paramLocals = new ArrayList<Local>();
+        final List<Local> paramLocals = new ArrayList<>();
         for (int i = 0; i < dest.getParameterCount(); i++) {
           paramLocals.add(dest.getActiveBody().getParameterLocal(i));
         }
         return new FlowFunction<Local>() {
-          public Set<Local> computeTargets(Local source) {
+          @Override
+		public Set<Local> computeTargets(Local source) {
             // ignore implicit calls to static initializers
             if (dest.getName().equals(SootMethod.staticInitializerName) && dest.getParameterCount() == 0) {
               return Collections.emptySet();
             }
 
-            Set<Local> taintsInCaller = new HashSet<Local>();
+            Set<Local> taintsInCaller = new HashSet<>();
             for (int i = 0; i < callArgs.size(); i++) {
               if (callArgs.get(i).equivTo(source)) {
                 taintsInCaller.add(paramLocals.get(i));
@@ -123,26 +125,25 @@ public class IFDSLocalInfoFlow extends DefaultJimpleIFDSTabulationProblem<Local,
         if (exitStmt instanceof ReturnStmt) {
           ReturnStmt returnStmt = (ReturnStmt) exitStmt;
           Value op = returnStmt.getOp();
-          if (op instanceof Local) {
-            if (callSite instanceof DefinitionStmt) {
-              DefinitionStmt defnStmt = (DefinitionStmt) callSite;
-              Value leftOp = defnStmt.getLeftOp();
-              if (leftOp instanceof Local) {
-                final Local tgtLocal = (Local) leftOp;
-                final Local retLocal = (Local) op;
-                return new FlowFunction<Local>() {
+          if (op instanceof Local && callSite instanceof DefinitionStmt) {
+		  DefinitionStmt defnStmt = (DefinitionStmt) callSite;
+		  Value leftOp = defnStmt.getLeftOp();
+		  if (leftOp instanceof Local) {
+		    final Local tgtLocal = (Local) leftOp;
+		    final Local retLocal = (Local) op;
+		    return new FlowFunction<Local>() {
 
-                  public Set<Local> computeTargets(Local source) {
-                    if (source == retLocal) {
-                      return Collections.singleton(tgtLocal);
-                    }
-                    return Collections.emptySet();
-                  }
+		      @Override
+			public Set<Local> computeTargets(Local source) {
+		        if (source == retLocal) {
+		          return Collections.singleton(tgtLocal);
+		        }
+		        return Collections.emptySet();
+		      }
 
-                };
-              }
-            }
-          }
+		    };
+		  }
+		}
         }
         return KillAll.v();
       }

@@ -7,9 +7,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AMultiLocalNameList extends PLocalNameList
 {
-    private PLocalName _localName_;
-    private TComma _comma_;
-    private PLocalNameList _localNameList_;
+    private PLocalName localName;
+    private TComma comma;
+    private PLocalNameList localNameList;
 
     public AMultiLocalNameList()
     {
@@ -34,9 +34,9 @@ public final class AMultiLocalNameList extends PLocalNameList
     public Object clone()
     {
         return new AMultiLocalNameList(
-            cloneNode(this._localName_),
-            cloneNode(this._comma_),
-            cloneNode(this._localNameList_));
+            cloneNode(this.localName),
+            cloneNode(this.comma),
+            cloneNode(this.localNameList));
     }
 
     @Override
@@ -47,14 +47,14 @@ public final class AMultiLocalNameList extends PLocalNameList
 
     public PLocalName getLocalName()
     {
-        return this._localName_;
+        return this.localName;
     }
 
     public void setLocalName(PLocalName node)
     {
-        if(this._localName_ != null)
+        if(this.localName != null)
         {
-            this._localName_.parent(null);
+            this.localName.parent(null);
         }
 
         if(node != null)
@@ -67,19 +67,19 @@ public final class AMultiLocalNameList extends PLocalNameList
             node.parent(this);
         }
 
-        this._localName_ = node;
+        this.localName = node;
     }
 
     public TComma getComma()
     {
-        return this._comma_;
+        return this.comma;
     }
 
     public void setComma(TComma node)
     {
-        if(this._comma_ != null)
+        if(this.comma != null)
         {
-            this._comma_.parent(null);
+            this.comma.parent(null);
         }
 
         if(node != null)
@@ -92,19 +92,19 @@ public final class AMultiLocalNameList extends PLocalNameList
             node.parent(this);
         }
 
-        this._comma_ = node;
+        this.comma = node;
     }
 
     public PLocalNameList getLocalNameList()
     {
-        return this._localNameList_;
+        return this.localNameList;
     }
 
     public void setLocalNameList(PLocalNameList node)
     {
-        if(this._localNameList_ != null)
+        if(this.localNameList != null)
         {
-            this._localNameList_.parent(null);
+            this.localNameList.parent(null);
         }
 
         if(node != null)
@@ -117,37 +117,34 @@ public final class AMultiLocalNameList extends PLocalNameList
             node.parent(this);
         }
 
-        this._localNameList_ = node;
+        this.localNameList = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._localName_)
-            + toString(this._comma_)
-            + toString(this._localNameList_);
+        return new StringBuilder().append("").append(toString(this.localName)).append(toString(this.comma)).append(toString(this.localNameList)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._localName_ == child)
+        if(this.localName == child)
         {
-            this._localName_ = null;
+            this.localName = null;
             return;
         }
 
-        if(this._comma_ == child)
+        if(this.comma == child)
         {
-            this._comma_ = null;
+            this.comma = null;
             return;
         }
 
-        if(this._localNameList_ == child)
+        if(this.localNameList == child)
         {
-            this._localNameList_ = null;
+            this.localNameList = null;
             return;
         }
 
@@ -158,19 +155,19 @@ public final class AMultiLocalNameList extends PLocalNameList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._localName_ == oldChild)
+        if(this.localName == oldChild)
         {
             setLocalName((PLocalName) newChild);
             return;
         }
 
-        if(this._comma_ == oldChild)
+        if(this.comma == oldChild)
         {
             setComma((TComma) newChild);
             return;
         }
 
-        if(this._localNameList_ == oldChild)
+        if(this.localNameList == oldChild)
         {
             setLocalNameList((PLocalNameList) newChild);
             return;

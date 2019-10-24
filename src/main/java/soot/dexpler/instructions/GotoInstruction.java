@@ -38,7 +38,8 @@ public class GotoInstruction extends JumpInstruction implements DeferableInstruc
     super(instruction, codeAdress);
   }
 
-  public void jimplify(DexBody body) {
+  @Override
+public void jimplify(DexBody body) {
     // check if target instruction has been jimplified
     if (getTargetInstruction(body).getUnit() != null) {
       body.add(gotoStatement());
@@ -52,7 +53,8 @@ public class GotoInstruction extends JumpInstruction implements DeferableInstruc
     body.add(markerUnit);
   }
 
-  public void deferredJimplify(DexBody body) {
+  @Override
+public void deferredJimplify(DexBody body) {
     body.getBody().getUnits().insertAfter(gotoStatement(), markerUnit);
   }
 

@@ -46,7 +46,8 @@ public class Insn31t extends InsnWithOffset implements OneRegInsn {
     regs.add(regA);
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 

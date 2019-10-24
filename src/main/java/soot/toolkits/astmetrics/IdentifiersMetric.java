@@ -99,8 +99,8 @@ public class IdentifiersMetric extends ASTMetric {
   private void initializeDictionary() {
     String line;
     BufferedReader br = null;
-    dictionary = new ArrayList<String>();
-    names = new HashMap<String, Double>();
+    dictionary = new ArrayList<>();
+    names = new HashMap<>();
 
     InputStream is = ClassLoader.getSystemResourceAsStream("mydict.txt");
     if (is != null) {
@@ -131,7 +131,7 @@ public class IdentifiersMetric extends ASTMetric {
     if ((dictionarySize = dictionary.size()) == 0) {
       logger.debug("Error reading in dictionary file(s)");
     } else if (Options.v().verbose()) {
-      logger.debug("Read " + dictionarySize + " words in from dictionary file(s)");
+      logger.debug(new StringBuilder().append("Read ").append(dictionarySize).append(" words in from dictionary file(s)").toString());
     }
 
     try {
@@ -173,7 +173,8 @@ public class IdentifiersMetric extends ASTMetric {
    *
    * @see soot.toolkits.astmetrics.ASTMetric#reset()
    */
-  public void reset() {
+  @Override
+public void reset() {
     nameComplexity = 0;
     nameCount = 0;
   }
@@ -183,12 +184,14 @@ public class IdentifiersMetric extends ASTMetric {
    *
    * @see soot.toolkits.astmetrics.ASTMetric#addMetrics(soot.toolkits.astmetrics.ClassData)
    */
-  public void addMetrics(ClassData data) {
-    data.addMetric(new MetricData("NameComplexity", new Double(nameComplexity)));
-    data.addMetric(new MetricData("NameCount", new Double(nameCount)));
+  @Override
+public void addMetrics(ClassData data) {
+    data.addMetric(new MetricData("NameComplexity", Double.valueOf(nameComplexity)));
+    data.addMetric(new MetricData("NameCount", Double.valueOf(nameCount)));
   }
 
-  public NodeVisitor enter(Node parent, Node n) {
+  @Override
+public NodeVisitor enter(Node parent, Node n) {
     double multiplier = 1;
     String name = null;
     if (n instanceof ClassDecl) {
@@ -223,7 +226,7 @@ public class IdentifiersMetric extends ASTMetric {
       return names.get(name).doubleValue();
     }
 
-    ArrayList<String> strings = new ArrayList<String>();
+    ArrayList<String> strings = new ArrayList<>();
 
     // throw out non-alpha characters
     String tmp = "";
@@ -240,9 +243,9 @@ public class IdentifiersMetric extends ASTMetric {
       strings.add(tmp);
     }
 
-    ArrayList<String> tokens = new ArrayList<String>();
-    for (int i = 0; i < strings.size(); i++) {
-      tmp = strings.get(i);
+    ArrayList<String> tokens = new ArrayList<>();
+    for (String string : strings) {
+      tmp = string;
       while (tmp.length() > 0) {
         int caps = countCaps(tmp);
         if (caps == 0) {
@@ -278,8 +281,8 @@ public class IdentifiersMetric extends ASTMetric {
 
     double words = 0;
     double complexity = 0;
-    for (int i = 0; i < tokens.size(); i++) {
-      if (dictionary.contains(tokens.get(i))) {
+    for (String token : tokens) {
+      if (dictionary.contains(token)) {
         words++;
       }
     }
@@ -288,13 +291,16 @@ public class IdentifiersMetric extends ASTMetric {
       complexity = (tokens.size()) / words;
     }
 
-    names.put(name, new Double(complexity + computeCharComplexity(name)));
+    names.put(name, Double.valueOf(complexity + computeCharComplexity(name)));
 
     return complexity;
   }
 
   private double computeCharComplexity(String name) {
-    int count = 0, index = 0, last = 0, lng = name.length();
+    int count = 0;
+	int index = 0;
+	int last = 0;
+	int lng = name.length();
     while (index < lng) {
       char c = name.charAt(index);
       if ((c < 65 || c > 90) && (c < 97 || c > 122)) {

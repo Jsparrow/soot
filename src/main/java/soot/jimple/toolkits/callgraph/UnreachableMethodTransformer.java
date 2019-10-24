@@ -40,7 +40,8 @@ import soot.jimple.JimpleBody;
 import soot.jimple.StringConstant;
 
 public class UnreachableMethodTransformer extends BodyTransformer {
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
     // System.out.println( "Performing UnreachableMethodTransformer" );
     ReachableMethods reachableMethods = Scene.v().getReachableMethods();
     SootMethod method = b.getMethod();
@@ -52,7 +53,7 @@ public class UnreachableMethodTransformer extends BodyTransformer {
     JimpleBody body = (JimpleBody) method.getActiveBody();
 
     PatchingChain units = body.getUnits();
-    List<Unit> list = new Vector<Unit>();
+    List<Unit> list = new Vector<>();
 
     Local tmpRef = Jimple.v().newLocal("tmpRef", RefType.v("java.io.PrintStream"));
     body.getLocals().add(tmpRef);
@@ -66,7 +67,7 @@ public class UnreachableMethodTransformer extends BodyTransformer {
     list.add(Jimple.v().newInvokeStmt(Jimple.v().newVirtualInvokeExpr(tmpRef, toCall.makeRef(),
         StringConstant.v("Executing supposedly unreachable method:"))));
     list.add(Jimple.v().newInvokeStmt(Jimple.v().newVirtualInvokeExpr(tmpRef, toCall.makeRef(),
-        StringConstant.v("\t" + method.getDeclaringClass().getName() + "." + method.getName()))));
+        StringConstant.v(new StringBuilder().append("\t").append(method.getDeclaringClass().getName()).append(".").append(method.getName()).toString()))));
 
     toCall = Scene.v().getMethod("<java.lang.System: void exit(int)>");
     list.add(Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(toCall.makeRef(), IntConstant.v(1))));

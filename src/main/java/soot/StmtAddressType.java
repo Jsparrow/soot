@@ -36,19 +36,23 @@ public class StmtAddressType extends Type {
     return G.v().soot_StmtAddressType();
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x74F368D1;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "address";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseStmtAddressType(this);
   }
 }

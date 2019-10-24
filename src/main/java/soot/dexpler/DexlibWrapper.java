@@ -58,10 +58,10 @@ import soot.javaToJimple.IInitialResolver.Dependencies;
  */
 public class DexlibWrapper {
 
-  private final static Set<String> systemAnnotationNames;
+  private static final Set<String> systemAnnotationNames;
 
   static {
-    Set<String> systemAnnotationNamesModifiable = new HashSet<String>();
+    Set<String> systemAnnotationNamesModifiable = new HashSet<>();
     // names as defined in the ".dex - Dalvik Executable Format" document
     systemAnnotationNamesModifiable.add("dalvik.annotation.AnnotationDefault");
     systemAnnotationNamesModifiable.add("dalvik.annotation.EnclosingClass");
@@ -74,21 +74,10 @@ public class DexlibWrapper {
   }
 
   private final DexClassLoader dexLoader = createDexClassLoader();
+private final Map<String, ClassInformation> classesToDefItems = new HashMap<>();
+private final Collection<DexBackedDexFile> dexFiles;
 
-  private static class ClassInformation {
-    public DexFile dexFile;
-    public ClassDef classDefinition;
-
-    public ClassInformation(DexFile file, ClassDef classDef) {
-      this.dexFile = file;
-      this.classDefinition = classDef;
-    }
-  }
-
-  private final Map<String, ClassInformation> classesToDefItems = new HashMap<String, ClassInformation>();
-  private final Collection<DexBackedDexFile> dexFiles;
-
-  /**
+/**
    * Construct a DexlibWrapper from a dex file and stores its classes referenced by their name. No further process is done
    * here.
    */
@@ -97,15 +86,13 @@ public class DexlibWrapper {
     try {
       List<DexFileProvider.DexContainer> containers = DexFileProvider.v().getDexFromSource(dexSource);
       this.dexFiles = new ArrayList<>(containers.size());
-      for (DexFileProvider.DexContainer container : containers) {
-        this.dexFiles.add(container.getBase());
-      }
+      containers.forEach(container -> this.dexFiles.add(container.getBase()));
     } catch (IOException e) {
       throw new CompilationDeathException("IOException during dex parsing", e);
     }
   }
 
-  /**
+/**
    * Allow custom implementations to use different class loading strategies. Do not remove this method.
    *
    * @return
@@ -114,14 +101,12 @@ public class DexlibWrapper {
     return new DexClassLoader();
   }
 
-  public void initialize() {
+public void initialize() {
     // resolve classes in dex files
-    for (DexBackedDexFile dexFile : dexFiles) {
-      for (ClassDef defItem : dexFile.getClasses()) {
-        String forClassName = Util.dottedClassName(defItem.getType());
-        classesToDefItems.put(forClassName, new ClassInformation(dexFile, defItem));
-      }
-    }
+	dexFiles.forEach(dexFile -> dexFile.getClasses().forEach(defItem -> {
+		String forClassName = Util.dottedClassName(defItem.getType());
+		classesToDefItems.put(forClassName, new ClassInformation(dexFile, defItem));
+	}));
 
     // It is important to first resolve the classes, otherwise we will
     // produce an error during type resolution.
@@ -152,7 +137,7 @@ public class DexlibWrapper {
     }
   }
 
-  public Dependencies makeSootClass(SootClass sc, String className) {
+public Dependencies makeSootClass(SootClass sc, String className) {
     if (Util.isByteCodeClassName(className)) {
       className = Util.dottedClassName(className);
     }
@@ -163,5 +148,15 @@ public class DexlibWrapper {
     }
 
     throw new RuntimeException("Error: class not found in DEX files: " + className);
+  }
+
+  private static class ClassInformation {
+    public DexFile dexFile;
+    public ClassDef classDefinition;
+
+    public ClassInformation(DexFile file, ClassDef classDef) {
+      this.dexFile = file;
+      this.classDefinition = classDef;
+    }
   }
 }

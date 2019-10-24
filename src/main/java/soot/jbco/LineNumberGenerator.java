@@ -32,6 +32,8 @@ import soot.PatchingChain;
 import soot.Transform;
 import soot.Unit;
 import soot.tagkit.LineNumberTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LineNumberGenerator {
 
@@ -50,23 +52,24 @@ public class LineNumberGenerator {
   }
 
   class BafLineNumberer extends BodyTransformer {
-    protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+    private final Logger logger = LoggerFactory.getLogger(BafLineNumberer.class);
 
-      System.out.println("Printing Line Numbers for: " + b.getMethod().getSignature());
+	@Override
+	protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+
+      logger.info("Printing Line Numbers for: " + b.getMethod().getSignature());
 
       PatchingChain<Unit> units = b.getUnits(); // get the method code
-      Iterator<Unit> it = units.iterator();
-      while (it.hasNext()) { // for each jimple statement or baf instruction
-        Unit u = (Unit) it.next();
-        if (u.hasTag("LineNumberTag")) { // see if a LineNumberTag exists (it will if you use -keep-line-number)
+      units.stream().map(unit -> (Unit) unit).forEach(u -> {
+		if (u.hasTag("LineNumberTag")) { // see if a LineNumberTag exists (it will if you use -keep-line-number)
           LineNumberTag tag = (LineNumberTag) u.getTag(("LineNumberTag"));
-          System.out.println(u + " has Line Number: " + tag.getLineNumber()); // print out the unit and line number
+          logger.info(new StringBuilder().append(u).append(" has Line Number: ").append(tag.getLineNumber()).toString()); // print out the unit and line number
         } else {
-          System.out.println(u + " has no Line Number");
+          logger.info(u + " has no Line Number");
         }
-      }
+	});
 
-      System.out.println("\n");
+      logger.info("\n");
     }
   }
 }

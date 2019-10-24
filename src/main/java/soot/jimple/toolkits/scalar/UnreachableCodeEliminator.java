@@ -55,17 +55,18 @@ public class UnreachableCodeEliminator extends BodyTransformer {
   public UnreachableCodeEliminator(Singletons.Global g) {
   }
 
-  public static UnreachableCodeEliminator v() {
-    return G.v().soot_jimple_toolkits_scalar_UnreachableCodeEliminator();
-  }
-
   public UnreachableCodeEliminator(ThrowAnalysis ta) {
     this.throwAnalysis = ta;
   }
 
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+public static UnreachableCodeEliminator v() {
+    return G.v().soot_jimple_toolkits_scalar_UnreachableCodeEliminator();
+  }
+
+@Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Eliminating unreachable code...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Eliminating unreachable code...").toString());
     }
 
     // Force a conservative ExceptionalUnitGraph() which
@@ -106,44 +107,34 @@ public class UnreachableCodeEliminator extends BodyTransformer {
     }
 
     // We must make sure that the end units of all traps which are still
-    // alive are kept in the code
-    for (Trap t : body.getTraps()) {
-      if (t.getEndUnit() == body.getUnits().getLast()) {
-        reachable.add(t.getEndUnit());
-      }
-    }
+	// alive are kept in the code
+	body.getTraps().stream().filter(t -> t.getEndUnit() == body.getUnits().getLast()).forEach(t -> reachable.add(t.getEndUnit()));
 
-    Set<Unit> notReachable = new HashSet<Unit>();
+    Set<Unit> notReachable = new HashSet<>();
     if (Options.v().verbose()) {
-      for (Unit u : units) {
-        if (!reachable.contains(u)) {
-          notReachable.add(u);
-        }
-      }
+      units.stream().filter(u -> !reachable.contains(u)).forEach(notReachable::add);
     }
 
     units.retainAll(reachable);
 
     numPruned -= units.size();
 
-    if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "]	 Removed " + numPruned + " statements: ");
-      for (Unit u : notReachable) {
-        logger.debug("[" + body.getMethod().getName() + "]	         " + u);
-      }
-
-    }
+    if (!Options.v().verbose()) {
+		return;
+	}
+	logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("]	 Removed ").append(numPruned).append(" statements: ").toString());
+	notReachable.forEach(u -> logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("]	         ").append(u).toString()));
   }
 
-  // Used to be: "mark first statement and all its successors, recursively"
+// Used to be: "mark first statement and all its successors, recursively"
   // Bad idea! Some methods are extremely long. It broke because the recursion reached the
   // 3799th level.
   private <T> Set<T> reachable(T first, DirectedGraph<T> g) {
     if (first == null || g == null) {
       return Collections.<T>emptySet();
     }
-    Set<T> visited = new HashSet<T>(g.size());
-    Deque<T> q = new ArrayDeque<T>();
+    Set<T> visited = new HashSet<>(g.size());
+    Deque<T> q = new ArrayDeque<>();
     q.addFirst(first);
     do {
       T t = q.removeFirst();

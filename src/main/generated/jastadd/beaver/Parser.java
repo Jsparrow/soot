@@ -9,6 +9,8 @@
 package beaver;
 
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Almost complete implementation of a LALR parser. Two components that it lacks to parse a concrete
@@ -16,361 +18,6 @@ import java.io.IOException;
  */
 public abstract class Parser
 {
-	static public class Exception extends java.lang.Exception
-	{
-		Exception(String msg)
-		{
-			super(msg);
-		}
-	}
-	
-	/**
-	 * This class "lists" reportable events that might happen during parsing.
-	 */
-	static public class Events
-	{
-		public void scannerError(Scanner.Exception e)
-		{
-			System.err.print("Scanner Error:");
-			if (e.line > 0)
-			{
-				System.err.print(e.line);
-				System.err.print(',');
-				System.err.print(e.column);
-				System.err.print(':');
-			}
-			System.err.print(' ');
-			System.err.println(e.getMessage());
-		}
-		public void syntaxError(Symbol token)
-		{
-			System.err.print(':');
-			System.err.print(Symbol.getLine(token.start));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.start));
-			System.err.print('-');
-			System.err.print(Symbol.getLine(token.end));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.end));
-			System.err.print(": Syntax Error: unexpected token ");
-			if (token.value != null)
-			{
-				System.err.print('"');
-				System.err.print(token.value);
-				System.err.println('"');
-			}
-			else
-			{
-				System.err.print('#');
-				System.err.println(token.id);
-			}
-		}
-		public void unexpectedTokenRemoved(Symbol token)
-		{
-			System.err.print(':');
-			System.err.print(Symbol.getLine(token.start));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.start));
-			System.err.print('-');
-			System.err.print(Symbol.getLine(token.end));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.end));
-			System.err.print(": Recovered: removed unexpected token ");
-			if (token.value != null)
-			{
-				System.err.print('"');
-				System.err.print(token.value);
-				System.err.println('"');
-			}
-			else
-			{
-				System.err.print('#');
-				System.err.println(token.id);
-			}
-		}
-		public void missingTokenInserted(Symbol token)
-		{
-			System.err.print(':');
-			System.err.print(Symbol.getLine(token.start));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.start));
-			System.err.print('-');
-			System.err.print(Symbol.getLine(token.end));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.end));
-			System.err.print(": Recovered: inserted missing token ");
-			if (token.value != null)
-			{
-				System.err.print('"');
-				System.err.print(token.value);
-				System.err.println('"');
-			}
-			else
-			{
-				System.err.print('#');
-				System.err.println(token.id);
-			}
-		}
-		public void misspelledTokenReplaced(Symbol token)
-		{
-			System.err.print(':');
-			System.err.print(Symbol.getLine(token.start));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.start));
-			System.err.print('-');
-			System.err.print(Symbol.getLine(token.end));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(token.end));
-			System.err.print(": Recovered: replaced unexpected token with ");
-			if (token.value != null)
-			{
-				System.err.print('"');
-				System.err.print(token.value);
-				System.err.println('"');
-			}
-			else
-			{
-				System.err.print('#');
-				System.err.println(token.id);
-			}
-		}
-		public void errorPhraseRemoved(Symbol error)
-		{
-			System.err.print(':');
-			System.err.print(Symbol.getLine(error.start));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(error.start));
-			System.err.print('-');
-			System.err.print(Symbol.getLine(error.end));
-			System.err.print(',');
-			System.err.print(Symbol.getColumn(error.end));
-			System.err.println(": Recovered: removed error phrase");
-		}
-	}
-	
-	/**
-	 * This class wraps a Scanner and provides a token "accumulator" for a parsing simulation.
-	 * <p>If a source that is being parsed does not have syntax errors this wrapper only adds 
-	 * one indirection while it delivers the next token. However when parser needs to recover
-	 * from a syntax error this wrapper accumulates tokens shifted by a forward parsing simulation
-	 * and later feeds them to the recovered parser.
-	 */
-	public class TokenStream
-	{
-		private Scanner  scanner;
-		private Symbol[] buffer;
-		private int      n_marked;
-		private int      n_read;
-		private int      n_written;
-		
-		public TokenStream(Scanner scanner)
-		{
-			this.scanner = scanner;
-		}
-
-        public TokenStream(Scanner scanner, Symbol first_symbol)
-        {
-            this(scanner);
-            alloc(1);
-            buffer[0] = first_symbol;
-            n_written++;
-        }
-        
-		public Symbol nextToken() throws IOException
-		{
-			if (buffer != null)
-			{				
-				if (n_read < n_written)
-					return buffer[n_read++];
-				
-				if (n_written < n_marked)
-				{
-					n_read++;
-					return buffer[n_written++] = readToken();
-				}
-				buffer = null;
-			}
-			return readToken();
-		}
-
-		/**
-		 * Prepare a stream to accumulate tokens.
-		 * 
-		 * @param size number of shifted tokens to accumulate
-		 */
-		public void alloc(int size)
-		{
-			buffer = new Symbol[(n_marked = size) + 1];
-			n_read = n_written = 0;
-		}
-		
-		/**
-		 * Prepare accumulated tokens to be reread by a next simulation run
-		 * or by a recovered parser.
-		 */
-		public void rewind()
-		{
-			n_read = 0;
-		}
-        
-		/**
-		 * Insert two tokens at the beginning of a stream.
-		 * 
-		 * @param t0 first token to be inserted
-		 * @param t1 second token to be inserted
-		 */
-		public void insert(Symbol t0, Symbol t1)
-		{
-		    if (buffer.length - n_written < 2)
-		        throw new IllegalStateException ("not enough space in the buffer");
-			System.arraycopy(buffer, 0, buffer, 2, n_written);
-			buffer[0] = t0;
-			buffer[1] = t1;
-			n_written += 2;
-		}
-		
-		/**
-		 * Removes a token from the accumulator.
-		 * 
-		 * @param i index of a token in the accumulator.
-		 * @return removed token
-		 */
-		public Symbol remove(int i)
-		{
-			Symbol token = buffer[i];
-			int last = n_written - 1;
-			while (i < last)
-			{
-				buffer[i] = buffer[++i];
-			}
-			n_written = last;
-			return token;
-		}
-
-		/**
-		 * Checks whether a simulation filled the token accumulator. 
-		 * 
-		 * @return true if accumulator is full
-		 */
-		boolean isFull()
-		{
-			return n_read == n_marked;
-		}
-		
-		/**
-		 * Reads next recognized token from the scanner. If scanner fails to recognize a token and
-		 * throws an exception it will be reported via Parser.scannerError().
-		 * <p>It is expected that scanner is capable of returning at least an EOF token after the
-		 * exception.</p>
-		 * 
-		 * @return next recognized token
-		 * @throws IOException
-		 *             as thrown by a scanner
-		 */
-		private Symbol readToken() throws IOException
-		{
-			while (true)
-			{
-				try
-				{
-					return scanner.nextToken();
-				}
-				catch (Scanner.Exception e)
-				{
-					report.scannerError(e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Simulator is a stripped (of action code) version of a parser that will try to parse ahead
-	 * token stream after a syntax error. The simulation is considered successful if 3 tokens were
-	 * shifted successfully. If during simulation this parser encounters an error it drops the first
-	 * token it tried to use and restarts the simulated parsing.
-	 * <p>
-	 * Note: Without a special "error" rule present in a grammar, which a parser will try to shift
-	 * at the beginning of an error recovery, simulation continues without removing anything from
-	 * the original states stack. This often will lead to cases when no parsing ahead will recover
-	 * the parser from a syntax error.
-	 * </p>
-	 */
-	public class Simulator
-	{
-		private short[] states;
-		private int top, min_top;
-
-		public boolean parse(TokenStream in) throws IOException
-		{
-			initStack();
-			do {
-				Symbol token = in.nextToken();
-				while (true)
-				{
-					short act = tables.findParserAction(states[top], token.id);
-					if (act > 0)
-					{
-						shift(act);
-						break;
-					}
-					else if (act == accept_action_id)
-					{
-						return true;
-					}
-					else if (act < 0)
-					{
-						short nt_id = reduce(~act);
-
-						act = tables.findNextState(states[top], nt_id);
-						if (act > 0)
-							shift(act);
-						else
-							return act == accept_action_id;
-					}
-					else // act == 0, i.e. this is an error
-					{
-						return false;
-					}
-				}
-			}
-			while (!in.isFull());
-			return true;
-		}
-
-		private void initStack() throws IOException
-		{
-			if (states == null || states.length < Parser.this.states.length)
-			{
-				states = new short[Parser.this.states.length];
-				min_top = 0;
-			}
-			System.arraycopy(Parser.this.states, min_top, states, min_top, (top = Parser.this.top) + 1);
-		}
-
-		private void increaseStackCapacity()
-		{
-			short[] new_states = new short[states.length * 2];
-			System.arraycopy(states, 0, new_states, 0, states.length);
-			states = new_states;
-		}
-
-		private void shift(short state)
-		{
-			if (++top == states.length)
-				increaseStackCapacity();
-			states[top] = state;
-		}
-
-		private short reduce(int rule_id)
-		{
-			int rule_info = tables.rule_infos[rule_id];
-			int rhs_size = rule_info & 0xFFFF;
-			top -= rhs_size;
-			min_top = Math.min(min_top, top);
-			return (short) (rule_info >>> 16);
-		}
-	}
-
 	/** The automaton tables. */
 	protected final ParsingTables tables;
 
@@ -388,7 +35,7 @@ public abstract class Parser
 
 	/** Parsing events notification "gateway" */
 	protected Events report;
-	
+
 
 	protected Parser(ParsingTables tables)
 	{
@@ -397,7 +44,7 @@ public abstract class Parser
 		this.states = new short[256];
 	}
 
-    /**
+	/**
      * Parses a source and returns a semantic value of the accepted nonterminal
      * 
      * @param source of tokens - a Scanner
@@ -408,8 +55,8 @@ public abstract class Parser
 		init();
 		return parse(new TokenStream(source));
 	}
-    
-    /**
+
+	/**
      * Parses a source and returns a semantic value of the accepted nonterminal.
      * Before parsing starts injects alternative goal marker into the source to
      * indicate that an alternative goal should be matched.
@@ -424,8 +71,8 @@ public abstract class Parser
         TokenStream in = new TokenStream(source, new Symbol(alt_goal_marker_id));
         return parse(in);
     }
-    
-    private Object parse(TokenStream in) throws IOException, Parser.Exception
+
+	private Object parse(TokenStream in) throws IOException, Parser.Exception
     {
         while (true)
         {
@@ -487,7 +134,9 @@ public abstract class Parser
 	 */
 	private void init()
 	{
-		if (report == null) report = new Events();
+		if (report == null) {
+			report = new Events();
+		}
 		
 		_symbols = new Symbol[states.length];
 		top = 0; // i.e. it's not empty
@@ -519,8 +168,9 @@ public abstract class Parser
 	 */
 	private void shift(Symbol sym, short goto_state)
 	{
-		if (++top == states.length)
+		if (++top == states.length) {
 			increaseStackCapacity();
+		}
 		_symbols[top] = sym;
 		states[top] = goto_state;
 	}
@@ -552,7 +202,7 @@ public abstract class Parser
 		return lhs_sym;
 	}
 
-    /**
+	/**
      * Implements parsing error recovery. Tries several simple approaches first, like deleting "bad" token
      * or replacing the latter with one of the expected in his state (if possible). If simple methods did
      * not work tries to do error phrase recovery.
@@ -567,8 +217,9 @@ public abstract class Parser
      */
 	protected void recoverFromError(Symbol token, TokenStream in) throws IOException, Parser.Exception
 	{
-		if (token.id == 0) // end of input
+		if (token.id == 0) {
 			throw new Parser.Exception("Cannot recover from the syntax error");
+		}
 		
 		Simulator sim = new Simulator();
 		in.alloc(3);
@@ -593,8 +244,9 @@ public abstract class Parser
 				for (short term_id = (short) (first_term_id + 1); term_id < tables.n_term; term_id++)
 				{
 					int index = offset + term_id;
-					if (index >= tables.lookaheads.length)
+					if (index >= tables.lookaheads.length) {
 						break;
+					}
 					if (tables.lookaheads[index] == term_id)
 					{
 						term.id = term_id;
@@ -615,8 +267,9 @@ public abstract class Parser
 				for (short term_id = first_term_id; term_id < tables.n_term; term_id++)
 				{
 					int index = offset + term_id;
-					if (index >= tables.lookaheads.length)
+					if (index >= tables.lookaheads.length) {
 						break;
+					}
 					if (tables.lookaheads[index] == term_id)
 					{
 						term.id = term_id;
@@ -647,7 +300,8 @@ public abstract class Parser
 		 * "error" symbol was not used by a grammar, in the end the entire input becomes an error phrase,
 		 * and ... parser won't recover from it :)
 		 */
-		Symbol first_sym = token, last_sym = token;
+		Symbol first_sym = token;
+		Symbol last_sym = token;
 		short goto_state;
 		while ((goto_state = tables.findNextState(states[top], tables.error_symbol_id)) <= 0)
 		{
@@ -655,8 +309,9 @@ public abstract class Parser
 			// as the leftmost symbol of an error phrase
 			first_sym = _symbols[top];
 			// and go to the previous state
-			if (--top < 0)
+			if (--top < 0) {
 				throw new Parser.Exception("Cannot recover from the syntax error");
+			}
 		}
 		Symbol error = new Symbol(tables.error_symbol_id, first_sym.start, last_sym.end); // the end is temporary
 		shift(error, goto_state);
@@ -665,12 +320,374 @@ public abstract class Parser
 		while (!sim.parse(in))
 		{
 			last_sym = in.remove(0);
-			if (last_sym.id == 0) // EOF
+			if (last_sym.id == 0) {
 				throw new Parser.Exception("Cannot recover from the syntax error");
+			}
 			in.rewind();
 		}
 		error.end = last_sym.end;
 		in.rewind();
 		report.errorPhraseRemoved(error);
+	}
+
+	public static class Exception extends java.lang.Exception
+	{
+		Exception(String msg)
+		{
+			super(msg);
+		}
+	}
+	
+	/**
+	 * This class "lists" reportable events that might happen during parsing.
+	 */
+	public static class Events
+	{
+		private final Logger logger = LoggerFactory.getLogger(Events.class);
+		public void scannerError(Scanner.Exception e)
+		{
+			logger.error("Scanner Error:");
+			if (e.line > 0)
+			{
+				logger.error(String.valueOf(e.line), e);
+				logger.error(String.valueOf(','));
+				logger.error(String.valueOf(e.column), e);
+				logger.error(String.valueOf(':'));
+			}
+			logger.error(String.valueOf(' '));
+			logger.error(e.getMessage(), e);
+		}
+		public void syntaxError(Symbol token)
+		{
+			logger.error(String.valueOf(':'));
+			logger.error(String.valueOf(Symbol.getLine(token.start)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.start)));
+			logger.error(String.valueOf('-'));
+			logger.error(String.valueOf(Symbol.getLine(token.end)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.end)));
+			logger.error(": Syntax Error: unexpected token ");
+			if (token.value != null)
+			{
+				logger.error(String.valueOf('"'));
+				logger.error(String.valueOf(token.value));
+				logger.error(String.valueOf('"'));
+			}
+			else
+			{
+				logger.error(String.valueOf('#'));
+				logger.error(String.valueOf(token.id));
+			}
+		}
+		public void unexpectedTokenRemoved(Symbol token)
+		{
+			logger.error(String.valueOf(':'));
+			logger.error(String.valueOf(Symbol.getLine(token.start)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.start)));
+			logger.error(String.valueOf('-'));
+			logger.error(String.valueOf(Symbol.getLine(token.end)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.end)));
+			logger.error(": Recovered: removed unexpected token ");
+			if (token.value != null)
+			{
+				logger.error(String.valueOf('"'));
+				logger.error(String.valueOf(token.value));
+				logger.error(String.valueOf('"'));
+			}
+			else
+			{
+				logger.error(String.valueOf('#'));
+				logger.error(String.valueOf(token.id));
+			}
+		}
+		public void missingTokenInserted(Symbol token)
+		{
+			logger.error(String.valueOf(':'));
+			logger.error(String.valueOf(Symbol.getLine(token.start)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.start)));
+			logger.error(String.valueOf('-'));
+			logger.error(String.valueOf(Symbol.getLine(token.end)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.end)));
+			logger.error(": Recovered: inserted missing token ");
+			if (token.value != null)
+			{
+				logger.error(String.valueOf('"'));
+				logger.error(String.valueOf(token.value));
+				logger.error(String.valueOf('"'));
+			}
+			else
+			{
+				logger.error(String.valueOf('#'));
+				logger.error(String.valueOf(token.id));
+			}
+		}
+		public void misspelledTokenReplaced(Symbol token)
+		{
+			logger.error(String.valueOf(':'));
+			logger.error(String.valueOf(Symbol.getLine(token.start)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.start)));
+			logger.error(String.valueOf('-'));
+			logger.error(String.valueOf(Symbol.getLine(token.end)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(token.end)));
+			logger.error(": Recovered: replaced unexpected token with ");
+			if (token.value != null)
+			{
+				logger.error(String.valueOf('"'));
+				logger.error(String.valueOf(token.value));
+				logger.error(String.valueOf('"'));
+			}
+			else
+			{
+				logger.error(String.valueOf('#'));
+				logger.error(String.valueOf(token.id));
+			}
+		}
+		public void errorPhraseRemoved(Symbol error)
+		{
+			logger.error(String.valueOf(':'));
+			logger.error(String.valueOf(Symbol.getLine(error.start)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(error.start)));
+			logger.error(String.valueOf('-'));
+			logger.error(String.valueOf(Symbol.getLine(error.end)));
+			logger.error(String.valueOf(','));
+			logger.error(String.valueOf(Symbol.getColumn(error.end)));
+			logger.error(": Recovered: removed error phrase");
+		}
+	}
+	
+	/**
+	 * This class wraps a Scanner and provides a token "accumulator" for a parsing simulation.
+	 * <p>If a source that is being parsed does not have syntax errors this wrapper only adds 
+	 * one indirection while it delivers the next token. However when parser needs to recover
+	 * from a syntax error this wrapper accumulates tokens shifted by a forward parsing simulation
+	 * and later feeds them to the recovered parser.
+	 */
+	public class TokenStream
+	{
+		private Scanner  scanner;
+		private Symbol[] buffer;
+		private int      nMarked;
+		private int      nRead;
+		private int      nWritten;
+		
+		public TokenStream(Scanner scanner)
+		{
+			this.scanner = scanner;
+		}
+
+        public TokenStream(Scanner scanner, Symbol first_symbol)
+        {
+            this(scanner);
+            alloc(1);
+            buffer[0] = first_symbol;
+            nWritten++;
+        }
+        
+		public Symbol nextToken() throws IOException
+		{
+			if (buffer != null)
+			{				
+				if (nRead < nWritten) {
+					return buffer[nRead++];
+				}
+				
+				if (nWritten < nMarked)
+				{
+					nRead++;
+					return buffer[nWritten++] = readToken();
+				}
+				buffer = null;
+			}
+			return readToken();
+		}
+
+		/**
+		 * Prepare a stream to accumulate tokens.
+		 * 
+		 * @param size number of shifted tokens to accumulate
+		 */
+		public void alloc(int size)
+		{
+			buffer = new Symbol[(nMarked = size) + 1];
+			nRead = nWritten = 0;
+		}
+		
+		/**
+		 * Prepare accumulated tokens to be reread by a next simulation run
+		 * or by a recovered parser.
+		 */
+		public void rewind()
+		{
+			nRead = 0;
+		}
+        
+		/**
+		 * Insert two tokens at the beginning of a stream.
+		 * 
+		 * @param t0 first token to be inserted
+		 * @param t1 second token to be inserted
+		 */
+		public void insert(Symbol t0, Symbol t1)
+		{
+		    if (buffer.length - nWritten < 2) {
+				throw new IllegalStateException ("not enough space in the buffer");
+			}
+			System.arraycopy(buffer, 0, buffer, 2, nWritten);
+			buffer[0] = t0;
+			buffer[1] = t1;
+			nWritten += 2;
+		}
+		
+		/**
+		 * Removes a token from the accumulator.
+		 * 
+		 * @param i index of a token in the accumulator.
+		 * @return removed token
+		 */
+		public Symbol remove(int i)
+		{
+			Symbol token = buffer[i];
+			int last = nWritten - 1;
+			while (i < last)
+			{
+				buffer[i] = buffer[++i];
+			}
+			nWritten = last;
+			return token;
+		}
+
+		/**
+		 * Checks whether a simulation filled the token accumulator. 
+		 * 
+		 * @return true if accumulator is full
+		 */
+		boolean isFull()
+		{
+			return nRead == nMarked;
+		}
+		
+		/**
+		 * Reads next recognized token from the scanner. If scanner fails to recognize a token and
+		 * throws an exception it will be reported via Parser.scannerError().
+		 * <p>It is expected that scanner is capable of returning at least an EOF token after the
+		 * exception.</p>
+		 * 
+		 * @return next recognized token
+		 * @throws IOException
+		 *             as thrown by a scanner
+		 */
+		private Symbol readToken() throws IOException
+		{
+			while (true)
+			{
+				try
+				{
+					return scanner.nextToken();
+				}
+				catch (Scanner.Exception e)
+				{
+					report.scannerError(e);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Simulator is a stripped (of action code) version of a parser that will try to parse ahead
+	 * token stream after a syntax error. The simulation is considered successful if 3 tokens were
+	 * shifted successfully. If during simulation this parser encounters an error it drops the first
+	 * token it tried to use and restarts the simulated parsing.
+	 * <p>
+	 * Note: Without a special "error" rule present in a grammar, which a parser will try to shift
+	 * at the beginning of an error recovery, simulation continues without removing anything from
+	 * the original states stack. This often will lead to cases when no parsing ahead will recover
+	 * the parser from a syntax error.
+	 * </p>
+	 */
+	public class Simulator
+	{
+		private short[] states;
+		private int top;
+		private int minTop;
+
+		public boolean parse(TokenStream in) throws IOException
+		{
+			initStack();
+			do {
+				Symbol token = in.nextToken();
+				while (true)
+				{
+					short act = tables.findParserAction(states[top], token.id);
+					if (act > 0)
+					{
+						shift(act);
+						break;
+					}
+					else if (act == accept_action_id)
+					{
+						return true;
+					}
+					else if (act < 0)
+					{
+						short nt_id = reduce(~act);
+
+						act = tables.findNextState(states[top], nt_id);
+						if (act > 0) {
+							shift(act);
+						} else {
+							return act == accept_action_id;
+						}
+					}
+					else // act == 0, i.e. this is an error
+					{
+						return false;
+					}
+				}
+			}
+			while (!in.isFull());
+			return true;
+		}
+
+		private void initStack() throws IOException
+		{
+			if (states == null || states.length < Parser.this.states.length)
+			{
+				states = new short[Parser.this.states.length];
+				minTop = 0;
+			}
+			System.arraycopy(Parser.this.states, minTop, states, minTop, (top = Parser.this.top) + 1);
+		}
+
+		private void increaseStackCapacity()
+		{
+			short[] new_states = new short[states.length * 2];
+			System.arraycopy(states, 0, new_states, 0, states.length);
+			states = new_states;
+		}
+
+		private void shift(short state)
+		{
+			if (++top == states.length) {
+				increaseStackCapacity();
+			}
+			states[top] = state;
+		}
+
+		private short reduce(int rule_id)
+		{
+			int rule_info = tables.rule_infos[rule_id];
+			int rhs_size = rule_info & 0xFFFF;
+			top -= rhs_size;
+			minTop = Math.min(minTop, top);
+			return (short) (rule_info >>> 16);
+		}
 	}
 }

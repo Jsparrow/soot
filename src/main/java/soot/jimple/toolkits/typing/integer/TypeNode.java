@@ -102,25 +102,26 @@ class TypeNode {
     return ClassHierarchy.v().gcd_2(id, typeNode.id);
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (type != null) {
-      return type + "(" + id + ")";
+      return new StringBuilder().append(type).append("(").append(id).append(")").toString();
     }
 
     if (this == ClassHierarchy.v().TOP) {
-      return "TOP" + "(" + id + ")";
+      return new StringBuilder().append("TOP").append("(").append(id).append(")").toString();
     }
 
     if (this == ClassHierarchy.v().R0_1) {
-      return "R0_1" + "(" + id + ")";
+      return new StringBuilder().append("R0_1").append("(").append(id).append(")").toString();
     }
 
     if (this == ClassHierarchy.v().R0_127) {
-      return "R0_127" + "(" + id + ")";
+      return new StringBuilder().append("R0_127").append("(").append(id).append(")").toString();
     }
 
     if (this == ClassHierarchy.v().R0_32767) {
-      return "R0_32767" + "(" + id + ")";
+      return new StringBuilder().append("R0_32767").append("(").append(id).append(")").toString();
     }
 
     return "ERROR!!!!";

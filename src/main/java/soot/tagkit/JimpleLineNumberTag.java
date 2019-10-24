@@ -49,16 +49,19 @@ public class JimpleLineNumberTag implements Tag {
     return endLineNumber;
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "JimpleLineNumberTag";
   }
 
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     byte[] v = new byte[2];
     return v;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "Jimple Line Tag: " + startLineNumber;
   }
 

@@ -50,67 +50,68 @@ public abstract class SETNode {
 
   protected SETNode parent;
   protected AugmentedStmt entryStmt;
-  protected IterableSet predecessors, successors;
+  protected IterableSet predecessors;
+protected IterableSet successors;
   protected LinkedList<IterableSet> subBodies;
   protected Map<IterableSet, IterableSet> body2childChain;
-
-  public abstract IterableSet get_NaturalExits();
-
-  public abstract ASTNode emit_AST();
-
-  public abstract AugmentedStmt get_EntryStmt();
-
-  protected abstract boolean resolve(SETNode parent);
 
   public SETNode(IterableSet<AugmentedStmt> body) {
     this.body = body;
 
     parent = null;
     label = new SETNodeLabel();
-    subBodies = new LinkedList<IterableSet>();
-    body2childChain = new HashMap<IterableSet, IterableSet>();
+    subBodies = new LinkedList<>();
+    body2childChain = new HashMap<>();
     predecessors = new IterableSet();
     successors = new IterableSet();
   }
 
-  public void add_SubBody(IterableSet body) {
+public abstract IterableSet get_NaturalExits();
+
+public abstract ASTNode emit_AST();
+
+public abstract AugmentedStmt get_EntryStmt();
+
+protected abstract boolean resolve(SETNode parent);
+
+public void add_SubBody(IterableSet body) {
     subBodies.add(body);
     body2childChain.put(body, new IterableSet());
   }
 
-  public Map<IterableSet, IterableSet> get_Body2ChildChain() {
+public Map<IterableSet, IterableSet> get_Body2ChildChain() {
     return body2childChain;
   }
 
-  public List<IterableSet> get_SubBodies() {
+public List<IterableSet> get_SubBodies() {
     return subBodies;
   }
 
-  public IterableSet<AugmentedStmt> get_Body() {
+public IterableSet<AugmentedStmt> get_Body() {
     return body;
   }
 
-  public SETNodeLabel get_Label() {
+public SETNodeLabel get_Label() {
     return label;
   }
 
-  public SETNode get_Parent() {
+public SETNode get_Parent() {
     return parent;
   }
 
-  public boolean contains(Object o) {
+public boolean contains(Object o) {
     return body.contains(o);
   }
 
-  public IterableSet get_Successors() {
+public IterableSet get_Successors() {
     return successors;
   }
 
-  public IterableSet get_Predecessors() {
+public IterableSet get_Predecessors() {
     return predecessors;
   }
 
-  public boolean add_Child(SETNode child, IterableSet children) {
+public boolean add_Child(SETNode child, IterableSet children) {
     if ((this == child) || (children.contains(child))) {
       return false;
     }
@@ -120,7 +121,7 @@ public abstract class SETNode {
     return true;
   }
 
-  public boolean remove_Child(SETNode child, IterableSet children) {
+public boolean remove_Child(SETNode child, IterableSet children) {
     if ((this == child) || (children.contains(child) == false)) {
       return false;
     }
@@ -130,7 +131,7 @@ public abstract class SETNode {
     return true;
   }
 
-  public boolean insert_ChildBefore(SETNode child, SETNode point, IterableSet children) {
+public boolean insert_ChildBefore(SETNode child, SETNode point, IterableSet children) {
     if ((this == child) || (this == point) || (children.contains(point) == false)) {
       return false;
     }
@@ -140,8 +141,8 @@ public abstract class SETNode {
     return true;
   }
 
-  public List<Object> emit_ASTBody(IterableSet children) {
-    LinkedList<Object> l = new LinkedList<Object>();
+public List<Object> emit_ASTBody(IterableSet children) {
+    LinkedList<Object> l = new LinkedList<>();
 
     Iterator cit = children.iterator();
     while (cit.hasNext()) {
@@ -155,7 +156,7 @@ public abstract class SETNode {
     return l;
   }
 
-  /*
+/*
    * Basic inter-SETNode utilities.
    */
 
@@ -163,7 +164,7 @@ public abstract class SETNode {
     return body.intersection(other.get_Body());
   }
 
-  public boolean has_IntersectionWith(SETNode other) {
+public boolean has_IntersectionWith(SETNode other) {
     for (AugmentedStmt as : other.get_Body()) {
       if (body.contains(as)) {
         return true;
@@ -173,22 +174,21 @@ public abstract class SETNode {
     return false;
   }
 
-  public boolean is_SupersetOf(SETNode other) {
+public boolean is_SupersetOf(SETNode other) {
     return body.isSupersetOf(other.get_Body());
   }
 
-  public boolean is_StrictSupersetOf(SETNode other) {
+public boolean is_StrictSupersetOf(SETNode other) {
     return body.isStrictSubsetOf(other.get_Body());
   }
 
-  /*
+/*
    * Tree traversing utilities.
    */
 
   public void find_SmallestSETNode(AugmentedStmt as) {
-    Iterator<IterableSet> sbit = subBodies.iterator();
-    while (sbit.hasNext()) {
-      Iterator it = body2childChain.get(sbit.next()).iterator();
+    for (IterableSet subBodie : subBodies) {
+      Iterator it = body2childChain.get(subBodie).iterator();
       while (it.hasNext()) {
         SETNode child = (SETNode) it.next();
 
@@ -202,10 +202,9 @@ public abstract class SETNode {
     as.myNode = this;
   }
 
-  public void find_LabeledBlocks(LabeledBlockFinder lbf) {
-    Iterator<IterableSet> sbit = subBodies.iterator();
-    while (sbit.hasNext()) {
-      Iterator cit = body2childChain.get(sbit.next()).iterator();
+public void find_LabeledBlocks(LabeledBlockFinder lbf) {
+    for (IterableSet subBodie : subBodies) {
+      Iterator cit = body2childChain.get(subBodie).iterator();
       while (cit.hasNext()) {
         ((SETNode) cit.next()).find_LabeledBlocks(lbf);
       }
@@ -215,13 +214,11 @@ public abstract class SETNode {
     lbf.find_LabeledBlocks(this);
   }
 
-  public void find_StatementSequences(SequenceFinder sf, DavaBody davaBody) {
-    Iterator<IterableSet> sbit = subBodies.iterator();
-    while (sbit.hasNext()) {
+public void find_StatementSequences(SequenceFinder sf, DavaBody davaBody) {
+    for (IterableSet body : subBodies) {
 
-      IterableSet body = sbit.next();
       IterableSet children = body2childChain.get(body);
-      HashSet<AugmentedStmt> childUnion = new HashSet<AugmentedStmt>();
+      HashSet<AugmentedStmt> childUnion = new HashSet<>();
 
       Iterator cit = children.iterator();
       while (cit.hasNext()) {
@@ -235,7 +232,7 @@ public abstract class SETNode {
     }
   }
 
-  public void find_AbruptEdges(AbruptEdgeFinder aef) {
+public void find_AbruptEdges(AbruptEdgeFinder aef) {
     Iterator<IterableSet> sbit = subBodies.iterator();
     while (sbit.hasNext()) {
       IterableSet body = sbit.next();
@@ -256,7 +253,8 @@ public abstract class SETNode {
       Iterator cit = children.iterator();
       if (cit.hasNext()) {
 
-        SETNode cur = (SETNode) cit.next(), prev = null;
+        SETNode cur = (SETNode) cit.next();
+		SETNode prev = null;
 
         while (cit.hasNext()) {
           prev = cur;
@@ -268,7 +266,7 @@ public abstract class SETNode {
     }
   }
 
-  protected void remove_AugmentedStmt(AugmentedStmt as) {
+protected void remove_AugmentedStmt(AugmentedStmt as) {
     IterableSet childChain = body2childChain.remove(body);
     if (body instanceof UnmodifiableIterableSet) {
       ((UnmodifiableIterableSet<AugmentedStmt>) body).forceRemove(as);
@@ -297,17 +295,14 @@ public abstract class SETNode {
     }
   }
 
-  public boolean nest(SETNode other) {
+public boolean nest(SETNode other) {
     if (other.resolve(this) == false) {
       return false;
     }
 
     IterableSet otherBody = other.get_Body();
 
-    Iterator<IterableSet> sbit = subBodies.iterator();
-    while (sbit.hasNext()) {
-      IterableSet subBody = sbit.next();
-
+    for (IterableSet subBody : subBodies) {
       if (subBody.intersects(otherBody)) {
         IterableSet childChain = body2childChain.get(subBody);
 
@@ -324,10 +319,7 @@ public abstract class SETNode {
             } else {
               remove_Child(curChild, childChain);
 
-              Iterator<IterableSet> osbit = other.subBodies.iterator();
-              while (osbit.hasNext()) {
-                IterableSet otherSubBody = osbit.next();
-
+              for (IterableSet otherSubBody : other.subBodies) {
                 if (otherSubBody.isSupersetOf(childBody)) {
                   other.add_Child(curChild, other.get_Body2ChildChain().get(otherSubBody));
                   break;
@@ -344,7 +336,7 @@ public abstract class SETNode {
     return true;
   }
 
-  /*
+/*
    * Debugging stuff.
    */
 
@@ -352,30 +344,30 @@ public abstract class SETNode {
     dump(G.v().out);
   }
 
-  public void dump(PrintStream out) {
+public void dump(PrintStream out) {
     dump(out, "");
   }
 
-  private void dump(PrintStream out, String indentation) {
-    String TOP = ".---", TAB = "|  ", MID = "+---", BOT = "`---";
+private void dump(PrintStream out, String indentation) {
+    String TOP = ".---";
+	String TAB = "|  ";
+	String MID = "+---";
+	String BOT = "`---";
 
     out.println(indentation);
     out.println(indentation + TOP);
-    out.println(indentation + TAB + getClass());
+    out.println(new StringBuilder().append(indentation).append(TAB).append(getClass()).toString());
     out.println(indentation + TAB);
     Iterator it = body.iterator();
     while (it.hasNext()) {
-      out.println(indentation + TAB + ((AugmentedStmt) it.next()).toString());
+      out.println(new StringBuilder().append(indentation).append(TAB).append(((AugmentedStmt) it.next()).toString()).toString());
     }
 
-    Iterator<IterableSet> sbit = subBodies.iterator();
-    while (sbit.hasNext()) {
-      IterableSet subBody = sbit.next();
-
+    for (IterableSet subBody : subBodies) {
       out.println(indentation + MID);
       Iterator bit = subBody.iterator();
       while (bit.hasNext()) {
-        out.println(indentation + TAB + ((AugmentedStmt) bit.next()).toString());
+        out.println(new StringBuilder().append(indentation).append(TAB).append(((AugmentedStmt) bit.next()).toString()).toString());
       }
 
       out.println(indentation + TAB);
@@ -388,11 +380,8 @@ public abstract class SETNode {
     out.println(indentation + BOT);
   }
 
-  public void verify() {
-    Iterator<IterableSet> sbit = subBodies.iterator();
-    while (sbit.hasNext()) {
-      IterableSet body = sbit.next();
-
+public void verify() {
+    for (IterableSet body : subBodies) {
       Iterator bit = body.iterator();
       while (bit.hasNext()) {
         if ((bit.next() instanceof AugmentedStmt) == false) {
@@ -407,7 +396,7 @@ public abstract class SETNode {
     }
   }
 
-  @Override
+@Override
   public boolean equals(Object other) {
     if (other instanceof SETNode == false) {
       return false;
@@ -425,7 +414,7 @@ public abstract class SETNode {
     return true;
   }
 
-  @Override
+@Override
   public int hashCode() {
     return 1;
   }

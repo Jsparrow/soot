@@ -74,8 +74,8 @@ public class TrapUnitGraph extends UnitGraph {
       Timers.v().graphTimer.start();
     }
 
-    unitToSuccs = new HashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
-    unitToPreds = new HashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
+    unitToSuccs = new HashMap<>(size * 2 + 1, 0.7f);
+    unitToPreds = new HashMap<>(size * 2 + 1, 0.7f);
     buildUnexceptionalEdges(unitToSuccs, unitToPreds);
     buildExceptionalEdges(unitToSuccs, unitToPreds);
 
@@ -102,7 +102,7 @@ public class TrapUnitGraph extends UnitGraph {
    *          all the <code>Unit</code>s within the scope of that <code>Trap</code>.
    */
   protected void buildExceptionalEdges(Map<Unit, List<Unit>> unitToSuccs, Map<Unit, List<Unit>> unitToPreds) {
-    for (Trap trap : body.getTraps()) {
+    body.getTraps().forEach(trap -> {
       Unit first = trap.getBeginUnit();
       Unit last = unitChain.getPredOf(trap.getEndUnit());
       Unit catcher = trap.getHandlerUnit();
@@ -111,6 +111,6 @@ public class TrapUnitGraph extends UnitGraph {
         Unit trapped = unitIt.next();
         addEdge(unitToSuccs, unitToPreds, trapped, catcher);
       }
-    }
+    });
   }
 }

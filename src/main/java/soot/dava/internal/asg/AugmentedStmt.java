@@ -35,7 +35,10 @@ import soot.util.IterableSet;
 
 public class AugmentedStmt {
   private static final Logger logger = LoggerFactory.getLogger(AugmentedStmt.class);
-  public List<AugmentedStmt> bpreds, bsuccs, cpreds, csuccs;
+  public List<AugmentedStmt> bpreds;
+public List<AugmentedStmt> bsuccs;
+public List<AugmentedStmt> cpreds;
+public List<AugmentedStmt> csuccs;
   public SETNode myNode;
 
   private final IterableSet<AugmentedStmt> dominators;
@@ -45,8 +48,8 @@ public class AugmentedStmt {
   public AugmentedStmt(Stmt s) {
     this.s = s;
 
-    dominators = new IterableSet<AugmentedStmt>();
-    reachers = new IterableSet<AugmentedStmt>();
+    dominators = new IterableSet<>();
+    reachers = new IterableSet<>();
 
     reset_PredsSuccs();
   }
@@ -84,21 +87,19 @@ public class AugmentedStmt {
   }
 
   public boolean add_CPred(AugmentedStmt cpred) {
-    if (cpreds.contains(cpred) == false) {
-      cpreds.add(cpred);
-      return true;
-    }
-
-    return false;
+    if (cpreds.contains(cpred) != false) {
+		return false;
+	}
+	cpreds.add(cpred);
+	return true;
   }
 
   public boolean add_CSucc(AugmentedStmt csucc) {
-    if (csuccs.contains(csucc) == false) {
-      csuccs.add(csucc);
-      return true;
-    }
-
-    return false;
+    if (csuccs.contains(csucc) != false) {
+		return false;
+	}
+	csuccs.add(csucc);
+	return true;
   }
 
   public boolean remove_BPred(AugmentedStmt bpred) {
@@ -130,21 +131,19 @@ public class AugmentedStmt {
   }
 
   public boolean remove_CPred(AugmentedStmt cpred) {
-    if (cpreds.contains(cpred)) {
-      cpreds.remove(cpred);
-      return true;
-    }
-
-    return false;
+    if (!cpreds.contains(cpred)) {
+		return false;
+	}
+	cpreds.remove(cpred);
+	return true;
   }
 
   public boolean remove_CSucc(AugmentedStmt csucc) {
-    if (csuccs.contains(csucc)) {
-      csuccs.remove(csucc);
-      return true;
-    }
-
-    return false;
+    if (!csuccs.contains(csucc)) {
+		return false;
+	}
+	csuccs.remove(csucc);
+	return true;
   }
 
   public Stmt get_Stmt() {
@@ -167,18 +166,20 @@ public class AugmentedStmt {
     logger.debug("" + toString());
   }
 
-  public String toString() {
-    return "(" + s.toString() + " @ " + hashCode() + ")";
+  @Override
+public String toString() {
+    return new StringBuilder().append("(").append(s.toString()).append(" @ ").append(hashCode()).append(")").toString();
   }
 
   public void reset_PredsSuccs() {
-    bpreds = new LinkedList<AugmentedStmt>();
-    bsuccs = new LinkedList<AugmentedStmt>();
-    cpreds = new LinkedList<AugmentedStmt>();
-    csuccs = new LinkedList<AugmentedStmt>();
+    bpreds = new LinkedList<>();
+    bsuccs = new LinkedList<>();
+    cpreds = new LinkedList<>();
+    csuccs = new LinkedList<>();
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new AugmentedStmt((Stmt) s.clone());
   }
 }

@@ -40,52 +40,64 @@ public class BStaticGetInst extends AbstractInst implements StaticGetInst {
     this.fieldRef = fieldRef;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 0;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BStaticGetInst(fieldRef);
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return AbstractJasminClass.sizeOfType(fieldRef.type());
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "staticget";
   }
 
-  final String getParameters() {
+  @Override
+final String getParameters() {
     return " " + fieldRef.getSignature();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     up.fieldRef(fieldRef);
   }
 
-  public SootFieldRef getFieldRef() {
+  @Override
+public SootFieldRef getFieldRef() {
     return fieldRef;
   }
 
-  public SootField getField() {
+  @Override
+public SootField getField() {
     return fieldRef.resolve();
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseStaticGetInst(this);
   }
 
-  public boolean containsFieldRef() {
+  @Override
+public boolean containsFieldRef() {
     return true;
   }
 }

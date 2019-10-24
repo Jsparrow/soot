@@ -33,10 +33,12 @@ import soot.baf.Inst;
  */
 public abstract class ImportantTagAggregator extends TagAggregator {
   /** Decide whether this tag should be aggregated by this aggregator. */
-  public abstract boolean wantTag(Tag t);
+  @Override
+public abstract boolean wantTag(Tag t);
 
   /** Return name of the resulting aggregated tag. */
-  public abstract String aggregatedName();
+  @Override
+public abstract String aggregatedName();
 
   /** Decide whether this tag should be aggregated by this aggregator. */
   @Override

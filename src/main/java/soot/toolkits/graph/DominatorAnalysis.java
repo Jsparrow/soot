@@ -60,7 +60,7 @@ public class DominatorAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Unit>> 
   }
 
   private void initAllNodes() {
-    allNodes = new ArraySparseSet<Unit>();
+    allNodes = new ArraySparseSet<>();
     for (Unit u : g) {
       allNodes.add(u);
     }
@@ -96,16 +96,13 @@ public class DominatorAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Unit>> 
       // System.out.println("s: "+s+" is not start node");
       // FlowSet domsOfPreds = allNodes.clone();
 
-      // for each pred of s
-      for (Unit pred : g.getPredsOf(s)) {
-        // get the unitToBeforeFlow and find the intersection
-        // System.out.println("pred: "+pred);
-        FlowSet<Unit> next = getFlowAfter(pred);
-        // System.out.println("next: "+next);
-        // System.out.println("in before intersect: "+in);
-        in.intersection(next, in);
-        // System.out.println("in after intersect: "+in);
-      }
+      // get the unitToBeforeFlow and find the intersection
+		// System.out.println("pred: "+pred);
+		// System.out.println("next: "+next);
+		// System.out.println("in before intersect: "+in);
+		// System.out.println("in after intersect: "+in);
+	// for each pred of s
+	g.getPredsOf(s).stream().map(pred -> getFlowAfter(pred)).forEach(next -> in.intersection(next, in));
 
       // intersected with in
 
@@ -132,7 +129,7 @@ public class DominatorAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Unit>> 
   @Override
   protected FlowSet<Unit> entryInitialFlow() {
 
-    FlowSet<Unit> fs = new ArraySparseSet<Unit>();
+    FlowSet<Unit> fs = new ArraySparseSet<>();
     List<Unit> heads = g.getHeads();
     if (heads.size() != 1) {
       throw new RuntimeException("Expect one start node only.");

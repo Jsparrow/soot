@@ -32,10 +32,11 @@ import soot.jimple.toolkits.callgraph.EdgePredicate;
  */
 public class RunMethodsPred implements EdgePredicate {
   /** Returns true iff the edge e is wanted. */
-  public boolean want(Edge e) {
+  @Override
+public boolean want(Edge e) {
     String tgtSubSignature = e.tgt().getSubSignature();
 
-    if (tgtSubSignature.equals("void run()")) {
+    if ("void run()".equals(tgtSubSignature)) {
       return true;
     }
     return false;

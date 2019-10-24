@@ -17,21 +17,14 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
   * @ast class
  * 
  */
 public class Options extends java.lang.Object {
-static  class Option {
-    public String name;
-    public boolean hasValue;
-    public boolean isCollection;
-    public Option(String name, boolean hasValue, boolean isCollection) {
-      this.name = name;
-      this.hasValue = hasValue;
-      this.isCollection = isCollection;
-    }
-  }
+private static final Logger logger = LoggerFactory.getLogger(Options.class);
 
 private  Map options = new HashMap();
 
@@ -50,32 +43,37 @@ public  void initOptions() {
   }
 
 public  void addKeyOption(String name) {
-    if(optionDescriptions.containsKey(name))
-      throw new Error("Command line definition error: option description for " + name + " is multiply declared");
+    if(optionDescriptions.containsKey(name)) {
+		throw new Error(new StringBuilder().append("Command line definition error: option description for ").append(name).append(" is multiply declared").toString());
+	}
     optionDescriptions.put(name, new Option(name, false, false));
   }
 
 public  void addKeyValueOption(String name) {
-    if(optionDescriptions.containsKey(name))
-      throw new Error("Command line definition error: option description for " + name + " is multiply declared");
+    if(optionDescriptions.containsKey(name)) {
+		throw new Error(new StringBuilder().append("Command line definition error: option description for ").append(name).append(" is multiply declared").toString());
+	}
     optionDescriptions.put(name, new Option(name, true, false));
   }
 
 public  void addKeyCollectionOption(String name) {
-    if(optionDescriptions.containsKey(name))
-      throw new Error("Command line definition error: option description for " + name + " is multiply declared");
+    if(optionDescriptions.containsKey(name)) {
+		throw new Error(new StringBuilder().append("Command line definition error: option description for ").append(name).append(" is multiply declared").toString());
+	}
     optionDescriptions.put(name, new Option(name, true, true));
   }
 
 public  void addOptionDescription(String name, boolean value) {
-    if(optionDescriptions.containsKey(name))
-      throw new Error("Command line definition error: option description for " + name + " is multiply declared");
+    if(optionDescriptions.containsKey(name)) {
+		throw new Error(new StringBuilder().append("Command line definition error: option description for ").append(name).append(" is multiply declared").toString());
+	}
     optionDescriptions.put(name, new Option(name, value, false));
   }
 
 public  void addOptionDescription(String name, boolean value, boolean isCollection) {
-    if(optionDescriptions.containsKey(name))
-      throw new Error("Command line definition error: option description for " + name + " is multiply declared");
+    if(optionDescriptions.containsKey(name)) {
+		throw new Error(new StringBuilder().append("Command line definition error: option description for ").append(name).append(" is multiply declared").toString());
+	}
     optionDescriptions.put(name, new Option(name, value, isCollection));
   }
 
@@ -110,40 +108,48 @@ public  void addOptions(String[] args) {
           addOptions(newArgs);
           r.close();
         } catch (java.io.FileNotFoundException e) {
-          System.err.println("File not found: "+arg.substring(1));
+          logger.error(e.getMessage(), e);
+		logger.error("File not found: "+arg.substring(1));
         } catch (java.io.IOException e) {
-          System.err.println("Exception: "+e.getMessage());
+          logger.error("Exception: "+e.getMessage(), e);
         }
       }
       else if(arg.startsWith("-")) {
-        if(!optionDescriptions.containsKey(arg))
-          throw new Error("Command line argument error: option " + arg + " is not defined");
+        if(!optionDescriptions.containsKey(arg)) {
+			throw new Error(new StringBuilder().append("Command line argument error: option ").append(arg).append(" is not defined").toString());
+		}
         Option o = (Option)optionDescriptions.get(arg);
         
-        if(!o.isCollection && options.containsKey(arg))
-          throw new Error("Command line argument error: option " + arg + " is multiply defined");
+        if(!o.isCollection && options.containsKey(arg)) {
+			throw new Error(new StringBuilder().append("Command line argument error: option ").append(arg).append(" is multiply defined").toString());
+		}
         
         if(o.hasValue && !o.isCollection) {
           String value = null;
-          if(i + 1 > args.length - 1)
-            throw new Error("Command line argument error: value missing for key " + arg);
+          if(i + 1 > args.length - 1) {
+			throw new Error("Command line argument error: value missing for key " + arg);
+		}
           value = args[i+1];
-          if(value.startsWith("-"))
-            throw new Error("Command line argument error: value missing for key " + arg);
+          if(value.startsWith("-")) {
+			throw new Error("Command line argument error: value missing for key " + arg);
+		}
           i++;
           options.put(arg, value);
         }
         else if(o.hasValue && o.isCollection) {
           String value = null;
-          if(i + 1 > args.length - 1)
-            throw new Error("Command line argument error: value missing for key " + arg);
+          if(i + 1 > args.length - 1) {
+			throw new Error("Command line argument error: value missing for key " + arg);
+		}
           value = args[i+1];
-          if(value.startsWith("-"))
-            throw new Error("Command line argument error: value missing for key " + arg);
+          if(value.startsWith("-")) {
+			throw new Error("Command line argument error: value missing for key " + arg);
+		}
           i++;
           Collection c = (Collection)options.get(arg);
-          if(c == null)
-            c = new ArrayList();
+          if(c == null) {
+			c = new ArrayList();
+		}
           c.add(value);
           options.put(arg, c);
         }
@@ -170,8 +176,9 @@ public  boolean hasValueForOption(String name) {
   }
 
 public  String getValueForOption(String name) {
-    if(!hasValueForOption(name))
-      throw new Error("Command line argument error: key " + name + " does not have a value");
+    if(!hasValueForOption(name)) {
+		throw new Error(new StringBuilder().append("Command line argument error: key ").append(name).append(" does not have a value").toString());
+	}
     return (String)options.get(name);
   }
 
@@ -180,13 +187,25 @@ public  void setValueForOption(String value, String option) {
   }
 
 public  Collection getValueCollectionForOption(String name) {
-    if(!hasValueForOption(name))
-      throw new Error("Command line argument error: key " + name + " does not have a value");
+    if(!hasValueForOption(name)) {
+		throw new Error(new StringBuilder().append("Command line argument error: key ").append(name).append(" does not have a value").toString());
+	}
     return (Collection)options.get(name);
   }
 
 public  boolean verbose() {
     return hasOption("-verbose");
+  }
+
+static  class Option {
+    public String name;
+    public boolean hasValue;
+    public boolean isCollection;
+    public Option(String name, boolean hasValue, boolean isCollection) {
+      this.name = name;
+      this.hasValue = hasValue;
+      this.isCollection = isCollection;
+    }
   }
 
 

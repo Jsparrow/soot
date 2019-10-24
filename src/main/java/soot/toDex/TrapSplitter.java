@@ -46,18 +46,6 @@ public class TrapSplitter extends BodyTransformer {
     return soot.G.v().soot_toDex_TrapSplitter();
   }
 
-  private class TrapOverlap {
-    private Trap t1;
-    private Trap t2;
-    private Unit t2Start;
-
-    public TrapOverlap(Trap t1, Trap t2, Unit t2Start) {
-      this.t1 = t1;
-      this.t2 = t2;
-      this.t2Start = t2Start;
-    }
-  }
-
   @Override
   protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     // If we have less then two traps, there's nothing to do here
@@ -143,7 +131,7 @@ public class TrapSplitter extends BodyTransformer {
     }
   }
 
-  /**
+/**
    * Adds a new trap to the given body only if the given trap is not empty
    *
    * @param b
@@ -164,7 +152,7 @@ public class TrapSplitter extends BodyTransformer {
     }
   }
 
-  /**
+/**
    * Gets two arbitrary overlapping traps in the given method body
    *
    * @param b
@@ -185,6 +173,18 @@ public class TrapSplitter extends BodyTransformer {
       }
     }
     return null;
+  }
+
+private class TrapOverlap {
+    private Trap t1;
+    private Trap t2;
+    private Unit t2Start;
+
+    public TrapOverlap(Trap t1, Trap t2, Unit t2Start) {
+      this.t1 = t1;
+      this.t2 = t2;
+      this.t2Start = t2Start;
+    }
   }
 
 }

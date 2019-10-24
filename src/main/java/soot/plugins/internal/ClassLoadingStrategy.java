@@ -36,5 +36,5 @@ public interface ClassLoadingStrategy {
    *          Name of the class.
    * @return The newly created instance.
    */
-  public Object create(final String className) throws ClassNotFoundException, InstantiationException;
+  Object create(final String className) throws ClassNotFoundException, InstantiationException;
 }

@@ -57,10 +57,8 @@ public class ConstantCastEliminator extends BodyTransformer {
   @Override
   protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     // Check for all assignments that perform casts on primitive constants
-    for (Unit u : b.getUnits()) {
-      if (u instanceof AssignStmt) {
-        AssignStmt assign = (AssignStmt) u;
-        if (assign.getRightOp() instanceof CastExpr) {
+	b.getUnits().stream().filter(u -> u instanceof AssignStmt).map(u -> (AssignStmt) u).forEach(assign -> {
+		if (assign.getRightOp() instanceof CastExpr) {
           CastExpr ce = (CastExpr) assign.getRightOp();
           if (ce.getOp() instanceof Constant) {
             // a = (float) 42
@@ -75,8 +73,7 @@ public class ConstantCastEliminator extends BodyTransformer {
             }
           }
         }
-      }
-    }
+	});
   }
 
 }

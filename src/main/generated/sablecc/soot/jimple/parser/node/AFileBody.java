@@ -8,9 +8,9 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFileBody extends PFileBody
 {
-    private TLBrace _lBrace_;
-    private final LinkedList<PMember> _member_ = new LinkedList<PMember>();
-    private TRBrace _rBrace_;
+    private TLBrace lBrace;
+    private final LinkedList<PMember> member = new LinkedList<>();
+    private TRBrace rBrace;
 
     public AFileBody()
     {
@@ -35,9 +35,9 @@ public final class AFileBody extends PFileBody
     public Object clone()
     {
         return new AFileBody(
-            cloneNode(this._lBrace_),
-            cloneList(this._member_),
-            cloneNode(this._rBrace_));
+            cloneNode(this.lBrace),
+            cloneList(this.member),
+            cloneNode(this.rBrace));
     }
 
     @Override
@@ -48,14 +48,14 @@ public final class AFileBody extends PFileBody
 
     public TLBrace getLBrace()
     {
-        return this._lBrace_;
+        return this.lBrace;
     }
 
     public void setLBrace(TLBrace node)
     {
-        if(this._lBrace_ != null)
+        if(this.lBrace != null)
         {
-            this._lBrace_.parent(null);
+            this.lBrace.parent(null);
         }
 
         if(node != null)
@@ -68,45 +68,39 @@ public final class AFileBody extends PFileBody
             node.parent(this);
         }
 
-        this._lBrace_ = node;
+        this.lBrace = node;
     }
 
     public LinkedList<PMember> getMember()
     {
-        return this._member_;
+        return this.member;
     }
 
     public void setMember(List<?> list)
     {
-        for(PMember e : this._member_)
-        {
-            e.parent(null);
-        }
-        this._member_.clear();
+        this.member.forEach(e -> e.parent(null));
+        this.member.clear();
 
-        for(Object obj_e : list)
-        {
-            PMember e = (PMember) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PMember) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._member_.add(e);
-        }
+			e.parent(this);
+			this.member.add(e);
+		});
     }
 
     public TRBrace getRBrace()
     {
-        return this._rBrace_;
+        return this.rBrace;
     }
 
     public void setRBrace(TRBrace node)
     {
-        if(this._rBrace_ != null)
+        if(this.rBrace != null)
         {
-            this._rBrace_.parent(null);
+            this.rBrace.parent(null);
         }
 
         if(node != null)
@@ -119,36 +113,33 @@ public final class AFileBody extends PFileBody
             node.parent(this);
         }
 
-        this._rBrace_ = node;
+        this.rBrace = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._lBrace_)
-            + toString(this._member_)
-            + toString(this._rBrace_);
+        return new StringBuilder().append("").append(toString(this.lBrace)).append(toString(this.member)).append(toString(this.rBrace)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._lBrace_ == child)
+        if(this.lBrace == child)
         {
-            this._lBrace_ = null;
+            this.lBrace = null;
             return;
         }
 
-        if(this._member_.remove(child))
+        if(this.member.remove(child))
         {
             return;
         }
 
-        if(this._rBrace_ == child)
+        if(this.rBrace == child)
         {
-            this._rBrace_ = null;
+            this.rBrace = null;
             return;
         }
 
@@ -159,13 +150,13 @@ public final class AFileBody extends PFileBody
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._lBrace_ == oldChild)
+        if(this.lBrace == oldChild)
         {
             setLBrace((TLBrace) newChild);
             return;
         }
 
-        for(ListIterator<PMember> i = this._member_.listIterator(); i.hasNext();)
+        for(ListIterator<PMember> i = this.member.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {
@@ -183,7 +174,7 @@ public final class AFileBody extends PFileBody
             }
         }
 
-        if(this._rBrace_ == oldChild)
+        if(this.rBrace == oldChild)
         {
             setRBrace((TRBrace) newChild);
             return;

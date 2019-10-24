@@ -45,26 +45,22 @@ public class SETSwitchNode extends SETDagNode {
 
     this.key = key;
     this.switchNodeList = switchNodeList;
-    Iterator<SwitchNode> it = switchNodeList.iterator();
-    while (it.hasNext()) {
-      add_SubBody(it.next().get_Body());
-    }
+    switchNodeList.forEach(aSwitchNodeList -> add_SubBody(aSwitchNodeList.get_Body()));
 
     add_SubBody(junkBody);
   }
 
-  public IterableSet get_NaturalExits() {
+  @Override
+public IterableSet get_NaturalExits() {
     return new IterableSet();
   }
 
-  public ASTNode emit_AST() {
-    LinkedList<Object> indexList = new LinkedList<Object>();
-    Map<Object, List<Object>> index2ASTBody = new HashMap<Object, List<Object>>();
+  @Override
+public ASTNode emit_AST() {
+    LinkedList<Object> indexList = new LinkedList<>();
+    Map<Object, List<Object>> index2ASTBody = new HashMap<>();
 
-    Iterator<SwitchNode> it = switchNodeList.iterator();
-    while (it.hasNext()) {
-      SwitchNode sn = it.next();
-
+    switchNodeList.forEach(sn -> {
       Object lastIndex = sn.get_IndexSet().last();
       Iterator iit = sn.get_IndexSet().iterator();
       while (iit.hasNext()) {
@@ -78,12 +74,13 @@ public class SETSwitchNode extends SETDagNode {
           index2ASTBody.put(index, emit_ASTBody(get_Body2ChildChain().get(sn.get_Body())));
         }
       }
-    }
+    });
 
     return new ASTSwitchNode(get_Label(), key, indexList, index2ASTBody);
   }
 
-  public AugmentedStmt get_EntryStmt() {
+  @Override
+public AugmentedStmt get_EntryStmt() {
     return get_CharacterizingStmt();
   }
 }

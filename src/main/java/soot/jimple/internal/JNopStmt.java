@@ -37,33 +37,40 @@ public class JNopStmt extends AbstractStmt implements NopStmt {
   public JNopStmt() {
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JNopStmt();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return Jimple.NOP;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.NOP);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseNopStmt(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     Unit u = Baf.v().newNopInst();
     u.addAllTagsOf(this);
     out.add(u);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

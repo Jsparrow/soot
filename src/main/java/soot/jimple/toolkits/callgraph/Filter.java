@@ -54,17 +54,20 @@ public class Filter implements Iterator<Edge> {
     next = null;
   }
 
-  public boolean hasNext() {
+  @Override
+public boolean hasNext() {
     return next != null;
   }
 
-  public Edge next() {
+  @Override
+public Edge next() {
     Edge ret = next;
     advance();
     return ret;
   }
 
-  public void remove() {
+  @Override
+public void remove() {
     throw new UnsupportedOperationException();
   }
 }

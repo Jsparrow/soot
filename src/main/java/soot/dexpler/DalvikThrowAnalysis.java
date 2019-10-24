@@ -153,173 +153,173 @@ import soot.toolkits.exceptions.UnitThrowAnalysis;
 
 public class DalvikThrowAnalysis extends UnitThrowAnalysis {
 
-  /**
-   * Constructs a <code>DalvikThrowAnalysis</code> for inclusion in Soot's global variable manager, {@link G}.
-   *
-   * @param g
-   *          guarantees that the constructor may only be called from {@link Singletons}.
-   */
-  public DalvikThrowAnalysis(Singletons.Global g) {
-  }
-
-  /**
-   * Returns the single instance of <code>DalvikThrowAnalysis</code>.
-   *
-   * @return Soot's <code>UnitThrowAnalysis</code>.
-   */
-  public static DalvikThrowAnalysis v() {
-    return G.v().soot_dexpler_DalvikThrowAnalysis();
-  }
-
-  protected DalvikThrowAnalysis(boolean isInterproc) {
-    super(isInterproc);
-  }
-
-  public DalvikThrowAnalysis(Singletons.Global g, boolean isInterproc) {
-    super(isInterproc);
-  }
-
   public static DalvikThrowAnalysis interproceduralAnalysis = null;
 
-  public static DalvikThrowAnalysis interproc() {
-    return G.v().interproceduralDalvikThrowAnalysis();
-  }
+	/**
+	   * Constructs a <code>DalvikThrowAnalysis</code> for inclusion in Soot's global variable manager, {@link G}.
+	   *
+	   * @param g
+	   *          guarantees that the constructor may only be called from {@link Singletons}.
+	   */
+	  public DalvikThrowAnalysis(Singletons.Global g) {
+	  }
 
-  @Override
-  protected ThrowableSet defaultResult() {
-    return mgr.EMPTY;
-  }
+	public DalvikThrowAnalysis(Singletons.Global g, boolean isInterproc) {
+	    super(isInterproc);
+	  }
 
-  @Override
-  protected UnitSwitch unitSwitch() {
-    return new UnitThrowAnalysis.UnitSwitch() {
+	protected DalvikThrowAnalysis(boolean isInterproc) {
+	    super(isInterproc);
+	  }
 
-      // Dalvik does not throw an exception for this instruction
-      @Override
-      public void caseReturnInst(ReturnInst i) {
-      }
+	/**
+	   * Returns the single instance of <code>DalvikThrowAnalysis</code>.
+	   *
+	   * @return Soot's <code>UnitThrowAnalysis</code>.
+	   */
+	  public static DalvikThrowAnalysis v() {
+	    return G.v().soot_dexpler_DalvikThrowAnalysis();
+	  }
 
-      // Dalvik does not throw an exception for this instruction
-      @Override
-      public void caseReturnVoidInst(ReturnVoidInst i) {
-      }
+	public static DalvikThrowAnalysis interproc() {
+	    return G.v().interproceduralDalvikThrowAnalysis();
+	  }
 
-      @Override
-      public void caseEnterMonitorInst(EnterMonitorInst i) {
-        result = result.add(mgr.NULL_POINTER_EXCEPTION);
-        result = result.add(mgr.ILLEGAL_MONITOR_STATE_EXCEPTION);
-      }
+	@Override
+	  protected ThrowableSet defaultResult() {
+	    return mgr.EMPTY;
+	  }
 
-      @Override
-      public void caseEnterMonitorStmt(EnterMonitorStmt s) {
-        result = result.add(mgr.NULL_POINTER_EXCEPTION);
-        result = result.add(mgr.ILLEGAL_MONITOR_STATE_EXCEPTION);
-        result = result.add(mightThrow(s.getOp()));
-      }
+	@Override
+	  protected UnitSwitch unitSwitch() {
+	    return new UnitThrowAnalysis.UnitSwitch() {
+	
+	      // Dalvik does not throw an exception for this instruction
+	      @Override
+	      public void caseReturnInst(ReturnInst i) {
+	      }
+	
+	      // Dalvik does not throw an exception for this instruction
+	      @Override
+	      public void caseReturnVoidInst(ReturnVoidInst i) {
+	      }
+	
+	      @Override
+	      public void caseEnterMonitorInst(EnterMonitorInst i) {
+	        result = result.add(mgr.NULL_POINTER_EXCEPTION);
+	        result = result.add(mgr.ILLEGAL_MONITOR_STATE_EXCEPTION);
+	      }
+	
+	      @Override
+	      public void caseEnterMonitorStmt(EnterMonitorStmt s) {
+	        result = result.add(mgr.NULL_POINTER_EXCEPTION);
+	        result = result.add(mgr.ILLEGAL_MONITOR_STATE_EXCEPTION);
+	        result = result.add(mightThrow(s.getOp()));
+	      }
+	
+	      @Override
+	      public void caseAssignStmt(AssignStmt s) {
+	        // Dalvik only throws ArrayIndexOutOfBounds and
+	        // NullPointerException which are both handled through the
+	        // ArrayRef expressions. There is no ArrayStoreException in
+	        // Dalvik.
+	        result = result.add(mightThrow(s.getLeftOp()));
+	        result = result.add(mightThrow(s.getRightOp()));
+	      }
+	
+	    };
+	  }
 
-      @Override
-      public void caseAssignStmt(AssignStmt s) {
-        // Dalvik only throws ArrayIndexOutOfBounds and
-        // NullPointerException which are both handled through the
-        // ArrayRef expressions. There is no ArrayStoreException in
-        // Dalvik.
-        result = result.add(mightThrow(s.getLeftOp()));
-        result = result.add(mightThrow(s.getRightOp()));
-      }
-
-    };
-  }
-
-  @Override
-  protected ValueSwitch valueSwitch() {
-    return new UnitThrowAnalysis.ValueSwitch() {
-
-      // from ./vm/mterp/c/OP_CONST_STRING.c
-      //
-      // HANDLE_OPCODE(OP_CONST_STRING /*vAA, string@BBBB*/)
-      // {
-      // StringObject* strObj;
-      //
-      // vdst = INST_AA(inst);
-      // ref = FETCH(1);
-      // ILOGV("|const-string v%d string@0x%04x", vdst, ref);
-      // strObj = dvmDexGetResolvedString(methodClassDex, ref);
-      // if (strObj == NULL) {
-      // EXPORT_PC();
-      // strObj = dvmResolveString(curMethod->clazz, ref);
-      // if (strObj == NULL)
-      // GOTO_exceptionThrown(); <--- HERE
-      // }
-      // SET_REGISTER(vdst, (u4) strObj);
-      // }
-      // FINISH(2);
-      // OP_END
-      //
-      @Override
-      public void caseStringConstant(StringConstant c) {
-        //
-        // the string is already fetched when converting
-        // Dalvik bytecode to Jimple. A potential error
-        // would be detected there.
-        //
-        // result = result.add(mgr.RESOLVE_FIELD_ERRORS); // should we add another kind of exception for this?
-      }
-
-      //
-      // from ./vm/mterp/c/OP_CONST_CLASS.c
-      //
-      // HANDLE_OPCODE(OP_CONST_CLASS /*vAA, class@BBBB*/)
-      // {
-      // ClassObject* clazz;
-      //
-      // vdst = INST_AA(inst);
-      // ref = FETCH(1);
-      // ILOGV("|const-class v%d class@0x%04x", vdst, ref);
-      // clazz = dvmDexGetResolvedClass(methodClassDex, ref);
-      // if (clazz == NULL) {
-      // EXPORT_PC();
-      // clazz = dvmResolveClass(curMethod->clazz, ref, true);
-      // if (clazz == NULL)
-      // GOTO_exceptionThrown(); <--- HERE
-      // }
-      // SET_REGISTER(vdst, (u4) clazz);
-      // }
-      // FINISH(2);
-      // OP_END
-      //
-      @Override
-      public void caseClassConstant(ClassConstant c) {
-        //
-        // the string is already fetched and stored in a
-        // ClassConstant object when converting
-        // Dalvik bytecode to Jimple. A potential error
-        // would be detected there.
-        //
-        // result = result.add(mgr.RESOLVE_CLASS_ERRORS);
-      }
-
-      @Override
-      public void caseCastExpr(CastExpr expr) {
-        if (expr.getCastType() instanceof PrimType) {
-          // No exception are thrown for primitive casts
-          return;
-        }
-        Type fromType = expr.getOp().getType();
-        Type toType = expr.getCastType();
-        result = result.add(mgr.RESOLVE_CLASS_ERRORS);
-        if (toType instanceof RefLikeType) {
-          // fromType might still be unknown when we are called,
-          // but toType will have a value.
-          FastHierarchy h = Scene.v().getOrMakeFastHierarchy();
-          if (fromType == null || fromType instanceof UnknownType
-              || ((!(fromType instanceof NullType)) && (!h.canStoreType(fromType, toType)))) {
-            result = result.add(mgr.CLASS_CAST_EXCEPTION);
-          }
-        }
-        result = result.add(mightThrow(expr.getOp()));
-      }
-    };
-
-  }
+	@Override
+	  protected ValueSwitch valueSwitch() {
+	    return new UnitThrowAnalysis.ValueSwitch() {
+	
+	      // from ./vm/mterp/c/OP_CONST_STRING.c
+	      //
+	      // HANDLE_OPCODE(OP_CONST_STRING /*vAA, string@BBBB*/)
+	      // {
+	      // StringObject* strObj;
+	      //
+	      // vdst = INST_AA(inst);
+	      // ref = FETCH(1);
+	      // ILOGV("|const-string v%d string@0x%04x", vdst, ref);
+	      // strObj = dvmDexGetResolvedString(methodClassDex, ref);
+	      // if (strObj == NULL) {
+	      // EXPORT_PC();
+	      // strObj = dvmResolveString(curMethod->clazz, ref);
+	      // if (strObj == NULL)
+	      // GOTO_exceptionThrown(); <--- HERE
+	      // }
+	      // SET_REGISTER(vdst, (u4) strObj);
+	      // }
+	      // FINISH(2);
+	      // OP_END
+	      //
+	      @Override
+	      public void caseStringConstant(StringConstant c) {
+	        //
+	        // the string is already fetched when converting
+	        // Dalvik bytecode to Jimple. A potential error
+	        // would be detected there.
+	        //
+	        // result = result.add(mgr.RESOLVE_FIELD_ERRORS); // should we add another kind of exception for this?
+	      }
+	
+	      //
+	      // from ./vm/mterp/c/OP_CONST_CLASS.c
+	      //
+	      // HANDLE_OPCODE(OP_CONST_CLASS /*vAA, class@BBBB*/)
+	      // {
+	      // ClassObject* clazz;
+	      //
+	      // vdst = INST_AA(inst);
+	      // ref = FETCH(1);
+	      // ILOGV("|const-class v%d class@0x%04x", vdst, ref);
+	      // clazz = dvmDexGetResolvedClass(methodClassDex, ref);
+	      // if (clazz == NULL) {
+	      // EXPORT_PC();
+	      // clazz = dvmResolveClass(curMethod->clazz, ref, true);
+	      // if (clazz == NULL)
+	      // GOTO_exceptionThrown(); <--- HERE
+	      // }
+	      // SET_REGISTER(vdst, (u4) clazz);
+	      // }
+	      // FINISH(2);
+	      // OP_END
+	      //
+	      @Override
+	      public void caseClassConstant(ClassConstant c) {
+	        //
+	        // the string is already fetched and stored in a
+	        // ClassConstant object when converting
+	        // Dalvik bytecode to Jimple. A potential error
+	        // would be detected there.
+	        //
+	        // result = result.add(mgr.RESOLVE_CLASS_ERRORS);
+	      }
+	
+	      @Override
+	      public void caseCastExpr(CastExpr expr) {
+	        if (expr.getCastType() instanceof PrimType) {
+	          // No exception are thrown for primitive casts
+	          return;
+	        }
+	        Type fromType = expr.getOp().getType();
+	        Type toType = expr.getCastType();
+	        result = result.add(mgr.RESOLVE_CLASS_ERRORS);
+	        if (toType instanceof RefLikeType) {
+	          // fromType might still be unknown when we are called,
+	          // but toType will have a value.
+	          FastHierarchy h = Scene.v().getOrMakeFastHierarchy();
+	          if (fromType == null || fromType instanceof UnknownType
+	              || ((!(fromType instanceof NullType)) && (!h.canStoreType(fromType, toType)))) {
+	            result = result.add(mgr.CLASS_CAST_EXCEPTION);
+	          }
+	        }
+	        result = result.add(mightThrow(expr.getOp()));
+	      }
+	    };
+	
+	  }
 
 }

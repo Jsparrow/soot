@@ -258,12 +258,12 @@ public class SootFilter {
     val = getEquivalentValueRoot(val);
 
     /* i really hope i did not forget any... */
-    if (val instanceof BinopExpr || val instanceof UnopExpr || val instanceof Local || val instanceof Constant) {
-      if (val instanceof DivExpr || val instanceof RemExpr || val instanceof LengthExpr) {
+	if (!(val instanceof BinopExpr || val instanceof UnopExpr || val instanceof Local || val instanceof Constant)) {
+		return true;
+	}
+	if (val instanceof DivExpr || val instanceof RemExpr || val instanceof LengthExpr) {
         return true;
       }
-      return false;
-    }
-    return true;
+	return false;
   }
 }

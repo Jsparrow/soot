@@ -25,6 +25,8 @@ package soot.toolkits.astmetrics;
 import polyglot.ast.Branch;
 import polyglot.ast.Node;
 import polyglot.visit.NodeVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Should take care of the following metrics:
@@ -42,8 +44,11 @@ import polyglot.visit.NodeVisitor;
   */
 public class AbruptEdgesMetric extends ASTMetric {
 
-  private int iBreaks, eBreaks;
-  private int iContinues, eContinues;
+  private static final Logger logger = LoggerFactory.getLogger(AbruptEdgesMetric.class);
+private int iBreaks;
+private int eBreaks;
+  private int iContinues;
+private int eContinues;
 
   public AbruptEdgesMetric(polyglot.ast.Node astNode) {
     super(astNode);
@@ -55,7 +60,8 @@ public class AbruptEdgesMetric extends ASTMetric {
    * @see soot.toolkits.astmetrics.ASTMetric#reset() Implementation of the abstract method which is invoked by parent
    * constructor and whenever the classDecl in the polyglot changes
    */
-  public void reset() {
+  @Override
+public void reset() {
     iBreaks = eBreaks = iContinues = eContinues = 0;
   }
 
@@ -64,23 +70,25 @@ public class AbruptEdgesMetric extends ASTMetric {
    *
    * Should add the metrics to the data object sent
    */
-  public void addMetrics(ClassData data) {
+  @Override
+public void addMetrics(ClassData data) {
 
-    data.addMetric(new MetricData("Total-breaks", new Integer(iBreaks + eBreaks)));
-    data.addMetric(new MetricData("I-breaks", new Integer(iBreaks)));
-    data.addMetric(new MetricData("E-breaks", new Integer(eBreaks)));
+    data.addMetric(new MetricData("Total-breaks", Integer.valueOf(iBreaks + eBreaks)));
+    data.addMetric(new MetricData("I-breaks", Integer.valueOf(iBreaks)));
+    data.addMetric(new MetricData("E-breaks", Integer.valueOf(eBreaks)));
 
-    data.addMetric(new MetricData("Total-continues", new Integer(iContinues + eContinues)));
-    data.addMetric(new MetricData("I-continues", new Integer(iContinues)));
-    data.addMetric(new MetricData("E-continues", new Integer(eContinues)));
+    data.addMetric(new MetricData("Total-continues", Integer.valueOf(iContinues + eContinues)));
+    data.addMetric(new MetricData("I-continues", Integer.valueOf(iContinues)));
+    data.addMetric(new MetricData("E-continues", Integer.valueOf(eContinues)));
 
-    data.addMetric(new MetricData("Total-Abrupt", new Integer(iBreaks + eBreaks + iContinues + eContinues)));
+    data.addMetric(new MetricData("Total-Abrupt", Integer.valueOf(iBreaks + eBreaks + iContinues + eContinues)));
   }
 
   /*
    * A branch in polyglot is either a break or continue
    */
-  public NodeVisitor enter(Node parent, Node n) {
+  @Override
+public NodeVisitor enter(Node parent, Node n) {
     if (n instanceof Branch) {
       Branch branch = (Branch) n;
       if (branch.kind().equals(Branch.BREAK)) {
@@ -96,7 +104,7 @@ public class AbruptEdgesMetric extends ASTMetric {
           iContinues++;
         }
       } else {
-        System.out.println("\t Error:'" + branch.toString() + "'");
+        logger.info(new StringBuilder().append("\t Error:'").append(branch.toString()).append("'").toString());
       }
     }
     return enter(n);

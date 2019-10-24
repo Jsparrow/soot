@@ -52,9 +52,10 @@ public class ParameterAliasTagger extends BodyTransformer {
     return G.v().soot_jimple_toolkits_pointer_ParameterAliasTagger();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map options) {
     PointsToAnalysis pa = Scene.v().getPointsToAnalysis();
-    Set<IdentityStmt> parms = new HashSet<IdentityStmt>();
+    Set<IdentityStmt> parms = new HashSet<>();
 
     for (Iterator sIt = b.getUnits().iterator(); sIt.hasNext();) {
 

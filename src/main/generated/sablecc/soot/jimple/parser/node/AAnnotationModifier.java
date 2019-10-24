@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AAnnotationModifier extends PModifier
 {
-    private TAnnotation _annotation_;
+    private TAnnotation annotation;
 
     public AAnnotationModifier()
     {
@@ -26,7 +26,7 @@ public final class AAnnotationModifier extends PModifier
     public Object clone()
     {
         return new AAnnotationModifier(
-            cloneNode(this._annotation_));
+            cloneNode(this.annotation));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AAnnotationModifier extends PModifier
 
     public TAnnotation getAnnotation()
     {
-        return this._annotation_;
+        return this.annotation;
     }
 
     public void setAnnotation(TAnnotation node)
     {
-        if(this._annotation_ != null)
+        if(this.annotation != null)
         {
-            this._annotation_.parent(null);
+            this.annotation.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AAnnotationModifier extends PModifier
             node.parent(this);
         }
 
-        this._annotation_ = node;
+        this.annotation = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._annotation_);
+            + toString(this.annotation);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._annotation_ == child)
+        if(this.annotation == child)
         {
-            this._annotation_ = null;
+            this.annotation = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AAnnotationModifier extends PModifier
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._annotation_ == oldChild)
+        if(this.annotation == oldChild)
         {
             setAnnotation((TAnnotation) newChild);
             return;

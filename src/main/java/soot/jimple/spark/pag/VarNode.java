@@ -43,91 +43,16 @@ import soot.toolkits.scalar.Pair;
  */
 public abstract class VarNode extends ValNode implements Comparable {
   private static final Logger logger = LoggerFactory.getLogger(VarNode.class);
+/* End of package methods. */
 
-  public Context context() {
-    return null;
-  }
+  protected Object variable;
+protected Map<SparkField, FieldRefNode> fields;
+protected int finishingNumber = 0;
+protected boolean interProcTarget = false;
+protected boolean interProcSource = false;
+protected int numDerefs = 0;
 
-  /** Returns all field ref nodes having this node as their base. */
-  public Collection<FieldRefNode> getAllFieldRefs() {
-    if (fields == null) {
-      return Collections.emptyList();
-    }
-    return fields.values();
-  }
-
-  /**
-   * Returns the field ref node having this node as its base, and field as its field; null if nonexistent.
-   */
-  public FieldRefNode dot(SparkField field) {
-    return fields == null ? null : fields.get(field);
-  }
-
-  public int compareTo(Object o) {
-    VarNode other = (VarNode) o;
-    if (other.finishingNumber == finishingNumber && other != this) {
-      logger.debug("" + "This is: " + this + " with id " + getNumber() + " and number " + finishingNumber);
-      logger.debug("" + "Other is: " + other + " with id " + other.getNumber() + " and number " + other.finishingNumber);
-      throw new RuntimeException("Comparison error");
-    }
-    return other.finishingNumber - finishingNumber;
-  }
-
-  public void setFinishingNumber(int i) {
-    finishingNumber = i;
-    if (i > pag.maxFinishNumber) {
-      pag.maxFinishNumber = i;
-    }
-  }
-
-  /** Returns the underlying variable that this node represents. */
-  public Object getVariable() {
-    return variable;
-  }
-
-  /**
-   * Designates this node as the potential target of a interprocedural assignment edge which may be added during on-the-fly
-   * call graph updating.
-   */
-  public void setInterProcTarget() {
-    interProcTarget = true;
-  }
-
-  /**
-   * Returns true if this node is the potential target of a interprocedural assignment edge which may be added during
-   * on-the-fly call graph updating.
-   */
-  public boolean isInterProcTarget() {
-    return interProcTarget;
-  }
-
-  /**
-   * Designates this node as the potential source of a interprocedural assignment edge which may be added during on-the-fly
-   * call graph updating.
-   */
-  public void setInterProcSource() {
-    interProcSource = true;
-  }
-
-  /**
-   * Returns true if this node is the potential source of a interprocedural assignment edge which may be added during
-   * on-the-fly call graph updating.
-   */
-  public boolean isInterProcSource() {
-    return interProcSource;
-  }
-
-  /** Returns true if this VarNode represents the THIS pointer */
-  public boolean isThisPtr() {
-    if (variable instanceof Pair) {
-      Pair o = (Pair) variable;
-      return o.isThisParameter();
-    }
-
-    return false;
-  }
-
-  /* End of public methods. */
+/* End of public methods. */
 
   VarNode(PAG pag, Object variable, Type t) {
     super(pag, t);
@@ -139,20 +64,96 @@ public abstract class VarNode extends ValNode implements Comparable {
     setFinishingNumber(++pag.maxFinishNumber);
   }
 
-  /** Registers a frn as having this node as its base. */
+public Context context() {
+    return null;
+  }
+
+/** Returns all field ref nodes having this node as their base. */
+  public Collection<FieldRefNode> getAllFieldRefs() {
+    if (fields == null) {
+      return Collections.emptyList();
+    }
+    return fields.values();
+  }
+
+/**
+   * Returns the field ref node having this node as its base, and field as its field; null if nonexistent.
+   */
+  public FieldRefNode dot(SparkField field) {
+    return fields == null ? null : fields.get(field);
+  }
+
+@Override
+public int compareTo(Object o) {
+    VarNode other = (VarNode) o;
+    if (other.finishingNumber == finishingNumber && other != this) {
+      logger.debug(new StringBuilder().append("").append("This is: ").append(this).append(" with id ").append(getNumber()).append(" and number ").append(finishingNumber)
+			.toString());
+      logger.debug(new StringBuilder().append("").append("Other is: ").append(other).append(" with id ").append(other.getNumber()).append(" and number ")
+			.append(other.finishingNumber).toString());
+      throw new RuntimeException("Comparison error");
+    }
+    return other.finishingNumber - finishingNumber;
+  }
+
+public void setFinishingNumber(int i) {
+    finishingNumber = i;
+    if (i > pag.maxFinishNumber) {
+      pag.maxFinishNumber = i;
+    }
+  }
+
+/** Returns the underlying variable that this node represents. */
+  public Object getVariable() {
+    return variable;
+  }
+
+/**
+   * Designates this node as the potential target of a interprocedural assignment edge which may be added during on-the-fly
+   * call graph updating.
+   */
+  public void setInterProcTarget() {
+    interProcTarget = true;
+  }
+
+/**
+   * Returns true if this node is the potential target of a interprocedural assignment edge which may be added during
+   * on-the-fly call graph updating.
+   */
+  public boolean isInterProcTarget() {
+    return interProcTarget;
+  }
+
+/**
+   * Designates this node as the potential source of a interprocedural assignment edge which may be added during on-the-fly
+   * call graph updating.
+   */
+  public void setInterProcSource() {
+    interProcSource = true;
+  }
+
+/**
+   * Returns true if this node is the potential source of a interprocedural assignment edge which may be added during
+   * on-the-fly call graph updating.
+   */
+  public boolean isInterProcSource() {
+    return interProcSource;
+  }
+
+/** Returns true if this VarNode represents the THIS pointer */
+  public boolean isThisPtr() {
+    if (!(variable instanceof Pair)) {
+		return false;
+	}
+	Pair o = (Pair) variable;
+	return o.isThisParameter();
+  }
+
+/** Registers a frn as having this node as its base. */
   void addField(FieldRefNode frn, SparkField field) {
     if (fields == null) {
-      fields = new HashMap<SparkField, FieldRefNode>();
+      fields = new HashMap<>();
     }
     fields.put(field, frn);
   }
-
-  /* End of package methods. */
-
-  protected Object variable;
-  protected Map<SparkField, FieldRefNode> fields;
-  protected int finishingNumber = 0;
-  protected boolean interProcTarget = false;
-  protected boolean interProcSource = false;
-  protected int numDerefs = 0;
 }

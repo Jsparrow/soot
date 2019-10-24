@@ -74,7 +74,8 @@ public class ExecuteInlineInstruction extends MethodInvocationInstruction implem
    *
    * @return a list of register indices
    */
-  protected List<Integer> getUsedRegistersNums() {
+  @Override
+protected List<Integer> getUsedRegistersNums() {
     if (instruction instanceof Instruction35mi) {
       return getUsedRegistersNums((Instruction35mi) instruction);
     } else if (instruction instanceof Instruction3rmi) {

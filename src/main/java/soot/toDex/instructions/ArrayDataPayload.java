@@ -41,7 +41,6 @@ public class ArrayDataPayload extends AbstractPayload {
   private final List<Number> arrayElements;
 
   public ArrayDataPayload(int elementWidth, List<Number> arrayElements) {
-    super();
     this.elementWidth = elementWidth;
     this.arrayElements = arrayElements;
   }

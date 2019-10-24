@@ -64,6 +64,6 @@ public class PhasePluginDescription extends PluginDescription {
 
   @Override
   public String toString() {
-    return "<PhasePluginDescription name=" + getPhaseName() + " class= " + getClassName() + ">";
+    return new StringBuilder().append("<PhasePluginDescription name=").append(getPhaseName()).append(" class= ").append(getClassName()).append(">").toString();
   }
 }

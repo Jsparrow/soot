@@ -43,18 +43,22 @@ package soot.toDex;
  */
 
 import soot.options.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Debug {
-  public static boolean TODEX_DEBUG;
+  private static final Logger logger = LoggerFactory.getLogger(Debug.class);
+public static boolean TODEX_DEBUG;
 
   public static void printDbg(String s, Object... objects) {
     TODEX_DEBUG = Options.v().verbose();
-    if (TODEX_DEBUG) {
-      for (Object o : objects) {
+    if (!TODEX_DEBUG) {
+		return;
+	}
+	for (Object o : objects) {
         s += o.toString();
       }
-      System.out.println(s);
-    }
+	logger.info(s);
 
   }
 

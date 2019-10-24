@@ -52,143 +52,152 @@ import soot.jimple.Stmt;
  */
 public class ClosestAbruptTargetFinder extends DepthFirstAdapter {
 
-  public ClosestAbruptTargetFinder(Singletons.Global g) {
-  }
+  HashMap<DAbruptStmt, ASTNode> closestNode = new HashMap<>();// a mapping of each abrupt statement to
+	// the node they are targeting
+  ArrayList<ASTLabeledNode> nodeStack = new ArrayList<>(); // the last element will always be the "currentNode"
+	public ClosestAbruptTargetFinder(Singletons.Global g) {
+	  }
 
-  public static ClosestAbruptTargetFinder v() {
-    return G.v().soot_dava_toolkits_base_AST_traversals_ClosestAbruptTargetFinder();
-  }
+	public static ClosestAbruptTargetFinder v() {
+	    return G.v().soot_dava_toolkits_base_AST_traversals_ClosestAbruptTargetFinder();
+	  }
 
-  HashMap<DAbruptStmt, ASTNode> closestNode = new HashMap<DAbruptStmt, ASTNode>();// a mapping of each abrupt statement to
-                                                                                  // the node they are targeting
-  ArrayList<ASTLabeledNode> nodeStack = new ArrayList<ASTLabeledNode>(); // the last element will always be the "currentNode"
-                                                                         // meaning the closest
-                                                                         // target to a abrupt stmt
+	// meaning the closest
+	 // target to a abrupt stmt
 
   /**
    * To be invoked by other analyses. Given an abrupt stmt as input this method will locate the closest target and return it
    */
   public ASTNode getTarget(DAbruptStmt ab) {
-    Object node = closestNode.get(ab);
-    if (node != null) {
-      return (ASTNode) node;
-    } else {
-      throw new RuntimeException("Unable to find target for AbruptStmt");
-    }
+   Object node = closestNode.get(ab);
+   if (node != null) {
+     return (ASTNode) node;
+   } else {
+     throw new RuntimeException("Unable to find target for AbruptStmt");
+   }
   }
 
-  /**
-   * Following methods add a new node to the end of the nodeStack arrayList Since that node becomes the closest target of an
-   * implicit break or continue
-   */
+	/**
+	   * Following methods add a new node to the end of the nodeStack arrayList Since that node becomes the closest target of an
+	   * implicit break or continue
+	   */
+	
+	  @Override
+	public void inASTWhileNode(ASTWhileNode node) {
+	    nodeStack.add(node);
+	  }
 
-  public void inASTWhileNode(ASTWhileNode node) {
-    nodeStack.add(node);
-  }
+	@Override
+	public void inASTDoWhileNode(ASTDoWhileNode node) {
+	    nodeStack.add(node);
+	  }
 
-  public void inASTDoWhileNode(ASTDoWhileNode node) {
-    nodeStack.add(node);
-  }
+	@Override
+	public void inASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
+	    nodeStack.add(node);
+	  }
 
-  public void inASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
-    nodeStack.add(node);
-  }
+	@Override
+	public void inASTForLoopNode(ASTForLoopNode node) {
+	    nodeStack.add(node);
+	  }
 
-  public void inASTForLoopNode(ASTForLoopNode node) {
-    nodeStack.add(node);
-  }
+	@Override
+	public void inASTSwitchNode(ASTSwitchNode node) {
+	    nodeStack.add(node);
+	  }
 
-  public void inASTSwitchNode(ASTSwitchNode node) {
-    nodeStack.add(node);
-  }
+	/**
+	   * Following methods remove the last node from the end of the nodeStack arrayList Since the previous node now becomes the
+	   * closest target to an implicit break or continue
+	   */
+	
+	  @Override
+	public void outASTWhileNode(ASTWhileNode node) {
+	    if (nodeStack.isEmpty()) {
+	      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
+	    }
+	    nodeStack.remove(nodeStack.size() - 1);
+	  }
 
-  /**
-   * Following methods remove the last node from the end of the nodeStack arrayList Since the previous node now becomes the
-   * closest target to an implicit break or continue
-   */
+	@Override
+	public void outASTDoWhileNode(ASTDoWhileNode node) {
+	    if (nodeStack.isEmpty()) {
+	      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
+	    }
+	    nodeStack.remove(nodeStack.size() - 1);
+	  }
 
-  public void outASTWhileNode(ASTWhileNode node) {
-    if (nodeStack.isEmpty()) {
-      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
-    }
-    nodeStack.remove(nodeStack.size() - 1);
-  }
+	@Override
+	public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
+	    if (nodeStack.isEmpty()) {
+	      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
+	    }
+	    nodeStack.remove(nodeStack.size() - 1);
+	  }
 
-  public void outASTDoWhileNode(ASTDoWhileNode node) {
-    if (nodeStack.isEmpty()) {
-      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
-    }
-    nodeStack.remove(nodeStack.size() - 1);
-  }
+	@Override
+	public void outASTForLoopNode(ASTForLoopNode node) {
+	    if (nodeStack.isEmpty()) {
+	      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
+	    }
+	    nodeStack.remove(nodeStack.size() - 1);
+	  }
 
-  public void outASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
-    if (nodeStack.isEmpty()) {
-      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
-    }
-    nodeStack.remove(nodeStack.size() - 1);
-  }
+	@Override
+	public void outASTSwitchNode(ASTSwitchNode node) {
+	    if (nodeStack.isEmpty()) {
+	      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
+	    }
+	    nodeStack.remove(nodeStack.size() - 1);
+	  }
 
-  public void outASTForLoopNode(ASTForLoopNode node) {
-    if (nodeStack.isEmpty()) {
-      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
-    }
-    nodeStack.remove(nodeStack.size() - 1);
-  }
-
-  public void outASTSwitchNode(ASTSwitchNode node) {
-    if (nodeStack.isEmpty()) {
-      throw new RuntimeException("trying to remove node from empty stack: ClosestBreakTargetFinder");
-    }
-    nodeStack.remove(nodeStack.size() - 1);
-  }
-
-  public void inStmt(Stmt s) {
-    if (s instanceof DAbruptStmt) {
-      // breaks and continues are abrupt statements
-      DAbruptStmt ab = (DAbruptStmt) s;
-
-      SETNodeLabel label = ab.getLabel();
-      if (label != null) {
-        if (label.toString() != null) {
-          // not considering explicit breaks
-          return;
-        }
-      }
-
-      // the break is an implict break
-      if (ab.is_Break()) {
-        // get the top of the stack
-        int index = nodeStack.size() - 1;
-        if (index < 0) {
-          // error
-          throw new RuntimeException("nodeStack empty??" + nodeStack.toString());
-        }
-        ASTNode currentNode = nodeStack.get(nodeStack.size() - 1);
-        closestNode.put(ab, currentNode);
-      } else if (ab.is_Continue()) {
-        // need something different because continues dont target switch
-        int index = nodeStack.size() - 1;
-        if (index < 0) {
-          // error
-          throw new RuntimeException("nodeStack empty??" + nodeStack.toString());
-        }
-
-        ASTNode currentNode = nodeStack.get(index);
-        while (currentNode instanceof ASTSwitchNode) {
-          if (index > 0) {
-            // more elements present in nodeStack
-            index--;
-            currentNode = nodeStack.get(index);
-          } else {
-            // error
-            throw new RuntimeException("Unable to find closest break Target");
-          }
-        }
-        // know that the currentNode is not an ASTSwitchNode
-        closestNode.put(ab, currentNode);
-      }
-    }
-  }
+	@Override
+	public void inStmt(Stmt s) {
+	    if (!(s instanceof DAbruptStmt)) {
+			return;
+		}
+		// breaks and continues are abrupt statements
+	      DAbruptStmt ab = (DAbruptStmt) s;
+		SETNodeLabel label = ab.getLabel();
+		boolean condition = label != null && label.toString() != null;
+		if (condition) {
+		  // not considering explicit breaks
+		  return;
+		}
+		// the break is an implict break
+	      if (ab.is_Break()) {
+	        // get the top of the stack
+	        int index = nodeStack.size() - 1;
+	        if (index < 0) {
+	          // error
+	          throw new RuntimeException("nodeStack empty??" + nodeStack.toString());
+	        }
+	        ASTNode currentNode = nodeStack.get(nodeStack.size() - 1);
+	        closestNode.put(ab, currentNode);
+	      } else if (ab.is_Continue()) {
+	        // need something different because continues dont target switch
+	        int index = nodeStack.size() - 1;
+	        if (index < 0) {
+	          // error
+	          throw new RuntimeException("nodeStack empty??" + nodeStack.toString());
+	        }
+	
+	        ASTNode currentNode = nodeStack.get(index);
+	        while (currentNode instanceof ASTSwitchNode) {
+	          if (index > 0) {
+	            // more elements present in nodeStack
+	            index--;
+	            currentNode = nodeStack.get(index);
+	          } else {
+	            // error
+	            throw new RuntimeException("Unable to find closest break Target");
+	          }
+	        }
+	        // know that the currentNode is not an ASTSwitchNode
+	        closestNode.put(ab, currentNode);
+	      }
+	  }
 
   /*
    * public void outASTMethodNode(ASTMethodNode node){ Iterator it = closestNode.keySet().iterator(); while(it.hasNext()){

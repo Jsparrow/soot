@@ -193,7 +193,8 @@ public class ClassFile {
   }
 
   /** Returns the name of this Class. */
-  public String toString() {
+  @Override
+public String toString() {
     return (constant_pool[this_class].toString(constant_pool));
   }
 
@@ -235,7 +236,7 @@ public class ClassFile {
         f.close();
       }
     } catch (IOException e) {
-      logger.debug("IOException with " + fn + ": " + e.getMessage());
+      logger.debug(new StringBuilder().append("IOException with ").append(fn).append(": ").append(e.getMessage()).toString());
       return false;
     }
 
@@ -260,7 +261,8 @@ public class ClassFile {
     try {
       f = new FileOutputStream(fn);
     } catch (FileNotFoundException e) {
-      if (fn.indexOf(".class") >= 0) {
+      logger.error(e.getMessage(), e);
+	if (fn.contains(".class")) {
         logger.debug("Can't find " + fn);
         return false;
       }
@@ -268,7 +270,8 @@ public class ClassFile {
       try {
         f = new FileOutputStream(fn);
       } catch (FileNotFoundException ee) {
-        logger.debug("Can't find " + fn);
+        logger.error(ee.getMessage(), ee);
+		logger.debug("Can't find " + fn);
         return false;
       }
     }
@@ -278,7 +281,7 @@ public class ClassFile {
       d.close();
       f.close();
     } catch (IOException e) {
-      logger.debug("IOException with " + fn + ": " + e.getMessage());
+      logger.debug(new StringBuilder().append("IOException with ").append(fn).append(": ").append(e.getMessage()).toString());
       return false;
     }
     return b;
@@ -421,7 +424,7 @@ public class ClassFile {
       // first read in magic number
       magic = d.readInt() & 0xFFFFFFFFL;
       if (magic != MAGIC) {
-        logger.debug("Wrong magic number in " + fn + ": " + magic);
+        logger.debug(new StringBuilder().append("Wrong magic number in ").append(fn).append(": ").append(magic).toString());
         return false;
       }
       minor_version = d.readUnsignedShort();
@@ -479,7 +482,7 @@ public class ClassFile {
       }
 
     } catch (IOException e) {
-      throw new RuntimeException("IOException with " + fn + ": " + e.getMessage(), e);
+      throw new RuntimeException(new StringBuilder().append("IOException with ").append(fn).append(": ").append(e.getMessage()).toString(), e);
     }
 
     return true;
@@ -515,7 +518,7 @@ public class ClassFile {
           cp = new CONSTANT_Class_info();
           ((CONSTANT_Class_info) cp).name_index = d.readUnsignedShort();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Class");
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Class").toString());
           }
           break;
         case cp_info.CONSTANT_Fieldref:
@@ -523,7 +526,7 @@ public class ClassFile {
           ((CONSTANT_Fieldref_info) cp).class_index = d.readUnsignedShort();
           ((CONSTANT_Fieldref_info) cp).name_and_type_index = d.readUnsignedShort();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Fieldref");
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Fieldref").toString());
           }
           break;
         case cp_info.CONSTANT_Methodref:
@@ -531,7 +534,7 @@ public class ClassFile {
           ((CONSTANT_Methodref_info) cp).class_index = d.readUnsignedShort();
           ((CONSTANT_Methodref_info) cp).name_and_type_index = d.readUnsignedShort();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Methodref");
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Methodref").toString());
           }
           break;
         case cp_info.CONSTANT_InterfaceMethodref:
@@ -539,28 +542,28 @@ public class ClassFile {
           ((CONSTANT_InterfaceMethodref_info) cp).class_index = d.readUnsignedShort();
           ((CONSTANT_InterfaceMethodref_info) cp).name_and_type_index = d.readUnsignedShort();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: MethodHandle");
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: MethodHandle").toString());
           }
           break;
         case cp_info.CONSTANT_String:
           cp = new CONSTANT_String_info();
           ((CONSTANT_String_info) cp).string_index = d.readUnsignedShort();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: String");
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: String").toString());
           }
           break;
         case cp_info.CONSTANT_Integer:
           cp = new CONSTANT_Integer_info();
           ((CONSTANT_Integer_info) cp).bytes = d.readInt();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Integer = " + ((CONSTANT_Integer_info) cp).bytes);
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Integer = ").append(((CONSTANT_Integer_info) cp).bytes).toString());
           }
           break;
         case cp_info.CONSTANT_Float:
           cp = new CONSTANT_Float_info();
           ((CONSTANT_Float_info) cp).bytes = d.readInt();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Float = " + ((CONSTANT_Float_info) cp).convert());
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Float = ").append(((CONSTANT_Float_info) cp).convert()).toString());
           }
           break;
         case cp_info.CONSTANT_Long:
@@ -570,7 +573,7 @@ public class ClassFile {
 
           if (debug) {
             String temp = cp.toString(constant_pool);
-            logger.debug("Constant pool[" + i + "]: Long = " + temp);
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Long = ").append(temp).toString());
             /*
              * logger.debug("Constant pool[" + i + "]: that's " + cp.printBits(((CONSTANT_Long_info)cp).high) + " <<32 + " +
              * cp.printBits(((CONSTANT_Long_info)cp).low) + " = " + cp.printBits(((CONSTANT_Long_info)cp).convert()));
@@ -583,7 +586,7 @@ public class ClassFile {
           ((CONSTANT_Double_info) cp).high = d.readInt() & 0xFFFFFFFFL;
           ((CONSTANT_Double_info) cp).low = d.readInt() & 0xFFFFFFFFL;
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Double = " + ((CONSTANT_Double_info) cp).convert());
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Double = ").append(((CONSTANT_Double_info) cp).convert()).toString());
           }
           skipone = true; // next entry needs to be skipped
           break;
@@ -592,7 +595,7 @@ public class ClassFile {
           ((CONSTANT_NameAndType_info) cp).name_index = d.readUnsignedShort();
           ((CONSTANT_NameAndType_info) cp).descriptor_index = d.readUnsignedShort();
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Name and Type");
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Name and Type").toString());
           }
           break;
         case cp_info.CONSTANT_Utf8:
@@ -601,7 +604,7 @@ public class ClassFile {
           // the pre-existing one and allow cputf8 to be GC'd.
           cp = (cp_info) CONSTANT_Utf8_collector.v().add(cputf8);
           if (debug) {
-            logger.debug("Constant pool[" + i + "]: Utf8 = \"" + cputf8.convert() + "\"");
+            logger.debug(new StringBuilder().append("Constant pool[").append(i).append("]: Utf8 = \"").append(cputf8.convert()).append("\"").toString());
           }
           break;
         case cp_info.CONSTANT_MethodHandle:
@@ -615,7 +618,7 @@ public class ClassFile {
           ((CONSTANT_InvokeDynamic_info) cp).name_and_type_index = d.readUnsignedShort();
           break;
         default:
-          logger.debug("Unknown tag in constant pool: " + tag + " at entry " + i);
+          logger.debug(new StringBuilder().append("Unknown tag in constant pool: ").append(tag).append(" at entry ").append(i).toString());
           return false;
       }
       cp.tag = tag;
@@ -1276,7 +1279,7 @@ public class ClassFile {
         writeAttributes(dd, attributes_count, attributes);
       }
     } catch (IOException e) {
-      logger.debug("IOException with " + fn + ": " + e.getMessage());
+      logger.debug(new StringBuilder().append("IOException with ").append(fn).append(": ").append(e.getMessage()).toString());
       return false;
     }
     return true;
@@ -1297,7 +1300,9 @@ public class ClassFile {
     int j;
     Code_attribute ca;
     ByteCode bc;
-    Instruction inst, head, tail;
+    Instruction inst;
+	Instruction head;
+	Instruction tail;
     exception_table_entry e;
 
     head = null;
@@ -1317,7 +1322,7 @@ public class ClassFile {
       // logger.debug(""+j + " : " + inst);
 
       if (inst instanceof Instruction_Unknown) {
-        logger.debug("Unknown instruction in \"" + m.toName(constant_pool) + "\" at offset " + j);
+        logger.debug(new StringBuilder().append("Unknown instruction in \"").append(m.toName(constant_pool)).append("\" at offset ").append(j).toString());
         logger.debug(" bytecode = " + (((int) (inst.code)) & 0xff));
       }
       // logger.debug("before: " + j);
@@ -1450,7 +1455,8 @@ public class ClassFile {
    * @see ClassFile#unparseMethod
    */
   void unparse() {
-    int i, j;
+    int i;
+	int j;
     Code_attribute ca;
     byte bc[];
     method_info mi;
@@ -1465,7 +1471,7 @@ public class ClassFile {
       }
       bc = unparseMethod(mi);
       if (bc == null) {
-        logger.debug("Recompile of " + mi.toName(constant_pool) + " failed!");
+        logger.debug(new StringBuilder().append("Recompile of ").append(mi.toName(constant_pool)).append(" failed!").toString());
       } else {
         ca.code_length = bc.length;
         ca.code = bc;
@@ -1512,7 +1518,8 @@ public class ClassFile {
    * @see ClassFile#parseMethodDesc_return
    */
   static String parseMethodDesc_params(String s) {
-    int i, j;
+    int i;
+	int j;
     i = s.indexOf('(');
     if (i >= 0) {
       j = s.indexOf(')', i + 1);
@@ -1535,9 +1542,12 @@ public class ClassFile {
    * @see ClassFile#parseMethodDesc_return
    */
   static String parseDesc(String desc, String sep) {
-    String params = "", param;
+    String params = "";
+	String param;
     char c;
-    int i, len, arraylevel = 0;
+    int i;
+	int len;
+	int arraylevel = 0;
     boolean didone = false;
 
     len = desc.length();
@@ -1572,7 +1582,7 @@ public class ClassFile {
           param = "<error>";
         } else {
           if (j - i > 10 && desc.substring(i + 1, i + 11).compareTo("java/lang/") == 0) {
-            i = i + 10;
+            i += 10;
           }
           param = desc.substring(i + 1, j);
           // replace '/'s with '.'s
@@ -1645,7 +1655,7 @@ public class ClassFile {
     // note that we start at 1 in the constant pool
     for (i = 1; i < constant_pool_count; i++) {
       c = constant_pool[i];
-      logger.debug("[" + i + "] " + c.typeName() + "=" + c.toString(constant_pool));
+      logger.debug(new StringBuilder().append("[").append(i).append("] ").append(c.typeName()).append("=").append(c.toString(constant_pool)).toString());
       if ((constant_pool[i]).tag == cp_info.CONSTANT_Long || (constant_pool[i]).tag == cp_info.CONSTANT_Double) {
         // must skip an entry after a long or double constant
         i++;
@@ -1665,7 +1675,8 @@ public class ClassFile {
     field_info fi;
     ConstantValue_attribute cva;
     CONSTANT_Utf8_info cm;
-    int i, j;
+    int i;
+	int j;
 
     for (i = 0; i < fields_count; i++) {
       fi = fields[i];
@@ -1694,9 +1705,10 @@ public class ClassFile {
    * @see ClassFile#methods
    */
   void moveMethod(String m, int pos) {
-    int i, j;
+    int i;
+	int j;
     method_info mthd;
-    logger.debug("Moving " + m + " to position " + pos + " of " + methods_count);
+    logger.debug(new StringBuilder().append("Moving ").append(m).append(" to position ").append(pos).append(" of ").append(methods_count).toString());
 
     for (i = 0; i < methods_count; i++) {
       if (m.compareTo(methods[i].toName(constant_pool)) == 0) {

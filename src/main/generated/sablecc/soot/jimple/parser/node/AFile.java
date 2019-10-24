@@ -8,12 +8,12 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFile extends PFile
 {
-    private final LinkedList<PModifier> _modifier_ = new LinkedList<PModifier>();
-    private PFileType _fileType_;
-    private PClassName _className_;
-    private PExtendsClause _extendsClause_;
-    private PImplementsClause _implementsClause_;
-    private PFileBody _fileBody_;
+    private final LinkedList<PModifier> modifier = new LinkedList<>();
+    private PFileType fileType;
+    private PClassName className;
+    private PExtendsClause extendsClause;
+    private PImplementsClause implementsClause;
+    private PFileBody fileBody;
 
     public AFile()
     {
@@ -47,12 +47,12 @@ public final class AFile extends PFile
     public Object clone()
     {
         return new AFile(
-            cloneList(this._modifier_),
-            cloneNode(this._fileType_),
-            cloneNode(this._className_),
-            cloneNode(this._extendsClause_),
-            cloneNode(this._implementsClause_),
-            cloneNode(this._fileBody_));
+            cloneList(this.modifier),
+            cloneNode(this.fileType),
+            cloneNode(this.className),
+            cloneNode(this.extendsClause),
+            cloneNode(this.implementsClause),
+            cloneNode(this.fileBody));
     }
 
     @Override
@@ -63,40 +63,34 @@ public final class AFile extends PFile
 
     public LinkedList<PModifier> getModifier()
     {
-        return this._modifier_;
+        return this.modifier;
     }
 
     public void setModifier(List<?> list)
     {
-        for(PModifier e : this._modifier_)
-        {
-            e.parent(null);
-        }
-        this._modifier_.clear();
+        this.modifier.forEach(e -> e.parent(null));
+        this.modifier.clear();
 
-        for(Object obj_e : list)
-        {
-            PModifier e = (PModifier) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PModifier) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._modifier_.add(e);
-        }
+			e.parent(this);
+			this.modifier.add(e);
+		});
     }
 
     public PFileType getFileType()
     {
-        return this._fileType_;
+        return this.fileType;
     }
 
     public void setFileType(PFileType node)
     {
-        if(this._fileType_ != null)
+        if(this.fileType != null)
         {
-            this._fileType_.parent(null);
+            this.fileType.parent(null);
         }
 
         if(node != null)
@@ -109,19 +103,19 @@ public final class AFile extends PFile
             node.parent(this);
         }
 
-        this._fileType_ = node;
+        this.fileType = node;
     }
 
     public PClassName getClassName()
     {
-        return this._className_;
+        return this.className;
     }
 
     public void setClassName(PClassName node)
     {
-        if(this._className_ != null)
+        if(this.className != null)
         {
-            this._className_.parent(null);
+            this.className.parent(null);
         }
 
         if(node != null)
@@ -134,19 +128,19 @@ public final class AFile extends PFile
             node.parent(this);
         }
 
-        this._className_ = node;
+        this.className = node;
     }
 
     public PExtendsClause getExtendsClause()
     {
-        return this._extendsClause_;
+        return this.extendsClause;
     }
 
     public void setExtendsClause(PExtendsClause node)
     {
-        if(this._extendsClause_ != null)
+        if(this.extendsClause != null)
         {
-            this._extendsClause_.parent(null);
+            this.extendsClause.parent(null);
         }
 
         if(node != null)
@@ -159,19 +153,19 @@ public final class AFile extends PFile
             node.parent(this);
         }
 
-        this._extendsClause_ = node;
+        this.extendsClause = node;
     }
 
     public PImplementsClause getImplementsClause()
     {
-        return this._implementsClause_;
+        return this.implementsClause;
     }
 
     public void setImplementsClause(PImplementsClause node)
     {
-        if(this._implementsClause_ != null)
+        if(this.implementsClause != null)
         {
-            this._implementsClause_.parent(null);
+            this.implementsClause.parent(null);
         }
 
         if(node != null)
@@ -184,19 +178,19 @@ public final class AFile extends PFile
             node.parent(this);
         }
 
-        this._implementsClause_ = node;
+        this.implementsClause = node;
     }
 
     public PFileBody getFileBody()
     {
-        return this._fileBody_;
+        return this.fileBody;
     }
 
     public void setFileBody(PFileBody node)
     {
-        if(this._fileBody_ != null)
+        if(this.fileBody != null)
         {
-            this._fileBody_.parent(null);
+            this.fileBody.parent(null);
         }
 
         if(node != null)
@@ -209,57 +203,52 @@ public final class AFile extends PFile
             node.parent(this);
         }
 
-        this._fileBody_ = node;
+        this.fileBody = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._modifier_)
-            + toString(this._fileType_)
-            + toString(this._className_)
-            + toString(this._extendsClause_)
-            + toString(this._implementsClause_)
-            + toString(this._fileBody_);
+        return new StringBuilder().append("").append(toString(this.modifier)).append(toString(this.fileType)).append(toString(this.className)).append(toString(this.extendsClause))
+				.append(toString(this.implementsClause)).append(toString(this.fileBody)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._modifier_.remove(child))
+        if(this.modifier.remove(child))
         {
             return;
         }
 
-        if(this._fileType_ == child)
+        if(this.fileType == child)
         {
-            this._fileType_ = null;
+            this.fileType = null;
             return;
         }
 
-        if(this._className_ == child)
+        if(this.className == child)
         {
-            this._className_ = null;
+            this.className = null;
             return;
         }
 
-        if(this._extendsClause_ == child)
+        if(this.extendsClause == child)
         {
-            this._extendsClause_ = null;
+            this.extendsClause = null;
             return;
         }
 
-        if(this._implementsClause_ == child)
+        if(this.implementsClause == child)
         {
-            this._implementsClause_ = null;
+            this.implementsClause = null;
             return;
         }
 
-        if(this._fileBody_ == child)
+        if(this.fileBody == child)
         {
-            this._fileBody_ = null;
+            this.fileBody = null;
             return;
         }
 
@@ -270,7 +259,7 @@ public final class AFile extends PFile
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        for(ListIterator<PModifier> i = this._modifier_.listIterator(); i.hasNext();)
+        for(ListIterator<PModifier> i = this.modifier.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {
@@ -288,31 +277,31 @@ public final class AFile extends PFile
             }
         }
 
-        if(this._fileType_ == oldChild)
+        if(this.fileType == oldChild)
         {
             setFileType((PFileType) newChild);
             return;
         }
 
-        if(this._className_ == oldChild)
+        if(this.className == oldChild)
         {
             setClassName((PClassName) newChild);
             return;
         }
 
-        if(this._extendsClause_ == oldChild)
+        if(this.extendsClause == oldChild)
         {
             setExtendsClause((PExtendsClause) newChild);
             return;
         }
 
-        if(this._implementsClause_ == oldChild)
+        if(this.implementsClause == oldChild)
         {
             setImplementsClause((PImplementsClause) newChild);
             return;
         }
 
-        if(this._fileBody_ == oldChild)
+        if(this.fileBody == oldChild)
         {
             setFileBody((PFileBody) newChild);
             return;

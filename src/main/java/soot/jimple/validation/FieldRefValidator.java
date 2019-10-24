@@ -37,11 +37,15 @@ import soot.util.Chain;
 import soot.validation.BodyValidator;
 import soot.validation.UnitValidationException;
 import soot.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum FieldRefValidator implements BodyValidator {
   INSTANCE;
 
-  public static FieldRefValidator v() {
+  private static final Logger logger = LoggerFactory.getLogger(FieldRefValidator.class);
+
+public static FieldRefValidator v() {
     return INSTANCE;
   }
 
@@ -75,7 +79,8 @@ public enum FieldRefValidator implements BodyValidator {
                 .add(new UnitValidationException(unit, body, "Trying to get a static field which is non-static: " + v));
           }
         } catch (ResolutionFailedException e) {
-          exceptions.add(new UnitValidationException(unit, body, "Trying to get a static field which is non-static: " + v));
+          logger.error(e.getMessage(), e);
+		exceptions.add(new UnitValidationException(unit, body, "Trying to get a static field which is non-static: " + v));
         }
       } else if (fr instanceof InstanceFieldRef) {
         InstanceFieldRef v = (InstanceFieldRef) fr;
@@ -88,7 +93,8 @@ public enum FieldRefValidator implements BodyValidator {
             exceptions.add(new UnitValidationException(unit, body, "Trying to get an instance field which is static: " + v));
           }
         } catch (ResolutionFailedException e) {
-          exceptions.add(new UnitValidationException(unit, body, "Trying to get an instance field which is static: " + v));
+          logger.error(e.getMessage(), e);
+		exceptions.add(new UnitValidationException(unit, body, "Trying to get an instance field which is static: " + v));
         }
       } else {
         throw new RuntimeException("unknown field ref");

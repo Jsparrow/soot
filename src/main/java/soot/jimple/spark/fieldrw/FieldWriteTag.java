@@ -32,7 +32,8 @@ public class FieldWriteTag extends FieldRWTag {
     super(fields);
   }
 
-  public String getName() {
+  @Override
+public String getName() {
     return "FieldWriteTag";
   }
 }

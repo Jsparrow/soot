@@ -72,6 +72,7 @@ import soot.jimple.SpecialInvokeExpr;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.VirtualInvokeExpr;
 import soot.util.Chain;
+import java.util.Collections;
 
 /**
  * Creates methods that "wraps" library method calls.
@@ -87,7 +88,7 @@ public class LibraryMethodWrappersBuilder extends SceneTransformer implements IJ
   public static final String name = "wjtp.jbco_blbc";
   public static final String dependencies[] = new String[] { "wjtp.jbco_blbc" };
 
-  private static final Map<SootClass, Map<SootMethod, SootMethodRef>> libClassesToMethods = new HashMap<>();
+  private static final Map<SootClass, Map<SootMethod, SootMethodRef>> libClassesToMethods = Collections.unmodifiableMap(new HashMap<>());
   public static List<SootMethod> builtByMe = new ArrayList<>();
 
   private int newmethods = 0;
@@ -108,7 +109,8 @@ public class LibraryMethodWrappersBuilder extends SceneTransformer implements IJ
     logger.info("Created {} new methods. Replaced {} method calls.", newmethods, methodcalls);
   }
 
-  protected void internalTransform(String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(String phaseName, Map<String, String> options) {
     if (isVerbose()) {
       logger.info("Building Library Wrapper Methods...");
     }

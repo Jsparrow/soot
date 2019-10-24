@@ -39,19 +39,23 @@ public class IntType extends PrimType implements IntegerType {
   /**
    * Returns true if the given object is equal to this one. Since IntType is a singleton, object equality is fine.
    */
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0xB747239F;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "int";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseIntType(this);
   }
 

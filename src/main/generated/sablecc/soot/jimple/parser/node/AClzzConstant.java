@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AClzzConstant extends PConstant
 {
-    private TClass _id_;
-    private TStringConstant _stringConstant_;
+    private TClass id;
+    private TStringConstant stringConstant;
 
     public AClzzConstant()
     {
@@ -30,8 +30,8 @@ public final class AClzzConstant extends PConstant
     public Object clone()
     {
         return new AClzzConstant(
-            cloneNode(this._id_),
-            cloneNode(this._stringConstant_));
+            cloneNode(this.id),
+            cloneNode(this.stringConstant));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class AClzzConstant extends PConstant
 
     public TClass getId()
     {
-        return this._id_;
+        return this.id;
     }
 
     public void setId(TClass node)
     {
-        if(this._id_ != null)
+        if(this.id != null)
         {
-            this._id_.parent(null);
+            this.id.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class AClzzConstant extends PConstant
             node.parent(this);
         }
 
-        this._id_ = node;
+        this.id = node;
     }
 
     public TStringConstant getStringConstant()
     {
-        return this._stringConstant_;
+        return this.stringConstant;
     }
 
     public void setStringConstant(TStringConstant node)
     {
-        if(this._stringConstant_ != null)
+        if(this.stringConstant != null)
         {
-            this._stringConstant_.parent(null);
+            this.stringConstant.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class AClzzConstant extends PConstant
             node.parent(this);
         }
 
-        this._stringConstant_ = node;
+        this.stringConstant = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._id_)
-            + toString(this._stringConstant_);
+        return new StringBuilder().append("").append(toString(this.id)).append(toString(this.stringConstant)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._id_ == child)
+        if(this.id == child)
         {
-            this._id_ = null;
+            this.id = null;
             return;
         }
 
-        if(this._stringConstant_ == child)
+        if(this.stringConstant == child)
         {
-            this._stringConstant_ = null;
+            this.stringConstant = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class AClzzConstant extends PConstant
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._id_ == oldChild)
+        if(this.id == oldChild)
         {
             setId((TClass) newChild);
             return;
         }
 
-        if(this._stringConstant_ == oldChild)
+        if(this.stringConstant == oldChild)
         {
             setStringConstant((TStringConstant) newChild);
             return;

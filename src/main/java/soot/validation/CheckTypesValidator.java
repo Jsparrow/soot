@@ -53,8 +53,8 @@ public enum CheckTypesValidator implements BodyValidator {
 
   @Override
   public void validate(Body body, List<ValidationException> exception) {
-    for (Unit u : body.getUnits()) {
-      String errorSuffix = " at " + u + " in " + body.getMethod();
+    body.getUnits().forEach(u -> {
+      String errorSuffix = new StringBuilder().append(" at ").append(u).append(" in ").append(body.getMethod()).toString();
 
       if (u instanceof DefinitionStmt) {
         DefinitionStmt astmt = (DefinitionStmt) u;
@@ -80,18 +80,17 @@ public enum CheckTypesValidator implements BodyValidator {
 
           if (called.parameterTypes().size() != iexpr.getArgCount()) {
             exception.add(new ValidationException(stmt, "Argument count does not match the signature of the called function",
-                "Warning: Argument count doesn't match up with signature in call" + errorSuffix + " in "
-                    + body.getMethod()));
+                new StringBuilder().append("Warning: Argument count doesn't match up with signature in call").append(errorSuffix).append(" in ").append(body.getMethod()).toString()));
           } else {
             for (int i = 0; i < iexpr.getArgCount(); i++) {
               checkCopy(stmt, body, exception, Type.toMachineType(called.parameterType(i)),
                   Type.toMachineType(iexpr.getArg(i).getType()),
-                  " in argument " + i + " of call" + errorSuffix + " (Note: Parameters are zero-indexed)");
+                  new StringBuilder().append(" in argument ").append(i).append(" of call").append(errorSuffix).append(" (Note: Parameters are zero-indexed)").toString());
             }
           }
         }
       }
-    }
+    });
   }
 
   private void checkCopy(Unit stmt, Body body, List<ValidationException> exception, Type leftType, Type rightType,
@@ -110,13 +109,13 @@ public enum CheckTypesValidator implements BodyValidator {
         return;
       }
       exception.add(
-          new ValidationException(stmt, "", "Warning: Bad use of primitive type" + errorSuffix + " in " + body.getMethod()));
+          new ValidationException(stmt, "", new StringBuilder().append("Warning: Bad use of primitive type").append(errorSuffix).append(" in ").append(body.getMethod()).toString()));
     }
 
     if (rightType instanceof NullType) {
       return;
     }
-    if (leftType instanceof RefType && ((RefType) leftType).getClassName().equals("java.lang.Object")) {
+    if (leftType instanceof RefType && "java.lang.Object".equals(((RefType) leftType).getClassName())) {
       return;
     }
 
@@ -124,17 +123,16 @@ public enum CheckTypesValidator implements BodyValidator {
       if (leftType instanceof ArrayType && rightType instanceof ArrayType) {
         return;
       }
-      // it is legal to assign arrays to variables of type Serializable,
+      boolean condition = rightType instanceof ArrayType && (leftType.equals(RefType.v("java.io.Serializable")) || leftType.equals(RefType.v("java.lang.Cloneable"))
+	    || leftType.equals(RefType.v("java.lang.Object")));
+	// it is legal to assign arrays to variables of type Serializable,
       // Cloneable or Object
-      if (rightType instanceof ArrayType) {
-        if (leftType.equals(RefType.v("java.io.Serializable")) || leftType.equals(RefType.v("java.lang.Cloneable"))
-            || leftType.equals(RefType.v("java.lang.Object"))) {
-          return;
-        }
+      if (condition) {
+        return;
       }
 
       exception
-          .add(new ValidationException(stmt, "Warning: Bad use of array type" + errorSuffix + " in " + body.getMethod()));
+          .add(new ValidationException(stmt, new StringBuilder().append("Warning: Bad use of array type").append(errorSuffix).append(" in ").append(body.getMethod()).toString()));
     }
 
     if (leftType instanceof RefType && rightType instanceof RefType) {
@@ -149,25 +147,24 @@ public enum CheckTypesValidator implements BodyValidator {
           if (!(leftClass.getName().equals(rightClass.getName())
               || Scene.v().getActiveHierarchy().isInterfaceSubinterfaceOf(rightClass, leftClass))) {
             exception.add(new ValidationException(stmt,
-                "Warning: Bad use of interface type" + errorSuffix + " in " + body.getMethod()));
+                new StringBuilder().append("Warning: Bad use of interface type").append(errorSuffix).append(" in ").append(body.getMethod()).toString()));
           }
         } else {
           // No quick way to check this for now.
         }
       } else {
         if (rightClass.isInterface()) {
-          exception.add(new ValidationException(stmt, "Warning: trying to use interface type where non-Object class expected"
-              + errorSuffix + " in " + body.getMethod()));
+          exception.add(new ValidationException(stmt, new StringBuilder().append("Warning: trying to use interface type where non-Object class expected").append(errorSuffix).append(" in ").append(body.getMethod()).toString()));
         } else {
           if (!Scene.v().getActiveHierarchy().isClassSubclassOfIncluding(rightClass, leftClass)) {
             exception.add(
-                new ValidationException(stmt, "Warning: Bad use of class type" + errorSuffix + " in " + body.getMethod()));
+                new ValidationException(stmt, new StringBuilder().append("Warning: Bad use of class type").append(errorSuffix).append(" in ").append(body.getMethod()).toString()));
           }
         }
       }
       return;
     }
-    exception.add(new ValidationException(stmt, "Warning: Bad types" + errorSuffix + " in " + body.getMethod()));
+    exception.add(new ValidationException(stmt, new StringBuilder().append("Warning: Bad types").append(errorSuffix).append(" in ").append(body.getMethod()).toString()));
   }
 
   @Override

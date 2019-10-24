@@ -38,60 +38,74 @@ public class BNewMultiArrayInst extends AbstractInst implements NewMultiArrayIns
     baseType = opType;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return dimensionCount;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return dimensionCount;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     return 1;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BNewMultiArrayInst(getBaseType(), getDimensionCount());
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "newmultiarray";
   }
 
-  final String getParameters() {
+  @Override
+final String getParameters() {
     return " " + dimensionCount;
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
-    up.literal(new Integer(dimensionCount).toString());
+    up.literal(Integer.toString(dimensionCount));
   }
 
-  public ArrayType getBaseType() {
+  @Override
+public ArrayType getBaseType() {
     return baseType;
   }
 
-  public void setBaseType(ArrayType type) {
+  @Override
+public void setBaseType(ArrayType type) {
     baseType = type;
   }
 
-  public int getDimensionCount() {
+  @Override
+public int getDimensionCount() {
     return dimensionCount;
   }
 
-  public void setDimensionCount(int x) {
+  @Override
+public void setDimensionCount(int x) {
     x = dimensionCount;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).caseNewMultiArrayInst(this);
   }
 
-  public boolean containsNewExpr() {
+  @Override
+public boolean containsNewExpr() {
     return true;
   }
 }

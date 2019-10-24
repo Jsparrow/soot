@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AClassNameBaseType extends PBaseType
 {
-    private PClassName _className_;
+    private PClassName className;
 
     public AClassNameBaseType()
     {
@@ -26,7 +26,7 @@ public final class AClassNameBaseType extends PBaseType
     public Object clone()
     {
         return new AClassNameBaseType(
-            cloneNode(this._className_));
+            cloneNode(this.className));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AClassNameBaseType extends PBaseType
 
     public PClassName getClassName()
     {
-        return this._className_;
+        return this.className;
     }
 
     public void setClassName(PClassName node)
     {
-        if(this._className_ != null)
+        if(this.className != null)
         {
-            this._className_.parent(null);
+            this.className.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AClassNameBaseType extends PBaseType
             node.parent(this);
         }
 
-        this._className_ = node;
+        this.className = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._className_);
+            + toString(this.className);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._className_ == child)
+        if(this.className == child)
         {
-            this._className_ = null;
+            this.className = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AClassNameBaseType extends PBaseType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._className_ == oldChild)
+        if(this.className == oldChild)
         {
             setClassName((PClassName) newChild);
             return;

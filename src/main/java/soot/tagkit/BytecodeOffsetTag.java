@@ -45,21 +45,20 @@ public class BytecodeOffsetTag implements Tag {
   /**
    * Returns the name of this tag.
    */
-  public String getName() {
+  @Override
+public String getName() {
     return "BytecodeOffsetTag";
   }
 
   /**
    * Returns the offset in a four byte array.
    */
-  public byte[] getValue() {
+  @Override
+public byte[] getValue() {
     byte[] v = new byte[4];
     v[0] = (byte) ((offset >> 24) % 256);
-    ;
     v[1] = (byte) ((offset >> 16) % 256);
-    ;
     v[2] = (byte) ((offset >> 8) % 256);
-    ;
     v[3] = (byte) (offset % 256);
     return v;
   }
@@ -74,7 +73,8 @@ public class BytecodeOffsetTag implements Tag {
   /**
    * Returns the offset in a string.
    */
-  public String toString() {
-    return "" + offset;
+  @Override
+public String toString() {
+    return Integer.toString(offset);
   }
 }

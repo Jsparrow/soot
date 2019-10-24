@@ -47,15 +47,22 @@ import soot.jimple.spark.solver.TopoSorter;
  */
 public class PAGDumper {
   private static final Logger logger = LoggerFactory.getLogger(PAGDumper.class);
+/* End of public methods. */
+  /* End of package methods. */
 
-  public PAGDumper(PAG pag, String output_dir) {
+  protected PAG pag;
+protected String output_dir;
+protected int fieldNum = 0;
+protected HashMap<SparkField, Integer> fieldMap = new HashMap<>();
+protected ObjectNumberer root = new ObjectNumberer(null, 0);
+
+public PAGDumper(PAG pag, String output_dir) {
     this.pag = pag;
     this.output_dir = output_dir;
   }
 
-  public void dumpPointsToSets() {
-    try {
-      final PrintWriter file = new PrintWriter(new FileOutputStream(new File(output_dir, "solution")));
+public void dumpPointsToSets() {
+    try (final PrintWriter file = new PrintWriter(new FileOutputStream(new File(output_dir, "solution")))) {
       file.println("Solution:");
       for (Iterator vnIt = pag.getVarNodeNumberer().iterator(); vnIt.hasNext();) {
         final VarNode vn = (VarNode) vnIt.next();
@@ -67,7 +74,8 @@ public class PAGDumper {
           continue;
         }
         p2set.forall(new P2SetVisitor() {
-          public final void visit(Node n) {
+          @Override
+		public final void visit(Node n) {
             try {
               dumpNode(vn, file);
               file.print(" ");
@@ -79,16 +87,13 @@ public class PAGDumper {
           }
         });
       }
-      file.close();
     } catch (IOException e) {
       throw new RuntimeException("Couldn't dump solution." + e);
     }
   }
 
-  public void dump() {
-    try {
-      PrintWriter file = new PrintWriter(new FileOutputStream(new File(output_dir, "pag")));
-
+public void dump() {
+    try (PrintWriter file = new PrintWriter(new FileOutputStream(new File(output_dir, "pag")))) {
       if (pag.getOpts().topo_sort()) {
         new TopoSorter(pag, false).sort();
       }
@@ -150,25 +155,15 @@ public class PAGDumper {
       if (pag.getOpts().dump_types()) {
         dumpTypes(file);
       }
-      file.close();
     } catch (IOException e) {
       throw new RuntimeException("Couldn't dump PAG." + e);
     }
   }
 
-  /* End of public methods. */
-  /* End of package methods. */
-
-  protected PAG pag;
-  protected String output_dir;
-  protected int fieldNum = 0;
-  protected HashMap<SparkField, Integer> fieldMap = new HashMap<SparkField, Integer>();
-  protected ObjectNumberer root = new ObjectNumberer(null, 0);
-
-  protected void dumpTypes(PrintWriter file) throws IOException {
-    HashSet<Type> declaredTypes = new HashSet<Type>();
-    HashSet<Type> actualTypes = new HashSet<Type>();
-    HashSet<SparkField> allFields = new HashSet<SparkField>();
+protected void dumpTypes(PrintWriter file) throws IOException {
+    HashSet<Type> declaredTypes = new HashSet<>();
+    HashSet<Type> actualTypes = new HashSet<>();
+    HashSet<SparkField> allFields = new HashSet<>();
     for (Iterator nIt = pag.getVarNodeNumberer().iterator(); nIt.hasNext();) {
       final Node n = (Node) nIt.next();
       Type t = n.getType();
@@ -208,24 +203,19 @@ public class PAGDumper {
         actualTypes.add(t);
       }
     }
-    HashMap<Type, Integer> typeToInt = new HashMap<Type, Integer>();
+    HashMap<Type, Integer> typeToInt = new HashMap<>();
     int nextint = 1;
     for (Type type : declaredTypes) {
-      typeToInt.put(type, new Integer(nextint++));
+      typeToInt.put(type, Integer.valueOf(nextint++));
     }
     for (Type t : actualTypes) {
       if (!typeToInt.containsKey(t)) {
-        typeToInt.put(t, new Integer(nextint++));
+        typeToInt.put(t, Integer.valueOf(nextint++));
       }
     }
     file.println("Declared Types:");
-    for (Type declType : declaredTypes) {
-      for (Type actType : actualTypes) {
-        if (pag.getTypeManager().castNeverFails(actType, declType)) {
-          file.println("" + typeToInt.get(declType) + " " + typeToInt.get(actType));
-        }
-      }
-    }
+    declaredTypes.forEach(declType -> actualTypes.stream().filter(actType -> pag.getTypeManager().castNeverFails(actType, declType))
+			.forEach(actType -> file.println(new StringBuilder().append(Integer.toString(typeToInt.get(declType))).append(" ").append(typeToInt.get(actType)).toString())));
     file.println("Allocation Types:");
     for (Object object : pag.allocSources()) {
       final Node n = (Node) object;
@@ -257,16 +247,16 @@ public class PAGDumper {
     }
   }
 
-  protected int fieldToNum(SparkField f) {
+protected int fieldToNum(SparkField f) {
     Integer ret = fieldMap.get(f);
     if (ret == null) {
-      ret = new Integer(++fieldNum);
+      ret = Integer.valueOf(++fieldNum);
       fieldMap.put(f, ret);
     }
     return ret.intValue();
   }
 
-  protected void dumpNode(Node n, PrintWriter out) throws IOException {
+protected void dumpNode(Node n, PrintWriter out) throws IOException {
     if (n.getReplacement() != n) {
       throw new RuntimeException("Attempt to dump collapsed node.");
     }
@@ -290,11 +280,12 @@ public class PAGDumper {
       /*
        * if( vr.num > 256 ) { logger.debug(""+ "Var with num: "+vr.num+" is "+vn+ " in method "+m+" in class "+c ); }
        */
-      out.print("" + cl.num + " " + me.num + " " + vr.num);
+      out.print(new StringBuilder().append(Integer.toString(cl.num)).append(" ").append(me.num).append(" ").append(vr.num)
+			.toString());
     } else if (pag.getOpts().topo_sort() && n instanceof VarNode) {
-      out.print("" + ((VarNode) n).finishingNumber);
+      out.print(Integer.toString(((VarNode) n).finishingNumber));
     } else {
-      out.print("" + n.getNumber());
+      out.print(Integer.toString(n.getNumber()));
     }
   }
 
@@ -311,7 +302,7 @@ public class PAGDumper {
 
     ObjectNumberer findOrAdd(Object child) {
       if (children == null) {
-        children = new HashMap<Object, ObjectNumberer>();
+        children = new HashMap<>();
       }
       ObjectNumberer ret = children.get(child);
       if (ret == null) {

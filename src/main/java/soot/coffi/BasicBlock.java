@@ -86,14 +86,6 @@ class BasicBlock {
   List<Stmt> statements;
   Set addressesToFixup = new ArraySet();
 
-  soot.jimple.Stmt getHeadJStmt() {
-    return statements.get(0);
-  }
-
-  soot.jimple.Stmt getTailJStmt() {
-    return statements.get(statements.size() - 1);
-  }
-
   public BasicBlock(Instruction insts) {
     id = G.v().coffi_BasicBlock_ids++;
     head = insts;
@@ -106,29 +98,38 @@ class BasicBlock {
         tail = tail.next;
       }
     }
-    succ = new Vector<BasicBlock>(2, 10);
-    pred = new Vector<BasicBlock>(2, 3);
+    succ = new Vector<>(2, 10);
+    pred = new Vector<>(2, 3);
   }
 
-  public BasicBlock(Instruction headinsn, Instruction tailinsn) {
+public BasicBlock(Instruction headinsn, Instruction tailinsn) {
     id = G.v().coffi_BasicBlock_ids++;
     head = headinsn;
     tail = tailinsn;
-    succ = new Vector<BasicBlock>(2, 10);
-    pred = new Vector<BasicBlock>(2, 3);
+    succ = new Vector<>(2, 10);
+    pred = new Vector<>(2, 3);
   }
 
-  /**
+soot.jimple.Stmt getHeadJStmt() {
+    return statements.get(0);
+  }
+
+soot.jimple.Stmt getTailJStmt() {
+    return statements.get(statements.size() - 1);
+  }
+
+/**
    * Computes a hash code for this block from the label of the first instruction in its contents.
    *
    * @return the hash code.
    * @see Instruction#label
    */
-  public int hashCode() {
-    return (new Integer(head.label)).hashCode();
+  @Override
+public int hashCode() {
+    return (Integer.valueOf(head.label)).hashCode();
   }
 
-  /**
+/**
    * True if this block represents the same piece of code. Basically compares labels of the head instructions.
    *
    * @param b
@@ -139,10 +140,11 @@ class BasicBlock {
     return (this == b);
   }
 
-  /**
+/**
    * For printing the string "BB: " + id.
    */
-  public String toString() {
+  @Override
+public String toString() {
     return "BB: " + id;
   }
 

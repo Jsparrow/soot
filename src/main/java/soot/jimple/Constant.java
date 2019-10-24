@@ -40,14 +40,16 @@ public abstract class Constant implements Value, ConvertToBaf, Immediate {
   }
 
   /** Adds a Baf instruction pushing this constant to the stack onto <code>out</code>. */
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     Unit u = Baf.v().newPushInst(this);
     u.addAllTagsOf(context.getCurrentUnit());
     out.add(u);
   }
 
   /** Clones the current constant. Not implemented here. */
-  public Object clone() {
+  @Override
+public Object clone() {
     throw new RuntimeException();
   }
 
@@ -55,7 +57,8 @@ public abstract class Constant implements Value, ConvertToBaf, Immediate {
    * Returns true if this object is structurally equivalent to c. For Constants, equality is structural equality, so we just
    * call equals().
    */
-  public boolean equivTo(Object c) {
+  @Override
+public boolean equivTo(Object c) {
     return equals(c);
   }
 
@@ -63,11 +66,13 @@ public abstract class Constant implements Value, ConvertToBaf, Immediate {
    * Returns a hash code consistent with structural equality for this object. For Constants, equality is structural equality;
    * we hope that each subclass defines hashCode() correctly.
    */
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return hashCode();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.constant(this);
   }
 }

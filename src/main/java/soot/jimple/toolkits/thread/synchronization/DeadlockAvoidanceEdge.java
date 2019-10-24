@@ -31,18 +31,21 @@ public class DeadlockAvoidanceEdge extends NewStaticLock {
   }
 
   /** Clones the object. */
-  public Object clone() {
+  @Override
+public Object clone() {
     return new DeadlockAvoidanceEdge(sc);
   }
 
-  public boolean equals(Object c) {
+  @Override
+public boolean equals(Object c) {
     if (c instanceof DeadlockAvoidanceEdge) {
       return ((DeadlockAvoidanceEdge) c).idnum == idnum;
     }
     return false;
   }
 
-  public String toString() {
-    return "dae<" + sc.toString() + ">";
+  @Override
+public String toString() {
+    return new StringBuilder().append("dae<").append(sc.toString()).append(">").toString();
   }
 }

@@ -41,8 +41,8 @@ public class ArrayPackedSetTest {
 	@Before
 	public void init() {
 		Integer[] aa = {1,2,3,4,5,6,7,8,9};
-		universe = new ArrayFlowUniverse<Integer>(aa);
-		a = new ArrayPackedSet<Integer>(universe);
+		universe = new ArrayFlowUniverse<>(aa);
+		a = new ArrayPackedSet<>(universe);
 	}
 
 	@Test
@@ -128,8 +128,9 @@ public class ArrayPackedSetTest {
 		FlowSet<Integer> e = a.emptySet();
 		Integer[] t = {3,7,33};
 
-		for (int i : t)
+		for (int i : t) {
 			e.add(i);
+		}
 
 		assertEquals(t.length, e.size());
 		assertArrayEquals(t, e.toList().toArray());
@@ -140,12 +141,14 @@ public class ArrayPackedSetTest {
 		FlowSet<Integer> e = a.emptySet();
 		Integer[] t = {3,6,7,8,12};
 
-		for (int i : t)
+		for (int i : t) {
 			e.add(i);
+		}
 
 		int j = 0;
-		for (int i : e)
+		for (int i : e) {
 			assertEquals(t[j++].intValue(), i);
+		}
 	}
 
 	@Test

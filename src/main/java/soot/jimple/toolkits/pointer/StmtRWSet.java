@@ -35,11 +35,13 @@ public class StmtRWSet extends RWSet {
   protected PointsToSet base;
   protected boolean callsNative = false;
 
-  public String toString() {
-    return "[Field: " + field + base + "]\n";
+  @Override
+public String toString() {
+    return new StringBuilder().append("[Field: ").append(field).append(base).append("]\n").toString();
   }
 
-  public int size() {
+  @Override
+public int size() {
     Set globals = getGlobals();
     Set fields = getFields();
     if (globals == null) {
@@ -57,45 +59,51 @@ public class StmtRWSet extends RWSet {
     }
   }
 
-  public boolean getCallsNative() {
+  @Override
+public boolean getCallsNative() {
     return callsNative;
   }
 
-  public boolean setCallsNative() {
+  @Override
+public boolean setCallsNative() {
     boolean ret = !callsNative;
     callsNative = true;
     return ret;
   }
 
   /** Returns an iterator over any globals read/written. */
-  public Set getGlobals() {
-    if (base == null) {
-      HashSet ret = new HashSet();
-      ret.add(field);
-      return ret;
-    }
-    return Collections.EMPTY_SET;
+  @Override
+public Set getGlobals() {
+    if (base != null) {
+		return Collections.EMPTY_SET;
+	}
+	HashSet ret = new HashSet();
+	ret.add(field);
+	return ret;
   }
 
   /** Returns an iterator over any fields read/written. */
-  public Set getFields() {
-    if (base != null) {
-      HashSet ret = new HashSet();
-      ret.add(field);
-      return ret;
-    }
-    return Collections.EMPTY_SET;
+  @Override
+public Set getFields() {
+    if (base == null) {
+		return Collections.EMPTY_SET;
+	}
+	HashSet ret = new HashSet();
+	ret.add(field);
+	return ret;
   }
 
   /** Returns a set of base objects whose field f is read/written. */
-  public PointsToSet getBaseForField(Object f) {
+  @Override
+public PointsToSet getBaseForField(Object f) {
     if (field.equals(f)) {
       return base;
     }
     return null;
   }
 
-  public boolean hasNonEmptyIntersection(RWSet other) {
+  @Override
+public boolean hasNonEmptyIntersection(RWSet other) {
     if (field == null) {
       return false;
     }
@@ -119,11 +127,13 @@ public class StmtRWSet extends RWSet {
   }
 
   /** Adds the RWSet other into this set. */
-  public boolean union(RWSet other) {
+  @Override
+public boolean union(RWSet other) {
     throw new RuntimeException("Can't do that");
   }
 
-  public boolean addGlobal(SootField global) {
+  @Override
+public boolean addGlobal(SootField global) {
     if (field != null || base != null) {
       throw new RuntimeException("Can't do that");
     }
@@ -131,7 +141,8 @@ public class StmtRWSet extends RWSet {
     return true;
   }
 
-  public boolean addFieldRef(PointsToSet otherBase, Object field) {
+  @Override
+public boolean addFieldRef(PointsToSet otherBase, Object field) {
     if (this.field != null || base != null) {
       throw new RuntimeException("Can't do that");
     }
@@ -140,7 +151,8 @@ public class StmtRWSet extends RWSet {
     return true;
   }
 
-  public boolean isEquivTo(RWSet other) {
+  @Override
+public boolean isEquivTo(RWSet other) {
     if (!(other instanceof StmtRWSet)) {
       return false;
     }

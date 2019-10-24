@@ -42,7 +42,9 @@ import soot.jimple.ThrowStmt;
 import soot.jimple.UnopExpr;
 
 public abstract class ASTAnalysis {
-  public static final int ANALYSE_AST = 0, ANALYSE_STMTS = 1, ANALYSE_VALUES = 2;
+  public static final int ANALYSE_AST = 0;
+public static final int ANALYSE_STMTS = 1;
+public static final int ANALYSE_VALUES = 2;
 
   public abstract int getAnalysisDepth();
 

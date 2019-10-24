@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ASingleNameList extends PNameList
 {
-    private PName _name_;
+    private PName name;
 
     public ASingleNameList()
     {
@@ -26,7 +26,7 @@ public final class ASingleNameList extends PNameList
     public Object clone()
     {
         return new ASingleNameList(
-            cloneNode(this._name_));
+            cloneNode(this.name));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ASingleNameList extends PNameList
 
     public PName getName()
     {
-        return this._name_;
+        return this.name;
     }
 
     public void setName(PName node)
     {
-        if(this._name_ != null)
+        if(this.name != null)
         {
-            this._name_.parent(null);
+            this.name.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ASingleNameList extends PNameList
             node.parent(this);
         }
 
-        this._name_ = node;
+        this.name = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._name_);
+            + toString(this.name);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._name_ == child)
+        if(this.name == child)
         {
-            this._name_ = null;
+            this.name = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ASingleNameList extends PNameList
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._name_ == oldChild)
+        if(this.name == oldChild)
         {
             setName((PName) newChild);
             return;

@@ -37,36 +37,44 @@ public class BPushInst extends AbstractInst implements PushInst {
     this.constant = c;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BPushInst(getConstant());
   }
 
-  final public String getName() {
+  @Override
+public final String getName() {
     return "push";
   }
 
-  final String getParameters() {
+  @Override
+final String getParameters() {
     return " " + constant.toString();
   }
 
-  protected void getParameters(UnitPrinter up) {
+  @Override
+protected void getParameters(UnitPrinter up) {
     up.literal(" ");
     up.constant(constant);
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 0;
   }
 
-  public int getInMachineCount() {
+  @Override
+public int getInMachineCount() {
     return 0;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 1;
   }
 
-  public int getOutMachineCount() {
+  @Override
+public int getOutMachineCount() {
     if (constant instanceof LongConstant || constant instanceof DoubleConstant) {
       return 2;
     } else {
@@ -74,15 +82,18 @@ public class BPushInst extends AbstractInst implements PushInst {
     }
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).casePushInst(this);
   }
 
-  public Constant getConstant() {
+  @Override
+public Constant getConstant() {
     return constant;
   }
 
-  public void setConstant(Constant c) {
+  @Override
+public void setConstant(Constant c) {
     this.constant = c;
   }
 }

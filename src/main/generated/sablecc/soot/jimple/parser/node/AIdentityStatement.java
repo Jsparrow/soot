@@ -7,11 +7,11 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AIdentityStatement extends PStatement
 {
-    private PLocalName _localName_;
-    private TColonEquals _colonEquals_;
-    private TAtIdentifier _atIdentifier_;
-    private PType _type_;
-    private TSemicolon _semicolon_;
+    private PLocalName localName;
+    private TColonEquals colonEquals;
+    private TAtIdentifier atIdentifier;
+    private PType type;
+    private TSemicolon semicolon;
 
     public AIdentityStatement()
     {
@@ -42,11 +42,11 @@ public final class AIdentityStatement extends PStatement
     public Object clone()
     {
         return new AIdentityStatement(
-            cloneNode(this._localName_),
-            cloneNode(this._colonEquals_),
-            cloneNode(this._atIdentifier_),
-            cloneNode(this._type_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.localName),
+            cloneNode(this.colonEquals),
+            cloneNode(this.atIdentifier),
+            cloneNode(this.type),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -57,14 +57,14 @@ public final class AIdentityStatement extends PStatement
 
     public PLocalName getLocalName()
     {
-        return this._localName_;
+        return this.localName;
     }
 
     public void setLocalName(PLocalName node)
     {
-        if(this._localName_ != null)
+        if(this.localName != null)
         {
-            this._localName_.parent(null);
+            this.localName.parent(null);
         }
 
         if(node != null)
@@ -77,19 +77,19 @@ public final class AIdentityStatement extends PStatement
             node.parent(this);
         }
 
-        this._localName_ = node;
+        this.localName = node;
     }
 
     public TColonEquals getColonEquals()
     {
-        return this._colonEquals_;
+        return this.colonEquals;
     }
 
     public void setColonEquals(TColonEquals node)
     {
-        if(this._colonEquals_ != null)
+        if(this.colonEquals != null)
         {
-            this._colonEquals_.parent(null);
+            this.colonEquals.parent(null);
         }
 
         if(node != null)
@@ -102,19 +102,19 @@ public final class AIdentityStatement extends PStatement
             node.parent(this);
         }
 
-        this._colonEquals_ = node;
+        this.colonEquals = node;
     }
 
     public TAtIdentifier getAtIdentifier()
     {
-        return this._atIdentifier_;
+        return this.atIdentifier;
     }
 
     public void setAtIdentifier(TAtIdentifier node)
     {
-        if(this._atIdentifier_ != null)
+        if(this.atIdentifier != null)
         {
-            this._atIdentifier_.parent(null);
+            this.atIdentifier.parent(null);
         }
 
         if(node != null)
@@ -127,19 +127,19 @@ public final class AIdentityStatement extends PStatement
             node.parent(this);
         }
 
-        this._atIdentifier_ = node;
+        this.atIdentifier = node;
     }
 
     public PType getType()
     {
-        return this._type_;
+        return this.type;
     }
 
     public void setType(PType node)
     {
-        if(this._type_ != null)
+        if(this.type != null)
         {
-            this._type_.parent(null);
+            this.type.parent(null);
         }
 
         if(node != null)
@@ -152,19 +152,19 @@ public final class AIdentityStatement extends PStatement
             node.parent(this);
         }
 
-        this._type_ = node;
+        this.type = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -177,51 +177,47 @@ public final class AIdentityStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._localName_)
-            + toString(this._colonEquals_)
-            + toString(this._atIdentifier_)
-            + toString(this._type_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.localName)).append(toString(this.colonEquals)).append(toString(this.atIdentifier)).append(toString(this.type))
+				.append(toString(this.semicolon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._localName_ == child)
+        if(this.localName == child)
         {
-            this._localName_ = null;
+            this.localName = null;
             return;
         }
 
-        if(this._colonEquals_ == child)
+        if(this.colonEquals == child)
         {
-            this._colonEquals_ = null;
+            this.colonEquals = null;
             return;
         }
 
-        if(this._atIdentifier_ == child)
+        if(this.atIdentifier == child)
         {
-            this._atIdentifier_ = null;
+            this.atIdentifier = null;
             return;
         }
 
-        if(this._type_ == child)
+        if(this.type == child)
         {
-            this._type_ = null;
+            this.type = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -232,31 +228,31 @@ public final class AIdentityStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._localName_ == oldChild)
+        if(this.localName == oldChild)
         {
             setLocalName((PLocalName) newChild);
             return;
         }
 
-        if(this._colonEquals_ == oldChild)
+        if(this.colonEquals == oldChild)
         {
             setColonEquals((TColonEquals) newChild);
             return;
         }
 
-        if(this._atIdentifier_ == oldChild)
+        if(this.atIdentifier == oldChild)
         {
             setAtIdentifier((TAtIdentifier) newChild);
             return;
         }
 
-        if(this._type_ == oldChild)
+        if(this.type == oldChild)
         {
             setType((PType) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

@@ -29,48 +29,48 @@ import soot.tagkit.SourceLnPosTag;
 
 public class ExceptionCheckerError extends Exception {
 
-  public ExceptionCheckerError(SootMethod m, SootClass sc, Stmt s, SourceLnPosTag pos) {
-    method(m);
-    excType(sc);
-    throwing(s);
-    position(pos);
-  }
-
   private SootMethod method;
-  private SootClass excType;
-  private Stmt throwing;
-  private SourceLnPosTag position;
+	private SootClass excType;
+	private Stmt throwing;
+	private SourceLnPosTag position;
 
-  public SootMethod method() {
-    return method;
-  }
+	public ExceptionCheckerError(SootMethod m, SootClass sc, Stmt s, SourceLnPosTag pos) {
+	    method(m);
+	    excType(sc);
+	    throwing(s);
+	    position(pos);
+	  }
 
-  public void method(SootMethod sm) {
-    method = sm;
-  }
+	public SootMethod method() {
+	    return method;
+	  }
 
-  public SootClass excType() {
-    return excType;
-  }
+	public void method(SootMethod sm) {
+	    method = sm;
+	  }
 
-  public void excType(SootClass sc) {
-    excType = sc;
-  }
+	public SootClass excType() {
+	    return excType;
+	  }
 
-  public Stmt throwing() {
-    return throwing;
-  }
+	public void excType(SootClass sc) {
+	    excType = sc;
+	  }
 
-  public void throwing(Stmt s) {
-    throwing = s;
-  }
+	public Stmt throwing() {
+	    return throwing;
+	  }
 
-  public SourceLnPosTag position() {
-    return position;
-  }
+	public void throwing(Stmt s) {
+	    throwing = s;
+	  }
 
-  public void position(SourceLnPosTag pos) {
-    position = pos;
-  }
+	public SourceLnPosTag position() {
+	    return position;
+	  }
+
+	public void position(SourceLnPosTag pos) {
+	    position = pos;
+	  }
 
 }

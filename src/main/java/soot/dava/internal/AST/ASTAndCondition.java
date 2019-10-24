@@ -32,43 +32,46 @@ public class ASTAndCondition extends ASTAggregatedCondition {
     super(left, right);
   }
 
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTAndCondition(this);
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (left instanceof ASTUnaryBinaryCondition) {
       if (right instanceof ASTUnaryBinaryCondition) {
         if (not) {
-          return "!(" + left.toString() + " && " + right.toString() + ")";
+          return new StringBuilder().append("!(").append(left.toString()).append(" && ").append(right.toString()).append(")").toString();
         } else {
-          return left.toString() + " && " + right.toString();
+          return new StringBuilder().append(left.toString()).append(" && ").append(right.toString()).toString();
         }
       } else { // right is ASTAggregatedCondition
         if (not) {
-          return "!(" + left.toString() + " && (" + right.toString() + " ))";
+          return new StringBuilder().append("!(").append(left.toString()).append(" && (").append(right.toString()).append(" ))").toString();
         } else {
-          return left.toString() + " && (" + right.toString() + " )";
+          return new StringBuilder().append(left.toString()).append(" && (").append(right.toString()).append(" )").toString();
         }
       }
     } else { // left is ASTAggregatedCondition
       if (right instanceof ASTUnaryBinaryCondition) {
         if (not) {
-          return "!(( " + left.toString() + ") && " + right.toString() + ")";
+          return new StringBuilder().append("!(( ").append(left.toString()).append(") && ").append(right.toString()).append(")").toString();
         } else {
-          return "( " + left.toString() + ") && " + right.toString();
+          return new StringBuilder().append("( ").append(left.toString()).append(") && ").append(right.toString()).toString();
         }
       } else { // right is ASTAggregatedCondition also
         if (not) {
-          return "!(( " + left.toString() + ") && (" + right.toString() + " ))";
+          return new StringBuilder().append("!(( ").append(left.toString()).append(") && (").append(right.toString()).append(" ))").toString();
         } else {
-          return "( " + left.toString() + ") && (" + right.toString() + " )";
+          return new StringBuilder().append("( ").append(left.toString()).append(") && (").append(right.toString()).append(" )").toString();
         }
       }
     }
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (up instanceof DavaUnitPrinter) {
 
       if (not) {

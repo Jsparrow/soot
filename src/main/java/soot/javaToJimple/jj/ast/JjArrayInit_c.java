@@ -38,7 +38,8 @@ public class JjArrayInit_c extends ArrayInit_c {
     super(pos, elements);
   }
 
-  public Type childExpectedType(Expr child, AscriptionVisitor av) {
+  @Override
+public Type childExpectedType(Expr child, AscriptionVisitor av) {
     if (elements.isEmpty()) {
       return child.type();
     }

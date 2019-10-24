@@ -38,7 +38,8 @@ class MethodParameter {
     return m.getParameterType(param);
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return m.hashCode() + param;
   }
 
@@ -50,17 +51,17 @@ class MethodParameter {
     return param;
   }
 
-  public boolean equals(Object other) {
-    if (other instanceof MethodParameter) {
-      MethodParameter another = (MethodParameter) other;
-
-      return (m.equals(another.getMethod()) && param == another.getIndex());
-    }
-
-    return false;
+  @Override
+public boolean equals(Object other) {
+    if (!(other instanceof MethodParameter)) {
+		return false;
+	}
+	MethodParameter another = (MethodParameter) other;
+	return (m.equals(another.getMethod()) && param == another.getIndex());
   }
 
-  public String toString() {
-    return "[" + m.getSignature() + " : P" + param + "]";
+  @Override
+public String toString() {
+    return new StringBuilder().append("[").append(m.getSignature()).append(" : P").append(param).append("]").toString();
   }
 }

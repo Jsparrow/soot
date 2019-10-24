@@ -23,11 +23,13 @@ package soot.jimple.toolkits.pointer.representations;
  */
 
 public abstract class ConstantObject implements AbstractObject {
-  public String toString() {
+  @Override
+public String toString() {
     return "constantobject";
   }
 
-  public String shortString() {
+  @Override
+public String shortString() {
     return "shortstring";
   }
 }

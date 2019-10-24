@@ -41,6 +41,8 @@ import soot.Type;
 import soot.Unit;
 import soot.jimple.FieldRef;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
 
@@ -49,13 +51,14 @@ public class DexRefsChecker extends DexTransformer {
   // Note: we need an instance variable for inner class access, treat this as
   // a local variable (including initialization before use)
 
-  public static DexRefsChecker v() {
+  private static final Logger logger = LoggerFactory.getLogger(DexRefsChecker.class);
+Local l = null;
+
+public static DexRefsChecker v() {
     return new DexRefsChecker();
   }
 
-  Local l = null;
-
-  @Override
+@Override
   protected void internalTransform(final Body body, String phaseName, @SuppressWarnings("rawtypes") Map options) {
     // final ExceptionalUnitGraph g = new ExceptionalUnitGraph(body);
     // final SmartLocalDefs localDefs = new SmartLocalDefs(g, new
@@ -74,11 +77,11 @@ public class DexRefsChecker extends DexTransformer {
           hasField = true;
         }
       } else {
-        throw new RuntimeException("Unit '" + u + "' does not contain array ref nor field ref.");
+        throw new RuntimeException(new StringBuilder().append("Unit '").append(u).append("' does not contain array ref nor field ref.").toString());
       }
 
       if (!hasField) {
-        System.out.println("Warning: add missing field '" + fr + "' to class!");
+        logger.info(new StringBuilder().append("Warning: add missing field '").append(fr).append("' to class!").toString());
         SootClass sc = null;
         String frStr = fr.toString();
         if (frStr.contains(".<")) {
@@ -98,14 +101,14 @@ public class DexRefsChecker extends DexTransformer {
     } // for if statements
   }
 
-  /**
+/**
    * Collect all the if statements comparing two locals with an Eq or Ne expression
    *
    * @param body
    *          the body to analyze
    */
   private Set<Unit> getRefCandidates(Body body) {
-    Set<Unit> candidates = new HashSet<Unit>();
+    Set<Unit> candidates = new HashSet<>();
     Iterator<Unit> i = body.getUnits().iterator();
     while (i.hasNext()) {
       Unit u = i.next();

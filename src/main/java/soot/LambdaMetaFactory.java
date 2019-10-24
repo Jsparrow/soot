@@ -101,8 +101,8 @@ public final class LambdaMetaFactory {
     }
 
     boolean serializable = (flags & 1 /* FLAGS_SERIALIZABLE */) != 0;
-    List<ClassConstant> markerInterfaces = new ArrayList<ClassConstant>();
-    List<MethodType> bridges = new ArrayList<MethodType>();
+    List<ClassConstant> markerInterfaces = new ArrayList<>();
+    List<MethodType> bridges = new ArrayList<>();
 
     int va = 4;
     if ((flags & 2 /* FLAG_MARKERS */) != 0) {
@@ -155,7 +155,7 @@ public final class LambdaMetaFactory {
     // Our thunk class implements the functional interface
     String enclosingClassname = enclosingClass.getName();
     String enclosingClassnamePrefix = null;
-    if (enclosingClassname == null || enclosingClassname.equals("")) {
+    if (enclosingClassname == null || "".equals(enclosingClassname)) {
       enclosingClassnamePrefix = "soot.dummy.";
     } else {
       enclosingClassnamePrefix = enclosingClassname + "$";
@@ -169,7 +169,7 @@ public final class LambdaMetaFactory {
       String dummyName = "<init>".equals(implMethodName) ? "init" : implMethodName;
       // XXX: $ causes confusion in inner class inference; remove for now
       dummyName = dummyName.replaceAll("\\$", "_");
-      className = enclosingClassnamePrefix + dummyName + "__" + uniqSupply();
+      className = new StringBuilder().append(enclosingClassnamePrefix).append(dummyName).append("__").append(uniqSupply()).toString();
     } else {
       className = "soot.dummy.lambda" + uniqSupply();
     }
@@ -182,12 +182,10 @@ public final class LambdaMetaFactory {
     if (serializable) {
       tclass.addInterface(RefType.v("java.io.Serializable").getSootClass());
     }
-    for (int i = 0; i < markerInterfaces.size(); i++) {
-      tclass.addInterface(((RefType) AsmUtil.toBaseType(markerInterfaces.get(i).getValue())).getSootClass());
-    }
+    markerInterfaces.forEach(markerInterface -> tclass.addInterface(((RefType) AsmUtil.toBaseType(markerInterface.getValue())).getSootClass()));
 
     // It contains fields for all the captures in the lambda
-    List<SootField> capFields = new ArrayList<SootField>(capTypes.size());
+    List<SootField> capFields = new ArrayList<>(capTypes.size());
     for (int i = 0; i < capTypes.size(); i++) {
       SootField f = Scene.v().makeSootField("cap" + i, capTypes.get(i), 0);
       capFields.add(f);
@@ -223,21 +221,16 @@ public final class LambdaMetaFactory {
     addDispatch(name, tclass, samMethodType, instantiatedMethodType, capFields, implMethod);
 
     // For each bridge MethodType, add another dispatch method which calls the 'real' method
-    for (int i = 0; i < bridges.size(); i++) {
-      final MethodType bridgeType = bridges.get(i);
-      addDispatch(name, tclass, bridgeType, instantiatedMethodType, capFields, implMethod);
-    }
+	bridges.forEach(bridgeType -> addDispatch(name, tclass, bridgeType, instantiatedMethodType, capFields, implMethod));
 
     Scene.v().addClass(tclass);
     if (enclosingClass.isApplicationClass()) {
       tclass.setApplicationClass();
     }
 
-    for (SootMethod m : tclass.getMethods()) {
-      // There is no reason not to load the bodies directly. After all,
-      // we are introducing new classes while loading bodies.
-      m.retrieveActiveBody();
-    }
+    // There is no reason not to load the bodies directly. After all,
+	// we are introducing new classes while loading bodies.
+	tclass.getMethods().forEach(SootMethod::retrieveActiveBody);
 
     // The hierarchy has to be rebuilt after adding the MetaFactory implementation.
     // soot.FastHierarchy.canStoreClass will otherwise fail due to not having an interval set for the class. This eventually
@@ -281,11 +274,11 @@ public final class LambdaMetaFactory {
 
         wrapperTypes.put(wrapperType, primType);
 
-        String valueOfMethodSignature = cn + " valueOf(" + primType.toString() + ")";
+        String valueOfMethodSignature = new StringBuilder().append(cn).append(" valueOf(").append(primType.toString()).append(")").toString();
         SootMethod valueOfMethod = wrapperType.getSootClass().getMethod(valueOfMethodSignature);
         valueOf.put(primType, valueOfMethod);
 
-        String primitiveValueMethodSignature = primType.toString() + " " + primType.toString() + "Value()";
+        String primitiveValueMethodSignature = new StringBuilder().append(primType.toString()).append(" ").append(primType.toString()).append("Value()").toString();
         SootMethod primitiveValueMethod = wrapperType.getSootClass().getMethod(primitiveValueMethodSignature);
         primitiveValue.put(wrapperType, primitiveValueMethod);
       }
@@ -319,16 +312,16 @@ public final class LambdaMetaFactory {
 
     @Override
     public Body getBody(SootMethod m, String phaseName) {
-      if (!phaseName.equals("jb")) {
+      if (!"jb".equals(phaseName)) {
         throw new Error("unsupported body type: " + phaseName);
       }
 
       SootClass tclass = m.getDeclaringClass();
       JimpleBody jb = Jimple.v().newBody(m);
 
-      if (m.getName().equals("<init>")) {
+      if ("<init>".equals(m.getName())) {
         getInitBody(tclass, jb);
-      } else if (m.getName().equals("bootstrap$")) {
+      } else if ("bootstrap$".equals(m.getName())) {
         getBootstrapBody(tclass, jb);
       } else {
         getInvokeBody(tclass, jb);
@@ -372,10 +365,10 @@ public final class LambdaMetaFactory {
 
       // assign parameters to fields
       Iterator<Local> localItr = capLocals.iterator();
-      for (SootField f : capFields) {
+      capFields.forEach(f -> {
         Local l2 = localItr.next();
         us.add(Jimple.v().newAssignStmt(Jimple.v().newInstanceFieldRef(l, f.makeRef()), l2));
-      }
+      });
 
       us.add(Jimple.v().newReturnVoidStmt());
     }
@@ -384,8 +377,8 @@ public final class LambdaMetaFactory {
       PatchingChain<Unit> us = jb.getUnits();
       LocalGenerator lc = new LocalGenerator(jb);
 
-      List<Value> capValues = new ArrayList<Value>();
-      List<Type> capTypes = new ArrayList<Type>();
+      List<Value> capValues = new ArrayList<>();
+      List<Type> capTypes = new ArrayList<>();
       int i = 0;
       for (SootField capField : capFields) {
         Type type = capField.getType();
@@ -431,20 +424,19 @@ public final class LambdaMetaFactory {
       // narrowing casts to match instantiatedMethodType
       Iterator<Type> iptItr = instantiatedMethodType.getParameterTypes().iterator();
       Chain<Local> instParamLocals = new HashChain<>();
-      for (Local l : samParamLocals) {
-        Type ipt = iptItr.next();
-        Local l2 = narrowingReferenceConversion(l, ipt, jb, us, lc);
-        instParamLocals.add(l2);
-      }
+      samParamLocals.stream().map(l -> {
+		Type ipt = iptItr.next();
+		return narrowingReferenceConversion(l, ipt, us, lc);
+	}).forEach(instParamLocals::add);
 
-      List<Local> args = new ArrayList<Local>();
+      List<Local> args = new ArrayList<>();
 
       // captured arguments
-      for (SootField f : capFields) {
+	capFields.forEach(f -> {
         Local l = lc.generateLocal(f.getType());
         us.add(Jimple.v().newAssignStmt(l, Jimple.v().newInstanceFieldRef(this_, f.makeRef())));
         args.add(l);
-      }
+      });
 
       // direct arguments
 
@@ -506,14 +498,14 @@ public final class LambdaMetaFactory {
       if (from instanceof PrimType) {
         if (to instanceof PrimType) {
           // a widening primitive conversion (§5.1.2)
-          return wideningPrimitiveConversion(fromLocal, to, jb, us, lc);
+          return wideningPrimitiveConversion(fromLocal, to, us, lc);
         } else {
           // a boxing conversion (§5.1.7)
           // a boxing conversion followed by widening reference conversion
 
           // from is PrimType
           // to is RefType
-          Local boxed = box(fromLocal, jb, us, lc);
+          Local boxed = box(fromLocal, us, lc);
           return wideningReferenceConversion(boxed);
         }
       } else {
@@ -526,8 +518,8 @@ public final class LambdaMetaFactory {
           throw new IllegalArgumentException("Expected 'to' to be a PrimType");
         }
 
-        Local unboxed = unbox(fromLocal, jb, us, lc);
-        return wideningPrimitiveConversion(unboxed, to, jb, us, lc);
+        Local unboxed = unbox(fromLocal, us, lc);
+        return wideningPrimitiveConversion(unboxed, to, us, lc);
       }
     }
 
@@ -536,11 +528,10 @@ public final class LambdaMetaFactory {
      *
      * @param fromLocal
      *          primitive
-     * @param jb
      * @param us
      * @return
      */
-    private Local box(Local fromLocal, JimpleBody jb, PatchingChain<Unit> us, LocalGenerator lc) {
+    private Local box(Local fromLocal, PatchingChain<Unit> us, LocalGenerator lc) {
       PrimType primitiveType = (PrimType) fromLocal.getType();
       RefType wrapperType = primitiveType.boxedType();
 
@@ -561,11 +552,10 @@ public final class LambdaMetaFactory {
      *
      * @param fromLocal
      *          boxed
-     * @param jb
      * @param us
      * @return
      */
-    private Local unbox(Local fromLocal, JimpleBody jb, PatchingChain<Unit> us, LocalGenerator lc) {
+    private Local unbox(Local fromLocal, PatchingChain<Unit> us, LocalGenerator lc) {
       RefType wrapperType = (RefType) fromLocal.getType();
       PrimType primitiveType = wrapper.wrapperTypes.get(wrapperType);
 
@@ -588,11 +578,10 @@ public final class LambdaMetaFactory {
      *
      * @param fromLocal
      * @param to
-     * @param jb
      * @param us
      * @return
      */
-    private Local narrowingReferenceConversion(Local fromLocal, Type to, JimpleBody jb, PatchingChain<Unit> us,
+    private Local narrowingReferenceConversion(Local fromLocal, Type to, PatchingChain<Unit> us,
         LocalGenerator lc) {
       if (fromLocal.getType().equals(to)) {
         return fromLocal;
@@ -617,11 +606,10 @@ public final class LambdaMetaFactory {
      *
      * @param fromLocal
      * @param to
-     * @param jb
      * @param us
      * @return
      */
-    private Local wideningPrimitiveConversion(Local fromLocal, Type to, JimpleBody jb, PatchingChain<Unit> us,
+    private Local wideningPrimitiveConversion(Local fromLocal, Type to, PatchingChain<Unit> us,
         LocalGenerator lc) {
       if (!(fromLocal.getType() instanceof PrimType)) {
         throw new IllegalArgumentException("Expected source to have primitive type");

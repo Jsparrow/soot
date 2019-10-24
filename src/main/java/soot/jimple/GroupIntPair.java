@@ -31,7 +31,8 @@ public class GroupIntPair {
     this.x = x;
   }
 
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     if (other instanceof GroupIntPair) {
       return ((GroupIntPair) other).group.equals(this.group) && ((GroupIntPair) other).x == this.x;
     } else {
@@ -39,13 +40,14 @@ public class GroupIntPair {
     }
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return group.hashCode() + 1013 * x;
   }
 
   @Override
   public String toString() {
-    return this.group + ": " + this.x;
+    return new StringBuilder().append(this.group).append(": ").append(this.x).toString();
   }
 
 }

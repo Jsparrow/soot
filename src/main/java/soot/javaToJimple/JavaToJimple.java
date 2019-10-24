@@ -37,10 +37,13 @@ import polyglot.frontend.Pass;
 import polyglot.frontend.SourceJob;
 import polyglot.frontend.SourceLoader;
 import polyglot.frontend.VisitorPass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JavaToJimple {
 
-  public static final polyglot.frontend.Pass.ID CAST_INSERTION = new polyglot.frontend.Pass.ID("cast-insertion");
+  private static final Logger logger = LoggerFactory.getLogger(JavaToJimple.class);
+public static final polyglot.frontend.Pass.ID CAST_INSERTION = new polyglot.frontend.Pass.ID("cast-insertion");
   public static final polyglot.frontend.Pass.ID STRICTFP_PROP = new polyglot.frontend.Pass.ID("strictfp-prop");
   public static final polyglot.frontend.Pass.ID ANON_CONSTR_FINDER = new polyglot.frontend.Pass.ID("anon-constr-finder");
   public static final polyglot.frontend.Pass.ID SAVE_AST = new polyglot.frontend.Pass.ID("save-ast");
@@ -50,9 +53,10 @@ public class JavaToJimple {
    */
   public polyglot.frontend.ExtensionInfo initExtInfo(String fileName, List<String> sourceLocations) {
 
-    Set<String> source = new HashSet<String>();
+    Set<String> source = new HashSet<>();
     ExtensionInfo extInfo = new soot.javaToJimple.jj.ExtensionInfo() {
-      public List passes(Job job) {
+      @Override
+	public List passes(Job job) {
         List passes = super.passes(job);
         // beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(polyglot.frontend.Pass.FOLD, job, new
         // polyglot.visit.ConstantFolder(ts, nf)));
@@ -70,12 +74,8 @@ public class JavaToJimple {
 
     options.assertions = true;
     options.source_path = new LinkedList<File>();
-    Iterator<String> it = sourceLocations.iterator();
-    while (it.hasNext()) {
-      Object next = it.next();
-      // System.out.println("adding src loc: "+next.toString());
-      options.source_path.add(new File(next.toString()));
-    }
+    // System.out.println("adding src loc: "+next.toString());
+	sourceLocations.forEach(next -> options.source_path.add(new File(next.toString())));
 
     options.source_ext = new String[] { "java" };
     options.serialize_type_info = false;
@@ -130,7 +130,8 @@ public class JavaToJimple {
       return node;
 
     } catch (IOException e) {
-      return null;
+      logger.error(e.getMessage(), e);
+	return null;
     }
 
   }

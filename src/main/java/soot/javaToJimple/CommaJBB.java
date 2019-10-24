@@ -34,7 +34,8 @@ public class CommaJBB extends AbstractJimpleBodyBuilder {
    * getCommaLocal((soot.javaToJimple.jj.ast.JjComma_c)expr); } else { return ext().createExpr(expr); } }
    */
 
-  protected soot.Value createAggressiveExpr(polyglot.ast.Expr expr, boolean redAggr, boolean revIfNec) {
+  @Override
+protected soot.Value createAggressiveExpr(polyglot.ast.Expr expr, boolean redAggr, boolean revIfNec) {
     if (expr instanceof soot.javaToJimple.jj.ast.JjComma_c) {
       return getCommaLocal((soot.javaToJimple.jj.ast.JjComma_c) expr);
     } else {

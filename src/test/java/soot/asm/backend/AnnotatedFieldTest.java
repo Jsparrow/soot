@@ -51,13 +51,13 @@ public class AnnotatedFieldTest extends AbstractASMBackendTest {
 		fv = cw.visitField(0, "a", "Ljava/lang/String;", null, null);
 		{
 		av0 = fv.visitAnnotation("Lsoot/asm/backend/targets/MyTestAnnotation;", true);
-		av0.visit("iVal", new Integer(124));
-		av0.visit("fVal", new Float("5132.0"));
-		av0.visit("lVal", new Long(5123L));
-		av0.visit("dVal", new Double("745.0"));
+		av0.visit("iVal", Integer.valueOf(124));
+		av0.visit("fVal", Float.valueOf("5132.0"));
+		av0.visit("lVal", Long.valueOf(5123L));
+		av0.visit("dVal", Double.valueOf("745.0"));
 		av0.visit("zVal", Boolean.TRUE);
-		av0.visit("bVal", new Byte((byte)1));
-		av0.visit("sVal", new Short((short)123));
+		av0.visit("bVal", Byte.valueOf((byte)1));
+		av0.visit("sVal", Short.valueOf((short)123));
 		av0.visit("strVal", "435243");
 		av0.visit("rVal", Type.getType("Lsoot/asm/backend/targets/AnnotatedClass;"));
 		av0.visit("iAVal", new int[] {123,234,345,456});

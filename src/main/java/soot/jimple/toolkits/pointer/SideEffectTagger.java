@@ -43,60 +43,28 @@ import soot.jimple.toolkits.callgraph.CallGraph;
 
 public class SideEffectTagger extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(SideEffectTagger.class);
+public int numRWs = 0;
+public int numWRs = 0;
+public int numRRs = 0;
+public int numWWs = 0;
+public int numNatives = 0;
+public Date startTime = null;
+boolean optionNaive = false;
+private CallGraph cg;
 
-  public SideEffectTagger(Singletons.Global g) {
+public SideEffectTagger(Singletons.Global g) {
   }
 
-  public static SideEffectTagger v() {
+public static SideEffectTagger v() {
     return G.v().soot_jimple_toolkits_pointer_SideEffectTagger();
   }
 
-  public int numRWs = 0;
-  public int numWRs = 0;
-  public int numRRs = 0;
-  public int numWWs = 0;
-  public int numNatives = 0;
-  public Date startTime = null;
-  boolean optionNaive = false;
-  private CallGraph cg;
-
-  protected class UniqueRWSets {
-    protected ArrayList<RWSet> l = new ArrayList<RWSet>();
-
-    RWSet getUnique(RWSet s) {
-      if (s == null) {
-        return s;
-      }
-      for (RWSet ret : l) {
-        if (ret.isEquivTo(s)) {
-          return ret;
-        }
-      }
-      l.add(s);
-      return s;
-    }
-
-    Iterator<RWSet> iterator() {
-      return l.iterator();
-    }
-
-    short indexOf(RWSet s) {
-      short i = 0;
-      for (RWSet ret : l) {
-        if (ret.isEquivTo(s)) {
-          return i;
-        }
-        i++;
-      }
-      return -1;
-    }
-  }
-
-  protected void initializationStuff(String phaseName) {
+protected void initializationStuff(String phaseName) {
     G.v().Union_factory = new UnionFactory() {
       // ReallyCheapRasUnion ru = new ReallyCheapRasUnion();
       // public Union newUnion() { return new RasUnion(); }
-      public Union newUnion() {
+      @Override
+	public Union newUnion() {
         return new MemoryEfficientRasUnion();
       }
     };
@@ -107,36 +75,36 @@ public class SideEffectTagger extends BodyTransformer {
     cg = Scene.v().getCallGraph();
   }
 
-  protected Object keyFor(Stmt s) {
-    if (s.containsInvokeExpr()) {
-      if (optionNaive) {
+protected Object keyFor(Stmt s) {
+    if (!s.containsInvokeExpr()) {
+		return s;
+	}
+	if (optionNaive) {
         throw new RuntimeException("shouldn't get here");
       }
-      Iterator it = cg.edgesOutOf(s);
-      if (!it.hasNext()) {
+	Iterator it = cg.edgesOutOf(s);
+	if (!it.hasNext()) {
         return Collections.EMPTY_LIST;
       }
-      ArrayList ret = new ArrayList();
-      while (it.hasNext()) {
+	ArrayList ret = new ArrayList();
+	while (it.hasNext()) {
         ret.add(it.next());
       }
-      return ret;
-    } else {
-      return s;
-    }
+	return ret;
   }
 
-  protected void internalTransform(Body body, String phaseName, Map options) {
+@Override
+protected void internalTransform(Body body, String phaseName, Map options) {
     initializationStuff(phaseName);
     SideEffectAnalysis sea = Scene.v().getSideEffectAnalysis();
     optionNaive = PhaseOptions.getBoolean(options, "naive");
     if (!optionNaive) {
       sea.findNTRWSets(body.getMethod());
     }
-    HashMap<Object, RWSet> stmtToReadSet = new HashMap<Object, RWSet>();
-    HashMap<Object, RWSet> stmtToWriteSet = new HashMap<Object, RWSet>();
+    HashMap<Object, RWSet> stmtToReadSet = new HashMap<>();
+    HashMap<Object, RWSet> stmtToWriteSet = new HashMap<>();
     UniqueRWSets sets = new UniqueRWSets();
-    boolean justDoTotallyConservativeThing = body.getMethod().getName().equals("<clinit>");
+    boolean justDoTotallyConservativeThing = "<clinit>".equals(body.getMethod().getName());
     for (Iterator stmtIt = body.getUnits().iterator(); stmtIt.hasNext();) {
       final Stmt stmt = (Stmt) stmtIt.next();
       if (justDoTotallyConservativeThing || (optionNaive && stmt.containsInvokeExpr())) {
@@ -202,6 +170,38 @@ public class SideEffectTagger extends BodyTransformer {
          * graph.areAdjacent( sets.indexOf( read ), sets.indexOf( innerRead ) ) ) numRRs++; } }
          */
       }
+    }
+  }
+
+  protected class UniqueRWSets {
+    protected ArrayList<RWSet> l = new ArrayList<>();
+
+    RWSet getUnique(RWSet s) {
+      if (s == null) {
+        return s;
+      }
+      for (RWSet ret : l) {
+        if (ret.isEquivTo(s)) {
+          return ret;
+        }
+      }
+      l.add(s);
+      return s;
+    }
+
+    Iterator<RWSet> iterator() {
+      return l.iterator();
+    }
+
+    short indexOf(RWSet s) {
+      short i = 0;
+      for (RWSet ret : l) {
+        if (ret.isEquivTo(s)) {
+          return i;
+        }
+        i++;
+      }
+      return -1;
     }
   }
 }

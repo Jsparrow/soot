@@ -1,5 +1,8 @@
 package soot.toolkits.exceptions.targets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*-
  * #%L
  * Soot - a J*va Optimization Framework
@@ -24,23 +27,9 @@ package soot.toolkits.exceptions.targets;
 
 
 public class MethodThrowableSetClass {
-	class target{
-		public target(){
-			
-		}
-		public int foo(int a, int b){
-			try{
-				a = 0;
-				int c = b/a;
-				return a + b;
-			}catch(ArithmeticException e){
-				e.printStackTrace();
-				return 0;
-			}
-		}
-	}
+	private static final Logger logger = LoggerFactory.getLogger(MethodThrowableSetClass.class);
 	public static  target c;
-		
+
 	public void recursion(){
 		try{
 			int a = 0;
@@ -48,13 +37,11 @@ public class MethodThrowableSetClass {
 			int c = 0;
 			recursion();
 			c = a/b;
-		}catch(ArithmeticException e){
-			e.printStackTrace();
-		}catch(OutOfMemoryError e){
-			e.printStackTrace();
+		}catch(OutOfMemoryError | ArithmeticException e){
+			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public void nestedTry() {
 		try{
 			int array[] = new int[10];
@@ -63,13 +50,13 @@ public class MethodThrowableSetClass {
 			try{
 			     c = 3/b;
 			}catch(ArithmeticException e){
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}catch(NegativeArraySizeException e){
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public void unitInCatchBlock(){
 		try{
 			int a = 0;
@@ -79,55 +66,68 @@ public class MethodThrowableSetClass {
 			int a0 = 0;
 			int b0 = 0; 
 			int c0 = a0/b0;
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public void foo(){
 		try{
 			bar();
-		}catch(StackOverflowError e){
-			e.printStackTrace();
-		}catch(ThreadDeath e){
-			e.printStackTrace();
+		}catch(ThreadDeath | StackOverflowError e){
+			logger.error(e.getMessage(), e);
 		}
 		
 	}
-	
+
 	private void bar(){
 		try{
 			tool();
 		}catch(ArrayIndexOutOfBoundsException e){
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		
 	}
-	
+
 	public void tool(){
 		try{
 			int array[] = new int[10];
 			int d = 0;
 			int c = array[0]/d;
 		}catch(NegativeArraySizeException e){
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public void getAllException(){
 		try{
 			tool();
-		}catch(Error e){
-			e.printStackTrace();
-		}catch(RuntimeException e){
-			e.printStackTrace();
+		}catch(RuntimeException | Error e){
+			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public void getMyException() {
 		try{
 			throw new MyException();
 		}catch(MyException e){
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	class target{
+		private final Logger logger = LoggerFactory.getLogger(target.class);
+		public target(){
+			
+		}
+		public int foo(int a, int b){
+			try{
+				a = 0;
+				int c = b/a;
+				return a + b;
+			}catch(ArithmeticException e){
+				logger.error(e.getMessage(), e);
+				return 0;
+			}
 		}
 	}
 }

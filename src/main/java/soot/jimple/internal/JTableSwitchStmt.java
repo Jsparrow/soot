@@ -43,7 +43,28 @@ public class JTableSwitchStmt extends AbstractSwitchStmt implements TableSwitchS
   int lowIndex;
   int highIndex;
 
-  // This method is necessary to deal with constructor-must-be-first-ism.
+  public JTableSwitchStmt(Value key, int lowIndex, int highIndex, List<? extends Unit> targets, Unit defaultTarget) {
+    this(Jimple.v().newImmediateBox(key), lowIndex, highIndex, getTargetBoxesArray(targets),
+        Jimple.v().newStmtBox(defaultTarget));
+  }
+
+public JTableSwitchStmt(Value key, int lowIndex, int highIndex, List<? extends UnitBox> targets, UnitBox defaultTarget) {
+    this(Jimple.v().newImmediateBox(key), lowIndex, highIndex, targets.toArray(new UnitBox[targets.size()]), defaultTarget);
+  }
+
+protected JTableSwitchStmt(ValueBox keyBox, int lowIndex, int highIndex, UnitBox[] targetBoxes, UnitBox defaultTargetBox) {
+    super(keyBox, defaultTargetBox, targetBoxes);
+
+    if (lowIndex > highIndex) {
+      throw new RuntimeException(
+          new StringBuilder().append("Error creating tableswitch: lowIndex(").append(lowIndex).append(") can't be greater than highIndex(").append(highIndex).append(").").toString());
+    }
+
+    this.lowIndex = lowIndex;
+    this.highIndex = highIndex;
+  }
+
+// This method is necessary to deal with constructor-must-be-first-ism.
   private static UnitBox[] getTargetBoxesArray(List<? extends Unit> targets) {
     UnitBox[] targetBoxes = new UnitBox[targets.size()];
     for (int i = 0; i < targetBoxes.length; i++) {
@@ -52,36 +73,17 @@ public class JTableSwitchStmt extends AbstractSwitchStmt implements TableSwitchS
     return targetBoxes;
   }
 
-  public Object clone() {
+@Override
+public Object clone() {
     return new JTableSwitchStmt(Jimple.cloneIfNecessary(getKey()), lowIndex, highIndex, getTargets(), getDefaultTarget());
   }
 
-  public JTableSwitchStmt(Value key, int lowIndex, int highIndex, List<? extends Unit> targets, Unit defaultTarget) {
-    this(Jimple.v().newImmediateBox(key), lowIndex, highIndex, getTargetBoxesArray(targets),
-        Jimple.v().newStmtBox(defaultTarget));
-  }
-
-  public JTableSwitchStmt(Value key, int lowIndex, int highIndex, List<? extends UnitBox> targets, UnitBox defaultTarget) {
-    this(Jimple.v().newImmediateBox(key), lowIndex, highIndex, targets.toArray(new UnitBox[targets.size()]), defaultTarget);
-  }
-
-  protected JTableSwitchStmt(ValueBox keyBox, int lowIndex, int highIndex, UnitBox[] targetBoxes, UnitBox defaultTargetBox) {
-    super(keyBox, defaultTargetBox, targetBoxes);
-
-    if (lowIndex > highIndex) {
-      throw new RuntimeException(
-          "Error creating tableswitch: lowIndex(" + lowIndex + ") can't be greater than highIndex(" + highIndex + ").");
-    }
-
-    this.lowIndex = lowIndex;
-    this.highIndex = highIndex;
-  }
-
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+@Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
     String endOfLine = " ";
 
-    buffer.append(Jimple.TABLESWITCH + "(" + keyBox.getValue().toString() + ")" + endOfLine);
+    buffer.append(new StringBuilder().append(Jimple.TABLESWITCH).append("(").append(keyBox.getValue().toString()).append(")").append(endOfLine).toString());
 
     buffer.append("{" + endOfLine);
 
@@ -90,21 +92,25 @@ public class JTableSwitchStmt extends AbstractSwitchStmt implements TableSwitchS
     for (int i = lowIndex; i < highIndex; i++) {
       Unit target = getTarget(i - lowIndex);
       buffer.append(
-          "    " + Jimple.CASE + " " + i + ": " + Jimple.GOTO + " " + (target == this ? "self" : target) + ";" + endOfLine);
+          new StringBuilder().append("    ").append(Jimple.CASE).append(" ").append(i).append(": ")
+				.append(Jimple.GOTO).append(" ").append(target == this ? "self" : target).append(";").append(endOfLine)
+				.toString());
     }
     Unit target = getTarget(highIndex - lowIndex);
-    buffer.append("    " + Jimple.CASE + " " + highIndex + ": " + Jimple.GOTO + " " + (target == this ? "self" : target)
-        + ";" + endOfLine);
+    buffer.append(new StringBuilder().append("    ").append(Jimple.CASE).append(" ").append(highIndex).append(": ").append(Jimple.GOTO)
+			.append(" ").append(target == this ? "self" : target).append(";").append(endOfLine).toString());
 
     target = getDefaultTarget();
-    buffer.append("    " + Jimple.DEFAULT + ": " + Jimple.GOTO + " " + (target == this ? "self" : target) + ";" + endOfLine);
+    buffer.append(new StringBuilder().append("    ").append(Jimple.DEFAULT).append(": ").append(Jimple.GOTO).append(" ")
+			.append(target == this ? "self" : target).append(";").append(endOfLine).toString());
 
     buffer.append("}");
 
     return buffer.toString();
   }
 
-  public void toString(UnitPrinter up) {
+@Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.TABLESWITCH);
     up.literal("(");
     keyBox.toString(up);
@@ -130,7 +136,7 @@ public class JTableSwitchStmt extends AbstractSwitchStmt implements TableSwitchS
     up.literal("}");
   }
 
-  private void printCaseTarget(UnitPrinter up, int targetIndex) {
+private void printCaseTarget(UnitPrinter up, int targetIndex) {
     up.literal("    ");
     up.literal(Jimple.CASE);
     up.literal(" ");
@@ -143,34 +149,38 @@ public class JTableSwitchStmt extends AbstractSwitchStmt implements TableSwitchS
     up.newline();
   }
 
-  public void setLowIndex(int lowIndex) {
+@Override
+public void setLowIndex(int lowIndex) {
     this.lowIndex = lowIndex;
   }
 
-  public void setHighIndex(int highIndex) {
+@Override
+public void setHighIndex(int highIndex) {
     this.highIndex = highIndex;
   }
 
-  public int getLowIndex() {
+@Override
+public int getLowIndex() {
     return lowIndex;
   }
 
-  public int getHighIndex() {
+@Override
+public int getHighIndex() {
     return highIndex;
   }
 
-  public void apply(Switch sw) {
+@Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseTableSwitchStmt(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
-    List<PlaceholderInst> targetPlaceholders = new ArrayList<PlaceholderInst>();
+@Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+    List<PlaceholderInst> targetPlaceholders = new ArrayList<>();
 
     ((ConvertToBaf) getKey()).convertToBaf(context, out);
 
-    for (Unit target : getTargets()) {
-      targetPlaceholders.add(Baf.v().newPlaceholderInst(target));
-    }
+    getTargets().forEach(target -> targetPlaceholders.add(Baf.v().newPlaceholderInst(target)));
 
     Unit u = Baf.v().newTableSwitchInst(Baf.v().newPlaceholderInst(getDefaultTarget()), lowIndex, highIndex,
         targetPlaceholders);

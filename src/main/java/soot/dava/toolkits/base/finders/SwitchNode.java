@@ -32,7 +32,8 @@ import soot.dava.internal.asg.AugmentedStmt;
 import soot.util.IterableSet;
 
 public class SwitchNode implements Comparable {
-  private final LinkedList preds, succs;
+  private final LinkedList preds;
+private final LinkedList succs;
   private AugmentedStmt as;
   private int score;
   private TreeSet<Object> indexSet;
@@ -85,7 +86,7 @@ public class SwitchNode implements Comparable {
   }
 
   public TreeSet<Object> get_IndexSet() {
-    return new TreeSet<Object>(indexSet);
+    return new TreeSet<>(indexSet);
   }
 
   public IterableSet get_Body() {
@@ -120,7 +121,8 @@ public class SwitchNode implements Comparable {
    * Can compare to an Integer, a String, a set of Indices, and another SwitchNode.
    */
 
-  public int compareTo(Object o) {
+  @Override
+public int compareTo(Object o) {
     if (o == this) {
       return 0;
     }

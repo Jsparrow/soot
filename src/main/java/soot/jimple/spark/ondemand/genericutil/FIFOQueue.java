@@ -33,25 +33,25 @@ public final class FIFOQueue {
   /**
    * the buffer.
    */
-  private Object[] _buf;
+  private Object[] buf;
 
   /**
    * pointer to current top of buffer
    */
-  private int _top;
+  private int top;
 
   /**
    * point to current bottom of buffer, where things will be added invariant: after call to add / remove, should always point
    * to an empty slot in the buffer
    */
-  private int _bottom;
+  private int bottom;
 
   /**
    * @param initialSize_
    *          the initial size of the queue
    */
   public FIFOQueue(int initialSize_) {
-    _buf = new Object[initialSize_];
+    buf = new Object[initialSize_];
   }
 
   public FIFOQueue() {
@@ -68,27 +68,27 @@ public final class FIFOQueue {
   public boolean add(Object obj_) {
     // Assert.chk(obj_ != null);
     // add the element
-    _buf[_bottom] = obj_;
+    buf[bottom] = obj_;
     // increment bottom, wrapping around if necessary
-    _bottom = (_bottom == _buf.length - 1) ? 0 : _bottom + 1;
+    bottom = (bottom == buf.length - 1) ? 0 : bottom + 1;
     // see if we need to increase the queue size
-    if (_bottom == _top) {
-      // allocate a new array and copy
-      int oldLen = _buf.length;
-      int newLen = oldLen * 2;
-      // System.out.println("growing buffer to size " + newLen);
+	if (bottom != top) {
+		return false;
+	}
+	// allocate a new array and copy
+      int oldLen = buf.length;
+	int newLen = oldLen * 2;
+	// System.out.println("growing buffer to size " + newLen);
       Object[] newBuf = new Object[newLen];
-      int topToEnd = oldLen - _top;
-      int newTop = newLen - topToEnd;
-      // copy from 0 to _top to beginning of new buffer,
+	int topToEnd = oldLen - top;
+	int newTop = newLen - topToEnd;
+	// copy from 0 to _top to beginning of new buffer,
       // _top to _buf.length to the end of the new buffer
-      System.arraycopy(_buf, 0, newBuf, 0, _top);
-      System.arraycopy(_buf, _top, newBuf, newTop, topToEnd);
-      _buf = newBuf;
-      _top = newTop;
-      return true;
-    }
-    return false;
+      System.arraycopy(buf, 0, newBuf, 0, top);
+	System.arraycopy(buf, top, newBuf, newTop, topToEnd);
+	buf = newBuf;
+	top = newTop;
+	return true;
   }
 
   public Object pop() {
@@ -100,25 +100,26 @@ public final class FIFOQueue {
    */
   public Object remove() {
     // check if buffer is empty
-    if (_bottom == _top) {
+    if (bottom == top) {
       return null;
     }
-    Object ret = _buf[_top];
+    Object ret = buf[top];
     // increment top, wrapping if necessary
-    _top = (_top == _buf.length - 1) ? 0 : _top + 1;
+    top = (top == buf.length - 1) ? 0 : top + 1;
     return ret;
   }
 
   public boolean isEmpty() {
-    return _bottom == _top;
+    return bottom == top;
   }
 
-  public String toString() {
-    return _bottom + " " + _top;
+  @Override
+public String toString() {
+    return new StringBuilder().append(bottom).append(" ").append(top).toString();
   }
 
   public void clear() {
-    _bottom = 0;
-    _top = 0;
+    bottom = 0;
+    top = 0;
   }
 }

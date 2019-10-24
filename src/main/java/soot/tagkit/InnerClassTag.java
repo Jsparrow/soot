@@ -23,9 +23,12 @@ package soot.tagkit;
  */
 
 import java.io.UnsupportedEncodingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InnerClassTag implements Tag {
-  String innerClass;
+  private static final Logger logger = LoggerFactory.getLogger(InnerClassTag.class);
+String innerClass;
   String outerClass;
   String name;
   int accessFlags;
@@ -37,14 +40,14 @@ public class InnerClassTag implements Tag {
     this.accessFlags = accessFlags;
     if (innerClass != null && (innerClass.startsWith("L") && innerClass.endsWith(";"))) {
       throw new RuntimeException(
-          "InnerClass annotation type string must " + "be of the form a/b/ClassName not '" + innerClass + "'");
+          new StringBuilder().append("InnerClass annotation type string must ").append("be of the form a/b/ClassName not '").append(innerClass).append("'").toString());
     }
     if (outerClass != null && (outerClass.startsWith("L") && outerClass.endsWith(";"))) {
       throw new RuntimeException(
-          "OuterType annotation type string must " + "be of the form a/b/ClassName not '" + innerClass + "'");
+          new StringBuilder().append("OuterType annotation type string must ").append("be of the form a/b/ClassName not '").append(innerClass).append("'").toString());
     }
     if (name != null && name.endsWith(";")) {
-      throw new RuntimeException("InnerClass name cannot end with ';', got '" + name + "'");
+      throw new RuntimeException(new StringBuilder().append("InnerClass name cannot end with ';', got '").append(name).append("'").toString());
     }
   }
 
@@ -62,7 +65,8 @@ public class InnerClassTag implements Tag {
     try {
       return innerClass.getBytes("UTF8");
     } catch (UnsupportedEncodingException e) {
-      return new byte[0];
+      logger.error(e.getMessage(), e);
+	return new byte[0];
     }
   }
 
@@ -84,6 +88,7 @@ public class InnerClassTag implements Tag {
 
   @Override
   public String toString() {
-    return "[inner=" + innerClass + ", outer=" + outerClass + ", name=" + name + ",flags=" + accessFlags + "]";
+    return new StringBuilder().append("[inner=").append(innerClass).append(", outer=").append(outerClass).append(", name=").append(name).append(",flags=")
+			.append(accessFlags).append("]").toString();
   }
 }

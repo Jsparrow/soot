@@ -37,21 +37,21 @@ public abstract class AbstractOpStmt extends AbstractStmt {
     this.opBox = opBox;
   }
 
-  final public Value getOp() {
+  public final Value getOp() {
     return opBox.getValue();
   }
 
-  final public void setOp(Value op) {
+  public final void setOp(Value op) {
     opBox.setValue(op);
   }
 
-  final public ValueBox getOpBox() {
+  public final ValueBox getOpBox() {
     return opBox;
   }
 
   @Override
-  final public List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+  public final List<ValueBox> getUseBoxes() {
+    List<ValueBox> list = new ArrayList<>();
 
     list.addAll(opBox.getValue().getUseBoxes());
     list.add(opBox);

@@ -69,22 +69,22 @@ public class PhiNodeManager {
   protected DominanceFrontier<Block> df;
   protected BlockGraph cfg;
   protected GuaranteedDefs gd;
+protected MultiMap<Local, Block> varToBlocks;
+protected Map<Unit, Block> unitToBlock;
 
-  public PhiNodeManager(ShimpleBody body, ShimpleFactory sf) {
+public PhiNodeManager(ShimpleBody body, ShimpleFactory sf) {
     this.body = body;
     this.sf = sf;
   }
 
-  public void update() {
+public void update() {
     gd = new GuaranteedDefs(sf.getUnitGraph());
     cfg = sf.getBlockGraph();
     dt = sf.getDominatorTree();
     df = sf.getDominanceFrontier();
   }
 
-  protected MultiMap<Local, Block> varToBlocks;
-
-  /**
+/**
    * Phi node Insertion Algorithm from Cytron et al 91, P24-5,
    *
    * <p>
@@ -94,27 +94,26 @@ public class PhiNodeManager {
   public boolean insertTrivialPhiNodes() {
     update();
     boolean change = false;
-    varToBlocks = new HashMultiMap<Local, Block>();
-    Map<Local, List<Block>> localsToDefPoints = new LinkedHashMap<Local, List<Block>>();
+    varToBlocks = new HashMultiMap<>();
+    Map<Local, List<Block>> localsToDefPoints = new LinkedHashMap<>();
 
     // compute localsToDefPoints and varToBlocks
     for (Block block : cfg) {
       for (Unit unit : block) {
         List<ValueBox> defBoxes = unit.getDefBoxes();
-        for (ValueBox vb : defBoxes) {
-          Value def = vb.getValue();
-          if (def instanceof Local) {
-            Local local = (Local) def;
-            List<Block> def_points = null;
-            if (localsToDefPoints.containsKey(local)) {
-              def_points = localsToDefPoints.get(local);
-            } else {
-              def_points = new ArrayList<Block>();
-              localsToDefPoints.put(local, def_points);
-            }
-            def_points.add(block);
-          }
-        }
+        defBoxes.stream().map(ValueBox::getValue).forEach(def -> {
+			if (def instanceof Local) {
+			    Local local = (Local) def;
+			    List<Block> def_points = null;
+			    if (localsToDefPoints.containsKey(local)) {
+			      def_points = localsToDefPoints.get(local);
+			    } else {
+			      def_points = new ArrayList<>();
+			      localsToDefPoints.put(local, def_points);
+			    }
+			    def_points.add(block);
+			  }
+		});
 
         if (Shimple.isPhiNode(unit)) {
           varToBlocks.put(Shimple.getLhsLocal(unit), block);
@@ -126,11 +125,10 @@ public class PhiNodeManager {
 
     int[] workFlags = new int[cfg.size()];
     int iterCount = 0;
-    Stack<Block> workList = new Stack<Block>();
+    Stack<Block> workList = new Stack<>();
 
-    Map<Integer, Integer> has_already = new HashMap<Integer, Integer>();
-    for (Iterator<Block> blocksIt = cfg.iterator(); blocksIt.hasNext();) {
-      Block block = blocksIt.next();
+    Map<Integer, Integer> has_already = new HashMap<>();
+    for (Block block : cfg) {
       has_already.put(block.getIndexInMethod(), 0);
     }
 
@@ -185,7 +183,7 @@ public class PhiNodeManager {
     return change;
   }
 
-  /**
+/**
    * Inserts a trivial Phi node with the appropriate number of arguments.
    **/
   public void prependTrivialPhiNode(Local local, Block frontierBlock) {
@@ -205,13 +203,13 @@ public class PhiNodeManager {
     varToBlocks.put(local, frontierBlock);
   }
 
-  /**
+/**
    * Exceptional Phi nodes have a huge number of arguments and control flow predecessors by default. Since it is useless
    * trying to keep the number of arguments and control flow predecessors in synch, we might as well trim out all redundant
    * arguments and eliminate a huge number of copy statements when we get out of SSA form in the process.
    **/
   public void trimExceptionalPhiNodes() {
-    Set<Unit> handlerUnits = new HashSet<Unit>();
+    Set<Unit> handlerUnits = new HashSet<>();
     Iterator<Trap> trapsIt = body.getTraps().iterator();
 
     while (trapsIt.hasNext()) {
@@ -236,7 +234,7 @@ public class PhiNodeManager {
     }
   }
 
-  /**
+/**
    * @see #trimExceptionalPhiNodes()
    **/
   public void trimPhiNode(PhiExpr phiExpr) {
@@ -245,11 +243,11 @@ public class PhiNodeManager {
      * build the MultiMap valueToPairs for convenience.
      */
 
-    MultiMap<Value, ValueUnitPair> valueToPairs = new HashMultiMap<Value, ValueUnitPair>();
-    for (ValueUnitPair argPair : phiExpr.getArgs()) {
+    MultiMap<Value, ValueUnitPair> valueToPairs = new HashMultiMap<>();
+    phiExpr.getArgs().forEach(argPair -> {
       Value value = argPair.getValue();
       valueToPairs.put(value, argPair);
-    }
+    });
 
     /*
      * Consider each value and see if we can find the dominating UnitBoxes. Once we have found all the dominating UnitBoxes,
@@ -264,8 +262,8 @@ public class PhiNodeManager {
       // termination, the challengers list never does. This could
       // be optimised.
       Set<ValueUnitPair> pairsSet = valueToPairs.get(value);
-      List<ValueUnitPair> champs = new LinkedList<ValueUnitPair>(pairsSet);
-      List<ValueUnitPair> challengers = new LinkedList<ValueUnitPair>(pairsSet);
+      List<ValueUnitPair> champs = new LinkedList<>(pairsSet);
+      List<ValueUnitPair> challengers = new LinkedList<>(pairsSet);
 
       // champ is the currently assumed dominator
       ValueUnitPair champ = champs.remove(0);
@@ -329,9 +327,7 @@ public class PhiNodeManager {
      */
   }
 
-  protected Map<Unit, Block> unitToBlock;
-
-  /**
+/**
    * Returns true if champ dominates challenger. Note that false doesn't necessarily mean that challenger dominates champ.
    **/
   public boolean dominates(Unit champ, Unit challenger) {
@@ -352,10 +348,7 @@ public class PhiNodeManager {
     Block challengerBlock = unitToBlock.get(challenger);
 
     if (champBlock.equals(challengerBlock)) {
-      Iterator<Unit> unitsIt = champBlock.iterator();
-
-      while (unitsIt.hasNext()) {
-        Unit unit = unitsIt.next();
+      for (Unit unit : champBlock) {
         if (unit.equals(champ)) {
           return true;
         }
@@ -376,7 +369,7 @@ public class PhiNodeManager {
     return (dt.isDominatorOf(champNode, challengerNode));
   }
 
-  /**
+/**
    * Eliminate Phi nodes in block by naively replacing them with shimple assignment statements in the control flow
    * predecessors. Returns true if new locals were added to the body during the process, false otherwise.
    **/
@@ -386,7 +379,7 @@ public class PhiNodeManager {
     boolean addedNewLocals = false;
 
     // List of Phi nodes to be deleted.
-    List<Unit> phiNodes = new ArrayList<Unit>();
+    List<Unit> phiNodes = new ArrayList<>();
 
     // This stores the assignment statements equivalent to each
     // (and every) Phi. We use lists instead of a Map of
@@ -394,12 +387,12 @@ public class PhiNodeManager {
     // of the assignment statements, i.e. if a block has more than
     // one Phi expression, we prefer that the equivalent
     // assignments be placed in the same order as the Phi expressions.
-    List<AssignStmt> equivStmts = new ArrayList<AssignStmt>();
+    List<AssignStmt> equivStmts = new ArrayList<>();
 
     // Similarly, to preserve order, instead of directly storing
     // the pred, we store the pred box so that we follow the
     // pointers when SPatchingChain moves them.
-    List<ValueUnitPair> predBoxes = new ArrayList<ValueUnitPair>();
+    List<ValueUnitPair> predBoxes = new ArrayList<>();
 
     Chain<Unit> units = body.getUnits();
     for (Unit unit : units) {
@@ -468,30 +461,22 @@ public class PhiNodeManager {
       }
     }
 
-    Iterator<Unit> phiNodesIt = phiNodes.iterator();
-
-    while (phiNodesIt.hasNext()) {
-      Unit removeMe = phiNodesIt.next();
+    phiNodes.forEach(removeMe -> {
       units.remove(removeMe);
       removeMe.clearUnitBoxes();
-    }
+    });
 
     return addedNewLocals;
   }
 
-  /**
+/**
    * Convenience function that maps units to blocks. Should probably be in BlockGraph.
    **/
   public Map<Unit, Block> getUnitToBlockMap(BlockGraph blocks) {
-    Map<Unit, Block> unitToBlock = new HashMap<Unit, Block>();
+    Map<Unit, Block> unitToBlock = new HashMap<>();
 
-    Iterator<Block> blocksIt = blocks.iterator();
-    while (blocksIt.hasNext()) {
-      Block block = blocksIt.next();
-      Iterator<Unit> unitsIt = block.iterator();
-
-      while (unitsIt.hasNext()) {
-        Unit unit = unitsIt.next();
+    for (Block block : blocks) {
+      for (Unit unit : block) {
         unitToBlock.put(unit, block);
       }
     }

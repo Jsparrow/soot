@@ -45,15 +45,18 @@ public class Insn22x extends AbstractInsn implements TwoRegInsn {
     regs.add(regB);
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 
-  public Register getRegB() {
+  @Override
+public Register getRegB() {
     return regs.get(REG_B_IDX);
   }
 
-  protected BuilderInstruction getRealInsn0(LabelAssigner assigner) {
+  @Override
+protected BuilderInstruction getRealInsn0(LabelAssigner assigner) {
     return new BuilderInstruction22x(opc, (short) getRegA().getNumber(), getRegB().getNumber());
   }
 

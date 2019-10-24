@@ -41,7 +41,8 @@ public abstract class SETControlFlowNode extends SETNode {
     return characterizingStmt;
   }
 
-  protected boolean resolve(SETNode parent) {
+  @Override
+protected boolean resolve(SETNode parent) {
     for (IterableSet subBody : parent.get_SubBodies()) {
       if (subBody.contains(get_EntryStmt()) == false) {
         continue;

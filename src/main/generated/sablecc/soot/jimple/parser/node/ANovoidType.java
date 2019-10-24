@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ANovoidType extends PType
 {
-    private PNonvoidType _nonvoidType_;
+    private PNonvoidType nonvoidType;
 
     public ANovoidType()
     {
@@ -26,7 +26,7 @@ public final class ANovoidType extends PType
     public Object clone()
     {
         return new ANovoidType(
-            cloneNode(this._nonvoidType_));
+            cloneNode(this.nonvoidType));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ANovoidType extends PType
 
     public PNonvoidType getNonvoidType()
     {
-        return this._nonvoidType_;
+        return this.nonvoidType;
     }
 
     public void setNonvoidType(PNonvoidType node)
     {
-        if(this._nonvoidType_ != null)
+        if(this.nonvoidType != null)
         {
-            this._nonvoidType_.parent(null);
+            this.nonvoidType.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ANovoidType extends PType
             node.parent(this);
         }
 
-        this._nonvoidType_ = node;
+        this.nonvoidType = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._nonvoidType_);
+            + toString(this.nonvoidType);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._nonvoidType_ == child)
+        if(this.nonvoidType == child)
         {
-            this._nonvoidType_ = null;
+            this.nonvoidType = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ANovoidType extends PType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._nonvoidType_ == oldChild)
+        if(this.nonvoidType == oldChild)
         {
             setNonvoidType((PNonvoidType) newChild);
             return;

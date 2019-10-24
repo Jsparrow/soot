@@ -64,7 +64,8 @@ public class BodyExtractorWalker extends Walker {
   /*
    * file = modifier* file_type class_name extends_clause? implements_clause? file_body;
    */
-  public void caseAFile(AFile node) {
+  @Override
+public void caseAFile(AFile node) {
     inAFile(node);
     {
       Object temp[] = node.getModifier().toArray();
@@ -81,7 +82,7 @@ public class BodyExtractorWalker extends Walker {
 
     String className = (String) mProductions.removeLast();
     if (!className.equals(mSootClass.getName())) {
-      throw new RuntimeException("expected:  " + className + ", but got: " + mSootClass.getName());
+      throw new RuntimeException(new StringBuilder().append("expected:  ").append(className).append(", but got: ").append(mSootClass.getName()).toString());
     }
 
     if (node.getExtendsClause() != null) {
@@ -96,7 +97,8 @@ public class BodyExtractorWalker extends Walker {
     outAFile(node);
   }
 
-  public void outAFile(AFile node) {
+  @Override
+public void outAFile(AFile node) {
     if (node.getImplementsClause() != null) {
       mProductions.removeLast(); // implements_clause
     }
@@ -113,15 +115,17 @@ public class BodyExtractorWalker extends Walker {
    * member = {field} modifier* type name semicolon | {method} modifier* type name l_paren parameter_list? r_paren
    * throws_clause? method_body;
    */
-  public void outAFieldMember(AFieldMember node) {
+  @Override
+public void outAFieldMember(AFieldMember node) {
     mProductions.removeLast(); // name
     mProductions.removeLast(); // type
   }
 
-  public void outAMethodMember(AMethodMember node) {
+  @Override
+public void outAMethodMember(AMethodMember node) {
     Type type;
     String name;
-    List<Type> parameterList = new ArrayList<Type>();
+    List<Type> parameterList = new ArrayList<>();
     List throwsClause = null;
     JimpleBody methodBody = null;
 
@@ -148,9 +152,7 @@ public class BodyExtractorWalker extends Walker {
       logger.debug("[!!! Couldn't parse !!] " + SootMethod.getSubSignature(name, parameterList, type));
 
       logger.debug("[!] Methods in class are:");
-      for (SootMethod next : mSootClass.getMethods()) {
-        logger.debug("" + next.getSubSignature());
-      }
+      mSootClass.getMethods().forEach(next -> logger.debug("" + next.getSubSignature()));
 
     }
 

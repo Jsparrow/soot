@@ -32,6 +32,8 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This utility class can convert any BlockGraph to a single-headed and single-tailed graph by inserting appropriate Start or
@@ -45,7 +47,9 @@ import soot.Unit;
  * @author Navindra Umanee
  **/
 public class BlockGraphConverter {
-  /**
+  private static final Logger logger = LoggerFactory.getLogger(BlockGraphConverter.class);
+
+/**
    * Transforms a multi-headed and/or multi-tailed BlockGraph to a single-headed singled-tailed BlockGraph by inserting a
    * dummy start and stop nodes.
    **/
@@ -67,11 +71,9 @@ public class BlockGraphConverter {
 
       graph.mHeads = Collections.<Block>singletonList(head);
 
-      for (Block block : blocks) {
-        block.setIndexInMethod(block.getIndexInMethod() + 1);
-      }
+      blocks.forEach(block -> block.setIndexInMethod(block.getIndexInMethod() + 1));
 
-      List<Block> newBlocks = new ArrayList<Block>();
+      List<Block> newBlocks = new ArrayList<>();
       newBlocks.add(head);
       newBlocks.addAll(blocks);
       graph.mBlocks = newBlocks;
@@ -121,8 +123,8 @@ public class BlockGraphConverter {
     List<Block> heads = graph.getHeads();
     List<Block> tails = graph.getTails();
 
-    graph.mHeads = new ArrayList<Block>(tails);
-    graph.mTails = new ArrayList<Block>(heads);
+    graph.mHeads = new ArrayList<>(tails);
+    graph.mTails = new ArrayList<>(heads);
   }
 
   public static void main(String[] args) {
@@ -133,11 +135,11 @@ public class BlockGraphConverter {
     SootMethod sm = sc.getMethod(args[1]);
     Body b = sm.retrieveActiveBody();
     CompleteBlockGraph cfg = new CompleteBlockGraph(b);
-    System.out.println(cfg);
+    logger.info(String.valueOf(cfg));
     BlockGraphConverter.addStartStopNodesTo(cfg);
-    System.out.println(cfg);
+    logger.info(String.valueOf(cfg));
     BlockGraphConverter.reverse(cfg);
-    System.out.println(cfg);
+    logger.info(String.valueOf(cfg));
   }
 
 }
@@ -153,14 +155,11 @@ class DummyBlock extends Block {
   }
 
   void makeHeadBlock(List<Block> oldHeads) {
-    setPreds(new ArrayList<Block>());
-    setSuccs(new ArrayList<Block>(oldHeads));
+    setPreds(new ArrayList<>());
+    setSuccs(new ArrayList<>(oldHeads));
 
-    Iterator<Block> headsIt = oldHeads.iterator();
-    while (headsIt.hasNext()) {
-      Block oldHead = headsIt.next();
-
-      List<Block> newPreds = new ArrayList<Block>();
+    oldHeads.forEach(oldHead -> {
+      List<Block> newPreds = new ArrayList<>();
       newPreds.add(this);
 
       List<Block> oldPreds = oldHead.getPreds();
@@ -169,18 +168,15 @@ class DummyBlock extends Block {
       }
 
       oldHead.setPreds(newPreds);
-    }
+    });
   }
 
   void makeTailBlock(List<Block> oldTails) {
-    setSuccs(new ArrayList<Block>());
-    setPreds(new ArrayList<Block>(oldTails));
+    setSuccs(new ArrayList<>());
+    setPreds(new ArrayList<>(oldTails));
 
-    Iterator<Block> tailsIt = oldTails.iterator();
-    while (tailsIt.hasNext()) {
-      Block oldTail = tailsIt.next();
-
-      List<Block> newSuccs = new ArrayList<Block>();
+    oldTails.forEach(oldTail -> {
+      List<Block> newSuccs = new ArrayList<>();
       newSuccs.add(this);
 
       List<Block> oldSuccs = oldTail.getSuccs();
@@ -189,10 +185,11 @@ class DummyBlock extends Block {
       }
 
       oldTail.setSuccs(newSuccs);
-    }
+    });
   }
 
-  public Iterator<Unit> iterator() {
+  @Override
+public Iterator<Unit> iterator() {
     List<Unit> s = Collections.emptyList();
     return s.iterator();
   }

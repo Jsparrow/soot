@@ -28,7 +28,8 @@ public class CastInsertionVisitor extends polyglot.visit.AscriptionVisitor {
     super(job, ts, nf);
   }
 
-  public polyglot.ast.Expr ascribe(polyglot.ast.Expr e, polyglot.types.Type toType) {
+  @Override
+public polyglot.ast.Expr ascribe(polyglot.ast.Expr e, polyglot.types.Type toType) {
 
     // System.out.println("expr: "+e);
     // System.out.println("expr: "+e.getClass());
@@ -50,14 +51,14 @@ public class CastInsertionVisitor extends polyglot.visit.AscriptionVisitor {
     }
 
     /*
-     * double -> (int, long, float) float -> (int, long, double) long -> (int, double, float) int (byte, char, short,
-     * boolean) -> (byte, char, short, long, double, float) ie double to short goes through int etc.
-     */
-    if (toType.isPrimitive() && fromType.isPrimitive()) {
-
-      polyglot.ast.Expr newExpr;
-
-      // System.out.println("from type: "+fromType);
+	     * double -> (int, long, float) float -> (int, long, double) long -> (int, double, float) int (byte, char, short,
+	     * boolean) -> (byte, char, short, long, double, float) ie double to short goes through int etc.
+	     */
+	if (!(toType.isPrimitive() && fromType.isPrimitive())) {
+		return e;
+	}
+	polyglot.ast.Expr newExpr;
+	// System.out.println("from type: "+fromType);
       // System.out.println("to type: "+toType);
       if (fromType.isFloat() || fromType.isLong() || fromType.isDouble()) {
         if (toType.isFloat() || toType.isLong() || toType.isDouble() || toType.isInt()) {
@@ -70,14 +71,12 @@ public class CastInsertionVisitor extends polyglot.visit.AscriptionVisitor {
       } else {
         newExpr = nf.Cast(p, nf.CanonicalTypeNode(p, toType), e).type(toType);
       }
-      return newExpr;
-    }
-
-    return e;
+	return newExpr;
 
   }
 
-  public polyglot.ast.Node leaveCall(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor v)
+  @Override
+public polyglot.ast.Node leaveCall(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor v)
       throws polyglot.types.SemanticException {
 
     n = super.leaveCall(old, n, v);

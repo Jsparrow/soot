@@ -30,151 +30,154 @@ import java.util.NoSuchElementException;
 public class ArraySet<T> extends AbstractSet<T> {
 
   private static final ArraySet EMPTY = new ArraySet<Object>(0, true) {
-    public boolean add(Object obj_) {
+    @Override
+	public boolean add(Object obj_) {
       throw new RuntimeException();
     }
   };
 
-  @SuppressWarnings("all")
-  public static final <T> ArraySet<T> empty() {
-    return (ArraySet<T>) EMPTY;
-  }
+private T[] elems;
 
-  private T[] _elems;
+private int curIndex = 0;
 
-  private int _curIndex = 0;
+private final boolean checkDupes;
 
-  private final boolean checkDupes;
-
-  @SuppressWarnings("all")
+@SuppressWarnings("all")
   public ArraySet(int numElems_, boolean checkDupes) {
-    _elems = (T[]) new Object[numElems_];
+    elems = (T[]) new Object[numElems_];
     this.checkDupes = checkDupes;
   }
 
-  public ArraySet() {
+public ArraySet() {
     this(1, true);
   }
 
-  @SuppressWarnings("all")
+@SuppressWarnings("all")
   public ArraySet(ArraySet<T> other) {
-    int size = other._curIndex;
-    this._elems = (T[]) new Object[size];
+    int size = other.curIndex;
+    this.elems = (T[]) new Object[size];
     this.checkDupes = other.checkDupes;
-    this._curIndex = size;
-    System.arraycopy(other._elems, 0, _elems, 0, size);
+    this.curIndex = size;
+    System.arraycopy(other.elems, 0, elems, 0, size);
   }
 
-  public ArraySet(Collection<T> other) {
+public ArraySet(Collection<T> other) {
     this(other.size(), true);
     addAll(other);
   }
 
-  /*
+@SuppressWarnings("all")
+  public static final <T> ArraySet<T> empty() {
+    return (ArraySet<T>) EMPTY;
+  }
+
+/*
    * (non-Javadoc)
    * 
    * @see AAA.util.AAASet#add(java.lang.Object)
    */
-  @SuppressWarnings("all")
+  @Override
+@SuppressWarnings("all")
   public boolean add(T obj_) {
     assert obj_ != null;
     if (checkDupes && this.contains(obj_)) {
       return false;
     }
-    if (_curIndex == _elems.length) {
+    if (curIndex == elems.length) {
       // lengthen array
-      Object[] tmp = _elems;
-      _elems = (T[]) new Object[tmp.length * 2];
-      System.arraycopy(tmp, 0, _elems, 0, tmp.length);
+      Object[] tmp = elems;
+      elems = (T[]) new Object[tmp.length * 2];
+      System.arraycopy(tmp, 0, elems, 0, tmp.length);
     }
-    _elems[_curIndex] = obj_;
-    _curIndex++;
+    elems[curIndex] = obj_;
+    curIndex++;
     return true;
   }
 
-  public boolean addAll(ArraySet<T> other) {
+public boolean addAll(ArraySet<T> other) {
     boolean ret = false;
-    for (int i = 0; i < other.size(); i++) {
-      boolean added = add(other.get(i));
+    for (T anOther : other) {
+      boolean added = add(anOther);
       ret = ret || added;
     }
     return ret;
   }
 
-  /*
+/*
    * (non-Javadoc)
    * 
    * @see AAA.util.AAASet#contains(java.lang.Object)
    */
-  public boolean contains(Object obj_) {
-    for (int i = 0; i < _curIndex; i++) {
-      if (_elems[i].equals(obj_)) {
+  @Override
+public boolean contains(Object obj_) {
+    for (int i = 0; i < curIndex; i++) {
+      if (elems[i].equals(obj_)) {
         return true;
       }
     }
     return false;
   }
 
-  public boolean intersects(ArraySet<T> other) {
-    for (int i = 0; i < other.size(); i++) {
-      if (contains(other.get(i))) {
-        return true;
-      }
-    }
-    return false;
+public boolean intersects(ArraySet<T> other) {
+    return other.stream().anyMatch(anOther -> contains(anOther));
   }
 
-  /*
+/*
    * (non-Javadoc)
    * 
    * @see AAA.util.AAASet#forall(AAA.util.ObjectVisitor)
    */
   public void forall(ObjectVisitor<T> visitor_) {
-    for (int i = 0; i < _curIndex; i++) {
-      visitor_.visit(_elems[i]);
+    for (int i = 0; i < curIndex; i++) {
+      visitor_.visit(elems[i]);
     }
   }
 
-  public int size() {
-    return _curIndex;
+@Override
+public int size() {
+    return curIndex;
   }
 
-  public T get(int i) {
-    return _elems[i];
+public T get(int i) {
+    return elems[i];
   }
 
-  public boolean remove(Object obj_) {
+@Override
+public boolean remove(Object obj_) {
     int ind;
-    for (ind = 0; ind < _curIndex && !_elems[ind].equals(obj_); ind++) {
+    for (ind = 0; ind < curIndex && !elems[ind].equals(obj_); ind++) {
     }
     // check if object was never there
-    if (ind == _curIndex) {
+    if (ind == curIndex) {
       return false;
     }
     return remove(ind);
   }
 
-  /**
+/**
    * @param ind
    * @return
    */
   public boolean remove(int ind) {
     // hope i got this right...
-    System.arraycopy(_elems, ind + 1, _elems, ind, _curIndex - (ind + 1));
-    _curIndex--;
+    System.arraycopy(elems, ind + 1, elems, ind, curIndex - (ind + 1));
+    curIndex--;
     return true;
   }
 
-  public void clear() {
-    _curIndex = 0;
+@Override
+public void clear() {
+    curIndex = 0;
   }
 
-  public boolean isEmpty() {
+@Override
+public boolean isEmpty() {
     return size() == 0;
   }
 
-  public String toString() {
-    StringBuffer ret = new StringBuffer();
+@Override
+public String toString() {
+    StringBuilder ret = new StringBuilder();
     ret.append('[');
     for (int i = 0; i < size(); i++) {
       ret.append(get(i).toString());
@@ -186,21 +189,23 @@ public class ArraySet<T> extends AbstractSet<T> {
     return ret.toString();
   }
 
-  /*
+/*
    * (non-Javadoc)
    * 
    * @see java.util.Set#toArray()
    */
-  public Object[] toArray() {
+  @Override
+public Object[] toArray() {
     throw new UnsupportedOperationException();
   }
 
-  /*
+/*
    * (non-Javadoc)
    * 
    * @see java.util.Set#addAll(java.util.Collection)
    */
-  public boolean addAll(Collection<? extends T> c) {
+  @Override
+public boolean addAll(Collection<? extends T> c) {
     boolean ret = false;
     for (T element : c) {
       boolean added = add(element);
@@ -209,24 +214,26 @@ public class ArraySet<T> extends AbstractSet<T> {
     return ret;
   }
 
-  /*
+/*
    * (non-Javadoc)
    * 
    * @see java.util.Set#iterator()
    */
-  public Iterator<T> iterator() {
+  @Override
+public Iterator<T> iterator() {
     return new ArraySetIterator();
   }
 
-  /*
+/*
    * (non-Javadoc)
    * 
    * @see java.util.Set#toArray(java.lang.Object[])
    */
-  @SuppressWarnings("unchecked")
+  @Override
+@SuppressWarnings("unchecked")
   public <U> U[] toArray(U[] a) {
-    for (int i = 0; i < _curIndex; i++) {
-      T t = _elems[i];
+    for (int i = 0; i < curIndex; i++) {
+      T t = elems[i];
       a[i] = (U) t;
     }
     return a;
@@ -252,7 +259,8 @@ public class ArraySet<T> extends AbstractSet<T> {
      * 
      * @see java.util.Iterator#remove()
      */
-    public void remove() {
+    @Override
+	public void remove() {
       throw new UnsupportedOperationException();
     }
 
@@ -261,7 +269,8 @@ public class ArraySet<T> extends AbstractSet<T> {
      * 
      * @see java.util.Iterator#hasNext()
      */
-    public boolean hasNext() {
+    @Override
+	public boolean hasNext() {
       return ind < setSize;
     }
 
@@ -270,7 +279,8 @@ public class ArraySet<T> extends AbstractSet<T> {
      * 
      * @see java.util.Iterator#next()
      */
-    public T next() {
+    @Override
+	public T next() {
       if (ind >= setSize) {
         throw new NoSuchElementException();
       }

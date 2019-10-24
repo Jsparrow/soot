@@ -74,8 +74,10 @@ import soot.jimple.toolkits.pointer.representations.ReferenceVariable;
 
 public class NativeMethodDriver {
   private static final Logger logger = LoggerFactory.getLogger(NativeMethodDriver.class);
+private final HashMap<String, NativeMethodClass> cnameToSim = new HashMap<>(100);
+private final boolean debug = false;
 
-  public NativeMethodDriver(NativeHelper helper) {
+public NativeMethodDriver(NativeHelper helper) {
     cnameToSim.put("java.lang.Object", new JavaLangObjectNative(helper));
     cnameToSim.put("java.lang.System", new JavaLangSystemNative(helper));
     cnameToSim.put("java.lang.Runtime", new JavaLangRuntimeNative(helper));
@@ -126,10 +128,7 @@ public class NativeMethodDriver {
     cnameToSim.put("sun.misc.Unsafe", new SunMiscUnsafeNative(helper));
   }
 
-  private final HashMap<String, NativeMethodClass> cnameToSim = new HashMap<String, NativeMethodClass>(100);
-  private final boolean DEBUG = false;
-
-  /**
+/**
    * The entry point of native method simulation.
    *
    * @param method,
@@ -158,7 +157,8 @@ public class NativeMethodDriver {
       try {
         clsSim.simulateMethod(method, thisVar, returnVar, params);
       } catch (NativeMethodNotSupportedException e) {
-        if (DEBUG) {
+        logger.error(e.getMessage(), e);
+		if (debug) {
           logger.warn("it is unsafe to simulate the method ");
           logger.debug("         " + method.toString());
         }

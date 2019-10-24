@@ -37,8 +37,9 @@ public class AnnotationDoubleElem extends AnnotationElem {
     this.value = v;
   }
 
-  public String toString() {
-    return super.toString() + " value: " + value;
+  @Override
+public String toString() {
+    return new StringBuilder().append(super.toString()).append(" value: ").append(value).toString();
   }
 
   public double getValue() {

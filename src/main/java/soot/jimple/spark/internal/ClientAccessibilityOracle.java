@@ -38,11 +38,11 @@ public interface ClientAccessibilityOracle {
   /**
    * Determines whether the method is accessible for a potential library user.
    */
-  public boolean isAccessible(SootMethod method);
+  boolean isAccessible(SootMethod method);
 
   /**
    * Determines whether the field is accessible for a potential library user.
    */
-  public boolean isAccessible(SootField field);
+  boolean isAccessible(SootField field);
 
 }

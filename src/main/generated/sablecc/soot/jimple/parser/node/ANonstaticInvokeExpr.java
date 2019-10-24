@@ -7,13 +7,13 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ANonstaticInvokeExpr extends PInvokeExpr
 {
-    private PNonstaticInvoke _nonstaticInvoke_;
-    private PLocalName _localName_;
-    private TDot _dot_;
-    private PMethodSignature _methodSignature_;
-    private TLParen _lParen_;
-    private PArgList _argList_;
-    private TRParen _rParen_;
+    private PNonstaticInvoke nonstaticInvoke;
+    private PLocalName localName;
+    private TDot dot;
+    private PMethodSignature methodSignature;
+    private TLParen lParen;
+    private PArgList argList;
+    private TRParen rParen;
 
     public ANonstaticInvokeExpr()
     {
@@ -50,13 +50,13 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
     public Object clone()
     {
         return new ANonstaticInvokeExpr(
-            cloneNode(this._nonstaticInvoke_),
-            cloneNode(this._localName_),
-            cloneNode(this._dot_),
-            cloneNode(this._methodSignature_),
-            cloneNode(this._lParen_),
-            cloneNode(this._argList_),
-            cloneNode(this._rParen_));
+            cloneNode(this.nonstaticInvoke),
+            cloneNode(this.localName),
+            cloneNode(this.dot),
+            cloneNode(this.methodSignature),
+            cloneNode(this.lParen),
+            cloneNode(this.argList),
+            cloneNode(this.rParen));
     }
 
     @Override
@@ -67,14 +67,14 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
 
     public PNonstaticInvoke getNonstaticInvoke()
     {
-        return this._nonstaticInvoke_;
+        return this.nonstaticInvoke;
     }
 
     public void setNonstaticInvoke(PNonstaticInvoke node)
     {
-        if(this._nonstaticInvoke_ != null)
+        if(this.nonstaticInvoke != null)
         {
-            this._nonstaticInvoke_.parent(null);
+            this.nonstaticInvoke.parent(null);
         }
 
         if(node != null)
@@ -87,19 +87,19 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._nonstaticInvoke_ = node;
+        this.nonstaticInvoke = node;
     }
 
     public PLocalName getLocalName()
     {
-        return this._localName_;
+        return this.localName;
     }
 
     public void setLocalName(PLocalName node)
     {
-        if(this._localName_ != null)
+        if(this.localName != null)
         {
-            this._localName_.parent(null);
+            this.localName.parent(null);
         }
 
         if(node != null)
@@ -112,19 +112,19 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._localName_ = node;
+        this.localName = node;
     }
 
     public TDot getDot()
     {
-        return this._dot_;
+        return this.dot;
     }
 
     public void setDot(TDot node)
     {
-        if(this._dot_ != null)
+        if(this.dot != null)
         {
-            this._dot_.parent(null);
+            this.dot.parent(null);
         }
 
         if(node != null)
@@ -137,19 +137,19 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._dot_ = node;
+        this.dot = node;
     }
 
     public PMethodSignature getMethodSignature()
     {
-        return this._methodSignature_;
+        return this.methodSignature;
     }
 
     public void setMethodSignature(PMethodSignature node)
     {
-        if(this._methodSignature_ != null)
+        if(this.methodSignature != null)
         {
-            this._methodSignature_.parent(null);
+            this.methodSignature.parent(null);
         }
 
         if(node != null)
@@ -162,19 +162,19 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._methodSignature_ = node;
+        this.methodSignature = node;
     }
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -187,19 +187,19 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PArgList getArgList()
     {
-        return this._argList_;
+        return this.argList;
     }
 
     public void setArgList(PArgList node)
     {
-        if(this._argList_ != null)
+        if(this.argList != null)
         {
-            this._argList_.parent(null);
+            this.argList.parent(null);
         }
 
         if(node != null)
@@ -212,19 +212,19 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._argList_ = node;
+        this.argList = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -237,65 +237,59 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._nonstaticInvoke_)
-            + toString(this._localName_)
-            + toString(this._dot_)
-            + toString(this._methodSignature_)
-            + toString(this._lParen_)
-            + toString(this._argList_)
-            + toString(this._rParen_);
+        return new StringBuilder().append("").append(toString(this.nonstaticInvoke)).append(toString(this.localName)).append(toString(this.dot)).append(toString(this.methodSignature))
+				.append(toString(this.lParen)).append(toString(this.argList)).append(toString(this.rParen)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._nonstaticInvoke_ == child)
+        if(this.nonstaticInvoke == child)
         {
-            this._nonstaticInvoke_ = null;
+            this.nonstaticInvoke = null;
             return;
         }
 
-        if(this._localName_ == child)
+        if(this.localName == child)
         {
-            this._localName_ = null;
+            this.localName = null;
             return;
         }
 
-        if(this._dot_ == child)
+        if(this.dot == child)
         {
-            this._dot_ = null;
+            this.dot = null;
             return;
         }
 
-        if(this._methodSignature_ == child)
+        if(this.methodSignature == child)
         {
-            this._methodSignature_ = null;
+            this.methodSignature = null;
             return;
         }
 
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._argList_ == child)
+        if(this.argList == child)
         {
-            this._argList_ = null;
+            this.argList = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
@@ -306,43 +300,43 @@ public final class ANonstaticInvokeExpr extends PInvokeExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._nonstaticInvoke_ == oldChild)
+        if(this.nonstaticInvoke == oldChild)
         {
             setNonstaticInvoke((PNonstaticInvoke) newChild);
             return;
         }
 
-        if(this._localName_ == oldChild)
+        if(this.localName == oldChild)
         {
             setLocalName((PLocalName) newChild);
             return;
         }
 
-        if(this._dot_ == oldChild)
+        if(this.dot == oldChild)
         {
             setDot((TDot) newChild);
             return;
         }
 
-        if(this._methodSignature_ == oldChild)
+        if(this.methodSignature == oldChild)
         {
             setMethodSignature((PMethodSignature) newChild);
             return;
         }
 
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._argList_ == oldChild)
+        if(this.argList == oldChild)
         {
             setArgList((PArgList) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;

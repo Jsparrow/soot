@@ -29,35 +29,36 @@ import soot.EquivalentValue;
  */
 @Deprecated
 public class RefIntPair {
-  private EquivalentValue _ref;
-  private int _val;
+  private EquivalentValue ref;
+  private int val;
 
   // constructor is not public so that people go throught the ref pair constants factory on the analysis
   RefIntPair(EquivalentValue r, int v, BranchedRefVarsAnalysis brva) {
-    this._ref = r;
-    this._val = v;
+    this.ref = r;
+    this.val = v;
   }
 
   public EquivalentValue ref() {
-    return this._ref;
+    return this.ref;
   }
 
   public int val() {
-    return this._val;
+    return this.val;
   }
 
-  public String toString() {
-    String prefix = "(" + _ref + ", ";
-    if (_val == BranchedRefVarsAnalysis.kNull) {
+  @Override
+public String toString() {
+    String prefix = new StringBuilder().append("(").append(ref).append(", ").toString();
+    if (val == BranchedRefVarsAnalysis.kNull) {
       return prefix + "null)";
-    } else if (_val == BranchedRefVarsAnalysis.kNonNull) {
+    } else if (val == BranchedRefVarsAnalysis.kNonNull) {
       return prefix + "non-null)";
-    } else if (_val == BranchedRefVarsAnalysis.kTop) {
+    } else if (val == BranchedRefVarsAnalysis.kTop) {
       return prefix + "top)";
-    } else if (_val == BranchedRefVarsAnalysis.kBottom) {
+    } else if (val == BranchedRefVarsAnalysis.kBottom) {
       return prefix + "bottom)";
     } else {
-      return prefix + _val + ")";
+      return new StringBuilder().append(prefix).append(val).append(")").toString();
     }
   }
 } // end class RefIntPair

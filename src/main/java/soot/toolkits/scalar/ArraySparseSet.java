@@ -55,45 +55,53 @@ public class ArraySparseSet<T> extends AbstractFlowSet<T> {
     return (flowSet instanceof ArraySparseSet);
   }
 
-  public ArraySparseSet<T> clone() {
-    return new ArraySparseSet<T>(this);
+  @Override
+public ArraySparseSet<T> clone() {
+    return new ArraySparseSet<>(this);
   }
 
-  public FlowSet<T> emptySet() {
-    return new ArraySparseSet<T>();
+  @Override
+public FlowSet<T> emptySet() {
+    return new ArraySparseSet<>();
   }
 
-  public void clear() {
+  @Override
+public void clear() {
     numElements = 0;
     Arrays.fill(elements, null);
   }
 
-  public int size() {
+  @Override
+public int size() {
     return numElements;
   }
 
-  public boolean isEmpty() {
+  @Override
+public boolean isEmpty() {
     return numElements == 0;
   }
 
   /** Returns a unbacked list of elements in this set. */
-  public List<T> toList() {
+  @Override
+public List<T> toList() {
     return Arrays.asList(Arrays.copyOf(elements, numElements));
   }
 
   /*
    * Expand array only when necessary, pointed out by Florian Loitsch March 08, 2002
    */
-  public void add(T e) {
+  @Override
+public void add(T e) {
     /* Expand only if necessary! and removes one if too:) */
-    // Add element
-    if (!contains(e)) {
-      // Expand array if necessary
+	// Add element
+	if (contains(e)) {
+		return;
+	}
+	// Expand array if necessary
       if (numElements == maxElements) {
         doubleCapacity();
       }
-      elements[numElements++] = e;
-    }
+	elements[numElements++] = e;
   }
 
   private void doubleCapacity() {
@@ -107,7 +115,8 @@ public class ArraySparseSet<T> extends AbstractFlowSet<T> {
     maxElements = newSize;
   }
 
-  public void remove(Object obj) {
+  @Override
+public void remove(Object obj) {
     for (int i = 0; i < numElements; i++) {
       if (elements[i].equals(obj)) {
         remove(i);
@@ -127,7 +136,8 @@ public class ArraySparseSet<T> extends AbstractFlowSet<T> {
     return;
   }
 
-  public void union(FlowSet<T> otherFlow, FlowSet<T> destFlow) {
+  @Override
+public void union(FlowSet<T> otherFlow, FlowSet<T> destFlow) {
     if (sameType(otherFlow) && sameType(destFlow)) {
       ArraySparseSet<T> other = (ArraySparseSet<T>) otherFlow;
       ArraySparseSet<T> dest = (ArraySparseSet<T>) destFlow;
@@ -154,14 +164,15 @@ public class ArraySparseSet<T> extends AbstractFlowSet<T> {
     }
   }
 
-  public void intersection(FlowSet<T> otherFlow, FlowSet<T> destFlow) {
+  @Override
+public void intersection(FlowSet<T> otherFlow, FlowSet<T> destFlow) {
     if (sameType(otherFlow) && sameType(destFlow)) {
       ArraySparseSet<T> other = (ArraySparseSet<T>) otherFlow;
       ArraySparseSet<T> dest = (ArraySparseSet<T>) destFlow;
       ArraySparseSet<T> workingSet;
 
       if (dest == other || dest == this) {
-        workingSet = new ArraySparseSet<T>();
+        workingSet = new ArraySparseSet<>();
       } else {
         workingSet = dest;
         workingSet.clear();
@@ -181,14 +192,15 @@ public class ArraySparseSet<T> extends AbstractFlowSet<T> {
     }
   }
 
-  public void difference(FlowSet<T> otherFlow, FlowSet<T> destFlow) {
+  @Override
+public void difference(FlowSet<T> otherFlow, FlowSet<T> destFlow) {
     if (sameType(otherFlow) && sameType(destFlow)) {
       ArraySparseSet<T> other = (ArraySparseSet<T>) otherFlow;
       ArraySparseSet<T> dest = (ArraySparseSet<T>) destFlow;
       ArraySparseSet<T> workingSet;
 
       if (dest == other || dest == this) {
-        workingSet = new ArraySparseSet<T>();
+        workingSet = new ArraySparseSet<>();
       } else {
         workingSet = dest;
         workingSet.clear();
@@ -212,7 +224,8 @@ public class ArraySparseSet<T> extends AbstractFlowSet<T> {
    * @deprecated This method uses linear-time lookup. For better performance, consider using a {@link HashSet} instead, if
    *             you require this operation.
    */
-  @Deprecated
+  @Override
+@Deprecated
   public boolean contains(Object obj) {
     for (int i = 0; i < numElements; i++) {
       if (elements[i].equals(obj)) {
@@ -223,37 +236,33 @@ public class ArraySparseSet<T> extends AbstractFlowSet<T> {
     return false;
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+@SuppressWarnings("unchecked")
   public boolean equals(Object otherFlow) {
-    if (sameType(otherFlow)) {
-      ArraySparseSet<T> other = (ArraySparseSet<T>) otherFlow;
-
-      if (other.numElements != this.numElements) {
+    /*
+	       * both arrays have the same size, no element appears twice in one array, all elements of ThisFlow are in otherFlow ->
+	       * they are equal! we don't need to test again! // Make sure that otherFlow is contained in ThisFlow for(int i = 0; i <
+	       * size; i++) if(!this.contains(other.elements[i])) return false;
+	       */
+	if (!sameType(otherFlow)) {
+		return super.equals(otherFlow);
+	}
+	ArraySparseSet<T> other = (ArraySparseSet<T>) otherFlow;
+	if (other.numElements != this.numElements) {
         return false;
       }
-
-      int size = this.numElements;
-
-      // Make sure that thisFlow is contained in otherFlow
+	int size = this.numElements;
+	// Make sure that thisFlow is contained in otherFlow
       for (int i = 0; i < size; i++) {
         if (!other.contains(this.elements[i])) {
           return false;
         }
       }
-
-      /*
-       * both arrays have the same size, no element appears twice in one array, all elements of ThisFlow are in otherFlow ->
-       * they are equal! we don't need to test again! // Make sure that otherFlow is contained in ThisFlow for(int i = 0; i <
-       * size; i++) if(!this.contains(other.elements[i])) return false;
-       */
-
-      return true;
-    } else {
-      return super.equals(otherFlow);
-    }
+	return true;
   }
 
-  public void copy(FlowSet<T> destFlow) {
+  @Override
+public void copy(FlowSet<T> destFlow) {
     if (sameType(destFlow)) {
       ArraySparseSet<T> dest = (ArraySparseSet<T>) destFlow;
 

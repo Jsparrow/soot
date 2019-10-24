@@ -63,7 +63,8 @@ public class InitializationDeclarationShortcut extends DepthFirstAdapter {
   /*
    * Check that the stmt of interest defines a local in the DVariableDeclarationNode of the method else set to false and stop
    */
-  public void inASTMethodNode(ASTMethodNode node) {
+  @Override
+public void inASTMethodNode(ASTMethodNode node) {
     Stmt s = ofInterest.get_Stmt();
     // check this is a definition
     if (!(s instanceof DefinitionStmt)) {
@@ -87,7 +88,8 @@ public class InitializationDeclarationShortcut extends DepthFirstAdapter {
     definedLocal = (Local) defined;
   }
 
-  public void inDefinitionStmt(DefinitionStmt s) {
+  @Override
+public void inDefinitionStmt(DefinitionStmt s) {
     if (definedLocal == null) {
       return;
     }

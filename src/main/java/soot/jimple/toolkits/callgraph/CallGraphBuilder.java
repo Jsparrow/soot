@@ -59,18 +59,6 @@ public final class CallGraphBuilder {
   private final OnFlyCallGraphBuilder ofcgb;
   private final CallGraph cg;
 
-  public CallGraph getCallGraph() {
-    return cg;
-  }
-
-  public ReachableMethods reachables() {
-    return reachables;
-  }
-
-  public static ContextManager makeContextManager(CallGraph cg) {
-    return new ContextInsensitiveContextManager(cg);
-  }
-
   /**
    * This constructor builds a complete call graph using the given PointsToAnalysis to resolve virtual calls.
    */
@@ -83,7 +71,7 @@ public final class CallGraphBuilder {
     ofcgb = new OnFlyCallGraphBuilder(cm, reachables);
   }
 
-  /**
+/**
    * This constructor builds the incomplete hack call graph for the Dava ThrowFinder. It uses all application class methods
    * as entry points, and it ignores any calls by non-application class methods. Don't use this constructor if you need a
    * real call graph.
@@ -93,7 +81,7 @@ public final class CallGraphBuilder {
     pa = soot.jimple.toolkits.pointer.DumbPointerAnalysis.v();
     cg = Scene.v().internalMakeCallGraph();
     Scene.v().setCallGraph(cg);
-    List<MethodOrMethodContext> entryPoints = new ArrayList<MethodOrMethodContext>();
+    List<MethodOrMethodContext> entryPoints = new ArrayList<>();
     entryPoints.addAll(EntryPoints.v().methodsOfApplicationClasses());
     entryPoints.addAll(EntryPoints.v().implicit());
     reachables = new ReachableMethods(cg, entryPoints);
@@ -101,7 +89,19 @@ public final class CallGraphBuilder {
     ofcgb = new OnFlyCallGraphBuilder(cm, reachables, true);
   }
 
-  public void build() {
+public CallGraph getCallGraph() {
+    return cg;
+  }
+
+public ReachableMethods reachables() {
+    return reachables;
+  }
+
+public static ContextManager makeContextManager(CallGraph cg) {
+    return new ContextInsensitiveContextManager(cg);
+  }
+
+public void build() {
     QueueReader<MethodOrMethodContext> worklist = reachables.listener();
     while (true) {
       ofcgb.processReachables();
@@ -112,23 +112,20 @@ public final class CallGraphBuilder {
       final MethodOrMethodContext momc = worklist.next();
       List<Local> receivers = ofcgb.methodToReceivers().get(momc.method());
       if (receivers != null) {
-        for (Iterator<Local> receiverIt = receivers.iterator(); receiverIt.hasNext();) {
-          final Local receiver = receiverIt.next();
+        receivers.forEach(receiver -> {
           final PointsToSet p2set = pa.reachingObjects(receiver);
           for (Iterator<Type> typeIt = p2set.possibleTypes().iterator(); typeIt.hasNext();) {
             final Type type = typeIt.next();
             ofcgb.addType(receiver, momc.context(), type, null);
           }
-        }
+        });
       }
       List<Local> bases = ofcgb.methodToInvokeArgs().get(momc.method());
       if (bases != null) {
-        for (Local base : bases) {
+        bases.forEach(base -> {
           PointsToSet pts = pa.reachingObjects(base);
-          for (Type ty : pts.possibleTypes()) {
-            ofcgb.addBaseType(base, momc.context(), ty);
-          }
-        }
+          pts.possibleTypes().forEach(ty -> ofcgb.addBaseType(base, momc.context(), ty));
+        });
       }
       List<Local> argArrays = ofcgb.methodToInvokeBases().get(momc.method());
       if (argArrays != null) {
@@ -143,39 +140,34 @@ public final class CallGraphBuilder {
                 AllocNode an = (AllocNode) n;
                 Object newExpr = an.getNewExpr();
                 ofcgb.addInvokeArgDotField(argArray, an.dot(ArrayElement.v()));
-                if (newExpr instanceof NewArrayExpr) {
-                  NewArrayExpr nae = (NewArrayExpr) newExpr;
-                  Value size = nae.getSize();
-                  if (size instanceof IntConstant) {
+                if (!(newExpr instanceof NewArrayExpr)) {
+					return;
+				}
+				NewArrayExpr nae = (NewArrayExpr) newExpr;
+				Value size = nae.getSize();
+				if (size instanceof IntConstant) {
                     IntConstant arrSize = (IntConstant) size;
                     ofcgb.addPossibleArgArraySize(argArray, arrSize.value, momc.context());
                   } else {
                     ofcgb.setArgArrayNonDetSize(argArray, momc.context());
                   }
-                }
               }
             });
           }
-          for (Type t : pa.reachingObjectsOfArrayElement(pts).possibleTypes()) {
-            ofcgb.addInvokeArgType(argArray, momc.context(), t);
-          }
+          pa.reachingObjectsOfArrayElement(pts).possibleTypes().forEach(t -> ofcgb.addInvokeArgType(argArray, momc.context(), t));
         }
       }
       List<Local> stringConstants = ofcgb.methodToStringConstants().get(momc.method());
       if (stringConstants != null) {
-        for (Iterator<Local> stringConstantIt = stringConstants.iterator(); stringConstantIt.hasNext();) {
-          final Local stringConstant = stringConstantIt.next();
+        stringConstants.forEach(stringConstant -> {
           PointsToSet p2set = pa.reachingObjects(stringConstant);
           Collection<String> possibleStringConstants = p2set.possibleStringConstants();
           if (possibleStringConstants == null) {
             ofcgb.addStringConstant(stringConstant, momc.context(), null);
           } else {
-            for (Iterator<String> constantIt = possibleStringConstants.iterator(); constantIt.hasNext();) {
-              final String constant = constantIt.next();
-              ofcgb.addStringConstant(stringConstant, momc.context(), constant);
-            }
+            possibleStringConstants.forEach(constant -> ofcgb.addStringConstant(stringConstant, momc.context(), constant));
           }
-        }
+        });
       }
     }
   }

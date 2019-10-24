@@ -41,8 +41,9 @@ public class SootField extends AbstractHost implements ClassMember, SparkField, 
   protected boolean isPhantom = false;
   protected volatile String sig;
   protected volatile String subSig;
+private int number = 0;
 
-  /** Constructs a Soot field with the given name, type and modifiers. */
+/** Constructs a Soot field with the given name, type and modifiers. */
   public SootField(String name, Type type, int modifiers) {
     if (name == null || type == null) {
       throw new RuntimeException("A SootField cannot have a null name or type.");
@@ -52,16 +53,16 @@ public class SootField extends AbstractHost implements ClassMember, SparkField, 
     this.modifiers = modifiers;
   }
 
-  /** Constructs a Soot field with the given name, type and no modifiers. */
+/** Constructs a Soot field with the given name, type and no modifiers. */
   public SootField(String name, Type type) {
     this(name, type, 0);
   }
 
-  public int equivHashCode() {
+public int equivHashCode() {
     return type.hashCode() * 101 + modifiers * 17 + name.hashCode();
   }
 
-  public String getSignature() {
+public String getSignature() {
     if (sig == null) {
       synchronized (this) {
         if (sig == null) {
@@ -71,12 +72,12 @@ public class SootField extends AbstractHost implements ClassMember, SparkField, 
     }
     return sig;
   }
-  
-  public static String getSignature(SootClass cl, String name, Type type) {
+
+public static String getSignature(SootClass cl, String name, Type type) {
     return getSignature(cl,getSubSignature(name,type));
   }
 
-  public static String getSignature(SootClass cl, String subSignature) {
+public static String getSignature(SootClass cl, String subSignature) {
     StringBuilder buffer = new StringBuilder();
 
     buffer.append("<").append(Scene.v().quotedNameOf(cl.getName())).append(": ");
@@ -86,7 +87,7 @@ public class SootField extends AbstractHost implements ClassMember, SparkField, 
 
   }
 
-  public String getSubSignature() {
+public String getSubSignature() {
     if (subSig == null) {
       synchronized (this) {
         if (subSig == null) {
@@ -96,22 +97,23 @@ public class SootField extends AbstractHost implements ClassMember, SparkField, 
     }
     return subSig;
   }
-  
-  private static String getSubSignature(String name, Type type) {
+
+private static String getSubSignature(String name, Type type) {
     StringBuilder buffer = new StringBuilder();
-    buffer.append(type.toQuotedString() + " " + Scene.v().quotedNameOf(name));
+    buffer.append(new StringBuilder().append(type.toQuotedString()).append(" ").append(Scene.v().quotedNameOf(name)).toString());
     return buffer.toString();
   }
 
-  public SootClass getDeclaringClass() {
+@Override
+public SootClass getDeclaringClass() {
     if (!isDeclared) {
-      throw new RuntimeException("not declared: " + getName() + " " + getType());
+      throw new RuntimeException(new StringBuilder().append("not declared: ").append(getName()).append(" ").append(getType()).toString());
     }
 
     return declaringClass;
   }
-  
-  public synchronized void setDeclaringClass(SootClass sc) {
+
+public synchronized void setDeclaringClass(SootClass sc) {
     if (sc != null && type instanceof RefLikeType) {
       Scene.v().getFieldNumberer().add(this);
     }
@@ -119,12 +121,12 @@ public class SootField extends AbstractHost implements ClassMember, SparkField, 
     this.sig = null;
   }
 
-  @Override
+@Override
   public boolean isPhantom() {
     return isPhantom;
   }
 
-  @Override
+@Override
   public void setPhantom(boolean value) {
     if (value) {
       if (!Scene.v().allowsPhantomRefs()) {
@@ -137,112 +139,123 @@ public class SootField extends AbstractHost implements ClassMember, SparkField, 
     isPhantom = value;
   }
 
-  public boolean isDeclared() {
+@Override
+public boolean isDeclared() {
     return isDeclared;
   }
 
-  public void setDeclared(boolean isDeclared) {
+public void setDeclared(boolean isDeclared) {
     this.isDeclared = isDeclared;
   }
-  
-  public String getName() {
+
+public String getName() {
     return name;
   }
 
-  public synchronized void setName(String name) {
-    if (name != null) {
-      this.name = name;
-      this.sig = null;
-      this.subSig = null;
-    }
+public synchronized void setName(String name) {
+    if (name == null) {
+		return;
+	}
+	this.name = name;
+	this.sig = null;
+	this.subSig = null;
   }
 
-  public Type getType() {
+@Override
+public Type getType() {
     return type;
   }
 
-  public synchronized void setType(Type t) {
-    if (t != null) {
-      this.type = t;
-      this.sig = null;
-      this.subSig = null;
-    }
+public synchronized void setType(Type t) {
+    if (t == null) {
+		return;
+	}
+	this.type = t;
+	this.sig = null;
+	this.subSig = null;
   }
 
-  /**
+/**
    * Convenience method returning true if this field is public.
    */
-  public boolean isPublic() {
+  @Override
+public boolean isPublic() {
     return Modifier.isPublic(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this field is protected.
    */
-  public boolean isProtected() {
+  @Override
+public boolean isProtected() {
     return Modifier.isProtected(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this field is private.
    */
-  public boolean isPrivate() {
+  @Override
+public boolean isPrivate() {
     return Modifier.isPrivate(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this field is static.
    */
-  public boolean isStatic() {
+  @Override
+public boolean isStatic() {
     return Modifier.isStatic(this.getModifiers());
   }
 
-  /**
+/**
    * Convenience method returning true if this field is final.
    */
   public boolean isFinal() {
     return Modifier.isFinal(this.getModifiers());
   }
 
-  public void setModifiers(int modifiers) {
+@Override
+public void setModifiers(int modifiers) {
     this.modifiers = modifiers;
   }
 
-  public int getModifiers() {
+@Override
+public int getModifiers() {
     return modifiers;
   }
 
-  public String toString() {
+@Override
+public String toString() {
     return getSignature();
   }
 
-  private String getOriginalStyleDeclaration() {
-    String qualifiers = Modifier.toString(modifiers) + " " + type.toQuotedString();
+private String getOriginalStyleDeclaration() {
+    String qualifiers = new StringBuilder().append(Modifier.toString(modifiers)).append(" ").append(type.toQuotedString()).toString();
     qualifiers = qualifiers.trim();
 
     if (qualifiers.isEmpty()) {
       return Scene.v().quotedNameOf(name);
     } else {
-      return qualifiers + " " + Scene.v().quotedNameOf(name) + "";
+      return new StringBuilder().append(qualifiers).append(" ").append(Scene.v().quotedNameOf(name)).append("").toString();
     }
 
   }
 
-  public String getDeclaration() {
+public String getDeclaration() {
     return getOriginalStyleDeclaration();
   }
 
-  public final int getNumber() {
+@Override
+public final int getNumber() {
     return number;
   }
 
-  public final void setNumber(int number) {
+@Override
+public final void setNumber(int number) {
     this.number = number;
   }
 
-  private int number = 0;
-
-  public SootFieldRef makeRef() {
+public SootFieldRef makeRef() {
     return Scene.v().makeFieldRef(declaringClass, name, type, isStatic());
   }
 

@@ -47,7 +47,7 @@ public abstract class UnitMap<T> implements Map<Unit, T> {
    *          a Body
    */
   public UnitMap(Body b) {
-    unitToResult = new HashMap<Unit, T>();
+    unitToResult = new HashMap<>();
     map(b);
   }
 
@@ -74,7 +74,7 @@ public abstract class UnitMap<T> implements Map<Unit, T> {
    *          the initialCapacity of the internal hashtable.
    */
   public UnitMap(Body b, int initialCapacity) {
-    unitToResult = new HashMap<Unit, T>(initialCapacity);
+    unitToResult = new HashMap<>(initialCapacity);
     map(b);
   }
 
@@ -105,7 +105,7 @@ public abstract class UnitMap<T> implements Map<Unit, T> {
    *          the loadFactor of the internal hashtable.
    */
   public UnitMap(Body b, int initialCapacity, float loadFactor) {
-    unitToResult = new HashMap<Unit, T>(initialCapacity);
+    unitToResult = new HashMap<>(initialCapacity);
     init();
     map(b);
   }
@@ -160,59 +160,73 @@ public abstract class UnitMap<T> implements Map<Unit, T> {
 
   /* ====== the Map-interface. all methods are deleguated tp the hashmap====== */
 
-  public void clear() {
+  @Override
+public void clear() {
     unitToResult.clear();
   }
 
-  public boolean containsKey(Object key) {
+  @Override
+public boolean containsKey(Object key) {
     return unitToResult.containsKey(key);
   }
 
-  public boolean containsValue(Object value) {
+  @Override
+public boolean containsValue(Object value) {
     return unitToResult.containsValue(value);
   }
 
-  public Set<Map.Entry<Unit, T>> entrySet() {
+  @Override
+public Set<Map.Entry<Unit, T>> entrySet() {
     return unitToResult.entrySet();
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     return unitToResult.equals(o);
   }
 
-  public T get(Object key) {
+  @Override
+public T get(Object key) {
     return unitToResult.get(key);
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return unitToResult.hashCode();
   }
 
-  public boolean isEmpty() {
+  @Override
+public boolean isEmpty() {
     return unitToResult.isEmpty();
   }
 
-  public Set<Unit> keySet() {
+  @Override
+public Set<Unit> keySet() {
     return unitToResult.keySet();
   }
 
-  public T put(Unit key, T value) {
+  @Override
+public T put(Unit key, T value) {
     return unitToResult.put(key, value);
   }
 
-  public void putAll(Map<? extends Unit, ? extends T> t) {
+  @Override
+public void putAll(Map<? extends Unit, ? extends T> t) {
     unitToResult.putAll(t);
   }
 
-  public T remove(Object key) {
+  @Override
+public T remove(Object key) {
     return unitToResult.remove(key);
   }
 
-  public int size() {
+  @Override
+public int size() {
     return unitToResult.size();
   }
 
-  public Collection<T> values() {
+  @Override
+public Collection<T> values() {
     return unitToResult.values();
   }
 }

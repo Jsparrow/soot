@@ -35,6 +35,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FastHierarchyTest {
 
@@ -110,13 +112,7 @@ public class FastHierarchyTest {
 
     ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    Callable<Set<SootClass>> c = new Callable<Set<SootClass>>() {
-
-      @Override
-      public Set<SootClass> call() throws Exception {
-        return hierarchy.getAllSubinterfaces(scE);
-      }
-    };
+    Callable<Set<SootClass>> c = () -> hierarchy.getAllSubinterfaces(scE);
 
     ArrayList<Future<Set<SootClass>>> results = new ArrayList<>(10);
     for (int i = 0; i < 10; i++) {
@@ -175,24 +171,27 @@ public class FastHierarchyTest {
     assertThat(fh.getAllImplementersOfInterface(interfaceD), containsInAnyOrder(scA, scB, scC1, scD));
   }
 
-  private static class FastHierarchyForUnittest extends FastHierarchy {
-
-    @Override
-    public Set<SootClass> getAllSubinterfaces(SootClass parent) {
-      try {
-        // We add a delay to increase the chance of a concurrent access
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-      }
-      return super.getAllSubinterfaces(parent);
-    }
-  }
-
   private static SootClass generacteSceneClass(String name, int modifier) {
     SootClass sootClass = new SootClass(name, modifier);
     Scene.v().addClass(sootClass);
     SootClass objectClass = Scene.v().getObjectType().getSootClass();
     sootClass.setSuperclass(objectClass);
     return sootClass;
+  }
+
+private static class FastHierarchyForUnittest extends FastHierarchy {
+
+    private final Logger logger = LoggerFactory.getLogger(FastHierarchyForUnittest.class);
+
+	@Override
+    public Set<SootClass> getAllSubinterfaces(SootClass parent) {
+      try {
+        // We add a delay to increase the chance of a concurrent access
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+		logger.error(e.getMessage(), e);
+      }
+      return super.getAllSubinterfaces(parent);
+    }
   }
 }

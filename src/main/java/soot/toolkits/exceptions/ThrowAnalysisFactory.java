@@ -56,7 +56,7 @@ public class ThrowAnalysisFactory {
   public static ThrowAnalysis checkInitThrowAnalysis() {
     switch (Options.v().check_init_throw_analysis()) {
       case soot.options.Options.check_init_throw_analysis_auto:
-        if (!Options.v().android_jars().equals("") || !Options.v().force_android_jar().equals("")) {
+        if (!"".equals(Options.v().android_jars()) || !"".equals(Options.v().force_android_jar())) {
           // If Android related options are set, use 'dalvik' throw
           // analysis.
           return DalvikThrowAnalysis.v();

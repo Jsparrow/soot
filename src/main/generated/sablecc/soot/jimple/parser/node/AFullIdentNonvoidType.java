@@ -8,8 +8,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFullIdentNonvoidType extends PNonvoidType
 {
-    private TFullIdentifier _fullIdentifier_;
-    private final LinkedList<PArrayBrackets> _arrayBrackets_ = new LinkedList<PArrayBrackets>();
+    private TFullIdentifier fullIdentifier;
+    private final LinkedList<PArrayBrackets> arrayBrackets = new LinkedList<>();
 
     public AFullIdentNonvoidType()
     {
@@ -31,8 +31,8 @@ public final class AFullIdentNonvoidType extends PNonvoidType
     public Object clone()
     {
         return new AFullIdentNonvoidType(
-            cloneNode(this._fullIdentifier_),
-            cloneList(this._arrayBrackets_));
+            cloneNode(this.fullIdentifier),
+            cloneList(this.arrayBrackets));
     }
 
     @Override
@@ -43,14 +43,14 @@ public final class AFullIdentNonvoidType extends PNonvoidType
 
     public TFullIdentifier getFullIdentifier()
     {
-        return this._fullIdentifier_;
+        return this.fullIdentifier;
     }
 
     public void setFullIdentifier(TFullIdentifier node)
     {
-        if(this._fullIdentifier_ != null)
+        if(this.fullIdentifier != null)
         {
-            this._fullIdentifier_.parent(null);
+            this.fullIdentifier.parent(null);
         }
 
         if(node != null)
@@ -63,54 +63,46 @@ public final class AFullIdentNonvoidType extends PNonvoidType
             node.parent(this);
         }
 
-        this._fullIdentifier_ = node;
+        this.fullIdentifier = node;
     }
 
     public LinkedList<PArrayBrackets> getArrayBrackets()
     {
-        return this._arrayBrackets_;
+        return this.arrayBrackets;
     }
 
     public void setArrayBrackets(List<?> list)
     {
-        for(PArrayBrackets e : this._arrayBrackets_)
-        {
-            e.parent(null);
-        }
-        this._arrayBrackets_.clear();
+        this.arrayBrackets.forEach(e -> e.parent(null));
+        this.arrayBrackets.clear();
 
-        for(Object obj_e : list)
-        {
-            PArrayBrackets e = (PArrayBrackets) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PArrayBrackets) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._arrayBrackets_.add(e);
-        }
+			e.parent(this);
+			this.arrayBrackets.add(e);
+		});
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._fullIdentifier_)
-            + toString(this._arrayBrackets_);
+        return new StringBuilder().append("").append(toString(this.fullIdentifier)).append(toString(this.arrayBrackets)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._fullIdentifier_ == child)
+        if(this.fullIdentifier == child)
         {
-            this._fullIdentifier_ = null;
+            this.fullIdentifier = null;
             return;
         }
 
-        if(this._arrayBrackets_.remove(child))
+        if(this.arrayBrackets.remove(child))
         {
             return;
         }
@@ -122,13 +114,13 @@ public final class AFullIdentNonvoidType extends PNonvoidType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._fullIdentifier_ == oldChild)
+        if(this.fullIdentifier == oldChild)
         {
             setFullIdentifier((TFullIdentifier) newChild);
             return;
         }
 
-        for(ListIterator<PArrayBrackets> i = this._arrayBrackets_.listIterator(); i.hasNext();)
+        for(ListIterator<PArrayBrackets> i = this.arrayBrackets.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {

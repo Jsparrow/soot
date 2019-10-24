@@ -75,26 +75,26 @@ import soot.util.UnitMap;
  */
 public class LazyCodeMotion extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(LazyCodeMotion.class);
+private static final String PREFIX = "$lcm";
 
-  public LazyCodeMotion(Singletons.Global g) {
+public LazyCodeMotion(Singletons.Global g) {
   }
 
-  public static LazyCodeMotion v() {
+public static LazyCodeMotion v() {
     return G.v().soot_jimple_toolkits_scalar_pre_LazyCodeMotion();
   }
 
-  private static final String PREFIX = "$lcm";
-
-  /**
+/**
    * performs the lazy code motion.
    */
-  protected void internalTransform(Body b, String phaseName, Map<String, String> opts) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> opts) {
     LCMOptions options = new LCMOptions(opts);
-    HashMap<EquivalentValue, Local> expToHelper = new HashMap<EquivalentValue, Local>();
+    HashMap<EquivalentValue, Local> expToHelper = new HashMap<>();
     Chain<Unit> unitChain = b.getUnits();
 
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "] Performing Lazy Code Motion...");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("] Performing Lazy Code Motion...").toString());
     }
 
     if (options.unroll()) {
@@ -107,7 +107,8 @@ public class LazyCodeMotion extends BodyTransformer {
 
     /* map each unit to its RHS. only take binary expressions */
     Map<Unit, EquivalentValue> unitToEquivRhs = new UnitMap<EquivalentValue>(b, graph.size() + 1, 0.7f) {
-      protected EquivalentValue mapTo(Unit unit) {
+      @Override
+	protected EquivalentValue mapTo(Unit unit) {
         Value tmp = SootFilter.noInvokeRhs(unit);
         Value tmp2 = SootFilter.binop(tmp);
         if (tmp2 == null) {
@@ -119,15 +120,16 @@ public class LazyCodeMotion extends BodyTransformer {
 
     /* same as before, but without exception-throwing expressions */
     Map<Unit, EquivalentValue> unitToNoExceptionEquivRhs = new UnitMap<EquivalentValue>(b, graph.size() + 1, 0.7f) {
-      protected EquivalentValue mapTo(Unit unit) {
+      @Override
+	protected EquivalentValue mapTo(Unit unit) {
         Value tmp = SootFilter.binopRhs(unit);
         tmp = SootFilter.noExceptionThrowing(tmp);
         return SootFilter.equiVal(tmp);
       }
     };
 
-    FlowUniverse<EquivalentValue> universe = new CollectionFlowUniverse<EquivalentValue>(unitToEquivRhs.values());
-    BoundedFlowSet<EquivalentValue> set = new ArrayPackedSet<EquivalentValue>(universe);
+    FlowUniverse<EquivalentValue> universe = new CollectionFlowUniverse<>(unitToEquivRhs.values());
+    BoundedFlowSet<EquivalentValue> set = new ArrayPackedSet<>(universe);
 
     /* if a more precise sideeffect-tester comes out, please change it here! */
     SideEffectTester sideEffect;
@@ -154,15 +156,12 @@ public class LazyCodeMotion extends BodyTransformer {
       downSafe = new DownSafetyAnalysis(graph, unitToEquivRhs, sideEffect, set);
     } else {
       downSafe = new DownSafetyAnalysis(graph, unitToNoExceptionEquivRhs, sideEffect, set);
-      /* we include the exception-throwing expressions at their uses */
-      Iterator<Unit> unitIt = unitChain.iterator();
-      while (unitIt.hasNext()) {
-        Unit currentUnit = unitIt.next();
+      unitChain.forEach(currentUnit -> {
         EquivalentValue rhs = unitToEquivRhs.get(currentUnit);
         if (rhs != null) {
           downSafe.getFlowBefore(currentUnit).add(rhs);
         }
-      }
+      });
     }
 
     earliest = new EarliestnessComputation(graph, upSafe, downSafe, sideEffect, set);
@@ -209,9 +208,8 @@ public class LazyCodeMotion extends BodyTransformer {
     }
 
     { /* replace old computations by the helper-vars */
-      Iterator<Unit> unitIt = unitChain.iterator();
-      while (unitIt.hasNext()) {
-        Unit currentUnit = (Unit) unitIt.next();
+      for (Unit anUnitChain : unitChain) {
+        Unit currentUnit = (Unit) anUnitChain;
         EquivalentValue rhs = (EquivalentValue) unitToEquivRhs.get(currentUnit);
         if (rhs != null) {
           FlowSet<EquivalentValue> latestSet = latest.getFlowBefore(currentUnit);
@@ -238,7 +236,7 @@ public class LazyCodeMotion extends BodyTransformer {
       }
     }
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     Lazy Code Motion done.");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     Lazy Code Motion done.").toString());
     }
   }
 }

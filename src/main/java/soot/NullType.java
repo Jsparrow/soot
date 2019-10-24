@@ -36,23 +36,28 @@ public class NullType extends RefLikeType {
     return G.v().soot_NullType();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0x9891DFE1;
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "null_type";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseNullType(this);
   }
 
-  public Type getArrayElementType() {
+  @Override
+public Type getArrayElementType() {
     throw new RuntimeException("Attempt to get array base type of a non-array");
   }
 }

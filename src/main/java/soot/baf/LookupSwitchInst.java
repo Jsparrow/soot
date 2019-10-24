@@ -29,29 +29,29 @@ import soot.UnitBox;
 import soot.jimple.IntConstant;
 
 public interface LookupSwitchInst extends Inst {
-  public Unit getDefaultTarget();
+  Unit getDefaultTarget();
 
-  public void setDefaultTarget(Unit defTarget);
+  void setDefaultTarget(Unit defTarget);
 
-  public UnitBox getDefaultTargetBox();
+  UnitBox getDefaultTargetBox();
 
-  public void setLookupValue(int index, int value);
+  void setLookupValue(int index, int value);
 
-  public int getLookupValue(int index);
+  int getLookupValue(int index);
 
-  public List<IntConstant> getLookupValues();
+  List<IntConstant> getLookupValues();
 
-  public void setLookupValues(List<IntConstant> values);
+  void setLookupValues(List<IntConstant> values);
 
-  public int getTargetCount();
+  int getTargetCount();
 
-  public Unit getTarget(int index);
+  Unit getTarget(int index);
 
-  public UnitBox getTargetBox(int index);
+  UnitBox getTargetBox(int index);
 
-  public void setTarget(int index, Unit target);
+  void setTarget(int index, Unit target);
 
-  public List<Unit> getTargets();
+  List<Unit> getTargets();
 
-  public void setTargets(List<Unit> targets);
+  void setTargets(List<Unit> targets);
 }

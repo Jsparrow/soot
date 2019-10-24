@@ -44,7 +44,8 @@ public class GVirtualInvokeExpr extends AbstractVirtualInvokeExpr implements Pre
     }
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 950;
   }
 
@@ -52,15 +53,16 @@ public class GVirtualInvokeExpr extends AbstractVirtualInvokeExpr implements Pre
     String leftOp = opString;
 
     if (getBase() instanceof Precedence && ((Precedence) getBase()).getPrecedence() < getPrecedence()) {
-      leftOp = "(" + leftOp + ")";
+      leftOp = new StringBuilder().append("(").append(leftOp).append(")").toString();
     }
     return leftOp + rightString;
   }
 
-  public String toString() {
-    StringBuffer buffer = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder buffer = new StringBuilder();
 
-    buffer.append("." + methodRef.getSignature() + "(");
+    buffer.append(new StringBuilder().append(".").append(methodRef.getSignature()).append("(").toString());
 
     if (argBoxes != null) {
       for (int i = 0; i < argBoxes.length; i++) {
@@ -77,7 +79,8 @@ public class GVirtualInvokeExpr extends AbstractVirtualInvokeExpr implements Pre
     return toString(getBase(), getBase().toString(), buffer.toString());
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     if (PrecedenceTest.needsBrackets(baseBox, this)) {
       up.literal("(");
     }
@@ -102,7 +105,8 @@ public class GVirtualInvokeExpr extends AbstractVirtualInvokeExpr implements Pre
     up.literal(")");
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     ArrayList clonedArgs = new ArrayList(getArgCount());
 
     for (int i = 0; i < getArgCount(); i++) {

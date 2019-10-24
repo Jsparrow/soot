@@ -36,19 +36,23 @@ public class FloatType extends PrimType {
     return G.v().soot_FloatType();
   }
 
-  public boolean equals(Object t) {
+  @Override
+public boolean equals(Object t) {
     return this == t;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return 0xA84373FA;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "float";
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((TypeSwitch) sw).caseFloatType(this);
   }
 

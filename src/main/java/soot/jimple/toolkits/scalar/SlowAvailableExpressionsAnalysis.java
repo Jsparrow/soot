@@ -68,19 +68,19 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
     UnitGraph g = (UnitGraph) dg;
 
     /* we need a universe of all of the expressions. */
-    ArrayList<Value> exprs = new ArrayList<Value>();
+    ArrayList<Value> exprs = new ArrayList<>();
 
     // Consider "a + b". containingExprs maps a and b (object equality) both to "a + b" (equivalence).
     HashMap<EquivalentValue, Chain<EquivalentValue>> containingExprs
-        = new HashMap<EquivalentValue, Chain<EquivalentValue>>();
+        = new HashMap<>();
 
     // maps a Value to its EquivalentValue.
-    valueToEquivValue = new HashMap<Value, EquivalentValue>();
+    valueToEquivValue = new HashMap<>();
 
     // maps an rhs to its containing stmt. object equality in rhs.
-    rhsToContainingStmt = new HashMap<Value, Stmt>();
+    rhsToContainingStmt = new HashMap<>();
 
-    HashMap<EquivalentValue, Chain<Value>> equivValToSiblingList = new HashMap<EquivalentValue, Chain<Value>>();
+    HashMap<EquivalentValue, Chain<Value>> equivValToSiblingList = new HashMap<>();
 
     // Create the set of all expressions, and a map from values to their containing expressions.
     for (Unit u : g.getBody().getUnits()) {
@@ -97,7 +97,7 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
 
         Chain<Value> sibList = null;
         if (equivValToSiblingList.get(ev) == null) {
-          sibList = new HashChain<Value>();
+          sibList = new HashChain<>();
           equivValToSiblingList.put(ev, sibList);
         } else {
           sibList = equivValToSiblingList.get(ev);
@@ -124,7 +124,7 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
             }
 
             if (equivValToSiblingList.get(eo) == null) {
-              sibList = new HashChain<Value>();
+              sibList = new HashChain<>();
               equivValToSiblingList.put(eo, sibList);
             } else {
               sibList = equivValToSiblingList.get(eo);
@@ -137,7 +137,7 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
             if (containingExprs.containsKey(eo)) {
               l = containingExprs.get(eo);
             } else {
-              l = new HashChain<EquivalentValue>();
+              l = new HashChain<>();
               containingExprs.put(eo, l);
             }
 
@@ -149,33 +149,27 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
       }
     }
 
-    FlowUniverse<Value> exprUniv = new ArrayFlowUniverse<Value>(exprs.toArray(new Value[exprs.size()]));
-    emptySet = new ArrayPackedSet<Value>(exprUniv);
+    FlowUniverse<Value> exprUniv = new ArrayFlowUniverse<>(exprs.toArray(new Value[exprs.size()]));
+    emptySet = new ArrayPackedSet<>(exprUniv);
 
     // Create preserve sets.
     {
-      unitToPreserveSet = new HashMap<Unit, BoundedFlowSet<Value>>(g.size() * 2 + 1, 0.7f);
+      unitToPreserveSet = new HashMap<>(g.size() * 2 + 1, 0.7f);
 
       for (Unit s : g) {
-        BoundedFlowSet<Value> killSet = new ArrayPackedSet<Value>(exprUniv);
+        BoundedFlowSet<Value> killSet = new ArrayPackedSet<>(exprUniv);
 
         // We need to do more! In particular handle invokeExprs, etc.
 
         // For each def (say of x), kill the set of exprs containing x.
-        for (ValueBox box : s.getDefBoxes()) {
-          Value v = box.getValue();
-          EquivalentValue ev = valueToEquivValue.get(v);
-
-          Chain<EquivalentValue> c = containingExprs.get(ev);
-          if (c != null) {
-            for (EquivalentValue container : c) {
-              // Add all siblings of it.next().
-              for (Value sibVal : equivValToSiblingList.get(container)) {
-                killSet.add(sibVal, killSet);
-              }
-            }
-          }
-        }
+		s.getDefBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+			EquivalentValue ev = valueToEquivValue.get(v);
+			Chain<EquivalentValue> c = containingExprs.get(ev);
+			if (c != null) {
+			    // Add all siblings of it.next().
+				c.forEach(container -> equivValToSiblingList.get(container).forEach(sibVal -> killSet.add(sibVal, killSet)));
+			  }
+		});
 
         // Store complement
         killSet.complement(killSet);
@@ -185,10 +179,10 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
 
     // Create generate sets
     {
-      unitToGenerateSet = new HashMap<Unit, BoundedFlowSet<Value>>(g.size() * 2 + 1, 0.7f);
+      unitToGenerateSet = new HashMap<>(g.size() * 2 + 1, 0.7f);
 
       for (Unit s : g) {
-        BoundedFlowSet<Value> genSet = new ArrayPackedSet<Value>(exprUniv);
+        BoundedFlowSet<Value> genSet = new ArrayPackedSet<>(exprUniv);
         // In Jimple, expressions only occur as the RHS of an AssignStmt.
         if (s instanceof AssignStmt)
 
@@ -223,17 +217,20 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
     doAnalysis();
   }
 
-  protected FlowSet<Value> newInitialFlow() {
+  @Override
+protected FlowSet<Value> newInitialFlow() {
     BoundedFlowSet<Value> out = (BoundedFlowSet<Value>) emptySet.clone();
     out.complement(out);
     return out;
   }
 
-  protected FlowSet<Value> entryInitialFlow() {
+  @Override
+protected FlowSet<Value> entryInitialFlow() {
     return emptySet.clone();
   }
 
-  protected void flowThrough(FlowSet<Value> in, Unit unit, FlowSet<Value> out) {
+  @Override
+protected void flowThrough(FlowSet<Value> in, Unit unit, FlowSet<Value> out) {
     // Perform kill
     in.intersection(unitToPreserveSet.get(unit), out);
 
@@ -241,11 +238,13 @@ public class SlowAvailableExpressionsAnalysis extends ForwardFlowAnalysis<Unit, 
     out.union(unitToGenerateSet.get(unit), out);
   }
 
-  protected void merge(FlowSet<Value> inSet1, FlowSet<Value> inSet2, FlowSet<Value> outSet) {
+  @Override
+protected void merge(FlowSet<Value> inSet1, FlowSet<Value> inSet2, FlowSet<Value> outSet) {
     inSet1.intersection(inSet2, outSet);
   }
 
-  protected void copy(FlowSet<Value> sourceSet, FlowSet<Value> destSet) {
+  @Override
+protected void copy(FlowSet<Value> sourceSet, FlowSet<Value> destSet) {
     sourceSet.copy(destSet);
   }
 }

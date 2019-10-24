@@ -44,66 +44,61 @@ public class HashMultiMap<K, V> extends AbstractMultiMap<K, V> {
   protected final Map<K, Set<V>> m;
   protected final float loadFactor;
 
-  protected Map<K, Set<V>> createMap() {
-    return createMap(0);
-  }
-
-  protected Map<K, Set<V>> createMap(int initialSize) {
-    return new HashMap<K, Set<V>>(initialSize, loadFactor);
-  }
-
   public HashMultiMap() {
     this.loadFactor = DEFAULT_LOAD_FACTOR;
     this.m = createMap();
   }
 
-  public HashMultiMap(int initialSize) {
+public HashMultiMap(int initialSize) {
     this.loadFactor = DEFAULT_LOAD_FACTOR;
     this.m = createMap(initialSize);
   }
 
-  public HashMultiMap(int initialSize, float loadFactor) {
+public HashMultiMap(int initialSize, float loadFactor) {
     this.loadFactor = loadFactor;
     this.m = createMap(initialSize);
   }
 
-  public HashMultiMap(MultiMap<K, V> m) {
+public HashMultiMap(MultiMap<K, V> m) {
     this.loadFactor = DEFAULT_LOAD_FACTOR;
     this.m = createMap();
     putAll(m);
   }
 
-  public HashMultiMap(Map<K, Set<V>> m) {
+public HashMultiMap(Map<K, Set<V>> m) {
     this.loadFactor = DEFAULT_LOAD_FACTOR;
     this.m = createMap();
     putAll(m);
   }
 
-  @Override
+protected Map<K, Set<V>> createMap() {
+    return createMap(0);
+  }
+
+protected Map<K, Set<V>> createMap(int initialSize) {
+    return new HashMap<>(initialSize, loadFactor);
+  }
+
+@Override
   public int numKeys() {
     return m.size();
   }
 
-  @Override
+@Override
   public boolean containsKey(Object key) {
     return m.containsKey(key);
   }
 
-  @Override
+@Override
   public boolean containsValue(V value) {
-    for (Set<V> s : m.values()) {
-      if (s.contains(value)) {
-        return true;
-      }
-    }
-    return false;
+    return m.values().stream().anyMatch(s -> s.contains(value));
   }
 
-  protected Set<V> newSet() {
-    return new HashSet<V>(4);
+protected Set<V> newSet() {
+    return new HashSet<>(4);
   }
 
-  private Set<V> findSet(K key) {
+private Set<V> findSet(K key) {
     Set<V> s = m.get(key);
     if (s == null) {
       s = newSet();
@@ -112,12 +107,12 @@ public class HashMultiMap<K, V> extends AbstractMultiMap<K, V> {
     return s;
   }
 
-  @Override
+@Override
   public boolean put(K key, V value) {
     return findSet(key).add(value);
   }
 
-  @Override
+@Override
   public boolean putAll(K key, Set<V> values) {
     if (values.isEmpty()) {
       return false;
@@ -125,7 +120,7 @@ public class HashMultiMap<K, V> extends AbstractMultiMap<K, V> {
     return findSet(key).addAll(values);
   }
 
-  @Override
+@Override
   public boolean remove(K key, V value) {
     Set<V> s = m.get(key);
     if (s == null) {
@@ -138,12 +133,12 @@ public class HashMultiMap<K, V> extends AbstractMultiMap<K, V> {
     return ret;
   }
 
-  @Override
+@Override
   public boolean remove(K key) {
     return null != m.remove(key);
   }
 
-  @Override
+@Override
   public boolean removeAll(K key, Set<V> values) {
     Set<V> s = m.get(key);
     if (s == null) {
@@ -156,7 +151,7 @@ public class HashMultiMap<K, V> extends AbstractMultiMap<K, V> {
     return ret;
   }
 
-  @Override
+@Override
   public Set<V> get(K o) {
     Set<V> ret = m.get(o);
     if (ret == null) {
@@ -166,21 +161,19 @@ public class HashMultiMap<K, V> extends AbstractMultiMap<K, V> {
     }
   }
 
-  @Override
+@Override
   public Set<K> keySet() {
     return m.keySet();
   }
 
-  @Override
+@Override
   public Set<V> values() {
-    Set<V> ret = new HashSet<V>(m.size());
-    for (Set<V> s : m.values()) {
-      ret.addAll(s);
-    }
+    Set<V> ret = new HashSet<>(m.size());
+    m.values().forEach(ret::addAll);
     return ret;
   }
 
-  @Override
+@Override
   public boolean equals(Object o) {
     if (!(o instanceof MultiMap)) {
       return false;
@@ -201,17 +194,17 @@ public class HashMultiMap<K, V> extends AbstractMultiMap<K, V> {
     return true;
   }
 
-  @Override
+@Override
   public int hashCode() {
     return m.hashCode();
   }
 
-  @Override
+@Override
   public int size() {
     return m.size();
   }
 
-  @Override
+@Override
   public void clear() {
     m.clear();
   }

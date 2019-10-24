@@ -62,12 +62,12 @@ public class ArraySet<E> extends AbstractSet<E> {
   }
 
   @Override
-  final public void clear() {
+  public final void clear() {
     numElements = 0;
   }
 
   @Override
-  final public boolean contains(Object obj) {
+  public final boolean contains(Object obj) {
     for (int i = 0; i < numElements; i++) {
       if (elements[i].equals(obj)) {
         return true;
@@ -80,7 +80,7 @@ public class ArraySet<E> extends AbstractSet<E> {
   /**
    * Add an element without checking whether it is already in the set. It is up to the caller to guarantee that it isn't.
    */
-  final public boolean addElement(E e) {
+  public final boolean addElement(E e) {
     if (e == null) {
       throw new RuntimeException("oops");
     }
@@ -95,7 +95,7 @@ public class ArraySet<E> extends AbstractSet<E> {
   }
 
   @Override
-  final public boolean add(E e) {
+  public final boolean add(E e) {
     if (e == null) {
       throw new RuntimeException("oops");
     }
@@ -115,7 +115,7 @@ public class ArraySet<E> extends AbstractSet<E> {
 
   @Override
   @SuppressWarnings("unchecked")
-  final public boolean addAll(Collection<? extends E> s) {
+  public final boolean addAll(Collection<? extends E> s) {
     boolean ret = false;
     if (!(s instanceof ArraySet)) {
       return super.addAll(s);
@@ -130,49 +130,16 @@ public class ArraySet<E> extends AbstractSet<E> {
   }
 
   @Override
-  final public int size() {
+  public final int size() {
     return numElements;
   }
 
   @Override
-  final public Iterator<E> iterator() {
-    return new ArrayIterator<E>();
+  public final Iterator<E> iterator() {
+    return new ArrayIterator<>();
   }
 
-  private class ArrayIterator<V> implements Iterator<V> {
-    int nextIndex;
-
-    ArrayIterator() {
-      nextIndex = 0;
-    }
-
-    @Override
-    final public boolean hasNext() {
-      return nextIndex < numElements;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    final public V next() throws NoSuchElementException {
-      if (!(nextIndex < numElements)) {
-        throw new NoSuchElementException();
-      }
-
-      return (V) elements[nextIndex++];
-    }
-
-    @Override
-    final public void remove() throws NoSuchElementException {
-      if (nextIndex == 0) {
-        throw new NoSuchElementException();
-      } else {
-        removeElementAt(nextIndex - 1);
-        nextIndex = nextIndex - 1;
-      }
-    }
-  }
-
-  final private void removeElementAt(int index) {
+  private final void removeElementAt(int index) {
     // Handle simple case
     if (index == numElements - 1) {
       numElements--;
@@ -184,7 +151,7 @@ public class ArraySet<E> extends AbstractSet<E> {
     numElements--;
   }
 
-  final private void doubleCapacity() {
+private final void doubleCapacity() {
     // plus one to ensure that we have at least one element
     int newSize = maxElements * 2 + 1;
 
@@ -195,17 +162,17 @@ public class ArraySet<E> extends AbstractSet<E> {
     maxElements = newSize;
   }
 
-  @Override
-  final public Object[] toArray() {
+@Override
+  public final Object[] toArray() {
     Object[] array = new Object[numElements];
 
     System.arraycopy(elements, 0, array, 0, numElements);
     return array;
   }
 
-  @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
   @Override
-  final public <T> T[] toArray(T[] array) {
+  public final <T> T[] toArray(T[] array) {
     if (array.length < numElements) {
       return (T[]) Arrays.copyOf(elements, numElements, array.getClass());
     } else {
@@ -217,28 +184,61 @@ public class ArraySet<E> extends AbstractSet<E> {
     }
   }
 
-  final public Object[] getUnderlyingArray() {
+public final Object[] getUnderlyingArray() {
     return elements;
   }
 
+private class ArrayIterator<V> implements Iterator<V> {
+    int nextIndex;
+
+    ArrayIterator() {
+      nextIndex = 0;
+    }
+
+    @Override
+    public final boolean hasNext() {
+      return nextIndex < numElements;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public final V next() {
+      if (!(nextIndex < numElements)) {
+        throw new NoSuchElementException();
+      }
+
+      return (V) elements[nextIndex++];
+    }
+
+    @Override
+    public final void remove() {
+      if (nextIndex == 0) {
+        throw new NoSuchElementException();
+      } else {
+        removeElementAt(nextIndex - 1);
+        nextIndex -= 1;
+      }
+    }
+  }
+
   class Array {
-    private final int DEFAULT_SIZE = 8;
+    private final int defaultSize = 8;
 
     private int numElements;
     private int maxElements;
     private Object[] elements;
 
-    final public void clear() {
-      numElements = 0;
-    }
-
     public Array() {
-      elements = new Object[DEFAULT_SIZE];
-      maxElements = DEFAULT_SIZE;
+      elements = new Object[defaultSize];
+      maxElements = defaultSize;
       numElements = 0;
     }
 
-    final private void doubleCapacity() {
+	public final void clear() {
+      numElements = 0;
+    }
+
+	private final void doubleCapacity() {
       int newSize = maxElements * 2;
 
       Object[] newElements = new Object[newSize];
@@ -248,7 +248,7 @@ public class ArraySet<E> extends AbstractSet<E> {
       maxElements = newSize;
     }
 
-    final public void addElement(Object e) {
+	public final void addElement(Object e) {
       // Expand array if necessary
       if (numElements == maxElements) {
         doubleCapacity();
@@ -258,7 +258,7 @@ public class ArraySet<E> extends AbstractSet<E> {
       elements[numElements++] = e;
     }
 
-    final public void insertElementAt(Object e, int index) {
+	public final void insertElementAt(Object e, int index) {
       // Expaxpand array if necessary
       if (numElements == maxElements) {
         doubleCapacity();
@@ -276,7 +276,7 @@ public class ArraySet<E> extends AbstractSet<E> {
       numElements++;
     }
 
-    final public boolean contains(Object e) {
+	public final boolean contains(Object e) {
       for (int i = 0; i < numElements; i++) {
         if (elements[i].equals(e)) {
           return true;
@@ -286,15 +286,15 @@ public class ArraySet<E> extends AbstractSet<E> {
       return false;
     }
 
-    final public int size() {
+	public final int size() {
       return numElements;
     }
 
-    final public Object elementAt(int index) {
+	public final Object elementAt(int index) {
       return elements[index];
     }
 
-    final public void removeElementAt(int index) {
+	public final void removeElementAt(int index) {
       // Handle simple case
       if (index == numElements - 1) {
         numElements--;

@@ -47,6 +47,8 @@ import soot.dava.internal.javaRep.DIntConstant;
 import soot.dava.internal.javaRep.DNotExpr;
 import soot.dava.toolkits.base.AST.analysis.DepthFirstAdapter;
 import soot.dava.toolkits.base.AST.traversals.ASTParentNodeFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * if (true)   ---> remove conditional copy ifbody to parent
@@ -72,7 +74,8 @@ import soot.dava.toolkits.base.AST.traversals.ASTParentNodeFinder;
  */
 public class EliminateConditions extends DepthFirstAdapter {
 
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(EliminateConditions.class);
+public static boolean DEBUG = false;
   public boolean modified = false;
 
   ASTParentNodeFinder finder;
@@ -80,7 +83,6 @@ public class EliminateConditions extends DepthFirstAdapter {
   List<Object> bodyContainingNode = null;
 
   public EliminateConditions(ASTMethodNode AST) {
-    super();
     finder = new ASTParentNodeFinder();
     this.AST = AST;
   }
@@ -91,7 +93,8 @@ public class EliminateConditions extends DepthFirstAdapter {
     this.AST = AST;
   }
 
-  public void normalRetrieving(ASTNode node) {
+  @Override
+public void normalRetrieving(ASTNode node) {
     modified = false;
     if (node instanceof ASTSwitchNode) {
       do {
@@ -118,7 +121,7 @@ public class EliminateConditions extends DepthFirstAdapter {
             break;
           } else {
             if (DEBUG) {
-              System.out.println("returned is null" + temp.getClass());
+              logger.info("returned is null" + temp.getClass());
             }
             bodyContainingNode = null;
           }
@@ -146,7 +149,7 @@ public class EliminateConditions extends DepthFirstAdapter {
       return null;
     }
 
-    if (cond == null || !(cond instanceof ASTUnaryCondition)) {
+    if (!(cond instanceof ASTUnaryCondition)) {
       return null;
     }
 
@@ -180,17 +183,15 @@ public class EliminateConditions extends DepthFirstAdapter {
 
     ASTNode parent = (ASTNode) temp;
     List<Object> subBodies = parent.get_SubBodies();
-    Iterator<Object> it = subBodies.iterator();
-
     int index = -1;
-    while (it.hasNext()) {
-      bodyContainingNode = (List<Object>) it.next();
+    for (Object subBodie : subBodies) {
+      bodyContainingNode = (List<Object>) subBodie;
       index = bodyContainingNode.indexOf(node);
       if (index < 0) {
         bodyContainingNode = null;
       } else {
         // bound the body containing Node
-        return new Boolean(trueOrFalse);
+        return Boolean.valueOf(trueOrFalse);
       }
     }
     return null;
@@ -208,7 +209,7 @@ public class EliminateConditions extends DepthFirstAdapter {
     }
 
     if (DEBUG) {
-      System.out.println("Found Constant");
+      logger.info("Found Constant");
     }
 
     DIntConstant intConst = (DIntConstant) internal;
@@ -219,13 +220,13 @@ public class EliminateConditions extends DepthFirstAdapter {
 
     // either true or false
     if (DEBUG) {
-      System.out.println("Found Boolean Constant");
+      logger.info("Found Boolean Constant");
     }
 
     if (intConst.value == 1) {
-      return new Boolean(true);
+      return Boolean.valueOf(true);
     } else if (intConst.value == 0) {
-      return new Boolean(false);
+      return Boolean.valueOf(false);
     } else {
       throw new RuntimeException("BooleanType found with value different than 0 or 1");
     }
@@ -239,7 +240,7 @@ public class EliminateConditions extends DepthFirstAdapter {
       return null;
     }
 
-    if (cond == null || !(cond instanceof ASTUnaryCondition)) {
+    if (!(cond instanceof ASTUnaryCondition)) {
       return null;
     }
 
@@ -283,27 +284,27 @@ public class EliminateConditions extends DepthFirstAdapter {
     if (index >= 0) {
       // bound the body containing Node
       bodyContainingNode = tryBody;
-      return new Boolean(trueOrFalse);
+      return Boolean.valueOf(trueOrFalse);
     }
 
     List<Object> catchList = parent.get_CatchList();
-    Iterator<Object> it = catchList.iterator();
-    while (it.hasNext()) {
-      ASTTryNode.container catchBody = (ASTTryNode.container) it.next();
+    for (Object aCatchList : catchList) {
+      ASTTryNode.container catchBody = (ASTTryNode.container) aCatchList;
 
       List<Object> body = (List<Object>) catchBody.o;
       index = body.indexOf(node);
       if (index >= 0) {
         // bound the body containing Node
         bodyContainingNode = body;
-        return new Boolean(trueOrFalse);
+        return Boolean.valueOf(trueOrFalse);
       }
 
     }
     return null;
   }
 
-  public void caseASTTryNode(ASTTryNode node) {
+  @Override
+public void caseASTTryNode(ASTTryNode node) {
     modified = false;
     inASTTryNode(node);
     // get try body iterator
@@ -382,7 +383,7 @@ public class EliminateConditions extends DepthFirstAdapter {
 
       int index = bodyContainingNode.indexOf(temp);
       if (DEBUG) {
-        System.out.println("in change");
+        logger.info("in change");
       }
       if (temp instanceof ASTIfNode) {
         bodyContainingNode.remove(temp);
@@ -403,7 +404,7 @@ public class EliminateConditions extends DepthFirstAdapter {
           }
         }
         if (DEBUG) {
-          System.out.println("Removed if" + temp);
+          logger.info("Removed if" + temp);
         }
         return true;
       } else if (temp instanceof ASTIfElseNode) {
@@ -459,10 +460,7 @@ public class EliminateConditions extends DepthFirstAdapter {
     List<Object> indexList = node.getIndexList();
     Map<Object, List<Object>> index2BodyList = node.getIndex2BodyList();
 
-    Iterator<Object> it = indexList.iterator();
-    while (it.hasNext()) {
-      // going through all the cases of the switch statement
-      Object currentIndex = it.next();
+    for (Object currentIndex : indexList) {
       List body = index2BodyList.get(currentIndex);
 
       if (body != null) {

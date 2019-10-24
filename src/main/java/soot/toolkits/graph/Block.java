@@ -42,10 +42,13 @@ import soot.util.Chain;
  */
 public class Block implements Iterable<Unit> {
   private static final Logger logger = LoggerFactory.getLogger(Block.class);
-  private Unit mHead, mTail;
+  private Unit mHead;
+private Unit mTail;
   private final Body mBody;
-  private List<Block> mPreds, mSuccessors;
-  private int mBlockLength = 0, mIndexInMethod = 0;
+  private List<Block> mPreds;
+private List<Block> mSuccessors;
+  private int mBlockLength = 0;
+private int mIndexInMethod = 0;
 
   /**
    * Constructs a Block in the context of a BlockGraph, and enclosing Body instances.
@@ -97,7 +100,8 @@ public class Block implements Iterable<Unit> {
    * @see Chain
    * @see Unit
    */
-  public Iterator<Unit> iterator() {
+  @Override
+public Iterator<Unit> iterator() {
     if (mBody != null) {
       Chain<Unit> units = mBody.getUnits();
       return units.iterator(mHead, mTail);
@@ -283,27 +287,20 @@ public class Block implements Iterable<Unit> {
     return "Block #" + mIndexInMethod;
   }
 
-  public String toString() {
-    StringBuffer strBuf = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder strBuf = new StringBuilder();
 
     // print out predecessors.
 
-    strBuf.append("Block " + mIndexInMethod + ":" + System.getProperty("line.separator"));
+    strBuf.append(new StringBuilder().append("Block ").append(mIndexInMethod).append(":").append(System.getProperty("line.separator")).toString());
     strBuf.append("[preds: ");
     if (mPreds != null) {
-      Iterator<Block> it = mPreds.iterator();
-      while (it.hasNext()) {
-
-        strBuf.append(it.next().getIndexInMethod() + " ");
-      }
+      mPreds.forEach(mPred -> strBuf.append(mPred.getIndexInMethod() + " "));
     }
     strBuf.append("] [succs: ");
     if (mSuccessors != null) {
-      Iterator<Block> it = mSuccessors.iterator();
-      while (it.hasNext()) {
-
-        strBuf.append(it.next().getIndexInMethod() + " ");
-      }
+      mSuccessors.forEach(mSuccessor -> strBuf.append(mSuccessor.getIndexInMethod() + " "));
 
     }
 
@@ -316,19 +313,19 @@ public class Block implements Iterable<Unit> {
 
     if (basicBlockIt.hasNext()) {
       Unit someUnit = (Unit) basicBlockIt.next();
-      strBuf.append(someUnit.toString() + ";" + System.getProperty("line.separator"));
+      strBuf.append(new StringBuilder().append(someUnit.toString()).append(";").append(System.getProperty("line.separator")).toString());
       while (basicBlockIt.hasNext()) {
         someUnit = (Unit) basicBlockIt.next();
         if (someUnit == mTail) {
           break;
         }
-        strBuf.append(someUnit.toString() + ";" + System.getProperty("line.separator"));
+        strBuf.append(new StringBuilder().append(someUnit.toString()).append(";").append(System.getProperty("line.separator")).toString());
       }
       someUnit = mTail;
       if (mTail == null) {
-        strBuf.append("error: null tail found; block length: " + mBlockLength + "" + System.getProperty("line.separator"));
+        strBuf.append(new StringBuilder().append("error: null tail found; block length: ").append(mBlockLength).append("").append(System.getProperty("line.separator")).toString());
       } else if (mHead != mTail) {
-        strBuf.append(someUnit.toString() + ";" + System.getProperty("line.separator"));
+        strBuf.append(new StringBuilder().append(someUnit.toString()).append(";").append(System.getProperty("line.separator")).toString());
       }
 
     }

@@ -29,7 +29,8 @@ public class Zone {
     this.name = name;
   }
 
-  public String toString() {
-    return "<zone: " + name + ">";
+  @Override
+public String toString() {
+    return new StringBuilder().append("<zone: ").append(name).append(">").toString();
   }
 }

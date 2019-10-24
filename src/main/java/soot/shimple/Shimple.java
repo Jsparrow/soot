@@ -201,12 +201,11 @@ public class Shimple {
 
     Value right = ((AssignStmt) unit).getRightOp();
 
-    if (right instanceof ShimpleExpr) {
-      Value left = ((AssignStmt) unit).getLeftOp();
-      return (Local) left;
-    }
-
-    return null;
+    if (!(right instanceof ShimpleExpr)) {
+		return null;
+	}
+	Value left = ((AssignStmt) unit).getLeftOp();
+	return (Local) left;
   }
 
   /**
@@ -243,8 +242,8 @@ public class Shimple {
 
     /* Ok, continuing... */
 
-    Set<Unit> preds = new HashSet<Unit>();
-    Set<PhiExpr> phis = new HashSet<PhiExpr>();
+    Set<Unit> preds = new HashSet<>();
+    Set<PhiExpr> phis = new HashSet<>();
 
     // find fall-through pred
     if (!remove.equals(units.getFirst())) {
@@ -255,26 +254,22 @@ public class Shimple {
     }
 
     // find the rest of the preds and all Phi's that point to remove
-    for (Unit unit : units) {
-      for (UnitBox targetBox : unit.getUnitBoxes()) {
-        if (remove.equals(targetBox.getUnit())) {
-          if (targetBox.isBranchTarget()) {
-            preds.add(unit);
-          } else {
-            PhiExpr phiExpr = Shimple.getPhiExpr(unit);
-            if (phiExpr != null) {
-              phis.add(phiExpr);
-            }
-          }
-        }
-      }
-    }
+	units.forEach(unit -> unit.getUnitBoxes().stream().filter(targetBox -> remove.equals(targetBox.getUnit())).forEach(targetBox -> {
+		if (targetBox.isBranchTarget()) {
+			preds.add(unit);
+		} else {
+			PhiExpr phiExpr = Shimple.getPhiExpr(unit);
+			if (phiExpr != null) {
+				phis.add(phiExpr);
+			}
+		}
+	}));
 
     /* sanity check */
 
     if (phis.size() == 0) {
       if (debug) {
-        logger.warn("Orphaned UnitBoxes to " + remove + "? Shimple.redirectToPreds is giving up.");
+        logger.warn(new StringBuilder().append("Orphaned UnitBoxes to ").append(remove).append("? Shimple.redirectToPreds is giving up.").toString());
       }
       return;
     }
@@ -282,19 +277,19 @@ public class Shimple {
     if (preds.size() == 0) {
       if (debug) {
         logger
-            .warn("Shimple.redirectToPreds couldn't find any predecessors for " + remove + " in " + body.getMethod() + ".");
+            .warn(new StringBuilder().append("Shimple.redirectToPreds couldn't find any predecessors for ").append(remove).append(" in ").append(body.getMethod()).append(".").toString());
       }
 
       if (!remove.equals(units.getFirst())) {
         Unit pred = (Unit) units.getPredOf(remove);
         if (debug) {
-          logger.warn("Falling back to immediate chain predecessor: " + pred + ".");
+          logger.warn(new StringBuilder().append("Falling back to immediate chain predecessor: ").append(pred).append(".").toString());
         }
         preds.add(pred);
       } else if (!remove.equals(units.getLast())) {
         Unit succ = (Unit) units.getSuccOf(remove);
         if (debug) {
-          logger.warn("Falling back to immediate chain successor: " + succ + ".");
+          logger.warn(new StringBuilder().append("Falling back to immediate chain successor: ").append(succ).append(".").toString());
         }
         preds.add(succ);
       } else {
@@ -304,10 +299,7 @@ public class Shimple {
 
     /* At this point we have found all the preds and relevant Phi's */
 
-    /* Each Phi needs an argument for each pred. */
-    Iterator<PhiExpr> phiIt = phis.iterator();
-    while (phiIt.hasNext()) {
-      PhiExpr phiExpr = phiIt.next();
+    for (PhiExpr phiExpr : phis) {
       ValueUnitPair argBox = phiExpr.getArgBox(remove);
 
       if (argBox == null) {
@@ -318,12 +310,7 @@ public class Shimple {
       Value arg = argBox.getValue();
       phiExpr.removeArg(argBox);
 
-      // add new arguments to Phi
-      Iterator<Unit> predsIt = preds.iterator();
-      while (predsIt.hasNext()) {
-        Unit pred = predsIt.next();
-        phiExpr.addArg(arg, pred);
-      }
+      preds.forEach(pred -> phiExpr.addArg(arg, pred));
     }
   }
 

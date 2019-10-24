@@ -7,10 +7,10 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ACastExpression extends PExpression
 {
-    private TLParen _lParen_;
-    private PNonvoidType _nonvoidType_;
-    private TRParen _rParen_;
-    private PImmediate _immediate_;
+    private TLParen lParen;
+    private PNonvoidType nonvoidType;
+    private TRParen rParen;
+    private PImmediate immediate;
 
     public ACastExpression()
     {
@@ -38,10 +38,10 @@ public final class ACastExpression extends PExpression
     public Object clone()
     {
         return new ACastExpression(
-            cloneNode(this._lParen_),
-            cloneNode(this._nonvoidType_),
-            cloneNode(this._rParen_),
-            cloneNode(this._immediate_));
+            cloneNode(this.lParen),
+            cloneNode(this.nonvoidType),
+            cloneNode(this.rParen),
+            cloneNode(this.immediate));
     }
 
     @Override
@@ -52,14 +52,14 @@ public final class ACastExpression extends PExpression
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -72,19 +72,19 @@ public final class ACastExpression extends PExpression
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PNonvoidType getNonvoidType()
     {
-        return this._nonvoidType_;
+        return this.nonvoidType;
     }
 
     public void setNonvoidType(PNonvoidType node)
     {
-        if(this._nonvoidType_ != null)
+        if(this.nonvoidType != null)
         {
-            this._nonvoidType_.parent(null);
+            this.nonvoidType.parent(null);
         }
 
         if(node != null)
@@ -97,19 +97,19 @@ public final class ACastExpression extends PExpression
             node.parent(this);
         }
 
-        this._nonvoidType_ = node;
+        this.nonvoidType = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -122,19 +122,19 @@ public final class ACastExpression extends PExpression
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -147,44 +147,41 @@ public final class ACastExpression extends PExpression
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._lParen_)
-            + toString(this._nonvoidType_)
-            + toString(this._rParen_)
-            + toString(this._immediate_);
+        return new StringBuilder().append("").append(toString(this.lParen)).append(toString(this.nonvoidType)).append(toString(this.rParen)).append(toString(this.immediate))
+				.toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._nonvoidType_ == child)
+        if(this.nonvoidType == child)
         {
-            this._nonvoidType_ = null;
+            this.nonvoidType = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
@@ -195,25 +192,25 @@ public final class ACastExpression extends PExpression
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._nonvoidType_ == oldChild)
+        if(this.nonvoidType == oldChild)
         {
             setNonvoidType((PNonvoidType) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;
         }
 
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;

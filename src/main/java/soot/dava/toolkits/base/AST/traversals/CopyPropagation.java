@@ -49,6 +49,8 @@ import soot.dava.toolkits.base.AST.structuredAnalysis.DavaFlowSet;
 import soot.dava.toolkits.base.AST.structuredAnalysis.ReachingCopies;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * TODO: shouldnt this be a transformation and hence under the transformation package???
@@ -74,7 +76,9 @@ import soot.jimple.Stmt;
  */
 
 public class CopyPropagation extends DepthFirstAdapter {
-  public static boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(CopyPropagation.class);
+
+public static boolean DEBUG = false;
 
   ASTNode AST;
 
@@ -92,7 +96,6 @@ public class CopyPropagation extends DepthFirstAdapter {
   boolean ASTMODIFIED;
 
   public CopyPropagation(ASTNode AST) {
-    super();
     someCopyStmtModified = false;
     this.AST = AST;
     ASTMODIFIED = false;
@@ -110,13 +113,13 @@ public class CopyPropagation extends DepthFirstAdapter {
   private void setup() {
     // create the uD and dU chains
     if (DEBUG) {
-      System.out.println("computing usesAnd Defs");
+      logger.info("computing usesAnd Defs");
     }
     useDefs = new ASTUsesAndDefs(AST);
     AST.apply(useDefs);
 
     if (DEBUG) {
-      System.out.println("computing usesAnd Defs....done");
+      logger.info("computing usesAnd Defs....done");
     }
 
     // apply the reaching copies Structural flow Analysis
@@ -129,27 +132,26 @@ public class CopyPropagation extends DepthFirstAdapter {
   /*
    * If any copy stmt was removed or any substitution made we might be able to get better results by redoing the analysis
    */
-  public void outASTMethodNode(ASTMethodNode node) {
-    if (ASTMODIFIED) {
-      // need to rerun copy prop
-
-      // before running a structured flow analysis have to do this one
+  @Override
+public void outASTMethodNode(ASTMethodNode node) {
+    // need to rerun copy prop
+	// System.out.println("\n\n\nCOPY PROP\n\n\n\n");
+	if (!ASTMODIFIED) {
+		return;
+	}
+	// before running a structured flow analysis have to do this one
       AST.apply(ClosestAbruptTargetFinder.v());
-
-      // System.out.println("\n\n\nCOPY PROP\n\n\n\n");
-
-      CopyPropagation prop1 = new CopyPropagation(AST);
-      AST.apply(prop1);
-    }
+	CopyPropagation prop1 = new CopyPropagation(AST);
+	AST.apply(prop1);
   }
 
-  public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
-    for (AugmentedStmt as : node.getStatements()) {
-      Stmt s = as.get_Stmt();
-      if (isCopyStmt(s)) {
-        handleCopyStmt((DefinitionStmt) s);
-      }
-    }
+  @Override
+public void inASTStatementSequenceNode(ASTStatementSequenceNode node) {
+    node.getStatements().stream().map(AugmentedStmt::get_Stmt).forEach(s -> {
+		if (isCopyStmt(s)) {
+		    handleCopyStmt((DefinitionStmt) s);
+		  }
+	});
   }
 
   /*
@@ -197,8 +199,8 @@ public class CopyPropagation extends DepthFirstAdapter {
     // check if uses is non-empty
     if (uses.size() != 0) {
       if (DEBUG) {
-        System.out.println(">>>>The defined local:" + definedLocal + " is used in the following");
-        System.out.println("\n numof uses:" + uses.size() + uses + ">>>>>>>>>>>>>>>\n\n");
+        logger.info(new StringBuilder().append(">>>>The defined local:").append(definedLocal).append(" is used in the following").toString());
+        logger.info(new StringBuilder().append("\n numof uses:").append(uses.size()).append(uses).append(">>>>>>>>>>>>>>>\n\n").toString());
       }
 
       // continuing with copy propagation algorithm
@@ -234,7 +236,7 @@ public class CopyPropagation extends DepthFirstAdapter {
       while (useIt.hasNext()) {
         Object tempUse = useIt.next();
         if (DEBUG) {
-          System.out.println("copy stmt reached this use" + tempUse);
+          logger.info("copy stmt reached this use" + tempUse);
         }
         replace(leftLocal, rightLocal, tempUse);
       }
@@ -272,15 +274,15 @@ public class CopyPropagation extends DepthFirstAdapter {
     }
     ASTStatementSequenceNode parentNode = (ASTStatementSequenceNode) parent;
 
-    ArrayList<AugmentedStmt> newSequence = new ArrayList<AugmentedStmt>();
+    ArrayList<AugmentedStmt> newSequence = new ArrayList<>();
 
-    for (AugmentedStmt as : parentNode.getStatements()) {
+    parentNode.getStatements().forEach(as -> {
       Stmt s = as.get_Stmt();
       if (s.toString().compareTo(stmt.toString()) != 0) {
         // this is not the stmt to be removed
         newSequence.add(as);
       }
-    }
+    });
     // System.out.println("STMT REMOVED---------------->"+stmt);
     parentNode.setStatements(newSequence);
 
@@ -376,7 +378,7 @@ public class CopyPropagation extends DepthFirstAdapter {
       }
       List useBoxes = s.getUseBoxes();
       if (DEBUG) {
-        System.out.println("Printing uses for stmt" + useBoxes);
+        logger.info("Printing uses for stmt" + useBoxes);
       }
 
       // TODO
@@ -407,7 +409,7 @@ public class CopyPropagation extends DepthFirstAdapter {
         }
       } else if (use instanceof ASTIfNode) {
         if (DEBUG) {
-          System.out.println("Use is an instanceof if node");
+          logger.info("Use is an instanceof if node");
         }
 
         ASTIfNode temp = (ASTIfNode) use;
@@ -429,16 +431,10 @@ public class CopyPropagation extends DepthFirstAdapter {
         ASTForLoopNode temp = (ASTForLoopNode) use;
 
         // init
-        for (AugmentedStmt as : temp.getInit()) {
-          Stmt s = as.get_Stmt();
-          replace(from, to, s);
-        }
+		temp.getInit().stream().map(AugmentedStmt::get_Stmt).forEach(s -> replace(from, to, s));
 
         // update
-        for (AugmentedStmt as : temp.getUpdate()) {
-          Stmt s = as.get_Stmt();
-          replace(from, to, s);
-        }
+		temp.getUpdate().stream().map(AugmentedStmt::get_Stmt).forEach(s -> replace(from, to, s));
 
         // condition
         ASTCondition cond = temp.get_Condition();

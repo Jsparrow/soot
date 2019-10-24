@@ -44,7 +44,8 @@ public class Insn11x extends AbstractInsn implements OneRegInsn {
     regs.add(regA);
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 

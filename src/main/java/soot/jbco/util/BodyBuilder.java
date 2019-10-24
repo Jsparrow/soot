@@ -63,7 +63,7 @@ public class BodyBuilder {
 
   public static boolean bodiesHaveBeenBuilt = false;
   public static boolean namesHaveBeenRetrieved = false;
-  public static List<String> nameList = new ArrayList<String>();
+  public static List<String> nameList = new ArrayList<>();
 
   public static void retrieveAllBodies() {
     if (bodiesHaveBeenBuilt) {
@@ -94,16 +94,12 @@ public class BodyBuilder {
 
     // iterate through application classes, rename fields with junk
 
-    for (SootClass c : soot.Scene.v().getApplicationClasses()) {
+    soot.Scene.v().getApplicationClasses().forEach(c -> {
       nameList.add(c.getName());
 
-      for (SootMethod m : c.getMethods()) {
-        nameList.add(m.getName());
-      }
-      for (SootField m : c.getFields()) {
-        nameList.add(m.getName());
-      }
-    }
+      c.getMethods().forEach(m -> nameList.add(m.getName()));
+      c.getFields().forEach(m -> nameList.add(m.getName()));
+    });
 
     namesHaveBeenRetrieved = true;
   }
@@ -117,7 +113,7 @@ public class BodyBuilder {
 
   public static List<Local> buildParameterLocals(PatchingChain<Unit> units, Collection<Local> locals,
       List<Type> paramTypes) {
-    List<Local> args = new ArrayList<Local>();
+    List<Local> args = new ArrayList<>();
     for (int k = 0; k < paramTypes.size(); k++) {
       Type type = paramTypes.get(k);
       Local loc = Jimple.v().newLocal("l" + k, type);

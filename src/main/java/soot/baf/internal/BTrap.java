@@ -32,7 +32,8 @@ public class BTrap extends AbstractTrap {
     super(exception, Baf.v().newInstBox(beginStmt), Baf.v().newInstBox(endStmt), Baf.v().newInstBox(handlerStmt));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new BTrap(exception, getBeginUnit(), getEndUnit(), getHandlerUnit());
   }
 

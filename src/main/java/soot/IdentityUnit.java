@@ -24,11 +24,11 @@ package soot;
 
 /** A unit that assigns to a variable from one of {parameters, this, caughtexception}. */
 public interface IdentityUnit extends Unit {
-  public Value getLeftOp();
+  Value getLeftOp();
 
-  public Value getRightOp();
+  Value getRightOp();
 
-  public ValueBox getLeftOpBox();
+  ValueBox getLeftOpBox();
 
-  public ValueBox getRightOpBox();
+  ValueBox getRightOpBox();
 }

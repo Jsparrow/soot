@@ -36,7 +36,8 @@ public class JjBinary_c extends Binary_c {
     super(pos, left, op, right);
   }
 
-  public Type childExpectedType(Expr child, AscriptionVisitor av) {
+  @Override
+public Type childExpectedType(Expr child, AscriptionVisitor av) {
     Expr other;
 
     // System.out.println("child: "+child+" op: "+op);
@@ -112,11 +113,10 @@ public class JjBinary_c extends Binary_c {
       }
     }
 
-    if (op == ADD || op == SUB || op == MUL || op == DIV || op == MOD) {
-      // System.out.println("other: "+other+" type: "+other.type());
-      // System.out.println("child: "+child+" child: "+child.type());
-
-      if (other.type().isNumeric()) {
+    boolean condition = (op == ADD || op == SUB || op == MUL || op == DIV || op == MOD) && other.type().isNumeric();
+	// System.out.println("other: "+other+" type: "+other.type());
+	// System.out.println("child: "+child+" child: "+child.type());
+	if (condition) {
         if (other.type().isDouble() || child.type().isDouble()) {
           return ts.Double();
         } else if (other.type().isFloat() || child.type().isFloat()) {
@@ -127,7 +127,6 @@ public class JjBinary_c extends Binary_c {
           return ts.Int();
         }
       }
-    }
 
     if (op == SHL || op == SHR || op == USHR) {
       if (child == right || !child.type().isLong()) {

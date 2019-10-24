@@ -34,6 +34,8 @@ import java.util.Set;
 
 import soot.toolkits.scalar.FlowSet;
 import soot.util.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -47,7 +49,8 @@ import soot.util.Chain;
 // -Richard L. Halpert, 2006-11-30
 
 public class CompactSequentNodes {
-  long compactNodes = 0;
+  private static final Logger logger = LoggerFactory.getLogger(CompactSequentNodes.class);
+long compactNodes = 0;
   long add = 0;
 
   public CompactSequentNodes(PegGraph pg) {
@@ -55,8 +58,8 @@ public class CompactSequentNodes {
     compactGraph(mainPegChain, pg);
     compactStartChain(pg);
     // PegToDotFile printer = new PegToDotFile(pg, false, "sequence");
-    System.err.println("compact seq. node: " + compactNodes);
-    System.err.println("number of compacting seq. nodes: " + add);
+    logger.error("compact seq. node: " + compactNodes);
+    logger.error("number of compacting seq. nodes: " + add);
   }
 
   private void compactGraph(Chain chain, PegGraph peg) {
@@ -90,15 +93,15 @@ public class CompactSequentNodes {
   }
 
   private List<List<Object>> computeSequentNodes(Chain chain, PegGraph pg) {
-    Set<Object> gray = new HashSet<Object>();
-    List<List<Object>> sequentNodes = new ArrayList<List<Object>>();
+    Set<Object> gray = new HashSet<>();
+    List<List<Object>> sequentNodes = new ArrayList<>();
 
     Set canNotBeCompacted = pg.getCanNotBeCompacted();
     TopologicalSorter ts = new TopologicalSorter(chain, pg);
     ListIterator<Object> it = ts.sorter().listIterator();
     while (it.hasNext()) {
       Object node = it.next();
-      List<Object> list = new ArrayList<Object>();
+      List<Object> list = new ArrayList<>();
       if (!gray.contains(node)) {
         visitNode(pg, node, list, canNotBeCompacted, gray);
         if (list.size() > 1) {
@@ -147,8 +150,8 @@ public class CompactSequentNodes {
     FlowSet allNodes = peg.getAllNodes();
     HashMap unitToSuccs = peg.getUnitToSuccs();
     HashMap unitToPreds = peg.getUnitToPreds();
-    List<Object> newPreds = new ArrayList<Object>();
-    List<Object> newSuccs = new ArrayList<Object>();
+    List<Object> newPreds = new ArrayList<>();
+    List<Object> newSuccs = new ArrayList<>();
 
     while (it.hasNext()) {
       Object s = it.next();

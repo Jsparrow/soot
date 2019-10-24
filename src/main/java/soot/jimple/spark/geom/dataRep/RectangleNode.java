@@ -43,19 +43,19 @@ public class RectangleNode extends SegmentNode {
     copyRectangle(other);
   }
 
-  public void copyRectangle(RectangleNode other) {
+  public RectangleNode(long I1, long I2, long L, long LL) {
+    super(I1, I2, L);
+    L_prime = LL;
+  }
+
+public void copyRectangle(RectangleNode other) {
     I1 = other.I1;
     I2 = other.I2;
     L = other.L;
     L_prime = other.L_prime;
   }
 
-  public RectangleNode(long I1, long I2, long L, long LL) {
-    super(I1, I2, L);
-    L_prime = LL;
-  }
-
-  public boolean equals(RectangleNode other) {
+public boolean equals(RectangleNode other) {
     if (I1 == other.I1 && I2 == other.I2 && L == other.L && L_prime == other.L_prime) {
       return true;
     }
@@ -63,12 +63,12 @@ public class RectangleNode extends SegmentNode {
     return false;
   }
 
-  @Override
+@Override
   public long yEnd() {
     return I2 + L_prime;
   }
 
-  @Override
+@Override
   public boolean intersect(SegmentNode q) {
     RectangleNode p = this;
 
@@ -113,17 +113,16 @@ public class RectangleNode extends SegmentNode {
     return false;
   }
 
-  private boolean point_within_rectangle(long x, long y, RectangleNode rect) {
-    if (x >= rect.I1 && x < rect.I1 + rect.L) {
-      if (y >= rect.I2 && y < rect.I2 + rect.L_prime) {
+private boolean point_within_rectangle(long x, long y, RectangleNode rect) {
+    boolean condition = x >= rect.I1 && x < rect.I1 + rect.L && y >= rect.I2 && y < rect.I2 + rect.L_prime;
+	if (condition) {
         return true;
       }
-    }
 
     return false;
   }
 
-  private boolean diagonal_line_intersect_vertical(SegmentNode p, long x, long y, long L) {
+private boolean diagonal_line_intersect_vertical(SegmentNode p, long x, long y, long L) {
     if (x >= p.I1 && x < (p.I1 + p.L)) {
       long y_cross = x - p.I1 + p.I2;
       if (y_cross >= y && y_cross < y + L) {
@@ -134,7 +133,7 @@ public class RectangleNode extends SegmentNode {
     return false;
   }
 
-  private boolean diagonal_line_intersect_horizontal(SegmentNode p, long x, long y, long L) {
+private boolean diagonal_line_intersect_horizontal(SegmentNode p, long x, long y, long L) {
     if (y >= p.I2 && y < (p.I2 + p.L)) {
       long x_cross = y - p.I2 + p.I1;
       if (x_cross >= x && x_cross < x + L) {

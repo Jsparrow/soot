@@ -51,12 +51,14 @@ public class UntypedIntOrFloatConstant extends UntypedConstant {
     return new UntypedIntOrFloatConstant(value);
   }
 
-  public boolean equals(Object c) {
+  @Override
+public boolean equals(Object c) {
     return c instanceof UntypedIntOrFloatConstant && ((UntypedIntOrFloatConstant) c).value == this.value;
   }
 
   /** Returns a hash code for this DoubleConstant object. */
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return (int) (value ^ (value >>> 32));
   }
 

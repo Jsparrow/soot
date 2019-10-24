@@ -37,12 +37,12 @@ public interface SootPhasePlugin {
   /**
    * Default option for enabling a plugin.
    */
-  public final String ENABLED_BY_DEFAULT = "enabled:true";
+  String ENABLED_BY_DEFAULT = "enabled:true";
 
   /**
    * @return a list of phase options.
    */
-  public abstract String[] getDeclaredOptions();
+  abstract String[] getDeclaredOptions();
 
   /**
    * Returns a list of default values for initializing the parameters. Each entry in the list is of kind
@@ -51,14 +51,14 @@ public interface SootPhasePlugin {
    *
    * @return a list of default values.
    */
-  public abstract String[] getDefaultOptions();
+  abstract String[] getDefaultOptions();
 
   /**
    * Creates a new transformer instance (either SceneTransformer or BodyTransformer). The method will be called just once.
    *
    * @return a new transformer instance.
    */
-  public abstract Transformer getTransformer();
+  abstract Transformer getTransformer();
 
-  public abstract void setDescription(final PhasePluginDescription pluginDescription);
+  abstract void setDescription(final PhasePluginDescription pluginDescription);
 }

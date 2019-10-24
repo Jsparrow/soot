@@ -47,7 +47,8 @@ public class DecrementIncrementStmtCreation extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
     for (AugmentedStmt as : node.getStatements()) {
       // System.out.println(temp);
       Stmt s = as.get_Stmt();

@@ -30,7 +30,7 @@ import java.util.Set;
 
 abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
 
-  protected final Map<K, Set<V>> map = new HashMap<K, Set<V>>();
+  protected final Map<K, Set<V>> map = new HashMap<>();
 
   protected final boolean create;
 
@@ -49,7 +49,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#get(K)
    */
-  public Set<V> get(K key) {
+  @Override
+public Set<V> get(K key) {
     Set<V> ret = map.get(key);
     if (ret == null) {
       if (create) {
@@ -67,7 +68,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#put(K, V)
    */
-  public boolean put(K key, V val) {
+  @Override
+public boolean put(K key, V val) {
     Set<V> vals = map.get(key);
     if (vals == null) {
       vals = createSet();
@@ -81,7 +83,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#remove(K, V)
    */
-  public boolean remove(K key, V val) {
+  @Override
+public boolean remove(K key, V val) {
     Set<V> elems = map.get(key);
     if (elems == null) {
       return false;
@@ -93,7 +96,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
     return ret;
   }
 
-  public Set<V> removeAll(K key) {
+  @Override
+public Set<V> removeAll(K key) {
     return map.remove(key);
   }
 
@@ -102,7 +106,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#keys()
    */
-  public Set<K> keySet() {
+  @Override
+public Set<K> keySet() {
     return map.keySet();
   }
 
@@ -111,7 +116,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#containsKey(java.lang.Object)
    */
-  public boolean containsKey(K key) {
+  @Override
+public boolean containsKey(K key) {
     return map.containsKey(key);
   }
 
@@ -120,7 +126,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#size()
    */
-  public int size() {
+  @Override
+public int size() {
     int ret = 0;
     for (K key : keySet()) {
       ret += get(key).size();
@@ -133,7 +140,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#toString()
    */
-  public String toString() {
+  @Override
+public String toString() {
     return map.toString();
   }
 
@@ -142,7 +150,8 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
    * 
    * @see AAA.util.MultiMap#putAll(K, java.util.Set)
    */
-  public boolean putAll(K key, Collection<? extends V> vals) {
+  @Override
+public boolean putAll(K key, Collection<? extends V> vals) {
     Set<V> edges = map.get(key);
     if (edges == null) {
       edges = createSet();
@@ -151,11 +160,13 @@ abstract class AbstractMultiMap<K, V> implements MultiMap<K, V> {
     return edges.addAll(vals);
   }
 
-  public void clear() {
+  @Override
+public void clear() {
     map.clear();
   }
 
-  public boolean isEmpty() {
+  @Override
+public boolean isEmpty() {
     return map.isEmpty();
   }
 }

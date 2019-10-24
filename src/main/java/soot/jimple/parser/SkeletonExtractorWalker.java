@@ -51,7 +51,8 @@ public class SkeletonExtractorWalker extends Walker {
     super(aResolver);
   }
 
-  public void caseAFile(AFile node) {
+  @Override
+public void caseAFile(AFile node) {
     inAFile(node);
     {
       Object temp[] = node.getModifier().toArray();
@@ -73,7 +74,7 @@ public class SkeletonExtractorWalker extends Walker {
       mSootClass.setResolvingLevel(SootClass.SIGNATURES);
     } else {
       if (!className.equals(mSootClass.getName())) {
-        throw new RuntimeException("expected:  " + className + ", but got: " + mSootClass.getName());
+        throw new RuntimeException(new StringBuilder().append("expected:  ").append(className).append(", but got: ").append(mSootClass.getName()).toString());
       }
     }
 
@@ -89,7 +90,8 @@ public class SkeletonExtractorWalker extends Walker {
     outAFile(node);
   }
 
-  public void outAFile(AFile node) {
+  @Override
+public void outAFile(AFile node) {
     List implementsList = null;
     String superClass = null;
 
@@ -106,7 +108,7 @@ public class SkeletonExtractorWalker extends Walker {
 
     int modifierFlags = processModifiers(node.getModifier());
 
-    if (classType.equals("interface")) {
+    if ("interface".equals(classType)) {
       modifierFlags |= Modifier.INTERFACE;
     }
 
@@ -132,7 +134,8 @@ public class SkeletonExtractorWalker extends Walker {
    * throws_clause? method_body;
    */
 
-  public void caseAMethodMember(AMethodMember node) {
+  @Override
+public void caseAMethodMember(AMethodMember node) {
     inAMethodMember(node);
     {
       Object temp[] = node.getModifier().toArray();
@@ -164,7 +167,8 @@ public class SkeletonExtractorWalker extends Walker {
     outAMethodMember(node);
   }
 
-  public void outAMethodMember(AMethodMember node) {
+  @Override
+public void outAMethodMember(AMethodMember node) {
     int modifier = 0;
     Type type;
     String name;
@@ -200,11 +204,12 @@ public class SkeletonExtractorWalker extends Walker {
   /*
    * throws_clause = throws class_name_list;
    */
-  public void outAThrowsClause(AThrowsClause node) {
+  @Override
+public void outAThrowsClause(AThrowsClause node) {
     List l = (List) mProductions.removeLast();
 
     Iterator it = l.iterator();
-    List<SootClass> exceptionClasses = new ArrayList<SootClass>(l.size());
+    List<SootClass> exceptionClasses = new ArrayList<>(l.size());
 
     while (it.hasNext()) {
       String className = (String) it.next();

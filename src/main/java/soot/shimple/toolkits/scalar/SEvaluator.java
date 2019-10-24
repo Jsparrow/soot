@@ -49,11 +49,12 @@ public class SEvaluator {
    * Returns true if given value is determined to be constant valued, false otherwise
    **/
   public static boolean isValueConstantValued(Value op) {
-    if (op instanceof PhiExpr) {
-      Iterator<Value> argsIt = ((PhiExpr) op).getValues().iterator();
-      Constant firstConstant = null;
-
-      while (argsIt.hasNext()) {
+    if (!(op instanceof PhiExpr)) {
+		return Evaluator.isValueConstantValued(op);
+	}
+	Iterator<Value> argsIt = ((PhiExpr) op).getValues().iterator();
+	Constant firstConstant = null;
+	while (argsIt.hasNext()) {
         Value arg = argsIt.next();
 
         if (!(arg instanceof Constant)) {
@@ -66,11 +67,7 @@ public class SEvaluator {
           return false;
         }
       }
-
-      return true;
-    }
-
-    return Evaluator.isValueConstantValued(op);
+	return true;
   }
 
   /**
@@ -217,7 +214,7 @@ public class SEvaluator {
   /**
    * Head of a new hierarchy of constants -- Top and Bottom.
    **/
-  public static abstract class MetaConstant extends Constant {
+  public abstract static class MetaConstant extends Constant {
   }
 
   /**
@@ -233,11 +230,13 @@ public class SEvaluator {
       return constant;
     }
 
-    public Type getType() {
+    @Override
+	public Type getType() {
       return UnknownType.v();
     }
 
-    public void apply(Switch sw) {
+    @Override
+	public void apply(Switch sw) {
       throw new RuntimeException("Not implemented.");
     }
   }
@@ -255,11 +254,13 @@ public class SEvaluator {
       return constant;
     }
 
-    public Type getType() {
+    @Override
+	public Type getType() {
       return UnknownType.v();
     }
 
-    public void apply(Switch sw) {
+    @Override
+	public void apply(Switch sw) {
       throw new RuntimeException("Not implemented.");
     }
   }

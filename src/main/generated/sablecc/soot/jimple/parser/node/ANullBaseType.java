@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ANullBaseType extends PBaseType
 {
-    private TNullType _nullType_;
+    private TNullType nullType;
 
     public ANullBaseType()
     {
@@ -26,7 +26,7 @@ public final class ANullBaseType extends PBaseType
     public Object clone()
     {
         return new ANullBaseType(
-            cloneNode(this._nullType_));
+            cloneNode(this.nullType));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ANullBaseType extends PBaseType
 
     public TNullType getNullType()
     {
-        return this._nullType_;
+        return this.nullType;
     }
 
     public void setNullType(TNullType node)
     {
-        if(this._nullType_ != null)
+        if(this.nullType != null)
         {
-            this._nullType_.parent(null);
+            this.nullType.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ANullBaseType extends PBaseType
             node.parent(this);
         }
 
-        this._nullType_ = node;
+        this.nullType = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._nullType_);
+            + toString(this.nullType);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._nullType_ == child)
+        if(this.nullType == child)
         {
-            this._nullType_ = null;
+            this.nullType = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ANullBaseType extends PBaseType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._nullType_ == oldChild)
+        if(this.nullType == oldChild)
         {
             setNullType((TNullType) newChild);
             return;

@@ -31,7 +31,6 @@ package soot.util;
 public class UnmodifiableIterableSet<E> extends IterableSet<E> {
 
   public UnmodifiableIterableSet() {
-    super();
   }
 
   /**
@@ -41,9 +40,7 @@ public class UnmodifiableIterableSet<E> extends IterableSet<E> {
    *          The original set to copy
    */
   public UnmodifiableIterableSet(IterableSet<E> original) {
-    for (E e : original) {
-      super.add(e);
-    }
+    original.forEach(e -> super.add(e));
   }
 
   @Override

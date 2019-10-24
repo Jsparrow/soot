@@ -59,7 +59,8 @@ public class PolyglotMethodSource implements MethodSource {
     this.formals = formals;
   }
 
-  public soot.Body getBody(soot.SootMethod sm, String phaseName) {
+  @Override
+public soot.Body getBody(soot.SootMethod sm, String phaseName) {
     // JimpleBodyBuilder jbb = new JimpleBodyBuilder();
     soot.jimple.JimpleBody jb = ajbb.createJimpleBody(block, formals, sm);
 

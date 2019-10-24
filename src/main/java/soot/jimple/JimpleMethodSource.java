@@ -40,14 +40,15 @@ public class JimpleMethodSource implements MethodSource {
     mJimpleAST = aJimpleAST;
   }
 
-  public Body getBody(SootMethod m, String phaseName) {
+  @Override
+public Body getBody(SootMethod m, String phaseName) {
     JimpleBody jb = (JimpleBody) mJimpleAST.getBody(m);
     if (jb == null) {
       throw new RuntimeException("Could not load body for method " + m.getSignature());
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + m.getName() + "] Retrieving JimpleBody from AST...");
+      logger.debug(new StringBuilder().append("[").append(m.getName()).append("] Retrieving JimpleBody from AST...").toString());
     }
 
     PackManager.v().getPack("jb").apply(jb);

@@ -53,8 +53,8 @@ public class DupsTest extends AbstractASMBackendTest {
 		{
 		mv = cw.visitMethod(ACC_PUBLIC, "dubl", "()J", null, null);
 		mv.visitCode();
-		mv.visitLdcInsn(new Long(1234L));
-		mv.visitLdcInsn(new Long(1234L));
+		mv.visitLdcInsn(Long.valueOf(1234L));
+		mv.visitLdcInsn(Long.valueOf(1234L));
 		mv.visitInsn(LADD);
 		mv.visitInsn(LRETURN);
 		mv.visitMaxs(0, 0);

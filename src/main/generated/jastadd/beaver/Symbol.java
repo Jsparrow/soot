@@ -13,53 +13,25 @@ package beaver;
  */
 public class Symbol implements Cloneable
 {
-	static private final int COLUMN_FIELD_BITS = 12;
-	static private final int COLUMN_FIELD_MASK = (1 << COLUMN_FIELD_BITS) - 1; 
-	
-	/**
-	 * Packs symbol "coordinates" into a single number.
-	 */
-	static public int makePosition(int line, int column)
-	{
-		return line << COLUMN_FIELD_BITS | column;
-	}
-	
-	/**
-	 * Extracts line number from a packed position.
-	 */
-	static public int getLine(int position)
-	{
-		return position >>> COLUMN_FIELD_BITS;
-	}
-	
-	/**
-	 * Extracts column number from a packed position.
-	 */
-	static public int getColumn(int position)
-	{
-		return position & COLUMN_FIELD_MASK;
-	}
-	
+	private static final int COLUMN_FIELD_BITS = 12;
+	private static final int COLUMN_FIELD_MASK = (1 << COLUMN_FIELD_BITS) - 1;
 	/**
 	 * Value assigned to this symbol. 
 	 */
 	public Object value;
-
 	/** 
 	 * Numeric symbol ID. 
 	 */
 	protected short id;
-	
 	/**
 	 * Line and column where this symbol begins.
 	 */
 	protected int start;
-	
 	/**
 	 * Line and column where this symbol ends.
 	 */
 	protected int end;
-	
+
 	public Symbol(short id)
 	{
 		this.id = id;
@@ -103,7 +75,7 @@ public class Symbol implements Cloneable
 		this.start = makePosition(start_line, start_column);
 		this.end   = makePosition(start_line, start_column + length - 1);
 	}
-	
+
 	/**
 	 * Creates Symbol for non-symbolic results of action routines
 	 * 
@@ -125,7 +97,31 @@ public class Symbol implements Cloneable
 	{
 		this.value = this;
 	}
-	
+
+	/**
+	 * Packs symbol "coordinates" into a single number.
+	 */
+	public static int makePosition(int line, int column)
+	{
+		return line << COLUMN_FIELD_BITS | column;
+	}
+
+	/**
+	 * Extracts line number from a packed position.
+	 */
+	public static int getLine(int position)
+	{
+		return position >>> COLUMN_FIELD_BITS;
+	}
+
+	/**
+	 * Extracts column number from a packed position.
+	 */
+	public static int getColumn(int position)
+	{
+		return position & COLUMN_FIELD_MASK;
+	}
+
 	/**
 	 * Returns an ID of this symbol.
 	 * <p/>
@@ -161,6 +157,7 @@ public class Symbol implements Cloneable
 		return end;
 	}
 
+	@Override
 	public Symbol clone() throws CloneNotSupportedException {
 		Symbol copy = (Symbol) super.clone();
 		copy.value = copy;

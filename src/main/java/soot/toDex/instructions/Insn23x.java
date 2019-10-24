@@ -46,15 +46,18 @@ public class Insn23x extends AbstractInsn implements ThreeRegInsn {
     regs.add(regC);
   }
 
-  public Register getRegA() {
+  @Override
+public Register getRegA() {
     return regs.get(REG_A_IDX);
   }
 
-  public Register getRegB() {
+  @Override
+public Register getRegB() {
     return regs.get(REG_B_IDX);
   }
 
-  public Register getRegC() {
+  @Override
+public Register getRegC() {
     return regs.get(REG_C_IDX);
   }
 

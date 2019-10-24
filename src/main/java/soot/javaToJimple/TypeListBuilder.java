@@ -30,15 +30,16 @@ public class TypeListBuilder extends polyglot.visit.NodeVisitor {
 
   private final HashSet<Type> list;
 
-  public HashSet<Type> getList() {
+  public TypeListBuilder() {
+    list = new HashSet<>();
+  }
+
+public HashSet<Type> getList() {
     return list;
   }
 
-  public TypeListBuilder() {
-    list = new HashSet<Type>();
-  }
-
-  public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
+@Override
+public polyglot.ast.Node leave(polyglot.ast.Node old, polyglot.ast.Node n, polyglot.visit.NodeVisitor visitor) {
 
     if (n instanceof polyglot.ast.Typed) {
       polyglot.ast.Typed typedNode = (polyglot.ast.Typed) n;

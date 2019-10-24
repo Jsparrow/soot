@@ -44,10 +44,7 @@ public class HashReversibleGraph<N> extends HashMutableDirectedGraph<N> implemen
     for (Iterator<N> i = dg.iterator(); i.hasNext();) {
       N s = i.next();
       List<N> succs = dg.getSuccsOf(s);
-      for (Iterator<N> succsIt = succs.iterator(); succsIt.hasNext();) {
-        N t = succsIt.next();
-        addEdge(s, t);
-      }
+      succs.forEach(t -> addEdge(s, t));
     }
 
     /* use the same heads and tails as the original graph */
@@ -59,20 +56,22 @@ public class HashReversibleGraph<N> extends HashMutableDirectedGraph<N> implemen
   }
 
   public HashReversibleGraph() {
-    super();
     reversed = false;
   }
 
-  public boolean isReversed() {
+  @Override
+public boolean isReversed() {
     return reversed;
   }
 
-  public ReversibleGraph<N> reverse() {
+  @Override
+public ReversibleGraph<N> reverse() {
     reversed = !reversed;
     return this;
   }
 
-  public void addEdge(N from, N to) {
+  @Override
+public void addEdge(N from, N to) {
     if (reversed) {
       super.addEdge(to, from);
     } else {
@@ -80,7 +79,8 @@ public class HashReversibleGraph<N> extends HashMutableDirectedGraph<N> implemen
     }
   }
 
-  public void removeEdge(N from, N to) {
+  @Override
+public void removeEdge(N from, N to) {
     if (reversed) {
       super.removeEdge(to, from);
     } else {
@@ -88,23 +88,28 @@ public class HashReversibleGraph<N> extends HashMutableDirectedGraph<N> implemen
     }
   }
 
-  public boolean containsEdge(N from, N to) {
+  @Override
+public boolean containsEdge(N from, N to) {
     return reversed ? super.containsEdge(to, from) : super.containsEdge(from, to);
   }
 
-  public List<N> getHeads() {
+  @Override
+public List<N> getHeads() {
     return reversed ? super.getTails() : super.getHeads();
   }
 
-  public List<N> getTails() {
+  @Override
+public List<N> getTails() {
     return reversed ? super.getHeads() : super.getTails();
   }
 
-  public List<N> getPredsOf(N s) {
+  @Override
+public List<N> getPredsOf(N s) {
     return reversed ? super.getSuccsOf(s) : super.getPredsOf(s);
   }
 
-  public List<N> getSuccsOf(N s) {
+  @Override
+public List<N> getSuccsOf(N s) {
     return reversed ? super.getPredsOf(s) : super.getSuccsOf(s);
   }
 }

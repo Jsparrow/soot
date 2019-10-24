@@ -18,57 +18,81 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production List : {@link ASTNode};
  * @ast node
  * 
  */
-public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable {
-  /**
+public class List<T extends ASTNode> extends ASTNode<T> {
+  private static final Logger logger = LoggerFactory.getLogger(List.class);
+/**
+   * @ast method 
+   * 
+   */
+  
+  private boolean listtouched = true;
+/**
+   * @ast method 
+   * 
+   */
+  public List() {
+
+
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<T> clone() throws CloneNotSupportedException {
     List node = (List)super.clone();
     node.in$Circle(false);
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<T> copy() {
     try {
       List node = (List) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<T> fullCopy() {
     List tree = (List) copy();
     if (children != null) {
@@ -82,7 +106,7 @@ public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:977
@@ -119,21 +143,12 @@ public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable {
         );
       }
       else {
-        throw new Error("Can only substitute lists of access nodes but node number " + i + " is of type " + node.getClass().getName());
+        throw new Error(new StringBuilder().append("Can only substitute lists of access nodes but node number ").append(i).append(" is of type ").append(node.getClass().getName()).toString());
       }
     }
     return list;
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public List() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -141,9 +156,10 @@ public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
   }
-  /**
+/**
    * @ast method 
    * 
    */
@@ -151,58 +167,58 @@ public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable {
     addChild(node);
     return this;
   }
-  /**
+/**
    * @ast method 
    * 
    */
-  public void insertChild(ASTNode node, int i) {
-    list$touched = true;
+  @Override
+public void insertChild(ASTNode node, int i) {
+    listtouched = true;
     super.insertChild(node, i);
   }
-  /**
+/**
    * @ast method 
    * 
    */
-  public void addChild(T node) {
-    list$touched = true;
+  @Override
+public void addChild(T node) {
+    listtouched = true;
     super.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  public void removeChild(int i) {
-    list$touched = true;
+  @Override
+public void removeChild(int i) {
+    listtouched = true;
     super.removeChild(i);
   }
-  /**
+/**
    * @ast method 
    * 
    */
-  public int getNumChild() {
-    if(list$touched) {
-      for(int i = 0; i < getNumChildNoTransform(); i++)
-        getChild(i);
-        list$touched = false;
+  @Override
+public int getNumChild() {
+    if(listtouched) {
+      for(int i = 0; i < getNumChildNoTransform(); i++) {
+		getChild(i);
+	}
+        listtouched = false;
       }
       return getNumChildNoTransform();
   }
-  /**
-   * @ast method 
-   * 
-   */
-  
-  private boolean list$touched = true;
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return true;
   }
-  /**
+/**
    * @attribute syn
    * @aspect ImplicitConstructor
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:158
@@ -219,47 +235,53 @@ public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect BooleanExpressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/BooleanExpressions.jrag:21
    */
-  public boolean definesLabel() {
+  @Override
+public boolean definesLabel() {
     ASTNode$State state = state();
     try {  return getParent().definesLabel();  }
     finally {
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
-    if(list$touched) {
-      for(int i = 0 ; i < getNumChildNoTransform(); i++)
-        getChild(i);
-      list$touched = false;
+  @Override
+public ASTNode rewriteTo() {
+    if(listtouched) {
+      for(int i = 0 ; i < getNumChildNoTransform(); i++) {
+		getChild(i);
+	}
+      listtouched = false;
       return this;
     }
     // Declared in /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag at line 186
-    if(requiresDefaultConstructor()) {
-      state().duringImplicitConstructor++;
-      ASTNode result = rewriteRule0();
-      state().duringImplicitConstructor--;
-      return result;
-    }
-
-    return super.rewriteTo();
+	if (!requiresDefaultConstructor()) {
+		return super.rewriteTo();
+	}
+	state().duringImplicitConstructor++;
+	ASTNode result = rewriteRule0();
+	state().duringImplicitConstructor--;
+	return result;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:186
    * @apilevel internal
    */  private List rewriteRule0() {
 {
       ClassDecl c = (ClassDecl)getParent();
       Modifiers m = new Modifiers();
-      if(c.isPublic()) m.addModifier(new Modifier("public"));
-      else if(c.isProtected()) m.addModifier(new Modifier("protected"));
-      else if(c.isPrivate()) m.addModifier(new Modifier("private"));
+      if(c.isPublic()) {
+		m.addModifier(new Modifier("public"));
+	} else if(c.isProtected()) {
+		m.addModifier(new Modifier("protected"));
+	} else if(c.isPrivate()) {
+		m.addModifier(new Modifier("private"));
+	}
       ConstructorDecl constructor = new ConstructorDecl(
             m,
             c.name(),

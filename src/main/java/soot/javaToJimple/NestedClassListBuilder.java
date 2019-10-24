@@ -32,25 +32,26 @@ public class NestedClassListBuilder extends polyglot.visit.NodeVisitor {
   private final ArrayList<Node> anonClassBodyList;
   private final ArrayList<Node> nestedUsedList;
 
-  public ArrayList<Node> getClassDeclsList() {
+  public NestedClassListBuilder() {
+    classDeclsList = new ArrayList<>();
+    anonClassBodyList = new ArrayList<>();
+    nestedUsedList = new ArrayList<>();
+  }
+
+public ArrayList<Node> getClassDeclsList() {
     return classDeclsList;
   }
 
-  public ArrayList<Node> getAnonClassBodyList() {
+public ArrayList<Node> getAnonClassBodyList() {
     return anonClassBodyList;
   }
 
-  public ArrayList<Node> getNestedUsedList() {
+public ArrayList<Node> getNestedUsedList() {
     return nestedUsedList;
   }
 
-  public NestedClassListBuilder() {
-    classDeclsList = new ArrayList<Node>();
-    anonClassBodyList = new ArrayList<Node>();
-    nestedUsedList = new ArrayList<Node>();
-  }
-
-  public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
+@Override
+public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
 
     if (n instanceof polyglot.ast.New) {
 
@@ -60,12 +61,9 @@ public class NestedClassListBuilder extends polyglot.visit.NodeVisitor {
         nestedUsedList.add(n);
       }
     }
-    if (n instanceof polyglot.ast.ClassDecl) {
-
-      if (((polyglot.types.ClassType) ((polyglot.ast.ClassDecl) n).type()).isNested()) {
+    if (n instanceof polyglot.ast.ClassDecl && ((polyglot.types.ClassType) ((polyglot.ast.ClassDecl) n).type()).isNested()) {
         classDeclsList.add(n);
       }
-    }
     return enter(n);
   }
 }

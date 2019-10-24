@@ -30,20 +30,69 @@ import java.util.*;
 @javax.annotation.Generated(value = "Saxonica v3.0", comments = "from soot_options.xml")
 public class PaddleOptions {
 
-    private Map<String, String> options;
+    public static final int conf_ofcg = 1;
+	public static final int conf_cha = 2;
+	public static final int conf_cha_aot = 3;
+	public static final int conf_ofcg_aot = 4;
+	public static final int conf_cha_context_aot = 5;
+	public static final int conf_ofcg_context_aot = 6;
+	public static final int conf_cha_context = 7;
+	public static final int conf_ofcg_context = 8;
+	public static final int q_auto = 1;
+	public static final int q_trad = 2;
+	public static final int q_bdd = 3;
+	public static final int q_debug = 4;
+	public static final int q_trace = 5;
+	public static final int q_numtrace = 6;
+	public static final int backend_auto = 1;
+	public static final int backend_buddy = 2;
+	public static final int backend_cudd = 3;
+	public static final int backend_sable = 4;
+	public static final int backend_javabdd = 5;
+	public static final int backend_none = 6;
+	public static final int context_insens = 1;
+	public static final int context_1cfa = 2;
+	public static final int context_kcfa = 3;
+	public static final int context_objsens = 4;
+	public static final int context_kobjsens = 5;
+	public static final int context_uniqkobjsens = 6;
+	public static final int context_threadkobjsens = 7;
+	public static final int propagator_auto = 1;
+	public static final int propagator_iter = 2;
+	public static final int propagator_worklist = 3;
+	public static final int propagator_alias = 4;
+	public static final int propagator_bdd = 5;
+	public static final int propagator_incbdd = 6;
+	public static final int set_impl_hash = 1;
+	public static final int set_impl_bit = 2;
+	public static final int set_impl_hybrid = 3;
+	public static final int set_impl_array = 4;
+	public static final int set_impl_heintze = 5;
+	public static final int set_impl_double = 6;
+	public static final int double_set_old_hash = 1;
+	public static final int double_set_old_bit = 2;
+	public static final int double_set_old_hybrid = 3;
+	public static final int double_set_old_array = 4;
+	public static final int double_set_old_heintze = 5;
+	public static final int double_set_new_hash = 1;
+	public static final int double_set_new_bit = 2;
+	public static final int double_set_new_hybrid = 3;
+	public static final int double_set_new_array = 4;
+	public static final int double_set_new_heintze = 5;
+	private Map<String, String> options;
 
-    public PaddleOptions(Map<String, String> options) {
+	public PaddleOptions(Map<String, String> options) {
         this.options = options;
     }
 
-    /**
+	/**
      * Enabled
      */
     public boolean enabled() {
         return soot.PhaseOptions.getBoolean(options, "enabled");
     }
 
-    /**
+	/**
      * Verbose --
      * Print detailed information about the execution of Paddle.
      *
@@ -54,7 +103,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "verbose");
     }
 
-    /**
+	/**
      * Use BDDs --
      * Use BDD version of Paddle.
      *
@@ -64,7 +113,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "bdd");
     }
 
-    /**
+	/**
      * Dynamic reordering
      * Allows the BDD package to perform dynamic variable ordering.
      */
@@ -72,7 +121,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "dynamic-order");
     }
 
-    /**
+	/**
      * Profile --
      * Profile BDDs using JeddProfiler.
      *
@@ -82,7 +131,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "profile");
     }
 
-    /**
+	/**
      * Verbose GC --
      * Print memory usage at each BDD garbage collection.
      *
@@ -92,7 +141,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "verbosegc");
     }
 
-    /**
+	/**
      * Ignore Types Entirely --
      * Make Paddle completely ignore declared types of variables.
      *
@@ -103,7 +152,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "ignore-types");
     }
 
-    /**
+	/**
      * Pre Jimplify --
      * Jimplify all methods before starting Paddle.
      *
@@ -118,7 +167,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "pre-jimplify");
     }
 
-    /**
+	/**
      * Context-sensitive Heap Locations --
      * Treat allocation sites context-sensitively.
      *
@@ -133,7 +182,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "context-heap");
     }
 
-    /**
+	/**
      * RTA --
      * Emulate Rapid Type Analysis.
      *
@@ -145,7 +194,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "rta");
     }
 
-    /**
+	/**
      * Field Based --
      * Use a field-based rather than field-sensitive representation.
      *
@@ -160,7 +209,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "field-based");
     }
 
-    /**
+	/**
      * Types For Sites --
      * Represent objects by their actual type rather than allocation 
      * site.
@@ -172,7 +221,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "types-for-sites");
     }
 
-    /**
+	/**
      * Merge String Buffer --
      * Represent all StringBuffers as one object.
      *
@@ -186,7 +235,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "merge-stringbuffer");
     }
 
-    /**
+	/**
      * Propagate All String Constants --
      * Propagate all string constants, not just class names.
      *
@@ -201,7 +250,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "string-constants");
     }
 
-    /**
+	/**
      * Simulate Natives --
      * Simulate effects of native methods in standard class library.
      *
@@ -212,7 +261,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "simulate-natives");
     }
 
-    /**
+	/**
      * Global Nodes in Simulated Natives --
      * Use global node to model variables in simulations of native 
      * methods.
@@ -228,7 +277,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "global-nodes-in-natives");
     }
 
-    /**
+	/**
      * Simple Edges Bidirectional --
      * Equality-based analysis between variable nodes.
      *
@@ -240,7 +289,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "simple-edges-bidirectional");
     }
 
-    /**
+	/**
      * this Pointer Assignment Edge --
      * Use pointer assignment edges to model this parameters.
      *
@@ -256,7 +305,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "this-edges");
     }
 
-    /**
+	/**
      * Precise newInstance --
      * Make newInstance only allocate objects of dynamic classes.
      *
@@ -269,7 +318,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "precise-newinstance");
     }
 
-    /**
+	/**
      * Print Context Counts --
      * Print number of contexts for each method.
      *
@@ -281,7 +330,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "context-counts");
     }
 
-    /**
+	/**
      * Print Context Counts (Totals only) --
      * Print total number of contexts.
      *
@@ -292,7 +341,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "total-context-counts");
     }
 
-    /**
+	/**
      * Method Context Counts (Totals only) --
      * Print number of contexts for each method.
      *
@@ -304,7 +353,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "method-context-counts");
     }
 
-    /**
+	/**
      * Calculate Set Mass --
      * Calculate statistics about points-to set sizes.
      *
@@ -316,7 +365,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "set-mass");
     }
 
-    /**
+	/**
      * Number nodes --
      * Print node numbers in dumps.
      *
@@ -327,7 +376,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getBoolean(options, "number-nodes");
     }
 
-    /**
+	/**
      * Variable ordering
      * Selects one of the BDD variable orderings hard-coded in Paddle.
      */
@@ -335,7 +384,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getInt(options, "order");
     }
 
-    /**
+	/**
      * BDD Nodes --
      * Number of BDD nodes to allocate (0=unlimited).
      *
@@ -349,7 +398,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getInt(options, "bdd-nodes");
     }
 
-    /**
+	/**
      * Context length (k)
      * The maximum length of call string or receiver object string used 
      * as context.
@@ -358,16 +407,7 @@ public class PaddleOptions {
         return soot.PhaseOptions.getInt(options, "k");
     }
 
-    public static final int conf_ofcg = 1;
-    public static final int conf_cha = 2;
-    public static final int conf_cha_aot = 3;
-    public static final int conf_ofcg_aot = 4;
-    public static final int conf_cha_context_aot = 5;
-    public static final int conf_ofcg_context_aot = 6;
-    public static final int conf_cha_context = 7;
-    public static final int conf_ofcg_context = 8;
-
-    /**
+	/**
      * Configuration --
      * Select Paddle configuration.
      *
@@ -376,37 +416,39 @@ public class PaddleOptions {
      */
     public int conf() {
         String s = soot.PhaseOptions.getString(options, "conf");
-        if (s == null || s.isEmpty())
-        	return conf_ofcg;
+        if (s == null || s.isEmpty()) {
+			return conf_ofcg;
+		}
 	
-        if (s.equalsIgnoreCase("ofcg"))
-            return conf_ofcg;
-        if (s.equalsIgnoreCase("cha"))
-            return conf_cha;
-        if (s.equalsIgnoreCase("cha-aot"))
-            return conf_cha_aot;
-        if (s.equalsIgnoreCase("ofcg-aot"))
-            return conf_ofcg_aot;
-        if (s.equalsIgnoreCase("cha-context-aot"))
-            return conf_cha_context_aot;
-        if (s.equalsIgnoreCase("ofcg-context-aot"))
-            return conf_ofcg_context_aot;
-        if (s.equalsIgnoreCase("cha-context"))
-            return conf_cha_context;
-        if (s.equalsIgnoreCase("ofcg-context"))
-            return conf_ofcg_context;
+        if ("ofcg".equalsIgnoreCase(s)) {
+			return conf_ofcg;
+		}
+        if ("cha".equalsIgnoreCase(s)) {
+			return conf_cha;
+		}
+        if ("cha-aot".equalsIgnoreCase(s)) {
+			return conf_cha_aot;
+		}
+        if ("ofcg-aot".equalsIgnoreCase(s)) {
+			return conf_ofcg_aot;
+		}
+        if ("cha-context-aot".equalsIgnoreCase(s)) {
+			return conf_cha_context_aot;
+		}
+        if ("ofcg-context-aot".equalsIgnoreCase(s)) {
+			return conf_ofcg_context_aot;
+		}
+        if ("cha-context".equalsIgnoreCase(s)) {
+			return conf_cha_context;
+		}
+        if ("ofcg-context".equalsIgnoreCase(s)) {
+			return conf_ofcg_context;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option conf", s));
     }
 
-    public static final int q_auto = 1;
-    public static final int q_trad = 2;
-    public static final int q_bdd = 3;
-    public static final int q_debug = 4;
-    public static final int q_trace = 5;
-    public static final int q_numtrace = 6;
-
-    /**
+	/**
      * Worklist Implementation --
      * Select queue implementation.
      *
@@ -414,33 +456,33 @@ public class PaddleOptions {
      */
     public int q() {
         String s = soot.PhaseOptions.getString(options, "q");
-        if (s == null || s.isEmpty())
-        	return q_auto;
+        if (s == null || s.isEmpty()) {
+			return q_auto;
+		}
 	
-        if (s.equalsIgnoreCase("auto"))
-            return q_auto;
-        if (s.equalsIgnoreCase("trad"))
-            return q_trad;
-        if (s.equalsIgnoreCase("bdd"))
-            return q_bdd;
-        if (s.equalsIgnoreCase("debug"))
-            return q_debug;
-        if (s.equalsIgnoreCase("trace"))
-            return q_trace;
-        if (s.equalsIgnoreCase("numtrace"))
-            return q_numtrace;
+        if ("auto".equalsIgnoreCase(s)) {
+			return q_auto;
+		}
+        if ("trad".equalsIgnoreCase(s)) {
+			return q_trad;
+		}
+        if ("bdd".equalsIgnoreCase(s)) {
+			return q_bdd;
+		}
+        if ("debug".equalsIgnoreCase(s)) {
+			return q_debug;
+		}
+        if ("trace".equalsIgnoreCase(s)) {
+			return q_trace;
+		}
+        if ("numtrace".equalsIgnoreCase(s)) {
+			return q_numtrace;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option q", s));
     }
 
-    public static final int backend_auto = 1;
-    public static final int backend_buddy = 2;
-    public static final int backend_cudd = 3;
-    public static final int backend_sable = 4;
-    public static final int backend_javabdd = 5;
-    public static final int backend_none = 6;
-
-    /**
+	/**
      * Backend --
      * Select BDD backend.
      *
@@ -448,34 +490,33 @@ public class PaddleOptions {
      */
     public int backend() {
         String s = soot.PhaseOptions.getString(options, "backend");
-        if (s == null || s.isEmpty())
-        	return backend_auto;
+        if (s == null || s.isEmpty()) {
+			return backend_auto;
+		}
 	
-        if (s.equalsIgnoreCase("auto"))
-            return backend_auto;
-        if (s.equalsIgnoreCase("buddy"))
-            return backend_buddy;
-        if (s.equalsIgnoreCase("cudd"))
-            return backend_cudd;
-        if (s.equalsIgnoreCase("sable"))
-            return backend_sable;
-        if (s.equalsIgnoreCase("javabdd"))
-            return backend_javabdd;
-        if (s.equalsIgnoreCase("none"))
-            return backend_none;
+        if ("auto".equalsIgnoreCase(s)) {
+			return backend_auto;
+		}
+        if ("buddy".equalsIgnoreCase(s)) {
+			return backend_buddy;
+		}
+        if ("cudd".equalsIgnoreCase(s)) {
+			return backend_cudd;
+		}
+        if ("sable".equalsIgnoreCase(s)) {
+			return backend_sable;
+		}
+        if ("javabdd".equalsIgnoreCase(s)) {
+			return backend_javabdd;
+		}
+        if ("none".equalsIgnoreCase(s)) {
+			return backend_none;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option backend", s));
     }
 
-    public static final int context_insens = 1;
-    public static final int context_1cfa = 2;
-    public static final int context_kcfa = 3;
-    public static final int context_objsens = 4;
-    public static final int context_kobjsens = 5;
-    public static final int context_uniqkobjsens = 6;
-    public static final int context_threadkobjsens = 7;
-
-    /**
+	/**
      * Context abstraction --
      * Select context-sensitivity level.
      *
@@ -484,35 +525,36 @@ public class PaddleOptions {
      */
     public int context() {
         String s = soot.PhaseOptions.getString(options, "context");
-        if (s == null || s.isEmpty())
-        	return context_insens;
+        if (s == null || s.isEmpty()) {
+			return context_insens;
+		}
 	
-        if (s.equalsIgnoreCase("insens"))
-            return context_insens;
-        if (s.equalsIgnoreCase("1cfa"))
-            return context_1cfa;
-        if (s.equalsIgnoreCase("kcfa"))
-            return context_kcfa;
-        if (s.equalsIgnoreCase("objsens"))
-            return context_objsens;
-        if (s.equalsIgnoreCase("kobjsens"))
-            return context_kobjsens;
-        if (s.equalsIgnoreCase("uniqkobjsens"))
-            return context_uniqkobjsens;
-        if (s.equalsIgnoreCase("threadkobjsens"))
-            return context_threadkobjsens;
+        if ("insens".equalsIgnoreCase(s)) {
+			return context_insens;
+		}
+        if ("1cfa".equalsIgnoreCase(s)) {
+			return context_1cfa;
+		}
+        if ("kcfa".equalsIgnoreCase(s)) {
+			return context_kcfa;
+		}
+        if ("objsens".equalsIgnoreCase(s)) {
+			return context_objsens;
+		}
+        if ("kobjsens".equalsIgnoreCase(s)) {
+			return context_kobjsens;
+		}
+        if ("uniqkobjsens".equalsIgnoreCase(s)) {
+			return context_uniqkobjsens;
+		}
+        if ("threadkobjsens".equalsIgnoreCase(s)) {
+			return context_threadkobjsens;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option context", s));
     }
 
-    public static final int propagator_auto = 1;
-    public static final int propagator_iter = 2;
-    public static final int propagator_worklist = 3;
-    public static final int propagator_alias = 4;
-    public static final int propagator_bdd = 5;
-    public static final int propagator_incbdd = 6;
-
-    /**
+	/**
      * Propagator --
      * Select propagation algorithm.
      *
@@ -520,33 +562,33 @@ public class PaddleOptions {
      */
     public int propagator() {
         String s = soot.PhaseOptions.getString(options, "propagator");
-        if (s == null || s.isEmpty())
-        	return propagator_auto;
+        if (s == null || s.isEmpty()) {
+			return propagator_auto;
+		}
 	
-        if (s.equalsIgnoreCase("auto"))
-            return propagator_auto;
-        if (s.equalsIgnoreCase("iter"))
-            return propagator_iter;
-        if (s.equalsIgnoreCase("worklist"))
-            return propagator_worklist;
-        if (s.equalsIgnoreCase("alias"))
-            return propagator_alias;
-        if (s.equalsIgnoreCase("bdd"))
-            return propagator_bdd;
-        if (s.equalsIgnoreCase("incbdd"))
-            return propagator_incbdd;
+        if ("auto".equalsIgnoreCase(s)) {
+			return propagator_auto;
+		}
+        if ("iter".equalsIgnoreCase(s)) {
+			return propagator_iter;
+		}
+        if ("worklist".equalsIgnoreCase(s)) {
+			return propagator_worklist;
+		}
+        if ("alias".equalsIgnoreCase(s)) {
+			return propagator_alias;
+		}
+        if ("bdd".equalsIgnoreCase(s)) {
+			return propagator_bdd;
+		}
+        if ("incbdd".equalsIgnoreCase(s)) {
+			return propagator_incbdd;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option propagator", s));
     }
 
-    public static final int set_impl_hash = 1;
-    public static final int set_impl_bit = 2;
-    public static final int set_impl_hybrid = 3;
-    public static final int set_impl_array = 4;
-    public static final int set_impl_heintze = 5;
-    public static final int set_impl_double = 6;
-
-    /**
+	/**
      * Set Implementation --
      * Select points-to set implementation.
      *
@@ -554,32 +596,33 @@ public class PaddleOptions {
      */
     public int set_impl() {
         String s = soot.PhaseOptions.getString(options, "set-impl");
-        if (s == null || s.isEmpty())
-        	return set_impl_double;
+        if (s == null || s.isEmpty()) {
+			return set_impl_double;
+		}
 	
-        if (s.equalsIgnoreCase("hash"))
-            return set_impl_hash;
-        if (s.equalsIgnoreCase("bit"))
-            return set_impl_bit;
-        if (s.equalsIgnoreCase("hybrid"))
-            return set_impl_hybrid;
-        if (s.equalsIgnoreCase("array"))
-            return set_impl_array;
-        if (s.equalsIgnoreCase("heintze"))
-            return set_impl_heintze;
-        if (s.equalsIgnoreCase("double"))
-            return set_impl_double;
+        if ("hash".equalsIgnoreCase(s)) {
+			return set_impl_hash;
+		}
+        if ("bit".equalsIgnoreCase(s)) {
+			return set_impl_bit;
+		}
+        if ("hybrid".equalsIgnoreCase(s)) {
+			return set_impl_hybrid;
+		}
+        if ("array".equalsIgnoreCase(s)) {
+			return set_impl_array;
+		}
+        if ("heintze".equalsIgnoreCase(s)) {
+			return set_impl_heintze;
+		}
+        if ("double".equalsIgnoreCase(s)) {
+			return set_impl_double;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option set-impl", s));
     }
 
-    public static final int double_set_old_hash = 1;
-    public static final int double_set_old_bit = 2;
-    public static final int double_set_old_hybrid = 3;
-    public static final int double_set_old_array = 4;
-    public static final int double_set_old_heintze = 5;
-
-    /**
+	/**
      * Double Set Old --
      * Select implementation of points-to set for old part of double 
      * set.
@@ -590,30 +633,30 @@ public class PaddleOptions {
      */
     public int double_set_old() {
         String s = soot.PhaseOptions.getString(options, "double-set-old");
-        if (s == null || s.isEmpty())
-        	return double_set_old_hybrid;
+        if (s == null || s.isEmpty()) {
+			return double_set_old_hybrid;
+		}
 	
-        if (s.equalsIgnoreCase("hash"))
-            return double_set_old_hash;
-        if (s.equalsIgnoreCase("bit"))
-            return double_set_old_bit;
-        if (s.equalsIgnoreCase("hybrid"))
-            return double_set_old_hybrid;
-        if (s.equalsIgnoreCase("array"))
-            return double_set_old_array;
-        if (s.equalsIgnoreCase("heintze"))
-            return double_set_old_heintze;
+        if ("hash".equalsIgnoreCase(s)) {
+			return double_set_old_hash;
+		}
+        if ("bit".equalsIgnoreCase(s)) {
+			return double_set_old_bit;
+		}
+        if ("hybrid".equalsIgnoreCase(s)) {
+			return double_set_old_hybrid;
+		}
+        if ("array".equalsIgnoreCase(s)) {
+			return double_set_old_array;
+		}
+        if ("heintze".equalsIgnoreCase(s)) {
+			return double_set_old_heintze;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option double-set-old", s));
     }
 
-    public static final int double_set_new_hash = 1;
-    public static final int double_set_new_bit = 2;
-    public static final int double_set_new_hybrid = 3;
-    public static final int double_set_new_array = 4;
-    public static final int double_set_new_heintze = 5;
-
-    /**
+	/**
      * Double Set New --
      * Select implementation of points-to set for new part of double 
      * set.
@@ -624,19 +667,25 @@ public class PaddleOptions {
      */
     public int double_set_new() {
         String s = soot.PhaseOptions.getString(options, "double-set-new");
-        if (s == null || s.isEmpty())
-        	return double_set_new_hybrid;
+        if (s == null || s.isEmpty()) {
+			return double_set_new_hybrid;
+		}
 	
-        if (s.equalsIgnoreCase("hash"))
-            return double_set_new_hash;
-        if (s.equalsIgnoreCase("bit"))
-            return double_set_new_bit;
-        if (s.equalsIgnoreCase("hybrid"))
-            return double_set_new_hybrid;
-        if (s.equalsIgnoreCase("array"))
-            return double_set_new_array;
-        if (s.equalsIgnoreCase("heintze"))
-            return double_set_new_heintze;
+        if ("hash".equalsIgnoreCase(s)) {
+			return double_set_new_hash;
+		}
+        if ("bit".equalsIgnoreCase(s)) {
+			return double_set_new_bit;
+		}
+        if ("hybrid".equalsIgnoreCase(s)) {
+			return double_set_new_hybrid;
+		}
+        if ("array".equalsIgnoreCase(s)) {
+			return double_set_new_array;
+		}
+        if ("heintze".equalsIgnoreCase(s)) {
+			return double_set_new_heintze;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option double-set-new", s));
     }

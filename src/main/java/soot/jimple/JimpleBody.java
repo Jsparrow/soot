@@ -53,11 +53,24 @@ public class JimpleBody extends StmtBody {
   private static BodyValidator[] validators;
 
   /**
+   * Construct an empty JimpleBody
+   */
+  public JimpleBody(SootMethod m) {
+    super(m);
+  }
+
+/**
+   * Construct an extremely empty JimpleBody, for parsing into.
+   */
+  public JimpleBody() {
+  }
+
+/**
    * Returns an array containing some validators in order to validate the JimpleBody
    *
    * @return the array containing validators
    */
-  private synchronized static BodyValidator[] getValidators() {
+  private static synchronized BodyValidator[] getValidators() {
     if (validators == null) {
       validators = new BodyValidator[] { IdentityStatementsValidator.v(), TypesValidator.v(), ReturnStatementsValidator.v(),
           InvokeArgumentValidator.v(), FieldRefValidator.v(), NewValidator.v(), JimpleTrapValidator.v(),
@@ -66,22 +79,9 @@ public class JimpleBody extends StmtBody {
       };
     }
     return validators;
-  };
-
-  /**
-   * Construct an empty JimpleBody
-   */
-  public JimpleBody(SootMethod m) {
-    super(m);
   }
 
-  /**
-   * Construct an extremely empty JimpleBody, for parsing into.
-   */
-  public JimpleBody() {
-  }
-
-  /** Clones the current body, making deep copies of the contents. */
+/** Clones the current body, making deep copies of the contents. */
   @Override
   public Object clone() {
     Body b = new JimpleBody(getMethod());
@@ -89,19 +89,19 @@ public class JimpleBody extends StmtBody {
     return b;
   }
 
-  /**
+/**
    * Make sure that the JimpleBody is well formed. If not, throw an exception. Right now, performs only a handful of checks.
    */
   @Override
   public void validate() {
-    final List<ValidationException> exceptionList = new ArrayList<ValidationException>();
+    final List<ValidationException> exceptionList = new ArrayList<>();
     validate(exceptionList);
     if (!exceptionList.isEmpty()) {
       throw exceptionList.get(0);
     }
   }
 
-  /**
+/**
    * Validates the jimple body and saves a list of all validation errors
    *
    * @param exceptionList
@@ -119,16 +119,16 @@ public class JimpleBody extends StmtBody {
     }
   }
 
-  public void validateIdentityStatements() {
+public void validateIdentityStatements() {
     runValidation(IdentityStatementsValidator.v());
   }
 
-  /** Inserts usual statements for handling this & parameters into body. */
+/** Inserts usual statements for handling this & parameters into body. */
   public void insertIdentityStmts() {
     insertIdentityStmts(getMethod().getDeclaringClass());
   }
 
-  /**
+/**
    * Inserts usual statements for handling this & parameters into body.
    *
    * @param declaringClass
@@ -171,7 +171,7 @@ public class JimpleBody extends StmtBody {
     }
   }
 
-  /** Returns the first non-identity stmt in this body. */
+/** Returns the first non-identity stmt in this body. */
   public Stmt getFirstNonIdentityStmt() {
     Iterator<Unit> it = getUnits().iterator();
     Object o = null;

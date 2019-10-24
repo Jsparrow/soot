@@ -34,7 +34,16 @@ import soot.toolkits.graph.UnitGraph;
  * Provides an interface to find the Units that use a Local defined at a given Unit.
  */
 public interface LocalUses {
-  static final public class Factory {
+  /**
+	   * Returns a list of the Units that use the Local that is defined by a given Unit.
+	   * 
+	   * @param s
+	   *          the unit we wish to query for the use of the Local it defines.
+	   * @return a list of the Local's uses.
+	   */
+	  List<UnitValueBoxPair> getUsesOf(Unit s);
+
+public static final class Factory {
     private Factory() {
     }
 
@@ -54,13 +63,4 @@ public interface LocalUses {
       return newLocalUses(graph.getBody(), localDefs);
     }
   }
-
-  /**
-   * Returns a list of the Units that use the Local that is defined by a given Unit.
-   * 
-   * @param s
-   *          the unit we wish to query for the use of the Local it defines.
-   * @return a list of the Local's uses.
-   */
-  public List<UnitValueBoxPair> getUsesOf(Unit s);
 }

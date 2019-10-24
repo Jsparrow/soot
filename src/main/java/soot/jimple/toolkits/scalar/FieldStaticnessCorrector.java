@@ -36,6 +36,8 @@ import soot.jimple.FieldRef;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.Jimple;
 import soot.jimple.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Transformer that checks whether a static field is used like an instance field. If this is the case, all instance
@@ -46,7 +48,9 @@ import soot.jimple.Stmt;
  */
 public class FieldStaticnessCorrector extends AbstractStaticnessCorrector {
 
-  public FieldStaticnessCorrector(Singletons.Global g) {
+  private static final Logger logger = LoggerFactory.getLogger(FieldStaticnessCorrector.class);
+
+public FieldStaticnessCorrector(Singletons.Global g) {
   }
 
   public static FieldStaticnessCorrector v() {
@@ -76,6 +80,7 @@ public class FieldStaticnessCorrector extends AbstractStaticnessCorrector {
               }
             }
           } catch (ConflictingFieldRefException ex) {
+			logger.error(ex.getMessage(), ex);
             // That field is broken, just don't touch it
           }
         }

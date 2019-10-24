@@ -63,13 +63,14 @@ public class CriticalEdgeRemover extends BodyTransformer {
   /**
    * performs critical edge-removing.
    */
-  protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     Removing Critical Edges...");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     Removing Critical Edges...").toString());
     }
     removeCriticalEdges(b);
     if (Options.v().verbose()) {
-      logger.debug("[" + b.getMethod().getName() + "]     Removing Critical Edges done.");
+      logger.debug(new StringBuilder().append("[").append(b.getMethod().getName()).append("]     Removing Critical Edges done.").toString());
     }
 
   }
@@ -123,12 +124,12 @@ public class CriticalEdgeRemover extends BodyTransformer {
    * @param newTarget
    */
   private static void redirectBranch(Unit node, Unit oldTarget, Unit newTarget) {
-    for (UnitBox targetBox : node.getUnitBoxes()) {
+    node.getUnitBoxes().forEach(targetBox -> {
       Unit target = targetBox.getUnit();
       if (target == oldTarget) {
         targetBox.setUnit(newTarget);
       }
-    }
+    });
   }
 
   /**
@@ -148,7 +149,7 @@ public class CriticalEdgeRemover extends BodyTransformer {
   private void removeCriticalEdges(Body b) {
     Chain<Unit> unitChain = b.getUnits();
     int size = unitChain.size();
-    Map<Unit, List<Unit>> predecessors = new HashMap<Unit, List<Unit>>(2 * size + 1, 0.7f);
+    Map<Unit, List<Unit>> predecessors = new HashMap<>(2 * size + 1, 0.7f);
 
     /*
      * First get the predecessors of each node (although direct predecessors are predecessors too, we'll not include them in
@@ -164,7 +165,7 @@ public class CriticalEdgeRemover extends BodyTransformer {
           Unit target = succsIt.next().getUnit();
           List<Unit> predList = predecessors.get(target);
           if (predList == null) {
-            predList = new ArrayList<Unit>();
+            predList = new ArrayList<>();
             predList.add(currentUnit);
             predecessors.put(target, predList);
           } else {
@@ -204,12 +205,7 @@ public class CriticalEdgeRemover extends BodyTransformer {
             directPredecessor = insertGotoAfter(unitChain, directPredecessor, currentUnit);
           }
 
-          /*
-           * if the predecessors have more than one successor insert the synthetic node.
-           */
-          Iterator<Unit> predIt = predList.iterator();
-          while (predIt.hasNext()) {
-            Unit predecessor = predIt.next();
+          for (Unit predecessor : predList) {
             /*
              * Although in Jimple there should be only two ways of having more than one successor (If and Case) we'll do it
              * the hard way:)

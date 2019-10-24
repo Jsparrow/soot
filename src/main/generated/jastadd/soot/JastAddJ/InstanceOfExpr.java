@@ -18,30 +18,60 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production InstanceOfExpr : {@link Expr} ::= <span class="component">{@link Expr}</span> <span class="component">TypeAccess:{@link Access}</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:185
  */
-public class InstanceOfExpr extends Expr implements Cloneable {
-  /**
+public class InstanceOfExpr extends Expr {
+  private static final Logger logger = LoggerFactory.getLogger(InstanceOfExpr.class);
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+/**
+   * @ast method 
+   * 
+   */
+  public InstanceOfExpr() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public InstanceOfExpr(Expr p0, Access p1) {
+    setChild(p0, 0);
+    setChild(p1, 1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     type_computed = false;
     type_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public InstanceOfExpr clone() throws CloneNotSupportedException {
     InstanceOfExpr node = (InstanceOfExpr)super.clone();
     node.type_computed = false;
@@ -50,29 +80,33 @@ public class InstanceOfExpr extends Expr implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public InstanceOfExpr copy() {
     try {
       InstanceOfExpr node = (InstanceOfExpr) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public InstanceOfExpr fullCopy() {
     InstanceOfExpr tree = (InstanceOfExpr) copy();
     if (children != null) {
@@ -86,58 +120,57 @@ public class InstanceOfExpr extends Expr implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:421
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     getExpr().toString(s);
     s.append(" instanceof ");
     getTypeAccess().toString(s);
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeCheck.jrag:235
    */
-  public void typeCheck() {
+  @Override
+public void typeCheck() {
     TypeDecl relationalExpr = getExpr().type();
     TypeDecl referenceType = getTypeAccess().type();
-    if(!relationalExpr.isUnknown()) {
-      if(!relationalExpr.isReferenceType() && !relationalExpr.isNull())
-        error("The relational expression in instance of must be reference or null type");
-      if(!referenceType.isReferenceType())
-        error("The reference expression in instance of must be reference type");
-      if(!relationalExpr.castingConversionTo(referenceType))
-        error("The type " + relationalExpr.typeName() + " of the relational expression " + 
-          getExpr() +  " can not be cast into the type " + referenceType.typeName());
-      if(getExpr().isTypeAccess())
-        error("The relational expression " + getExpr() + " must not be a type name");
-    }
+    if (relationalExpr.isUnknown()) {
+		return;
+	}
+	if(!relationalExpr.isReferenceType() && !relationalExpr.isNull()) {
+		error("The relational expression in instance of must be reference or null type");
+	}
+	if(!referenceType.isReferenceType()) {
+		error("The reference expression in instance of must be reference type");
+	}
+	if(!relationalExpr.castingConversionTo(referenceType)) {
+		error(new StringBuilder().append("The type ").append(relationalExpr.typeName()).append(" of the relational expression ").append(getExpr()).append(" can not be cast into the type ").append(referenceType.typeName())
+				.toString());
+	}
+	if(getExpr().isTypeAccess()) {
+		error(new StringBuilder().append("The relational expression ").append(getExpr()).append(" must not be a type name").toString());
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect Expressions
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/JimpleBackend/Expressions.jrag:902
    */
-  public soot.Value eval(Body b) {
+  @Override
+public soot.Value eval(Body b) {
     return b.newInstanceOfExpr(
       asImmediate(b, getExpr().eval(b)),
       getTypeAccess().type().getSootType(),
       this
     );
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public InstanceOfExpr() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -145,34 +178,29 @@ public class InstanceOfExpr extends Expr implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[2];
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public InstanceOfExpr(Expr p0, Access p1) {
-    setChild(p0, 0);
-    setChild(p1, 1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 2;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the Expr child.
    * @param node The new node to replace the Expr child.
    * @apilevel high-level
@@ -182,7 +210,7 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   public void setExpr(Expr node) {
     setChild(node, 0);
   }
-  /**
+/**
    * Retrieves the Expr child.
    * @return The current node used as the Expr child.
    * @apilevel high-level
@@ -192,7 +220,7 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   public Expr getExpr() {
     return (Expr)getChild(0);
   }
-  /**
+/**
    * Retrieves the Expr child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the Expr child.
@@ -203,7 +231,7 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   public Expr getExprNoTransform() {
     return (Expr)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the TypeAccess child.
    * @param node The new node to replace the TypeAccess child.
    * @apilevel high-level
@@ -213,7 +241,7 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   public void setTypeAccess(Access node) {
     setChild(node, 1);
   }
-  /**
+/**
    * Retrieves the TypeAccess child.
    * @return The current node used as the TypeAccess child.
    * @apilevel high-level
@@ -223,7 +251,7 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   public Access getTypeAccess() {
     return (Access)getChild(1);
   }
-  /**
+/**
    * Retrieves the TypeAccess child.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The current node used as the TypeAccess child.
@@ -234,29 +262,31 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   public Access getTypeAccessNoTransform() {
     return (Access)getChildNoTransform(1);
   }
-  /**
+/**
    * @attribute syn
    * @aspect ConstantExpression
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/ConstantExpression.jrag:336
    */
-  public boolean isConstant() {
+  @Override
+public boolean isConstant() {
     ASTNode$State state = state();
     try {  return false;  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:333
    */
-  public boolean isDAafterFalse(Variable v) {
+  @Override
+public boolean isDAafterFalse(Variable v) {
     ASTNode$State state = state();
     try {  return isDAafter(v);  }
     finally {
     }
   }
-  /*eq Stmt.isDAafter(Variable v) {
+/*eq Stmt.isDAafter(Variable v) {
     //System.out.println("### isDAafter reached in " + getClass().getName());
     //throw new NullPointerException();
     throw new Error("Can not compute isDAafter for " + getClass().getName() + " at " + errorPrefix());
@@ -264,48 +294,44 @@ public class InstanceOfExpr extends Expr implements Cloneable {
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:332
    */
-  public boolean isDAafterTrue(Variable v) {
+  @Override
+public boolean isDAafterTrue(Variable v) {
     ASTNode$State state = state();
     try {  return isDAafter(v);  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:235
    */
-  public boolean isDAafter(Variable v) {
+  @Override
+public boolean isDAafter(Variable v) {
     ASTNode$State state = state();
     try {  return getExpr().isDAafter(v);  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:694
    */
-  public boolean isDUafter(Variable v) {
+  @Override
+public boolean isDUafter(Variable v) {
     ASTNode$State state = state();
     try {  return getExpr().isDUafter(v);  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
    * @attribute syn
    * @aspect TypeAnalysis
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:361
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -314,28 +340,32 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {  return typeBoolean();  }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:89
    * @apilevel internal
    */
-  public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
+  @Override
+public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
     if(caller == getTypeAccessNoTransform()) {
       return NameType.TYPE_NAME;
     }
     else {      return getParent().Define_NameType_nameType(this, caller);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

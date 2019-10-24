@@ -25,54 +25,69 @@ import soot.coffi.CoffiMethodSource;
 public interface SimpleSet {
 
      
-    int size();
-
-     
-    boolean isEmpty();
-
-     
-    SimpleSet add(Object o);
-
-     
-    Iterator iterator();
-
-     
-    boolean contains(Object o);
-
-     
-    boolean isSingleton();
-
-     
-    boolean isSingleton(Object o);
-
-     
     SimpleSet emptySet = new SimpleSet() {
-      public int size() { return 0; }
-      public boolean isEmpty() { return true; }
-      public SimpleSet add(Object o) {
-        if(o instanceof SimpleSet)
-          return (SimpleSet)o;
+      @Override
+	public int size() { return 0; }
+      @Override
+	public boolean isEmpty() { return true; }
+      @Override
+	public SimpleSet add(Object o) {
+        if(o instanceof SimpleSet) {
+			return (SimpleSet)o;
+		}
         return new SimpleSetImpl().add(o);
       }
-      public boolean contains(Object o) { return false; }
-      public Iterator iterator() { return Collections.EMPTY_LIST.iterator(); }
-      public boolean isSingleton() { return false; }
-      public boolean isSingleton(Object o) { return false; }
+      @Override
+	public boolean contains(Object o) { return false; }
+      @Override
+	public Iterator iterator() { return Collections.EMPTY_LIST.iterator(); }
+      @Override
+	public boolean isSingleton() { return false; }
+      @Override
+	public boolean isSingleton(Object o) { return false; }
     };
 
-     
-    SimpleSet fullSet = new SimpleSet() {
-      public int size() { throw new Error("Operation size not supported on the full set"); }
-      public boolean isEmpty() { return false; }
-      public SimpleSet add(Object o) { return this; }
-      public boolean contains(Object o) { return true; }
-      public Iterator iterator() { throw new Error("Operation iterator not support on the full set"); }
-      public boolean isSingleton() { return false; }
-      public boolean isSingleton(Object o) { return false; }
+
+	SimpleSet fullSet = new SimpleSet() {
+      @Override
+	public int size() { throw new Error("Operation size not supported on the full set"); }
+      @Override
+	public boolean isEmpty() { return false; }
+      @Override
+	public SimpleSet add(Object o) { return this; }
+      @Override
+	public boolean contains(Object o) { return true; }
+      @Override
+	public Iterator iterator() { throw new Error("Operation iterator not support on the full set"); }
+      @Override
+	public boolean isSingleton() { return false; }
+      @Override
+	public boolean isSingleton(Object o) { return false; }
     };
 
-     
-    class SimpleSetImpl implements SimpleSet {
+
+	int size();
+
+
+	boolean isEmpty();
+
+
+	SimpleSet add(Object o);
+
+
+	Iterator iterator();
+
+
+	boolean contains(Object o);
+
+
+	boolean isSingleton();
+
+
+	boolean isSingleton(Object o);
+
+
+	class SimpleSetImpl implements SimpleSet {
       private HashSet internalSet;
       public SimpleSetImpl() {
         internalSet = new HashSet(4);
@@ -84,25 +99,34 @@ public interface SimpleSet {
       private SimpleSetImpl(SimpleSetImpl set) {
         this.internalSet = new HashSet(set.internalSet);
       }
-      public int size() {
+      @Override
+	public int size() {
         return internalSet.size();
       }
-      public boolean isEmpty() {
+      @Override
+	public boolean isEmpty() {
         return internalSet.isEmpty();
       }
-      public SimpleSet add(Object o) {
-        if(internalSet.contains(o)) return this;
+      @Override
+	public SimpleSet add(Object o) {
+        if(internalSet.contains(o)) {
+			return this;
+		}
         SimpleSetImpl set = new SimpleSetImpl(this);
         set.internalSet.add(o);
         return set;
       }
-      public Iterator iterator() {
+      @Override
+	public Iterator iterator() {
         return internalSet.iterator();
       }
-      public boolean contains(Object o) {
+      @Override
+	public boolean contains(Object o) {
         return internalSet.contains(o);
       }
-      public boolean isSingleton() { return internalSet.size() == 1; }
-      public boolean isSingleton(Object o) { return isSingleton() && contains(o); }
+      @Override
+	public boolean isSingleton() { return internalSet.size() == 1; }
+      @Override
+	public boolean isSingleton(Object o) { return isSingleton() && contains(o); }
     }
 }

@@ -38,20 +38,23 @@ public class GInstanceFieldRef extends AbstractInstanceFieldRef implements Prece
     String leftOp = opString;
 
     if (op instanceof Precedence && ((Precedence) op).getPrecedence() < getPrecedence()) {
-      leftOp = "(" + leftOp + ")";
+      leftOp = new StringBuilder().append("(").append(leftOp).append(")").toString();
     }
     return leftOp + rightString;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return toString(getBase(), getBase().toString(), "." + fieldRef.getSignature());
   }
 
-  public int getPrecedence() {
+  @Override
+public int getPrecedence() {
     return 950;
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GInstanceFieldRef(Grimp.cloneIfNecessary(getBase()), fieldRef);
   }
 

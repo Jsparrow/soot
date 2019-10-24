@@ -73,11 +73,10 @@ public class ShimpleLocalDefs implements LocalDefs {
     // each local -- no need for fancy analysis
     {
       Chain<Unit> unitsChain = sb.getUnits();
-      Iterator<Unit> unitsIt = unitsChain.iterator();
-      localToDefs = new HashMap<Value, List<Unit>>(unitsChain.size() * 2 + 1, 0.7f);
+      localToDefs = new HashMap<>(unitsChain.size() * 2 + 1, 0.7f);
 
-      while (unitsIt.hasNext()) {
-        Unit unit = (Unit) unitsIt.next();
+      for (Unit anUnitsChain : unitsChain) {
+        Unit unit = (Unit) anUnitsChain;
         Iterator<ValueBox> defBoxesIt = unit.getDefBoxes().iterator();
         while (defBoxesIt.hasNext()) {
           Value value = ((ValueBox) defBoxesIt.next()).getValue();
@@ -138,7 +137,7 @@ public class ShimpleLocalDefs implements LocalDefs {
       }
 
       if (!defined) {
-        throw new RuntimeException("Illegal LocalDefs query; local " + l + " is not being used at " + s);
+        throw new RuntimeException(new StringBuilder().append("Illegal LocalDefs query; local ").append(l).append(" is not being used at ").append(s).toString());
       }
     }
 

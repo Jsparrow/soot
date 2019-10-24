@@ -71,7 +71,7 @@ public class ShimpleLocalUses implements LocalUses {
     }
 
     // initialise the map
-    localToUses = new HashMap<Local, ArrayList>();
+    localToUses = new HashMap<>();
     Iterator localsIt = sb.getLocals().iterator();
     while (localsIt.hasNext()) {
       Local local = (Local) localsIt.next();
@@ -119,7 +119,8 @@ public class ShimpleLocalUses implements LocalUses {
    * If a Local is defined in the Unit, returns all the uses of that Local as a list of UnitValueBoxPairs, each containing a
    * Unit that uses the local and the corresponding ValueBox containing the Local.
    **/
-  public List getUsesOf(Unit unit) {
+  @Override
+public List getUsesOf(Unit unit) {
     List defBoxes = unit.getDefBoxes();
 
     switch (defBoxes.size()) {

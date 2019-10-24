@@ -35,34 +35,35 @@ public class JavaSecurityAccessControllerNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.lang.Object doPrivileged(java.security.PrivilegedAction)")) {
+    if ("java.lang.Object doPrivileged(java.security.PrivilegedAction)".equals(subSignature)) {
       java_security_AccessController_doPrivileged(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)")) {
+    } else if ("java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)".equals(subSignature)) {
       java_security_AccessController_doPrivileged(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature
-        .equals("java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)")) {
+    } else if ("java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)"
+        .equals(subSignature)) {
       java_security_AccessController_doPrivileged(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals(
-        "java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext)")) {
+    } else if ("java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext)".equals(
+        subSignature)) {
       java_security_AccessController_doPrivileged(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.security.AccessControlContext getStackAccessControlContext()")) {
+    } else if ("java.security.AccessControlContext getStackAccessControlContext()".equals(subSignature)) {
       java_security_AccessController_getStackAccessControlContext(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.security.AccessControlContext getInheritedAccessControlContext()")) {
+    } else if ("java.security.AccessControlContext getInheritedAccessControlContext()".equals(subSignature)) {
       java_security_AccessController_getInheritedAccessControlContext(method, thisVar, returnVar, params);
       return;
 

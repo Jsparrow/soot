@@ -494,43 +494,53 @@ public class Baf {
     TypeSwitch sw;
 
     type.apply(sw = new TypeSwitch() {
-      public void caseBooleanType(BooleanType t) {
+      @Override
+	public void caseBooleanType(BooleanType t) {
         setResult("b");
       }
 
-      public void caseByteType(ByteType t) {
+      @Override
+	public void caseByteType(ByteType t) {
         setResult("b");
       }
 
-      public void caseCharType(CharType t) {
+      @Override
+	public void caseCharType(CharType t) {
         setResult("c");
       }
 
-      public void caseDoubleType(DoubleType t) {
+      @Override
+	public void caseDoubleType(DoubleType t) {
         setResult("d");
       }
 
-      public void caseFloatType(FloatType t) {
+      @Override
+	public void caseFloatType(FloatType t) {
         setResult("f");
       }
 
-      public void caseIntType(IntType t) {
+      @Override
+	public void caseIntType(IntType t) {
         setResult("i");
       }
 
-      public void caseLongType(LongType t) {
+      @Override
+	public void caseLongType(LongType t) {
         setResult("l");
       }
 
-      public void caseShortType(ShortType t) {
+      @Override
+	public void caseShortType(ShortType t) {
         setResult("s");
       }
 
-      public void defaultCase(Type t) {
+      @Override
+	public void defaultCase(Type t) {
         throw new RuntimeException("Invalid type: " + t);
       }
 
-      public void caseRefType(RefType t) {
+      @Override
+	public void caseRefType(RefType t) {
         setResult("r");
       }
 

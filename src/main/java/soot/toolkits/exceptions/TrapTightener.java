@@ -60,32 +60,34 @@ public final class TrapTightener extends TrapTransformer {
   public TrapTightener(Singletons.Global g) {
   }
 
-  public static TrapTightener v() {
-    return soot.G.v().soot_toolkits_exceptions_TrapTightener();
-  }
-
   public TrapTightener(ThrowAnalysis ta) {
     this.throwAnalysis = ta;
   }
 
-  protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+public static TrapTightener v() {
+    return soot.G.v().soot_toolkits_exceptions_TrapTightener();
+  }
+
+@Override
+protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     if (this.throwAnalysis == null) {
       this.throwAnalysis = Scene.v().getDefaultThrowAnalysis();
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Tightening trap boundaries...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Tightening trap boundaries...").toString());
     }
 
     Chain<Trap> trapChain = body.getTraps();
     Chain<Unit> unitChain = body.getUnits();
-    if (trapChain.size() > 0) {
-      ExceptionalUnitGraph graph = new ExceptionalUnitGraph(body, throwAnalysis);
-      Set<Unit> unitsWithMonitor = getUnitsWithMonitor(graph);
-
-      for (Iterator<Trap> trapIt = trapChain.iterator(); trapIt.hasNext();) {
+    if (trapChain.size() <= 0) {
+		return;
+	}
+	ExceptionalUnitGraph graph = new ExceptionalUnitGraph(body, throwAnalysis);
+	Set<Unit> unitsWithMonitor = getUnitsWithMonitor(graph);
+	for (Iterator<Trap> trapIt = trapChain.iterator(); trapIt.hasNext();) {
         Trap trap = trapIt.next();
-        boolean isCatchAll = trap.getException().getName().equals("java.lang.Throwable");
+        boolean isCatchAll = "java.lang.Throwable".equals(trap.getException().getName());
         Unit firstTrappedUnit = trap.getBeginUnit();
         Unit firstTrappedThrower = null;
         Unit firstUntrappedUnit = trap.getEndUnit();
@@ -138,10 +140,9 @@ public final class TrapTightener extends TrapTransformer {
           }
         }
       }
-    }
   }
 
-  /**
+/**
    * A utility routine which determines if a particular {@link Unit} might throw an exception to a particular {@link Trap},
    * according to the information supplied by a particular control flow graph.
    *
@@ -154,11 +155,6 @@ public final class TrapTightener extends TrapTransformer {
    * @return <tt>true</tt> if <tt>u</tt> might throw an exception caught by <tt>t</tt>, according to <tt>g</tt.
    */
   protected boolean mightThrowTo(ExceptionalUnitGraph g, Unit u, Trap t) {
-    for (ExceptionDest dest : g.getExceptionDests(u)) {
-      if (dest.getTrap() == t) {
-        return true;
-      }
-    }
-    return false;
+    return g.getExceptionDests(u).stream().anyMatch(dest -> dest.getTrap() == t);
   }
 }

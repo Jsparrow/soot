@@ -61,21 +61,25 @@ class Instruction_Multianewarray extends Instruction_intindex {
     name = "multianewarray";
   }
 
-  public String toString(cp_info constant_pool[]) {
-    return super.toString(constant_pool) + argsep + dims;
+  @Override
+public String toString(cp_info constant_pool[]) {
+    return new StringBuilder().append(super.toString(constant_pool)).append(argsep).append(dims).toString();
   }
 
-  public int nextOffset(int curr) {
+  @Override
+public int nextOffset(int curr) {
     return super.nextOffset(curr) + 1;
   }
 
-  public int parse(byte bc[], int index) {
+  @Override
+public int parse(byte bc[], int index) {
     index = super.parse(bc, index);
     dims = bc[index];
     return index + 1;
   }
 
-  public int compile(byte bc[], int index) {
+  @Override
+public int compile(byte bc[], int index) {
     index = super.compile(bc, index);
     bc[index] = dims;
     return index + 1;

@@ -68,7 +68,8 @@ public class ForLoopCreator extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
   /*
@@ -77,7 +78,8 @@ public class ForLoopCreator extends DepthFirstAdapter {
    * ASTMethodNode ASTSwitchNode ASTIfNode ASTIfElseNode ASTUnconditionalWhileNode ASTWhileNode ASTDoWhileNode ASTForLoopNode
    * ASTLabeledBlockNode ASTSynchronizedBlockNode
    */
-  public void normalRetrieving(ASTNode node) {
+  @Override
+public void normalRetrieving(ASTNode node) {
     if (node instanceof ASTSwitchNode) {
       dealWithSwitchNode((ASTSwitchNode) node);
       return;
@@ -96,9 +98,10 @@ public class ForLoopCreator extends DepthFirstAdapter {
       // go over the ASTNodes in this subBody and apply
       while (it.hasNext()) {
         ASTNode temp = (ASTNode) it.next();
-        if (temp instanceof ASTStatementSequenceNode) {
-          // need to check if this is followed by a while node
-          if (it.hasNext()) {
+        // need to check if this is followed by a while node
+		// temp is a stmtSeqNode
+		if (temp instanceof ASTStatementSequenceNode && it.hasNext())
+		 {
             // there is a next node
             ASTNode temp1 = (ASTNode) subBody.get(nodeNumber + 1);
             if (temp1 instanceof ASTWhileNode) {
@@ -182,7 +185,6 @@ public class ForLoopCreator extends DepthFirstAdapter {
               } // for loop creation pattern matched
             } // the next node was a whilenode
           } // there is a next node
-        } // temp is a stmtSeqNode
         temp.apply(this);
         nodeNumber++;
       } // end of going over nodes
@@ -190,7 +192,8 @@ public class ForLoopCreator extends DepthFirstAdapter {
     } // end of going over subBodies
   }
 
-  public void caseASTTryNode(ASTTryNode node) {
+  @Override
+public void caseASTTryNode(ASTTryNode node) {
     inASTTryNode(node);
 
     // get try body
@@ -201,31 +204,31 @@ public class ForLoopCreator extends DepthFirstAdapter {
     // go over the ASTNodes and apply
     while (it.hasNext()) {
       ASTNode temp = (ASTNode) it.next();
-      if (temp instanceof ASTStatementSequenceNode) {
-        // need to check if this is followed by a while node
-        if (it.hasNext()) {
-          // there is a next node
-          ASTNode temp1 = (ASTNode) tryBody.get(nodeNumber + 1);
-          if (temp1 instanceof ASTWhileNode) {
-            // a statement sequence node followed by a while node
+      // need to check if this is followed by a while node
+	// temp is a stmtSeqNode
+	if (temp instanceof ASTStatementSequenceNode && it.hasNext())
+	 {
+	  // there is a next node
+	  ASTNode temp1 = (ASTNode) tryBody.get(nodeNumber + 1);
+	  if (temp1 instanceof ASTWhileNode) {
+	    // a statement sequence node followed by a while node
 
-            ForLoopCreationHelper helper = new ForLoopCreationHelper((ASTStatementSequenceNode) temp, (ASTWhileNode) temp1);
+	    ForLoopCreationHelper helper = new ForLoopCreationHelper((ASTStatementSequenceNode) temp, (ASTWhileNode) temp1);
 
-            if (helper.checkPattern()) {
-              // pattern matched
+	    if (helper.checkPattern()) {
+	      // pattern matched
 
-              List<Object> newBody = helper.createNewBody(tryBody, nodeNumber);
-              if (newBody != null) {
-                // something did not go wrong
-                node.replaceTryBody(newBody);
-                G.v().ASTTransformations_modified = true;
-                // System.out.println("FOR LOOP CREATED");
-                return;
-              } // newBody was not null
-            } // for loop creation pattern matched
-          } // the next node was a whilenode
-        } // there is a next node
-      } // temp is a stmtSeqNode
+	      List<Object> newBody = helper.createNewBody(tryBody, nodeNumber);
+	      if (newBody != null) {
+	        // something did not go wrong
+	        node.replaceTryBody(newBody);
+	        G.v().ASTTransformations_modified = true;
+	        // System.out.println("FOR LOOP CREATED");
+	        return;
+	      } // newBody was not null
+	    } // for loop creation pattern matched
+	  } // the next node was a whilenode
+	} // there is a next node
       temp.apply(this);
       nodeNumber++;
     } // end of while going through tryBody
@@ -261,9 +264,10 @@ public class ForLoopCreator extends DepthFirstAdapter {
       while (itBody.hasNext()) {
         ASTNode temp = (ASTNode) itBody.next();
 
-        if (temp instanceof ASTStatementSequenceNode) {
-          // need to check if this is followed by a while node
-          if (itBody.hasNext()) {
+        // need to check if this is followed by a while node
+		// temp is a stmtSeqNode
+		if (temp instanceof ASTStatementSequenceNode && itBody.hasNext())
+		 {
             // there is a next node
             ASTNode temp1 = (ASTNode) body.get(nodeNumber + 1);
             if (temp1 instanceof ASTWhileNode) {
@@ -286,7 +290,6 @@ public class ForLoopCreator extends DepthFirstAdapter {
               } // for loop creation pattern matched
             } // the next node was a whilenode
           } // there is a next node
-        } // temp is a stmtSeqNode
 
         temp.apply(this);
         nodeNumber++;
@@ -302,10 +305,7 @@ public class ForLoopCreator extends DepthFirstAdapter {
     List<Object> indexList = node.getIndexList();
     Map<Object, List<Object>> index2BodyList = node.getIndex2BodyList();
 
-    Iterator<Object> it = indexList.iterator();
-    while (it.hasNext()) {
-      // going through all the cases of the switch statement
-      Object currentIndex = it.next();
+    for (Object currentIndex : indexList) {
       List<Object> body = index2BodyList.get(currentIndex);
 
       if (body != null) {
@@ -317,37 +317,37 @@ public class ForLoopCreator extends DepthFirstAdapter {
         while (itBody.hasNext()) {
           ASTNode temp = (ASTNode) itBody.next();
 
-          if (temp instanceof ASTStatementSequenceNode) {
-            // need to check if this is followed by a while node
-            if (itBody.hasNext()) {
-              // there is a next node
-              ASTNode temp1 = (ASTNode) body.get(nodeNumber + 1);
-              if (temp1 instanceof ASTWhileNode) {
-                // a statement sequence node followed by a while node
+          // need to check if this is followed by a while node
+		// temp is a stmtSeqNode
+		if (temp instanceof ASTStatementSequenceNode && itBody.hasNext())
+		 {
+		  // there is a next node
+		  ASTNode temp1 = (ASTNode) body.get(nodeNumber + 1);
+		  if (temp1 instanceof ASTWhileNode) {
+		    // a statement sequence node followed by a while node
 
-                ForLoopCreationHelper helper
-                    = new ForLoopCreationHelper((ASTStatementSequenceNode) temp, (ASTWhileNode) temp1);
+		    ForLoopCreationHelper helper
+		        = new ForLoopCreationHelper((ASTStatementSequenceNode) temp, (ASTWhileNode) temp1);
 
-                if (helper.checkPattern()) {
-                  // pattern matched
+		    if (helper.checkPattern()) {
+		      // pattern matched
 
-                  List<Object> newBody = helper.createNewBody(body, nodeNumber);
-                  if (newBody != null) {
-                    // something did not go wrong
+		      List<Object> newBody = helper.createNewBody(body, nodeNumber);
+		      if (newBody != null) {
+		        // something did not go wrong
 
-                    // put this body in the Map
-                    index2BodyList.put(currentIndex, newBody);
-                    // replace in actual switchNode
-                    node.replaceIndex2BodyList(index2BodyList);
+		        // put this body in the Map
+		        index2BodyList.put(currentIndex, newBody);
+		        // replace in actual switchNode
+		        node.replaceIndex2BodyList(index2BodyList);
 
-                    G.v().ASTTransformations_modified = true;
-                    // System.out.println("FOR LOOP CREATED");
-                    return;
-                  } // newBody was not null
-                } // for loop creation pattern matched
-              } // the next node was a whilenode
-            } // there is a next node
-          } // temp is a stmtSeqNode
+		        G.v().ASTTransformations_modified = true;
+		        // System.out.println("FOR LOOP CREATED");
+		        return;
+		      } // newBody was not null
+		    } // for loop creation pattern matched
+		  } // the next node was a whilenode
+		} // there is a next node
           temp.apply(this);
           nodeNumber++;
         }

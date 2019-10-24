@@ -33,18 +33,20 @@ import soot.Type;
  */
 public class BottomType extends Type {
 
-  public static BottomType v() {
-    return G.v().soot_jimple_toolkits_typing_fast_BottomType();
-  }
-
   public BottomType(Singletons.Global g) {
-  }
+	  }
 
-  public String toString() {
-    return "bottom_type";
-  }
+	public static BottomType v() {
+	    return G.v().soot_jimple_toolkits_typing_fast_BottomType();
+	  }
 
-  public boolean equals(Object t) {
-    return this == t;
-  }
+	@Override
+	public String toString() {
+	    return "bottom_type";
+	  }
+
+	@Override
+	public boolean equals(Object t) {
+	    return this == t;
+	  }
 }

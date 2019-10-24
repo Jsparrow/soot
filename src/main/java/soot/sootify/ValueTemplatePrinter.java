@@ -91,7 +91,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
   private final TypeTemplatePrinter ttp;
   private String varName;
 
-  private Set<String> varnamesAlreadyUsed = new HashSet<String>();
+  private Set<String> varnamesAlreadyUsed = new HashSet<>();
 
   public ValueTemplatePrinter(TemplatePrinter p) {
     this.p = p;
@@ -110,7 +110,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 
   private void printConstant(Value v, String... ops) {
     String stmtClassName = v.getClass().getSimpleName();
-    p.print("Value " + varName + " = ");
+    p.print(new StringBuilder().append("Value ").append(varName).append(" = ").toString());
     p.printNoIndent(stmtClassName);
     p.printNoIndent(".v(");
     int i = 1;
@@ -130,7 +130,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     if (stmtClassName.charAt(0) == 'J') {
       stmtClassName = stmtClassName.substring(1);
     }
-    p.print("Value " + varName + " = ");
+    p.print(new StringBuilder().append("Value ").append(varName).append(" = ").toString());
     printFactoryMethodCall(stmtClassName, ops);
     p.printlnNoIndent(";");
   }
@@ -165,43 +165,53 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     return varName;
   }
 
-  public void caseDoubleConstant(DoubleConstant v) {
+  @Override
+public void caseDoubleConstant(DoubleConstant v) {
     printConstant(v, Double.toString(v.value));
   }
 
-  public void caseFloatConstant(FloatConstant v) {
+  @Override
+public void caseFloatConstant(FloatConstant v) {
     printConstant(v, Float.toString(v.value));
   }
 
-  public void caseIntConstant(IntConstant v) {
+  @Override
+public void caseIntConstant(IntConstant v) {
     printConstant(v, Integer.toString(v.value));
   }
 
-  public void caseLongConstant(LongConstant v) {
+  @Override
+public void caseLongConstant(LongConstant v) {
     printConstant(v, Long.toString(v.value));
   }
 
-  public void caseNullConstant(NullConstant v) {
+  @Override
+public void caseNullConstant(NullConstant v) {
     printConstant(v);
   }
 
-  public void caseStringConstant(StringConstant v) {
-    printConstant(v, "\"" + v.value + "\"");
+  @Override
+public void caseStringConstant(StringConstant v) {
+    printConstant(v, new StringBuilder().append("\"").append(v.value).append("\"").toString());
   }
 
-  public void caseClassConstant(ClassConstant v) {
-    printConstant(v, "\"" + v.value + "\"");
+  @Override
+public void caseClassConstant(ClassConstant v) {
+    printConstant(v, new StringBuilder().append("\"").append(v.value).append("\"").toString());
   }
 
-  public void caseAddExpr(AddExpr v) {
+  @Override
+public void caseAddExpr(AddExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseMethodHandle(MethodHandle handle) {
+  @Override
+public void caseMethodHandle(MethodHandle handle) {
     throw new UnsupportedOperationException("we have not yet determined how to print Java 7 method handles");
   }
   
-  public void caseMethodType(MethodType type) {
+  @Override
+public void caseMethodType(MethodType type) {
     throw new UnsupportedOperationException("we have not yet determined how to print Java 8 method handles");
   }
 
@@ -219,88 +229,109 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     Value right = v.getOp2();
     String v2 = printValueAssignment(right, "right");
 
-    p.println("Value " + oldName + " = Jimple.v().new" + className + "(" + v1 + "," + v2 + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().new").append(className).append("(").append(v1).append(",")
+			.append(v2).append(");").toString());
 
     varName = oldName;
   }
 
-  public void caseAndExpr(AndExpr v) {
+  @Override
+public void caseAndExpr(AndExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseCmpExpr(CmpExpr v) {
+  @Override
+public void caseCmpExpr(CmpExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseCmpgExpr(CmpgExpr v) {
+  @Override
+public void caseCmpgExpr(CmpgExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseCmplExpr(CmplExpr v) {
+  @Override
+public void caseCmplExpr(CmplExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseDivExpr(DivExpr v) {
+  @Override
+public void caseDivExpr(DivExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseEqExpr(EqExpr v) {
+  @Override
+public void caseEqExpr(EqExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseNeExpr(NeExpr v) {
+  @Override
+public void caseNeExpr(NeExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseGeExpr(GeExpr v) {
+  @Override
+public void caseGeExpr(GeExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseGtExpr(GtExpr v) {
+  @Override
+public void caseGtExpr(GtExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseLeExpr(LeExpr v) {
+  @Override
+public void caseLeExpr(LeExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseLtExpr(LtExpr v) {
+  @Override
+public void caseLtExpr(LtExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseMulExpr(MulExpr v) {
+  @Override
+public void caseMulExpr(MulExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseOrExpr(OrExpr v) {
+  @Override
+public void caseOrExpr(OrExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseRemExpr(RemExpr v) {
+  @Override
+public void caseRemExpr(RemExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseShlExpr(ShlExpr v) {
+  @Override
+public void caseShlExpr(ShlExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseShrExpr(ShrExpr v) {
+  @Override
+public void caseShrExpr(ShrExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseUshrExpr(UshrExpr v) {
+  @Override
+public void caseUshrExpr(UshrExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseSubExpr(SubExpr v) {
+  @Override
+public void caseSubExpr(SubExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseXorExpr(XorExpr v) {
+  @Override
+public void caseXorExpr(XorExpr v) {
     printBinaryExpr(v);
   }
 
-  public void caseInterfaceInvokeExpr(InterfaceInvokeExpr v) {
+  @Override
+public void caseInterfaceInvokeExpr(InterfaceInvokeExpr v) {
     printInvokeExpr(v);
   }
 
@@ -313,7 +344,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 
     if (!m.isStatic()) {
       Local base = (Local) ((InstanceInvokeExpr) v).getBase();
-      p.println("Local base = localByName(b,\"" + base.getName() + "\");");
+      p.println(new StringBuilder().append("Local base = localByName(b,\"").append(base.getName()).append("\");").toString());
     }
 
     p.println("List<Type> parameterTypes = new LinkedList<Type>();");
@@ -321,7 +352,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     for (Type t : (List<Type>) m.getParameterTypes()) {
       ttp.setVariableName("type" + i);
       t.apply(ttp);
-      p.println("parameterTypes.add(type" + i + ");");
+      p.println(new StringBuilder().append("parameterTypes.add(type").append(i).append(");").toString());
       i++;
     }
 
@@ -331,8 +362,8 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     p.print("SootMethodRef methodRef = ");
     p.printNoIndent("Scene.v().makeMethodRef(");
     String className = m.getDeclaringClass().getName();
-    p.printNoIndent("Scene.v().getSootClass(\"" + className + "\"),");
-    p.printNoIndent("\"" + m.getName() + "\",");
+    p.printNoIndent(new StringBuilder().append("Scene.v().getSootClass(\"").append(className).append("\"),").toString());
+    p.printNoIndent(new StringBuilder().append("\"").append(m.getName()).append("\",").toString());
     p.printNoIndent("parameterTypes,");
     p.printNoIndent("returnType,");
     p.printlnNoIndent(m.isStatic() + ");");
@@ -344,19 +375,23 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     p.closeBlock();
   }
 
-  public void caseSpecialInvokeExpr(SpecialInvokeExpr v) {
+  @Override
+public void caseSpecialInvokeExpr(SpecialInvokeExpr v) {
     printInvokeExpr(v);
   }
 
-  public void caseStaticInvokeExpr(StaticInvokeExpr v) {
+  @Override
+public void caseStaticInvokeExpr(StaticInvokeExpr v) {
     printInvokeExpr(v);
   }
 
-  public void caseVirtualInvokeExpr(VirtualInvokeExpr v) {
+  @Override
+public void caseVirtualInvokeExpr(VirtualInvokeExpr v) {
     printInvokeExpr(v);
   }
 
-  public void caseDynamicInvokeExpr(DynamicInvokeExpr v) {
+  @Override
+public void caseDynamicInvokeExpr(DynamicInvokeExpr v) {
     printInvokeExpr(v);
   }
 
@@ -375,7 +410,8 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
   // varName = oldName;
   // }
 
-  public void caseCastExpr(CastExpr v) {
+  @Override
+public void caseCastExpr(CastExpr v) {
     String oldName = varName;
 
     suggestVariableName("type");
@@ -385,12 +421,14 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 
     String rhsName = printValueAssignment(v.getOp(), "op");
 
-    p.println("Value " + oldName + " = Jimple.v().newCastExpr(" + lhsName + "," + rhsName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newCastExpr(").append(lhsName).append(",").append(rhsName).append(");")
+			.toString());
 
     varName = oldName;
   }
 
-  public void caseInstanceOfExpr(InstanceOfExpr v) {
+  @Override
+public void caseInstanceOfExpr(InstanceOfExpr v) {
     String oldName = varName;
 
     suggestVariableName("type");
@@ -400,12 +438,14 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 
     String rhsName = printValueAssignment(v.getOp(), "op");
 
-    p.println("Value " + oldName + " = Jimple.v().newInstanceOfExpr(" + lhsName + "," + rhsName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newInstanceOfExpr(").append(lhsName).append(",").append(rhsName).append(");")
+			.toString());
 
     varName = oldName;
   }
 
-  public void caseNewArrayExpr(NewArrayExpr v) {
+  @Override
+public void caseNewArrayExpr(NewArrayExpr v) {
     String oldName = varName;
 
     Value size = v.getSize();
@@ -418,11 +458,13 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     ttp.setVariableName(varName);
     v.getType().apply(ttp);
 
-    p.println("Value " + oldName + " = Jimple.v().newNewArrayExpr(" + lhsName + ", " + sizeName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newNewArrayExpr(").append(lhsName).append(", ").append(sizeName).append(");")
+			.toString());
     varName = oldName;
   }
 
-  public void caseNewMultiArrayExpr(NewMultiArrayExpr v) {
+  @Override
+public void caseNewMultiArrayExpr(NewMultiArrayExpr v) {
     p.openBlock();
     String oldName = varName;
 
@@ -436,15 +478,16 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
       s.apply(this);
       i++;
 
-      p.println("sizes.add(sizes" + i + ");");
+      p.println(new StringBuilder().append("sizes.add(sizes").append(i).append(");").toString());
     }
 
-    p.println("Value " + oldName + " = Jimple.v().newNewMultiArrayExpr(arrayType, sizes);");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newNewMultiArrayExpr(arrayType, sizes);").toString());
     varName = oldName;
     p.closeBlock();
   }
 
-  public void caseNewExpr(NewExpr v) {
+  @Override
+public void caseNewExpr(NewExpr v) {
     String oldName = varName;
 
     suggestVariableName("type");
@@ -452,12 +495,13 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     ttp.setVariableName(varName);
     v.getType().apply(ttp);
 
-    p.println("Value " + oldName + " = Jimple.v().newNewExpr(" + typeName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newNewExpr(").append(typeName).append(");").toString());
     varName = oldName;
 
   }
 
-  public void caseLengthExpr(LengthExpr v) {
+  @Override
+public void caseLengthExpr(LengthExpr v) {
     String oldName = varName;
 
     Value op = v.getOp();
@@ -465,11 +509,12 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     String opName = varName;
     op.apply(this);
 
-    p.println("Value " + oldName + " = Jimple.v().newLengthExpr(" + opName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newLengthExpr(").append(opName).append(");").toString());
     varName = oldName;
   }
 
-  public void caseNegExpr(NegExpr v) {
+  @Override
+public void caseNegExpr(NegExpr v) {
     String oldName = varName;
 
     Value op = v.getOp();
@@ -477,11 +522,12 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     String opName = varName;
     op.apply(this);
 
-    p.println("Value " + oldName + " = Jimple.v().newNegExpr(" + opName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newNegExpr(").append(opName).append(");").toString());
     varName = oldName;
   }
 
-  public void caseArrayRef(ArrayRef v) {
+  @Override
+public void caseArrayRef(ArrayRef v) {
     String oldName = varName;
 
     Value base = v.getBase();
@@ -494,11 +540,13 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     String indexName = varName;
     index.apply(this);
 
-    p.println("Value " + oldName + " = Jimple.v().newArrayRef(" + baseName + ", " + indexName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newArrayRef(").append(baseName).append(", ").append(indexName).append(");")
+			.toString());
     varName = oldName;
   }
 
-  public void caseStaticFieldRef(StaticFieldRef v) {
+  @Override
+public void caseStaticFieldRef(StaticFieldRef v) {
     printFieldRef(v);
   }
 
@@ -514,21 +562,23 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     p.print("SootFieldRef fieldRef = ");
     p.printNoIndent("Scene.v().makeFieldRef(");
     String className = f.getDeclaringClass().getName();
-    p.printNoIndent("Scene.v().getSootClass(\"" + className + "\"),");
-    p.printNoIndent("\"" + f.getName() + "\",");
+    p.printNoIndent(new StringBuilder().append("Scene.v().getSootClass(\"").append(className).append("\"),").toString());
+    p.printNoIndent(new StringBuilder().append("\"").append(f.getName()).append("\",").toString());
     p.printNoIndent("type,");
     p.printNoIndent(f.isStatic() + ");");
 
-    p.println("Value " + oldName + " = Jimple.v().new" + refTypeName + "(fieldRef);");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().new").append(refTypeName).append("(fieldRef);").toString());
     varName = oldName;
     p.closeBlock();
   }
 
-  public void caseInstanceFieldRef(InstanceFieldRef v) {
+  @Override
+public void caseInstanceFieldRef(InstanceFieldRef v) {
     printFieldRef(v);
   }
 
-  public void caseParameterRef(ParameterRef v) {
+  @Override
+public void caseParameterRef(ParameterRef v) {
     String oldName = varName;
 
     Type paramType = v.getType();
@@ -539,17 +589,20 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 
     int number = v.getIndex();
     suggestVariableName("number");
-    p.println("int " + varName + "=" + number + ";");
+    p.println(new StringBuilder().append("int ").append(varName).append("=").append(number).append(";").toString());
 
-    p.println("Value " + oldName + " = Jimple.v().newParameterRef(" + paramTypeName + ", " + varName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newParameterRef(").append(paramTypeName).append(", ").append(varName).append(");")
+			.toString());
     varName = oldName;
   }
 
-  public void caseCaughtExceptionRef(CaughtExceptionRef v) {
-    p.println("Value " + varName + " = Jimple.v().newCaughtExceptionRef();");
+  @Override
+public void caseCaughtExceptionRef(CaughtExceptionRef v) {
+    p.println(new StringBuilder().append("Value ").append(varName).append(" = Jimple.v().newCaughtExceptionRef();").toString());
   }
 
-  public void caseThisRef(ThisRef v) {
+  @Override
+public void caseThisRef(ThisRef v) {
 
     String oldName = varName;
 
@@ -559,20 +612,22 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
     ttp.setVariableName(typeName);
     paramType.apply(ttp);
 
-    p.println("Value " + oldName + " = Jimple.v().newThisRef(" + typeName + ");");
+    p.println(new StringBuilder().append("Value ").append(oldName).append(" = Jimple.v().newThisRef(").append(typeName).append(");").toString());
     varName = oldName;
 
   }
 
-  public void caseLocal(Local l) {
+  @Override
+public void caseLocal(Local l) {
     String oldName = varName;
 
-    p.println("Local " + varName + " = localByName(b,\"" + l.getName() + "\");");
+    p.println(new StringBuilder().append("Local ").append(varName).append(" = localByName(b,\"").append(l.getName()).append("\");").toString());
 
     varName = oldName;
   }
 
-  public void defaultCase(Object object) {
+  @Override
+public void defaultCase(Object object) {
     throw new InternalError();
   }
 }

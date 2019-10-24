@@ -53,17 +53,23 @@ public abstract class LabeledUnitPrinter extends AbstractUnitPrinter {
     return references;
   }
 
-  public abstract void literal(String s);
+  @Override
+public abstract void literal(String s);
 
-  public abstract void methodRef(SootMethodRef m);
+  @Override
+public abstract void methodRef(SootMethodRef m);
 
-  public abstract void fieldRef(SootFieldRef f);
+  @Override
+public abstract void fieldRef(SootFieldRef f);
 
-  public abstract void identityRef(IdentityRef r);
+  @Override
+public abstract void identityRef(IdentityRef r);
 
-  public abstract void type(Type t);
+  @Override
+public abstract void type(Type t);
 
-  public void unitRef(Unit u, boolean branchTarget) {
+  @Override
+public void unitRef(Unit u, boolean branchTarget) {
     String oldIndent = getIndent();
 
     // normal case, ie labels
@@ -73,7 +79,7 @@ public abstract class LabeledUnitPrinter extends AbstractUnitPrinter {
       setIndent(oldIndent);
       String label = labels.get(u);
       if (label == null || "<unnamed>".equals(label)) {
-        label = "[?= " + u + "]";
+        label = new StringBuilder().append("[?= ").append(u).append("]").toString();
       }
       output.append(label);
     }
@@ -82,7 +88,7 @@ public abstract class LabeledUnitPrinter extends AbstractUnitPrinter {
       String ref = references.get(u);
 
       if (startOfLine) {
-        String newIndent = "(" + ref + ")" + indent.substring(ref.length() + 2);
+        String newIndent = new StringBuilder().append("(").append(ref).append(")").append(indent.substring(ref.length() + 2)).toString();
 
         setIndent(newIndent);
         handleIndent();
@@ -96,15 +102,15 @@ public abstract class LabeledUnitPrinter extends AbstractUnitPrinter {
   private void createLabelMaps(Body body) {
     Chain<Unit> units = body.getUnits();
 
-    labels = new HashMap<Unit, String>(units.size() * 2 + 1, 0.7f);
-    references = new HashMap<Unit, String>(units.size() * 2 + 1, 0.7f);
+    labels = new HashMap<>(units.size() * 2 + 1, 0.7f);
+    references = new HashMap<>(units.size() * 2 + 1, 0.7f);
 
     // Create statement name table
-    Set<Unit> labelStmts = new HashSet<Unit>();
-    Set<Unit> refStmts = new HashSet<Unit>();
+    Set<Unit> labelStmts = new HashSet<>();
+    Set<Unit> refStmts = new HashSet<>();
 
     // Build labelStmts and refStmts
-    for (UnitBox box : body.getAllUnitBoxes()) {
+	body.getAllUnitBoxes().forEach(box -> {
       Unit stmt = box.getUnit();
 
       if (box.isBranchTarget()) {
@@ -112,13 +118,13 @@ public abstract class LabeledUnitPrinter extends AbstractUnitPrinter {
       } else {
         refStmts.add(stmt);
       }
-    }
+    });
 
     // left side zero padding for all labels
     // this simplifies debugging the jimple code in simple editors, as it
     // avoids the situation where a label is the prefix of another label
     final int maxDigits = 1 + (int) Math.log10(labelStmts.size());
-    final String formatString = "label%0" + maxDigits + "d";
+    final String formatString = new StringBuilder().append("label%0").append(maxDigits).append("d").toString();
 
     int labelCount = 0;
     int refCount = 0;

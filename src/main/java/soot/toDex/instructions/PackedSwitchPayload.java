@@ -55,10 +55,8 @@ public class PackedSwitchPayload extends SwitchPayload {
 
   @Override
   protected BuilderInstruction getRealInsn0(LabelAssigner assigner) {
-    List<Label> elements = new ArrayList<Label>();
-    for (int i = 0; i < targets.size(); i++) {
-      elements.add(assigner.getOrCreateLabel((Stmt) targets.get(i)));
-    }
+    List<Label> elements = new ArrayList<>();
+    targets.forEach(target -> elements.add(assigner.getOrCreateLabel((Stmt) target)));
     return new BuilderPackedSwitchPayload(firstKey, elements);
   }
 }

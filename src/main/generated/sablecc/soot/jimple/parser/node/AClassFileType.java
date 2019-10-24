@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AClassFileType extends PFileType
 {
-    private TClass _theclass_;
+    private TClass theclass;
 
     public AClassFileType()
     {
@@ -26,7 +26,7 @@ public final class AClassFileType extends PFileType
     public Object clone()
     {
         return new AClassFileType(
-            cloneNode(this._theclass_));
+            cloneNode(this.theclass));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AClassFileType extends PFileType
 
     public TClass getTheclass()
     {
-        return this._theclass_;
+        return this.theclass;
     }
 
     public void setTheclass(TClass node)
     {
-        if(this._theclass_ != null)
+        if(this.theclass != null)
         {
-            this._theclass_.parent(null);
+            this.theclass.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AClassFileType extends PFileType
             node.parent(this);
         }
 
-        this._theclass_ = node;
+        this.theclass = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._theclass_);
+            + toString(this.theclass);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._theclass_ == child)
+        if(this.theclass == child)
         {
-            this._theclass_ = null;
+            this.theclass = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AClassFileType extends PFileType
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._theclass_ == oldChild)
+        if(this.theclass == oldChild)
         {
             setTheclass((TClass) newChild);
             return;

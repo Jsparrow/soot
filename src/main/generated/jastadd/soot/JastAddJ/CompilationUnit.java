@@ -18,32 +18,147 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @production CompilationUnit : {@link ASTNode} ::= <span class="component">&lt;PackageDecl:java.lang.String&gt;</span> <span class="component">{@link ImportDecl}*</span> <span class="component">{@link TypeDecl}*</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:4
  */
-public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
+public class CompilationUnit extends ASTNode<ASTNode> {
+  private static final Logger logger = LoggerFactory.getLogger(CompilationUnit.class);
+/**
+   * @ast method 
+   * @aspect ClassPath
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:159
+   */
+  
+
+  private String relativeName;
+/**
+   * @ast method 
+   * @aspect ClassPath
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:160
+   */
+  
+  private String pathName;
+/**
+   * @ast method 
+   * @aspect ClassPath
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:161
+   */
+  
+  private boolean fromSource;
+/**
+   * @ast method 
+   * @aspect ErrorCheck
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:65
+   */
+  
+
+  protected java.util.ArrayList errors = new java.util.ArrayList();
+/**
+   * @ast method 
+   * @aspect ErrorCheck
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:66
+   */
+  
+  protected java.util.ArrayList warnings = new java.util.ArrayList();
+/**
+   * @ast method 
+   * @aspect ErrorCheck
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:70
+   */
+  
+  protected Collection parseErrors = new ArrayList();
+/**
+   * @ast method 
+   * @aspect ClassLoading
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/SootJastAddJ/ClassLoading.jrag:12
+   */
+  
+
+  public boolean isResolved = false;
+/**
+   * @apilevel internal
+   * @ast method 
+   * 
+   */
+  
   /**
+   * @apilevel internal
+   */
+  protected java.lang.String tokenjava_lang_String_PackageDecl;
+/**
+   * @ast method 
+   * 
+   */
+  
+  public int PackageDeclstart;
+/**
+   * @ast method 
+   * 
+   */
+  
+  public int PackageDeclend;
+/**
+   * @apilevel internal
+   */
+  protected boolean packageName_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected String packageName_value;
+protected java.util.Map lookupType_String_values;
+/**
+   * @ast method 
+   * 
+   */
+  public CompilationUnit() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public CompilationUnit(java.lang.String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
+    setPackageDecl(p0);
+    setChild(p1, 0);
+    setChild(p2, 1);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public CompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
+    setPackageDecl(p0);
+    setChild(p1, 0);
+    setChild(p2, 1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     packageName_computed = false;
     packageName_value = null;
     lookupType_String_values = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public CompilationUnit clone() throws CloneNotSupportedException {
     CompilationUnit node = (CompilationUnit)super.clone();
     node.packageName_computed = false;
@@ -53,29 +168,33 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public CompilationUnit copy() {
     try {
       CompilationUnit node = (CompilationUnit) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public CompilationUnit fullCopy() {
     CompilationUnit tree = (CompilationUnit) copy();
     if (children != null) {
@@ -89,29 +208,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     }
     return tree;
   }
-  /**
-   * @ast method 
-   * @aspect ClassPath
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:159
-   */
-  
-
-  private String relativeName;
-  /**
-   * @ast method 
-   * @aspect ClassPath
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:160
-   */
-  
-  private String pathName;
-  /**
-   * @ast method 
-   * @aspect ClassPath
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:161
-   */
-  
-  private boolean fromSource;
-  /**
+/**
    * @ast method 
    * @aspect ClassPath
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:163
@@ -119,7 +216,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public void setRelativeName(String name) {
     relativeName = name;
   }
-  /**
+/**
    * @ast method 
    * @aspect ClassPath
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:166
@@ -127,7 +224,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public void setPathName(String name) {
     pathName = name;
   }
-  /**
+/**
    * @ast method 
    * @aspect ClassPath
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:169
@@ -135,41 +232,19 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public void setFromSource(boolean value) {
     fromSource = value;
   }
-  /**
-   * @ast method 
-   * @aspect ErrorCheck
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:65
-   */
-  
-
-  protected java.util.ArrayList errors = new java.util.ArrayList();
-  /**
-   * @ast method 
-   * @aspect ErrorCheck
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:66
-   */
-  
-  protected java.util.ArrayList warnings = new java.util.ArrayList();
-  /**
+/**
    * @ast method 
    * @aspect ErrorCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:68
    */
   public Collection parseErrors() { return parseErrors; }
-  /**
+/**
    * @ast method 
    * @aspect ErrorCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:69
    */
   public void addParseError(Problem msg) { parseErrors.add(msg); }
-  /**
-   * @ast method 
-   * @aspect ErrorCheck
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:70
-   */
-  
-  protected Collection parseErrors = new ArrayList();
-  /**
+/**
    * @ast method 
    * @aspect ErrorCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:228
@@ -178,7 +253,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     collectErrors();
     collection.addAll(errors);
   }
-  /**
+/**
    * @ast method 
    * @aspect ErrorCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ErrorCheck.jrag:232
@@ -188,7 +263,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     err.addAll(errors);
     warn.addAll(warnings);
   }
-  /**
+/**
    * @ast method 
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:35
@@ -201,21 +276,23 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
         Iterator iter = localLookupType(importedType.name()).iterator();
         while (iter.hasNext()) {
           TypeDecl local = (TypeDecl) iter.next();
-          if (local != importedType)
-            error("imported type " + decl + " is conflicting with visible type");
+          if (local != importedType) {
+			error(new StringBuilder().append("imported type ").append(decl).append(" is conflicting with visible type").toString());
+		}
         }
       }
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:32
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     try {
-      if(!getPackageDecl().equals("")) {
-        s.append("package " + getPackageDecl() + ";\n");
+      if(!"".equals(getPackageDecl())) {
+        s.append(new StringBuilder().append("package ").append(getPackageDecl()).append(";\n").toString());
       }
       for(int i = 0; i < getNumImportDecl(); i++) {
         getImportDecl(i).toString(s);
@@ -225,40 +302,24 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
         s.append("\n");
       }
     } catch (NullPointerException e) {
-      System.out.print("Error in compilation unit hosting " + getTypeDecl(0).typeName());
+      logger.info("Error in compilation unit hosting " + getTypeDecl(0).typeName());
       throw e;
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect Transformations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/Transformations.jrag:18
    */
-  public void transformation() {
+  @Override
+public void transformation() {
     if(fromSource()) {
       for(int i = 0; i < getNumTypeDecl(); i++) {
         getTypeDecl(i).transformation();
       }
     }
   }
-  /**
-   * @ast method 
-   * @aspect ClassLoading
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/SootJastAddJ/ClassLoading.jrag:12
-   */
-  
-
-  public boolean isResolved = false;
-  /**
-   * @ast method 
-   * 
-   */
-  public CompilationUnit() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -266,46 +327,31 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[2];
     setChild(new List(), 0);
     setChild(new List(), 1);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public CompilationUnit(java.lang.String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
-    setPackageDecl(p0);
-    setChild(p1, 0);
-    setChild(p2, 1);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public CompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
-    setPackageDecl(p0);
-    setChild(p1, 0);
-    setChild(p2, 1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 2;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the lexeme PackageDecl.
    * @param value The new value for the lexeme PackageDecl.
    * @apilevel high-level
@@ -315,42 +361,21 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public void setPackageDecl(java.lang.String value) {
     tokenjava_lang_String_PackageDecl = value;
   }
-  /**
-   * @apilevel internal
-   * @ast method 
-   * 
-   */
-  
-  /**
-   * @apilevel internal
-   */
-  protected java.lang.String tokenjava_lang_String_PackageDecl;
-  /**
-   * @ast method 
-   * 
-   */
-  
-  public int PackageDeclstart;
-  /**
-   * @ast method 
-   * 
-   */
-  
-  public int PackageDeclend;
-  /**
+/**
    * JastAdd-internal setter for lexeme PackageDecl using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
   public void setPackageDecl(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setPackageDecl is only valid for String lexemes");
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setPackageDecl is only valid for String lexemes");
+	}
     tokenjava_lang_String_PackageDecl = (String)symbol.value;
     PackageDeclstart = symbol.getStart();
     PackageDeclend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme PackageDecl.
    * @return The value for the lexeme PackageDecl.
    * @apilevel high-level
@@ -360,7 +385,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public java.lang.String getPackageDecl() {
     return tokenjava_lang_String_PackageDecl != null ? tokenjava_lang_String_PackageDecl : "";
   }
-  /**
+/**
    * Replaces the ImportDecl list.
    * @param list The new list node to be used as the ImportDecl list.
    * @apilevel high-level
@@ -370,7 +395,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public void setImportDeclList(List<ImportDecl> list) {
     setChild(list, 0);
   }
-  /**
+/**
    * Retrieves the number of children in the ImportDecl list.
    * @return Number of children in the ImportDecl list.
    * @apilevel high-level
@@ -380,7 +405,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public int getNumImportDecl() {
     return getImportDeclList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the ImportDecl list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the ImportDecl list.
@@ -391,7 +416,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public int getNumImportDeclNoTransform() {
     return getImportDeclListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the ImportDecl list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the ImportDecl list.
@@ -403,7 +428,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public ImportDecl getImportDecl(int i) {
     return (ImportDecl)getImportDeclList().getChild(i);
   }
-  /**
+/**
    * Append an element to the ImportDecl list.
    * @param node The element to append to the ImportDecl list.
    * @apilevel high-level
@@ -414,7 +439,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     List<ImportDecl> list = (parent == null || state == null) ? getImportDeclListNoTransform() : getImportDeclList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -423,7 +448,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     List<ImportDecl> list = getImportDeclListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the ImportDecl list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -435,7 +460,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     List<ImportDecl> list = getImportDeclList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * @return The node representing the ImportDecl list.
    * @apilevel high-level
@@ -445,7 +470,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public List<ImportDecl> getImportDecls() {
     return getImportDeclList();
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the ImportDecl list.
@@ -456,7 +481,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public List<ImportDecl> getImportDeclsNoTransform() {
     return getImportDeclListNoTransform();
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * @return The node representing the ImportDecl list.
    * @apilevel high-level
@@ -469,7 +494,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the ImportDecl list.
@@ -481,7 +506,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public List<ImportDecl> getImportDeclListNoTransform() {
     return (List<ImportDecl>)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the TypeDecl list.
    * @param list The new list node to be used as the TypeDecl list.
    * @apilevel high-level
@@ -491,7 +516,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public void setTypeDeclList(List<TypeDecl> list) {
     setChild(list, 1);
   }
-  /**
+/**
    * Retrieves the number of children in the TypeDecl list.
    * @return Number of children in the TypeDecl list.
    * @apilevel high-level
@@ -501,7 +526,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public int getNumTypeDecl() {
     return getTypeDeclList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the TypeDecl list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the TypeDecl list.
@@ -512,7 +537,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public int getNumTypeDeclNoTransform() {
     return getTypeDeclListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the TypeDecl list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the TypeDecl list.
@@ -524,7 +549,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public TypeDecl getTypeDecl(int i) {
     return (TypeDecl)getTypeDeclList().getChild(i);
   }
-  /**
+/**
    * Append an element to the TypeDecl list.
    * @param node The element to append to the TypeDecl list.
    * @apilevel high-level
@@ -535,7 +560,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     List<TypeDecl> list = (parent == null || state == null) ? getTypeDeclListNoTransform() : getTypeDeclList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -544,7 +569,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     List<TypeDecl> list = getTypeDeclListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the TypeDecl list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -556,7 +581,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     List<TypeDecl> list = getTypeDeclList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * @return The node representing the TypeDecl list.
    * @apilevel high-level
@@ -566,7 +591,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public List<TypeDecl> getTypeDecls() {
     return getTypeDeclList();
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the TypeDecl list.
@@ -577,7 +602,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public List<TypeDecl> getTypeDeclsNoTransform() {
     return getTypeDeclListNoTransform();
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * @return The node representing the TypeDecl list.
    * @apilevel high-level
@@ -590,7 +615,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the TypeDecl list.
@@ -602,12 +627,13 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public List<TypeDecl> getTypeDeclListNoTransform() {
     return (List<TypeDecl>)getChildNoTransform(1);
   }
-  /**
+/**
    * @ast method 
    * @aspect StaticImports
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:181
    */
-    public void nameCheck() {
+    @Override
+	public void nameCheck() {
     refined_NameCheck_CompilationUnit_nameCheck();
     for(int i = 0; i < getNumImportDecl(); i++) {
       if(getImportDecl(i) instanceof SingleStaticImportDecl) {
@@ -615,13 +641,14 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
         String name = decl.name();
         if(!decl.importedTypes(name).isEmpty()) {
           TypeDecl type = (TypeDecl)decl.importedTypes(name).iterator().next();
-          if(localLookupType(name).contains(type))
-            decl.error(packageName() + "." + name + " is already defined in this compilation unit");
+          if(localLookupType(name).contains(type)) {
+			decl.error(new StringBuilder().append(packageName()).append(".").append(name).append(" is already defined in this compilation unit").toString());
+		}
         }
       }
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:270
@@ -630,32 +657,42 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
 {
     // locally declared types in compilation unit
     SimpleSet set = localLookupType(name);
-    if(!set.isEmpty()) return set;
+    if(!set.isEmpty()) {
+		return set;
+	}
 
     // imported types
     set = importedTypes(name);
-    if(!set.isEmpty()) return set;
+    if(!set.isEmpty()) {
+		return set;
+	}
 
     // types in the same package
     TypeDecl result = lookupType(packageName(), name);
-    if(result != null && result.accessibleFromPackage(packageName())) 
-      return SimpleSet.emptySet.add(result);
+    if(result != null && result.accessibleFromPackage(packageName())) {
+		return SimpleSet.emptySet.add(result);
+	}
     
     // types imported on demand
     set = importedTypesOnDemand(name);
-    if(!set.isEmpty()) return set;
+    if(!set.isEmpty()) {
+		return set;
+	}
     
     // include primitive types
     result = lookupType(PRIMITIVE_PACKAGE_NAME, name);
-    if(result != null) return SimpleSet.emptySet.add(result);
+    if(result != null) {
+		return SimpleSet.emptySet.add(result);
+	}
     
     // 7.5.5 Automatic Imports
     result = lookupType("java.lang", name);
-    if(result != null && result.accessibleFromPackage(packageName()))
-      return SimpleSet.emptySet.add(result);
+    if(result != null && result.accessibleFromPackage(packageName())) {
+		return SimpleSet.emptySet.add(result);
+	}
     return lookupType(name);
   }
-  /**
+/**
    * @attribute syn
    * @aspect ClassPath
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:27
@@ -666,7 +703,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect ClassPath
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:28
@@ -677,7 +714,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect ClassPath
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:29
@@ -688,7 +725,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:299
@@ -696,15 +733,17 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   public SimpleSet localLookupType(String name) {
     ASTNode$State state = state();
     try {
-    for(int i = 0; i < getNumTypeDecl(); i++)
-      if(getTypeDecl(i).name().equals(name))
-        return SimpleSet.emptySet.add(getTypeDecl(i));
+    for(int i = 0; i < getNumTypeDecl(); i++) {
+		if(getTypeDecl(i).name().equals(name)) {
+			return SimpleSet.emptySet.add(getTypeDecl(i));
+		}
+	}
     return SimpleSet.emptySet;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:306
@@ -713,16 +752,19 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     ASTNode$State state = state();
     try {
     SimpleSet set = SimpleSet.emptySet;
-    for(int i = 0; i < getNumImportDecl(); i++)
-      if(!getImportDecl(i).isOnDemand())
-        for(Iterator iter = getImportDecl(i).importedTypes(name).iterator(); iter.hasNext(); )
-          set = set.add(iter.next());
+    for(int i = 0; i < getNumImportDecl(); i++) {
+		if(!getImportDecl(i).isOnDemand()) {
+			for(Iterator iter = getImportDecl(i).importedTypes(name).iterator(); iter.hasNext(); ) {
+				set = set.add(iter.next());
+			}
+		}
+	}
     return set;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:314
@@ -731,35 +773,31 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     ASTNode$State state = state();
     try {
     SimpleSet set = SimpleSet.emptySet;
-    for(int i = 0; i < getNumImportDecl(); i++)
-      if(getImportDecl(i).isOnDemand())
-        for(Iterator iter = getImportDecl(i).importedTypes(name).iterator(); iter.hasNext(); )
-          set = set.add(iter.next());
+    for(int i = 0; i < getNumImportDecl(); i++) {
+		if(getImportDecl(i).isOnDemand()) {
+			for(Iterator iter = getImportDecl(i).importedTypes(name).iterator(); iter.hasNext(); ) {
+				set = set.add(iter.next());
+			}
+		}
+	}
     return set;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:800
    */
-  public String dumpString() {
+  @Override
+public String dumpString() {
     ASTNode$State state = state();
-    try {  return getClass().getName() + " [" + getPackageDecl() + "]";  }
+    try {  return new StringBuilder().append(getClass().getName()).append(" [").append(getPackageDecl()).append("]").toString();  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean packageName_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected String packageName_value;
-  /**
+/**
    * @attribute syn
    * @aspect TypeName
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/QualifiedNames.jrag:92
@@ -773,14 +811,16 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     packageName_value = packageName_compute();
-      if(isFinal && num == state().boundariesCrossed) packageName_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		packageName_computed = true;
+	}
     return packageName_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private String packageName_compute() {return getPackageDecl();}
-  /**
+/**
    * @attribute syn
    * @aspect StaticImports
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:112
@@ -789,16 +829,19 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     ASTNode$State state = state();
     try {
     SimpleSet set = SimpleSet.emptySet;
-    for(int i = 0; i < getNumImportDecl(); i++)
-      if(!getImportDecl(i).isOnDemand())
-        for(Iterator iter = getImportDecl(i).importedFields(name).iterator(); iter.hasNext(); )
-          set = set.add(iter.next());
+    for(int i = 0; i < getNumImportDecl(); i++) {
+		if(!getImportDecl(i).isOnDemand()) {
+			for(Iterator iter = getImportDecl(i).importedFields(name).iterator(); iter.hasNext(); ) {
+				set = set.add(iter.next());
+			}
+		}
+	}
     return set;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect StaticImports
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:120
@@ -807,16 +850,19 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     ASTNode$State state = state();
     try {
     SimpleSet set = SimpleSet.emptySet;
-    for(int i = 0; i < getNumImportDecl(); i++)
-      if(getImportDecl(i).isOnDemand())
-        for(Iterator iter = getImportDecl(i).importedFields(name).iterator(); iter.hasNext(); )
-          set = set.add(iter.next());
+    for(int i = 0; i < getNumImportDecl(); i++) {
+		if(getImportDecl(i).isOnDemand()) {
+			for(Iterator iter = getImportDecl(i).importedFields(name).iterator(); iter.hasNext(); ) {
+				set = set.add(iter.next());
+			}
+		}
+	}
     return set;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect StaticImports
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:141
@@ -825,15 +871,17 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     ASTNode$State state = state();
     try {
     Collection list = new ArrayList();
-    for(int i = 0; i < getNumImportDecl(); i++)
-      if(!getImportDecl(i).isOnDemand())
-        list.addAll(getImportDecl(i).importedMethods(name));
+    for(int i = 0; i < getNumImportDecl(); i++) {
+		if(!getImportDecl(i).isOnDemand()) {
+			list.addAll(getImportDecl(i).importedMethods(name));
+		}
+	}
     return list;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect StaticImports
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:148
@@ -842,15 +890,17 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     ASTNode$State state = state();
     try {
     Collection list = new ArrayList();
-    for(int i = 0; i < getNumImportDecl(); i++)
-      if(getImportDecl(i).isOnDemand())
-        list.addAll(getImportDecl(i).importedMethods(name));
+    for(int i = 0; i < getNumImportDecl(); i++) {
+		if(getImportDecl(i).isOnDemand()) {
+			list.addAll(getImportDecl(i).importedMethods(name));
+		}
+	}
     return list;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute inh
    * @aspect LookupFullyQualifiedTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:99
@@ -861,8 +911,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     TypeDecl lookupType_String_String_value = getParent().Define_TypeDecl_lookupType(this, null, packageName, typeName);
     return lookupType_String_String_value;
   }
-  protected java.util.Map lookupType_String_values;
-  /**
+/**
    * @attribute inh
    * @aspect TypeScopePropagation
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:259
@@ -870,7 +919,9 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   @SuppressWarnings({"unchecked", "cast"})
   public SimpleSet lookupType(String name) {
     Object _parameters = name;
-    if(lookupType_String_values == null) lookupType_String_values = new java.util.HashMap(4);
+    if(lookupType_String_values == null) {
+		lookupType_String_values = new java.util.HashMap(4);
+	}
     if(lookupType_String_values.containsKey(_parameters)) {
       return (SimpleSet)lookupType_String_values.get(_parameters);
     }
@@ -878,10 +929,12 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     SimpleSet lookupType_String_value = getParent().Define_SimpleSet_lookupType(this, null, name);
-      if(isFinal && num == state().boundariesCrossed) lookupType_String_values.put(_parameters, lookupType_String_value);
+      if(isFinal && num == state().boundariesCrossed) {
+		lookupType_String_values.put(_parameters, lookupType_String_value);
+	}
     return lookupType_String_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect StaticImports
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:111
@@ -892,7 +945,7 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     SimpleSet lookupVariable_String_value = getParent().Define_SimpleSet_lookupVariable(this, null, name);
     return lookupVariable_String_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect StaticImports
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:140
@@ -903,21 +956,23 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     Collection lookupMethod_String_value = getParent().Define_Collection_lookupMethod(this, null, name);
     return lookupMethod_String_value;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ClassPath.jrag:32
    * @apilevel internal
    */
-  public CompilationUnit Define_CompilationUnit_compilationUnit(ASTNode caller, ASTNode child) {
+  @Override
+public CompilationUnit Define_CompilationUnit_compilationUnit(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return this;
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:51
    * @apilevel internal
    */
-  public boolean Define_boolean_isIncOrDec(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isIncOrDec(ASTNode caller, ASTNode child) {
     if(caller == getTypeDeclListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return false;
@@ -925,11 +980,12 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     else {      return getParent().Define_boolean_isIncOrDec(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:198
    * @apilevel internal
    */
-  public boolean Define_boolean_handlesException(ASTNode caller, ASTNode child, TypeDecl exceptionType) {
+  @Override
+public boolean Define_boolean_handlesException(ASTNode caller, ASTNode child, TypeDecl exceptionType) {
     if(caller == getImportDeclListNoTransform())  { 
     int childIndex = caller.getIndexOfChild(child);
     {
@@ -943,11 +999,12 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     else {      return getParent().Define_boolean_handlesException(this, caller, exceptionType);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:355
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
     if(caller == getImportDeclListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return lookupType(name);
@@ -958,20 +1015,22 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     SimpleSet result = SimpleSet.emptySet;
     for(Iterator iter = refined_TypeScopePropagation_CompilationUnit_Child_lookupType_String(name).iterator(); iter.hasNext(); ) {
       TypeDecl typeDecl = (TypeDecl)iter.next();
-      if(typeDecl instanceof ParTypeDecl)
-        result = result.add(((ParTypeDecl)typeDecl).genericDecl());
-      else
-        result = result.add(typeDecl);
+      if(typeDecl instanceof ParTypeDecl) {
+		result = result.add(((ParTypeDecl)typeDecl).genericDecl());
+	} else {
+		result = result.add(typeDecl);
+	}
     }
     return result;
   }
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:27
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_allImportedTypes(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_allImportedTypes(ASTNode caller, ASTNode child, String name) {
     if(caller == getImportDeclListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return importedTypes(name);
@@ -979,21 +1038,23 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     else {      return getParent().Define_SimpleSet_allImportedTypes(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/QualifiedNames.jrag:90
    * @apilevel internal
    */
-  public String Define_String_packageName(ASTNode caller, ASTNode child) {
+  @Override
+public String Define_String_packageName(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return packageName();
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:69
    * @apilevel internal
    */
-  public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
+  @Override
+public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
     if(caller == getImportDeclListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return NameType.PACKAGE_NAME;
@@ -1001,31 +1062,34 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     else {      return getParent().Define_NameType_nameType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:493
    * @apilevel internal
    */
-  public TypeDecl Define_TypeDecl_enclosingType(ASTNode caller, ASTNode child) {
+  @Override
+public TypeDecl Define_TypeDecl_enclosingType(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return null;
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:519
    * @apilevel internal
    */
-  public boolean Define_boolean_isNestedType(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isNestedType(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return false;
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:529
    * @apilevel internal
    */
-  public boolean Define_boolean_isMemberType(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isMemberType(ASTNode caller, ASTNode child) {
     if(caller == getTypeDeclListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return false;
@@ -1033,31 +1097,34 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     else {      return getParent().Define_boolean_isMemberType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:541
    * @apilevel internal
    */
-  public boolean Define_boolean_isLocalClass(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_isLocalClass(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return false;
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:563
    * @apilevel internal
    */
-  public String Define_String_hostPackage(ASTNode caller, ASTNode child) {
+  @Override
+public String Define_String_hostPackage(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return packageName();
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:583
    * @apilevel internal
    */
-  public TypeDecl Define_TypeDecl_hostType(ASTNode caller, ASTNode child) {
+  @Override
+public TypeDecl Define_TypeDecl_hostType(ASTNode caller, ASTNode child) {
     if(caller == getImportDeclListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return null;
@@ -1065,46 +1132,57 @@ public class CompilationUnit extends ASTNode<ASTNode> implements Cloneable {
     else {      return getParent().Define_TypeDecl_hostType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:104
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
     if(caller == getTypeDeclListNoTransform())  { 
     int childIndex = caller.getIndexOfChild(child);
     {
     SimpleSet set = importedFields(name);
-    if(!set.isEmpty()) return set;
+    if(!set.isEmpty()) {
+		return set;
+	}
     set = importedFieldsOnDemand(name);
-    if(!set.isEmpty()) return set;
+    if(!set.isEmpty()) {
+		return set;
+	}
     return lookupVariable(name);
   }
   }
     else {      return getParent().Define_SimpleSet_lookupVariable(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/StaticImports.jrag:133
    * @apilevel internal
    */
-  public Collection Define_Collection_lookupMethod(ASTNode caller, ASTNode child, String name) {
+  @Override
+public Collection Define_Collection_lookupMethod(ASTNode caller, ASTNode child, String name) {
     if(caller == getTypeDeclListNoTransform())  { 
     int childIndex = caller.getIndexOfChild(child);
     {
     Collection list = importedMethods(name);
-    if(!list.isEmpty()) return list;
+    if(!list.isEmpty()) {
+		return list;
+	}
     list = importedMethodsOnDemand(name);
-    if(!list.isEmpty()) return list;
+    if(!list.isEmpty()) {
+		return list;
+	}
     return lookupMethod(name);
   }
   }
     else {      return getParent().Define_Collection_lookupMethod(this, caller, name);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

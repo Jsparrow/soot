@@ -211,8 +211,8 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
       Timers.v().graphTimer.start();
     }
 
-    unitToUnexceptionalSuccs = new LinkedHashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
-    unitToUnexceptionalPreds = new LinkedHashMap<Unit, List<Unit>>(size * 2 + 1, 0.7f);
+    unitToUnexceptionalSuccs = new LinkedHashMap<>(size * 2 + 1, 0.7f);
+    unitToUnexceptionalPreds = new LinkedHashMap<>(size * 2 + 1, 0.7f);
     buildUnexceptionalEdges(unitToUnexceptionalSuccs, unitToUnexceptionalPreds);
     this.throwAnalysis = throwAnalysis;
 
@@ -227,8 +227,8 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
 
     } else {
       unitToExceptionDests = buildExceptionDests(throwAnalysis);
-      unitToExceptionalSuccs = new LinkedHashMap<Unit, List<Unit>>(unitToExceptionDests.size() * 2 + 1, 0.7f);
-      unitToExceptionalPreds = new LinkedHashMap<Unit, List<Unit>>(body.getTraps().size() * 2 + 1, 0.7f);
+      unitToExceptionalSuccs = new LinkedHashMap<>(unitToExceptionDests.size() * 2 + 1, 0.7f);
+      unitToExceptionalPreds = new LinkedHashMap<>(body.getTraps().size() * 2 + 1, 0.7f);
       trapUnitsThatAreHeads = buildExceptionalEdges(throwAnalysis, unitToExceptionDests, unitToExceptionalSuccs,
           unitToExceptionalPreds, omitExceptingUnitEdges);
 
@@ -273,7 +273,7 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
    */
   protected Map<Unit, Collection<ExceptionDest>> buildExceptionDests(ThrowAnalysis throwAnalysis) {
     Chain<Unit> units = body.getUnits();
-    Map<Unit, ThrowableSet> unitToUncaughtThrowables = new LinkedHashMap<Unit, ThrowableSet>(units.size());
+    Map<Unit, ThrowableSet> unitToUncaughtThrowables = new LinkedHashMap<>(units.size());
     Map<Unit, Collection<ExceptionDest>> result = null;
 
     // Record the caught exceptions.
@@ -292,11 +292,9 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
           result = addDestToMap(result, unit, trap, catchableAs.getCaught());
           unitToUncaughtThrowables.put(unit, catchableAs.getUncaught());
         } else {
-          assert thrownSet.equals(catchableAs.getUncaught()) : "ExceptionalUnitGraph.buildExceptionDests(): "
-              + "catchableAs.caught == EMPTY, but catchableAs.uncaught != thrownSet" + System.getProperty("line.separator")
-              + body.getMethod().getSubSignature() + " Unit: " + unit.toString() + System.getProperty("line.separator")
-              + " catchableAs.getUncaught() == " + catchableAs.getUncaught().toString()
-              + System.getProperty("line.separator") + " thrownSet == " + thrownSet.toString();
+          assert thrownSet.equals(catchableAs.getUncaught()) : new StringBuilder().append("ExceptionalUnitGraph.buildExceptionDests(): ").append("catchableAs.caught == EMPTY, but catchableAs.uncaught != thrownSet").append(System.getProperty("line.separator")).append(body.getMethod().getSubSignature()).append(" Unit: ").append(unit.toString())
+				.append(System.getProperty("line.separator")).append(" catchableAs.getUncaught() == ").append(catchableAs.getUncaught().toString()).append(System.getProperty("line.separator")).append(" thrownSet == ").append(thrownSet.toString())
+				.toString();
         }
       }
     }
@@ -344,9 +342,9 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
         return map;
       } else {
         if (map == null) {
-          map = new LinkedHashMap<Unit, Collection<ExceptionDest>>(unitChain.size() * 2 + 1);
+          map = new LinkedHashMap<>(unitChain.size() * 2 + 1);
         }
-        dests = new ArrayList<ExceptionDest>(3);
+        dests = new ArrayList<>(3);
         map.put(u, dests);
       }
     }
@@ -386,9 +384,9 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
   protected Set<Unit> buildExceptionalEdges(ThrowAnalysis throwAnalysis,
       Map<Unit, Collection<ExceptionDest>> unitToExceptionDests, Map<Unit, List<Unit>> unitToSuccs,
       Map<Unit, List<Unit>> unitToPreds, boolean omitExceptingUnitEdges) {
-    Set<Unit> trapsThatAreHeads = new ArraySet<Unit>();
+    Set<Unit> trapsThatAreHeads = new ArraySet<>();
     Unit entryPoint = unitChain.getFirst();
-    for (Entry<Unit, Collection<ExceptionDest>> entry : unitToExceptionDests.entrySet()) {
+    unitToExceptionDests.entrySet().forEach(entry -> {
       Unit thrower = entry.getKey();
       List<Unit> throwersPreds = getUnexceptionalPredsOf(thrower);
       Collection<ExceptionDest> dests = entry.getValue();
@@ -449,16 +447,14 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
             if (thrower == entryPoint) {
               trapsThatAreHeads.add(catcher);
             }
-            for (Unit pred : throwersPreds) {
-              addEdge(unitToSuccs, unitToPreds, pred, catcher);
-            }
+            throwersPreds.forEach(pred -> addEdge(unitToSuccs, unitToPreds, pred, catcher));
           }
           if (alwaysAddSelfEdges || (selfThrowables != null && selfThrowables.catchableAs(trapsType))) {
             addEdge(unitToSuccs, unitToPreds, thrower, catcher);
           }
         }
       }
-    }
+    });
 
     // Now we have to worry about transitive exceptional
     // edges, when a handler might itself throw an exception
@@ -475,7 +471,7 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
 
       CFGEdge(Unit head, Unit tail) {
         if (tail == null) {
-          throw new RuntimeException("invalid CFGEdge(" + (head == null ? "null" : head.toString()) + ',' + "null" + ')');
+          throw new RuntimeException(new StringBuilder().append("invalid CFGEdge(").append(head == null ? "null" : head.toString()).append(',').append("null").append(')').toString());
         }
         this.head = head;
         this.tail = tail;
@@ -503,24 +499,19 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
       }
     }
 
-    LinkedList<CFGEdge> workList = new LinkedList<CFGEdge>();
+    LinkedList<CFGEdge> workList = new LinkedList<>();
 
-    for (Trap trap : body.getTraps()) {
-      Unit handlerStart = trap.getHandlerUnit();
-      if (mightThrowToIntraproceduralCatcher(handlerStart)) {
-        List<Unit> handlerPreds = getUnexceptionalPredsOf(handlerStart);
-        for (Unit pred : handlerPreds) {
-          workList.addLast(new CFGEdge(pred, handlerStart));
-        }
-        handlerPreds = getExceptionalPredsOf(handlerStart);
-        for (Unit pred : handlerPreds) {
-          workList.addLast(new CFGEdge(pred, handlerStart));
-        }
-        if (trapsThatAreHeads.contains(handlerStart)) {
-          workList.addLast(new CFGEdge(null, handlerStart));
-        }
-      }
-    }
+    body.getTraps().stream().map(Trap::getHandlerUnit).forEach(handlerStart -> {
+		if (mightThrowToIntraproceduralCatcher(handlerStart)) {
+		    List<Unit> handlerPreds = getUnexceptionalPredsOf(handlerStart);
+		    handlerPreds.forEach(pred -> workList.addLast(new CFGEdge(pred, handlerStart)));
+		    handlerPreds = getExceptionalPredsOf(handlerStart);
+		    handlerPreds.forEach(pred -> workList.addLast(new CFGEdge(pred, handlerStart)));
+		    if (trapsThatAreHeads.contains(handlerStart)) {
+		      workList.addLast(new CFGEdge(null, handlerStart));
+		    }
+		  }
+	});
 
     // Now for every CFG edge that leads to a handler that may
     // itself throw an exception catchable within the method, add
@@ -531,26 +522,23 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
       Unit pred = edgeToThrower.head;
       Unit thrower = edgeToThrower.tail;
       Collection<ExceptionDest> throwerDests = getExceptionDests(thrower);
-      for (ExceptionDest dest : throwerDests) {
-        if (dest.getTrap() != null) {
-          Unit handlerStart = dest.getTrap().getHandlerUnit();
-          boolean edgeAdded = false;
-          if (pred == null) {
-            if (!trapsThatAreHeads.contains(handlerStart)) {
-              trapsThatAreHeads.add(handlerStart);
-              edgeAdded = true;
-            }
-          } else {
-            if (!getExceptionalSuccsOf(pred).contains(handlerStart)) {
-              addEdge(unitToSuccs, unitToPreds, pred, handlerStart);
-              edgeAdded = true;
-            }
-          }
-          if (edgeAdded && mightThrowToIntraproceduralCatcher(handlerStart)) {
-            workList.addLast(new CFGEdge(pred, handlerStart));
-          }
-        }
-      }
+      throwerDests.stream().filter(dest -> dest.getTrap() != null).map(dest -> dest.getTrap().getHandlerUnit()).forEach(handlerStart -> {
+		boolean edgeAdded = false;
+		if (pred == null) {
+		    if (!trapsThatAreHeads.contains(handlerStart)) {
+		      trapsThatAreHeads.add(handlerStart);
+		      edgeAdded = true;
+		    }
+		  } else {
+		    if (!getExceptionalSuccsOf(pred).contains(handlerStart)) {
+		      addEdge(unitToSuccs, unitToPreds, pred, handlerStart);
+		      edgeAdded = true;
+		    }
+		  }
+		if (edgeAdded && mightThrowToIntraproceduralCatcher(handlerStart)) {
+		    workList.addLast(new CFGEdge(pred, handlerStart));
+		  }
+	});
     }
     return trapsThatAreHeads;
   }
@@ -596,12 +584,7 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
    */
   private boolean mightThrowToIntraproceduralCatcher(Unit u) {
     Collection<ExceptionDest> dests = getExceptionDests(u);
-    for (ExceptionDest dest : dests) {
-      if (dest.getTrap() != null) {
-        return true;
-      }
-    }
-    return false;
+    return dests.stream().anyMatch(dest -> dest.getTrap() != null);
   }
 
   /**
@@ -621,7 +604,7 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
    * </p>
    */
   @Override
-  protected void buildHeadsAndTails() throws IllegalStateException {
+  protected void buildHeadsAndTails() {
     throw new IllegalStateException("ExceptionalUnitGraph uses buildHeadsAndTails(List) instead of buildHeadsAndTails()");
   }
 
@@ -632,7 +615,7 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
    * sort of return bytecode or an <code>athrow</code> bytecode which may escape the method.
    */
   private void buildHeadsAndTails(Set<Unit> additionalHeads) {
-    heads = new ArrayList<Unit>(additionalHeads.size() + 1);
+    heads = new ArrayList<>(additionalHeads.size() + 1);
     heads.addAll(additionalHeads);
 
     if (unitChain.isEmpty()) {
@@ -644,8 +627,8 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
       heads.add(entryPoint);
     }
 
-    tails = new ArrayList<Unit>();
-    for (Unit u : unitChain) {
+    tails = new ArrayList<>();
+    unitChain.forEach(u -> {
       if (u instanceof soot.jimple.ReturnStmt || u instanceof soot.jimple.ReturnVoidStmt || u instanceof soot.baf.ReturnInst
           || u instanceof soot.baf.ReturnVoidInst) {
         tails.add(u);
@@ -661,7 +644,7 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
           tails.add(u);
         }
       }
-    }
+    });
   }
 
   /**
@@ -679,8 +662,10 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
   @Override
   public Collection<ExceptionDest> getExceptionDests(final Unit u) {
     Collection<ExceptionDest> result = unitToExceptionDests.get(u);
-    if (result == null) {
-      ExceptionDest e = new ExceptionDest(null, null) {
+    if (result != null) {
+		return result;
+	}
+	ExceptionDest e = new ExceptionDest(null, null) {
         private ThrowableSet throwables;
 
         @Override
@@ -691,12 +676,71 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
           return throwables;
         }
       };
-      return Collections.singletonList(e);
-    }
-    return result;
+	return Collections.singletonList(e);
   }
 
-  public static class ExceptionDest implements ExceptionalGraph.ExceptionDest<Unit> {
+  @Override
+  public List<Unit> getUnexceptionalPredsOf(Unit u) {
+    List<Unit> preds = unitToUnexceptionalPreds.get(u);
+    return preds == null ? Collections.<Unit>emptyList() : preds;
+  }
+
+@Override
+  public List<Unit> getUnexceptionalSuccsOf(Unit u) {
+    List<Unit> succs = unitToUnexceptionalSuccs.get(u);
+    return succs == null ? Collections.<Unit>emptyList() : succs;
+  }
+
+@Override
+  public List<Unit> getExceptionalPredsOf(Unit u) {
+    List<Unit> preds = unitToExceptionalPreds.get(u);
+    return preds == null ? Collections.<Unit>emptyList() : preds;
+  }
+
+@Override
+  public List<Unit> getExceptionalSuccsOf(Unit u) {
+    List<Unit> succs = unitToExceptionalSuccs.get(u);
+    return succs == null ? Collections.<Unit>emptyList() : succs;
+  }
+
+/**
+   * <p>
+   * Return the {@link ThrowAnalysis} used to construct this graph, if the graph contains no {@link Trap}s, or
+   * <code>null</code> if the graph does contain <code>Trap</code>s. A reference to the <code>ThrowAnalysis</code> is kept
+   * when there are no <code>Trap</code>s so that the graph can generate responses to {@link #getExceptionDests(Object)} on
+   * the fly, rather than precomputing information that may never be needed.
+   * </p>
+   *
+   * <p>
+   * This method is package-private because it exposes a detail of the implementation of <code>ExceptionalUnitGraph</code> so
+   * that the {@link soot.toolkits.graph.ExceptionalBlockGraph ExceptionalBlockGraph} constructor can cache the same
+   * <code>ThrowAnalysis</code> for the same purpose.
+   *
+   * @return the {@link ThrowAnalysis} used to generate this graph if the graph contains no {@link Trap}s, or
+   *         <code>null</code> if the graph contains one or more {@link Trap}s.
+   */
+  ThrowAnalysis getThrowAnalysis() {
+    return throwAnalysis;
+  }
+
+@Override
+  public String toString() {
+    StringBuilder buf = new StringBuilder();
+    unitChain.forEach(u -> {
+      buf.append(new StringBuilder().append("  preds: ").append(getPredsOf(u)).append("\n").toString());
+      buf.append(new StringBuilder().append("  unexceptional preds: ").append(getUnexceptionalPredsOf(u)).append("\n").toString());
+      buf.append(new StringBuilder().append("  exceptional preds: ").append(getExceptionalPredsOf(u)).append("\n").toString());
+      buf.append(u.toString() + '\n');
+      buf.append(new StringBuilder().append("  exception destinations: ").append(getExceptionDests(u)).append("\n").toString());
+      buf.append(new StringBuilder().append("  unexceptional succs: ").append(getUnexceptionalSuccsOf(u)).append("\n").toString());
+      buf.append(new StringBuilder().append("  exceptional succs: ").append(getExceptionalSuccsOf(u)).append("\n").toString());
+      buf.append(new StringBuilder().append("  succs ").append(getSuccsOf(u)).append("\n\n").toString());
+    });
+
+    return buf.toString();
+  }
+
+public static class ExceptionDest implements ExceptionalGraph.ExceptionDest<Unit> {
     private Trap trap;
     private ThrowableSet throwables;
 
@@ -726,7 +770,7 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
 
     @Override
     public String toString() {
-      StringBuffer buf = new StringBuffer();
+      StringBuilder buf = new StringBuilder();
       buf.append(getThrowables());
       buf.append(" -> ");
       if (trap == null) {
@@ -736,66 +780,5 @@ public class ExceptionalUnitGraph extends UnitGraph implements ExceptionalGraph<
       }
       return buf.toString();
     }
-  }
-
-  @Override
-  public List<Unit> getUnexceptionalPredsOf(Unit u) {
-    List<Unit> preds = unitToUnexceptionalPreds.get(u);
-    return preds == null ? Collections.<Unit>emptyList() : preds;
-  }
-
-  @Override
-  public List<Unit> getUnexceptionalSuccsOf(Unit u) {
-    List<Unit> succs = unitToUnexceptionalSuccs.get(u);
-    return succs == null ? Collections.<Unit>emptyList() : succs;
-  }
-
-  @Override
-  public List<Unit> getExceptionalPredsOf(Unit u) {
-    List<Unit> preds = unitToExceptionalPreds.get(u);
-    return preds == null ? Collections.<Unit>emptyList() : preds;
-  }
-
-  @Override
-  public List<Unit> getExceptionalSuccsOf(Unit u) {
-    List<Unit> succs = unitToExceptionalSuccs.get(u);
-    return succs == null ? Collections.<Unit>emptyList() : succs;
-  }
-
-  /**
-   * <p>
-   * Return the {@link ThrowAnalysis} used to construct this graph, if the graph contains no {@link Trap}s, or
-   * <code>null</code> if the graph does contain <code>Trap</code>s. A reference to the <code>ThrowAnalysis</code> is kept
-   * when there are no <code>Trap</code>s so that the graph can generate responses to {@link #getExceptionDests(Object)} on
-   * the fly, rather than precomputing information that may never be needed.
-   * </p>
-   *
-   * <p>
-   * This method is package-private because it exposes a detail of the implementation of <code>ExceptionalUnitGraph</code> so
-   * that the {@link soot.toolkits.graph.ExceptionalBlockGraph ExceptionalBlockGraph} constructor can cache the same
-   * <code>ThrowAnalysis</code> for the same purpose.
-   *
-   * @return the {@link ThrowAnalysis} used to generate this graph if the graph contains no {@link Trap}s, or
-   *         <code>null</code> if the graph contains one or more {@link Trap}s.
-   */
-  ThrowAnalysis getThrowAnalysis() {
-    return throwAnalysis;
-  }
-
-  @Override
-  public String toString() {
-    StringBuffer buf = new StringBuffer();
-    for (Unit u : unitChain) {
-      buf.append("  preds: " + getPredsOf(u) + "\n");
-      buf.append("  unexceptional preds: " + getUnexceptionalPredsOf(u) + "\n");
-      buf.append("  exceptional preds: " + getExceptionalPredsOf(u) + "\n");
-      buf.append(u.toString() + '\n');
-      buf.append("  exception destinations: " + getExceptionDests(u) + "\n");
-      buf.append("  unexceptional succs: " + getUnexceptionalSuccsOf(u) + "\n");
-      buf.append("  exceptional succs: " + getExceptionalSuccsOf(u) + "\n");
-      buf.append("  succs " + getSuccsOf(u) + "\n\n");
-    }
-
-    return buf.toString();
   }
 }

@@ -30,33 +30,30 @@ public interface MemberSubstitutor extends Parameterization {
    void addBodyDecl(BodyDecl b);
 
      
-    TypeDecl substitute(TypeVariable typeVariable);
+    @Override
+	TypeDecl substitute(TypeVariable typeVariable);
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1084
    */
-  @SuppressWarnings({"unchecked", "cast"})
-  public HashMap localMethodsSignatureMap();
+  @SuppressWarnings({"unchecked", "cast"}) HashMap localMethodsSignatureMap();
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1119
    */
-  @SuppressWarnings({"unchecked", "cast"})
-  public SimpleSet localFields(String name);
+  @SuppressWarnings({"unchecked", "cast"}) SimpleSet localFields(String name);
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1154
    */
-  @SuppressWarnings({"unchecked", "cast"})
-  public SimpleSet localTypeDecls(String name);
+  @SuppressWarnings({"unchecked", "cast"}) SimpleSet localTypeDecls(String name);
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1213
    */
-  @SuppressWarnings({"unchecked", "cast"})
-  public Collection constructors();
+  @SuppressWarnings({"unchecked", "cast"}) Collection constructors();
 }

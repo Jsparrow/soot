@@ -26,9 +26,9 @@ import soot.Value;
 import soot.ValueBox;
 
 public interface UnopExpr extends Expr {
-  public Value getOp();
+  Value getOp();
 
-  public void setOp(Value op);
+  void setOp(Value op);
 
-  public ValueBox getOpBox();
+  ValueBox getOpBox();
 }

@@ -35,12 +35,13 @@ public class JavaIoFileSystemNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("java.io.FileSystem getFileSystem()")) {
+    if ("java.io.FileSystem getFileSystem()".equals(subSignature)) {
       java_io_FileSystem_getFileSystem(method, thisVar, returnVar, params);
       return;
 

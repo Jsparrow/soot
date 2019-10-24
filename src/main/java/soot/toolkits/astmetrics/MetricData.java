@@ -34,11 +34,12 @@ public class MetricData {
     value = val;
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     b.append("<Metric>\n");
-    b.append("  <MetricName>" + metricName + "</MetricName>\n");
-    b.append("  <Value>" + value.toString() + "</Value>\n");
+    b.append(new StringBuilder().append("  <MetricName>").append(metricName).append("</MetricName>\n").toString());
+    b.append(new StringBuilder().append("  <Value>").append(value.toString()).append("</Value>\n").toString());
     b.append("</Metric>\n");
     return b.toString();
   }

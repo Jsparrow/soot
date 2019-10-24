@@ -34,18 +34,21 @@ public class CONSTANT_Integer_Info extends CONSTANT_Info {
 
 
 
-    public String toString() {
+    @Override
+	public String toString() {
       return "IntegerInfo: " + Integer.toString(value);
     }
 
 
 
-    public Expr expr() {
+    @Override
+	public Expr expr() {
       return Literal.buildIntegerLiteral(value);
     }
 
 
-    public Expr exprAsBoolean() {
+    @Override
+	public Expr exprAsBoolean() {
       return Literal.buildBooleanLiteral(value == 0);
     }
 

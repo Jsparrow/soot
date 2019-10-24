@@ -38,12 +38,14 @@ public class JTrap extends AbstractTrap {
     super(exception, beginStmt, endStmt, handlerStmt);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JTrap(exception, getBeginUnit(), getEndUnit(), getHandlerUnit());
   }
 
-  public String toString() {
-    StringBuffer buf = new StringBuffer("Trap :");
+  @Override
+public String toString() {
+    StringBuilder buf = new StringBuilder("Trap :");
     buf.append("\nbegin  : ");
     buf.append(getBeginUnit());
     buf.append("\nend    : ");

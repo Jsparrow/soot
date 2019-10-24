@@ -32,27 +32,33 @@ public class JBreakpointStmt extends AbstractStmt implements BreakpointStmt {
   public JBreakpointStmt() {
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return Jimple.BREAKPOINT;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.BREAKPOINT);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseBreakpointStmt(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JBreakpointStmt();
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return true;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

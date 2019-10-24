@@ -52,9 +52,7 @@ public abstract class TrapTransformer extends BodyTransformer {
     // Start at the heads of the unit graph
     List<Unit> workList = new ArrayList<>();
     Set<Unit> doneSet = new HashSet<>();
-    for (Unit head : ug.getHeads()) {
-      workList.add(head);
-    }
+    ug.getHeads().forEach(workList::add);
 
     while (!workList.isEmpty()) {
       Unit curUnit = workList.remove(0);
@@ -74,11 +72,10 @@ public abstract class TrapTransformer extends BodyTransformer {
       // Copy over the monitors from the predecessors
       for (Unit pred : ug.getPredsOf(curUnit)) {
         for (Value v : unitMonitors.get(pred)) {
-          if (v != exitValue) {
-            if (unitMonitors.put(curUnit, v)) {
-              hasChanged = true;
-            }
-          }
+          boolean condition = v != exitValue && unitMonitors.put(curUnit, v);
+		if (condition) {
+		  hasChanged = true;
+		}
         }
       }
 

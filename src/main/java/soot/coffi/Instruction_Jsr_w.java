@@ -60,7 +60,8 @@ class Instruction_Jsr_w extends Instruction_longbranch {
     // calls = true;
   }
 
-  public Instruction[] branchpoints(Instruction next) {
+  @Override
+public Instruction[] branchpoints(Instruction next) {
     Instruction i[] = new Instruction[1];
     i[0] = target;
     return i;

@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ABreakpointStatement extends PStatement
 {
-    private TBreakpoint _breakpoint_;
-    private TSemicolon _semicolon_;
+    private TBreakpoint breakpoint;
+    private TSemicolon semicolon;
 
     public ABreakpointStatement()
     {
@@ -30,8 +30,8 @@ public final class ABreakpointStatement extends PStatement
     public Object clone()
     {
         return new ABreakpointStatement(
-            cloneNode(this._breakpoint_),
-            cloneNode(this._semicolon_));
+            cloneNode(this.breakpoint),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class ABreakpointStatement extends PStatement
 
     public TBreakpoint getBreakpoint()
     {
-        return this._breakpoint_;
+        return this.breakpoint;
     }
 
     public void setBreakpoint(TBreakpoint node)
     {
-        if(this._breakpoint_ != null)
+        if(this.breakpoint != null)
         {
-            this._breakpoint_.parent(null);
+            this.breakpoint.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class ABreakpointStatement extends PStatement
             node.parent(this);
         }
 
-        this._breakpoint_ = node;
+        this.breakpoint = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class ABreakpointStatement extends PStatement
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._breakpoint_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.breakpoint)).append(toString(this.semicolon)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._breakpoint_ == child)
+        if(this.breakpoint == child)
         {
-            this._breakpoint_ = null;
+            this.breakpoint = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class ABreakpointStatement extends PStatement
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._breakpoint_ == oldChild)
+        if(this.breakpoint == oldChild)
         {
             setBreakpoint((TBreakpoint) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

@@ -7,12 +7,12 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
 {
-    private TCmplt _cmplt_;
-    private PType _type_;
-    private TLParen _lParen_;
-    private PParameterList _parameterList_;
-    private TRParen _rParen_;
-    private TCmpgt _cmpgt_;
+    private TCmplt cmplt;
+    private PType type;
+    private TLParen lParen;
+    private PParameterList parameterList;
+    private TRParen rParen;
+    private TCmpgt cmpgt;
 
     public AUnnamedMethodSignature()
     {
@@ -46,12 +46,12 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
     public Object clone()
     {
         return new AUnnamedMethodSignature(
-            cloneNode(this._cmplt_),
-            cloneNode(this._type_),
-            cloneNode(this._lParen_),
-            cloneNode(this._parameterList_),
-            cloneNode(this._rParen_),
-            cloneNode(this._cmpgt_));
+            cloneNode(this.cmplt),
+            cloneNode(this.type),
+            cloneNode(this.lParen),
+            cloneNode(this.parameterList),
+            cloneNode(this.rParen),
+            cloneNode(this.cmpgt));
     }
 
     @Override
@@ -62,14 +62,14 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
 
     public TCmplt getCmplt()
     {
-        return this._cmplt_;
+        return this.cmplt;
     }
 
     public void setCmplt(TCmplt node)
     {
-        if(this._cmplt_ != null)
+        if(this.cmplt != null)
         {
-            this._cmplt_.parent(null);
+            this.cmplt.parent(null);
         }
 
         if(node != null)
@@ -82,19 +82,19 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
             node.parent(this);
         }
 
-        this._cmplt_ = node;
+        this.cmplt = node;
     }
 
     public PType getType()
     {
-        return this._type_;
+        return this.type;
     }
 
     public void setType(PType node)
     {
-        if(this._type_ != null)
+        if(this.type != null)
         {
-            this._type_.parent(null);
+            this.type.parent(null);
         }
 
         if(node != null)
@@ -107,19 +107,19 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
             node.parent(this);
         }
 
-        this._type_ = node;
+        this.type = node;
     }
 
     public TLParen getLParen()
     {
-        return this._lParen_;
+        return this.lParen;
     }
 
     public void setLParen(TLParen node)
     {
-        if(this._lParen_ != null)
+        if(this.lParen != null)
         {
-            this._lParen_.parent(null);
+            this.lParen.parent(null);
         }
 
         if(node != null)
@@ -132,19 +132,19 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
             node.parent(this);
         }
 
-        this._lParen_ = node;
+        this.lParen = node;
     }
 
     public PParameterList getParameterList()
     {
-        return this._parameterList_;
+        return this.parameterList;
     }
 
     public void setParameterList(PParameterList node)
     {
-        if(this._parameterList_ != null)
+        if(this.parameterList != null)
         {
-            this._parameterList_.parent(null);
+            this.parameterList.parent(null);
         }
 
         if(node != null)
@@ -157,19 +157,19 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
             node.parent(this);
         }
 
-        this._parameterList_ = node;
+        this.parameterList = node;
     }
 
     public TRParen getRParen()
     {
-        return this._rParen_;
+        return this.rParen;
     }
 
     public void setRParen(TRParen node)
     {
-        if(this._rParen_ != null)
+        if(this.rParen != null)
         {
-            this._rParen_.parent(null);
+            this.rParen.parent(null);
         }
 
         if(node != null)
@@ -182,19 +182,19 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
             node.parent(this);
         }
 
-        this._rParen_ = node;
+        this.rParen = node;
     }
 
     public TCmpgt getCmpgt()
     {
-        return this._cmpgt_;
+        return this.cmpgt;
     }
 
     public void setCmpgt(TCmpgt node)
     {
-        if(this._cmpgt_ != null)
+        if(this.cmpgt != null)
         {
-            this._cmpgt_.parent(null);
+            this.cmpgt.parent(null);
         }
 
         if(node != null)
@@ -207,58 +207,53 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
             node.parent(this);
         }
 
-        this._cmpgt_ = node;
+        this.cmpgt = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._cmplt_)
-            + toString(this._type_)
-            + toString(this._lParen_)
-            + toString(this._parameterList_)
-            + toString(this._rParen_)
-            + toString(this._cmpgt_);
+        return new StringBuilder().append("").append(toString(this.cmplt)).append(toString(this.type)).append(toString(this.lParen)).append(toString(this.parameterList))
+				.append(toString(this.rParen)).append(toString(this.cmpgt)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._cmplt_ == child)
+        if(this.cmplt == child)
         {
-            this._cmplt_ = null;
+            this.cmplt = null;
             return;
         }
 
-        if(this._type_ == child)
+        if(this.type == child)
         {
-            this._type_ = null;
+            this.type = null;
             return;
         }
 
-        if(this._lParen_ == child)
+        if(this.lParen == child)
         {
-            this._lParen_ = null;
+            this.lParen = null;
             return;
         }
 
-        if(this._parameterList_ == child)
+        if(this.parameterList == child)
         {
-            this._parameterList_ = null;
+            this.parameterList = null;
             return;
         }
 
-        if(this._rParen_ == child)
+        if(this.rParen == child)
         {
-            this._rParen_ = null;
+            this.rParen = null;
             return;
         }
 
-        if(this._cmpgt_ == child)
+        if(this.cmpgt == child)
         {
-            this._cmpgt_ = null;
+            this.cmpgt = null;
             return;
         }
 
@@ -269,37 +264,37 @@ public final class AUnnamedMethodSignature extends PUnnamedMethodSignature
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._cmplt_ == oldChild)
+        if(this.cmplt == oldChild)
         {
             setCmplt((TCmplt) newChild);
             return;
         }
 
-        if(this._type_ == oldChild)
+        if(this.type == oldChild)
         {
             setType((PType) newChild);
             return;
         }
 
-        if(this._lParen_ == oldChild)
+        if(this.lParen == oldChild)
         {
             setLParen((TLParen) newChild);
             return;
         }
 
-        if(this._parameterList_ == oldChild)
+        if(this.parameterList == oldChild)
         {
             setParameterList((PParameterList) newChild);
             return;
         }
 
-        if(this._rParen_ == oldChild)
+        if(this.rParen == oldChild)
         {
             setRParen((TRParen) newChild);
             return;
         }
 
-        if(this._cmpgt_ == oldChild)
+        if(this.cmpgt == oldChild)
         {
             setCmpgt((TCmpgt) newChild);
             return;

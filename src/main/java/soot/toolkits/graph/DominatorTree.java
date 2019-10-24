@@ -67,9 +67,9 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
     this.dominators = dominators;
     this.graph = dominators.getGraph();
 
-    heads = new ArrayList<DominatorNode<N>>();
-    tails = new ArrayList<DominatorNode<N>>();
-    godeToDode = new HashMap<N, DominatorNode<N>>();
+    heads = new ArrayList<>();
+    tails = new ArrayList<>();
+    godeToDode = new HashMap<>();
 
     buildTree();
   }
@@ -85,7 +85,7 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
    * @return the root of the dominator tree.
    **/
   public List<DominatorNode<N>> getHeads() {
-    return new ArrayList<DominatorNode<N>>(heads);
+    return new ArrayList<>(heads);
   }
 
   /**
@@ -102,7 +102,7 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
    * @return list of the tails of the dominator tree.
    **/
   public List<DominatorNode<N>> getTails() {
-    return new ArrayList<DominatorNode<N>>(tails);
+    return new ArrayList<>(tails);
   }
 
   /**
@@ -116,7 +116,7 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
    * @return the children of node in the tree.
    **/
   public List<DominatorNode<N>> getChildrenOf(DominatorNode<N> node) {
-    return new ArrayList<DominatorNode<N>>(node.getChildren());
+    return new ArrayList<>(node.getChildren());
   }
 
   /**
@@ -124,10 +124,8 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
    **/
   public List<DominatorNode<N>> getPredsOf(DominatorNode<N> node) {
     List<N> preds = graph.getPredsOf(node.getGode());
-    List<DominatorNode<N>> predNodes = new ArrayList<DominatorNode<N>>();
-    for (N pred : preds) {
-      predNodes.add(getDode(pred));
-    }
+    List<DominatorNode<N>> predNodes = new ArrayList<>();
+    preds.forEach(pred -> predNodes.add(getDode(pred)));
     return predNodes;
   }
 
@@ -136,10 +134,8 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
    **/
   public List<DominatorNode<N>> getSuccsOf(DominatorNode<N> node) {
     List<N> succs = graph.getSuccsOf(node.getGode());
-    List<DominatorNode<N>> succNodes = new ArrayList<DominatorNode<N>>();
-    for (N succ : succs) {
-      succNodes.add(getDode(succ));
-    }
+    List<DominatorNode<N>> succNodes = new ArrayList<>();
+    succs.forEach(succ -> succNodes.add(getDode(succ)));
     return succNodes;
   }
 
@@ -166,7 +162,7 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
 
     if (dode == null) {
       throw new RuntimeException(
-          "Assertion failed: Dominator tree does not have a corresponding dode for gode (" + gode + ")");
+          new StringBuilder().append("Assertion failed: Dominator tree does not have a corresponding dode for gode (").append(gode).append(")").toString());
     }
 
     return dode;
@@ -175,7 +171,8 @@ public class DominatorTree<N> implements Iterable<DominatorNode<N>> {
   /**
    * @return iterator over the nodes in the tree. No ordering is implied.
    **/
-  public Iterator<DominatorNode<N>> iterator() {
+  @Override
+public Iterator<DominatorNode<N>> iterator() {
     return godeToDode.values().iterator();
   }
 

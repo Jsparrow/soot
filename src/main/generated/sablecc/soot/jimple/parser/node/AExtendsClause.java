@@ -8,7 +8,7 @@ import soot.jimple.parser.analysis.*;
 public final class AExtendsClause extends PExtendsClause
 {
     private TExtends _extends_;
-    private PClassName _className_;
+    private PClassName className;
 
     public AExtendsClause()
     {
@@ -31,7 +31,7 @@ public final class AExtendsClause extends PExtendsClause
     {
         return new AExtendsClause(
             cloneNode(this._extends_),
-            cloneNode(this._className_));
+            cloneNode(this.className));
     }
 
     @Override
@@ -67,14 +67,14 @@ public final class AExtendsClause extends PExtendsClause
 
     public PClassName getClassName()
     {
-        return this._className_;
+        return this.className;
     }
 
     public void setClassName(PClassName node)
     {
-        if(this._className_ != null)
+        if(this.className != null)
         {
-            this._className_.parent(null);
+            this.className.parent(null);
         }
 
         if(node != null)
@@ -87,15 +87,13 @@ public final class AExtendsClause extends PExtendsClause
             node.parent(this);
         }
 
-        this._className_ = node;
+        this.className = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._extends_)
-            + toString(this._className_);
+        return new StringBuilder().append("").append(toString(this._extends_)).append(toString(this.className)).toString();
     }
 
     @Override
@@ -108,9 +106,9 @@ public final class AExtendsClause extends PExtendsClause
             return;
         }
 
-        if(this._className_ == child)
+        if(this.className == child)
         {
-            this._className_ = null;
+            this.className = null;
             return;
         }
 
@@ -127,7 +125,7 @@ public final class AExtendsClause extends PExtendsClause
             return;
         }
 
-        if(this._className_ == oldChild)
+        if(this.className == oldChild)
         {
             setClassName((PClassName) newChild);
             return;

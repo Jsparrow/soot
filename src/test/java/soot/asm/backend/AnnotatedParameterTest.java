@@ -59,13 +59,13 @@ public class AnnotatedParameterTest extends AbstractASMBackendTest {
 		mv = cw.visitMethod(ACC_PUBLIC, "doSth", "(Ljava/lang/String;)V", null, null);
 		{
 		av0 = mv.visitParameterAnnotation(0, "Lsoot/asm/backend/targets/MyTestAnnotation;", true);
-		av0.visit("iVal", new Integer(1));
-		av0.visit("fVal", new Float("1.0"));
-		av0.visit("lVal", new Long(1L));
-		av0.visit("dVal", new Double("1.0"));
+		av0.visit("iVal", Integer.valueOf(1));
+		av0.visit("fVal", Float.valueOf("1.0"));
+		av0.visit("lVal", Long.valueOf(1L));
+		av0.visit("dVal", Double.valueOf("1.0"));
 		av0.visit("zVal", Boolean.TRUE);
-		av0.visit("bVal", new Byte((byte)1));
-		av0.visit("sVal", new Short((short)1));
+		av0.visit("bVal", Byte.valueOf((byte)1));
+		av0.visit("sVal", Short.valueOf((short)1));
 		av0.visit("strVal", "1");
 		av0.visit("rVal", Type.getType("Lsoot/asm/backend/targets/AnnotatedClass;"));
 		av0.visit("iAVal", new int[] {1,2,3,4});

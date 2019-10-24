@@ -34,7 +34,8 @@ public class ASTUnaryCondition extends ASTUnaryBinaryCondition {
     this.value = value;
   }
 
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTUnaryCondition(this);
   }
 
@@ -46,15 +47,18 @@ public class ASTUnaryCondition extends ASTUnaryBinaryCondition {
     this.value = value;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return value.toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     value.toString(up);
   }
 
-  public void flip() {
+  @Override
+public void flip() {
     /*
      * Since its a unarycondition we know this is a flag See if its a DNotExpr if yes set this.value to the op inside
      * DNotExpr If it is NOT a DNotExpr make one
@@ -66,7 +70,8 @@ public class ASTUnaryCondition extends ASTUnaryBinaryCondition {
     }
   }
 
-  public boolean isNotted() {
+  @Override
+public boolean isNotted() {
     return (value instanceof DNotExpr);
   }
 }

@@ -45,17 +45,19 @@ public class StaticDefinitionFinder extends DepthFirstAdapter {
     finalFieldDefined = false;
   }
 
-  public void inDefinitionStmt(DefinitionStmt s) {
+  @Override
+public void inDefinitionStmt(DefinitionStmt s) {
     Value leftOp = s.getLeftOp();
-    if (leftOp instanceof FieldRef) {
-      // System.out.println("leftOp is a fieldRef:"+s);
+    if (!(leftOp instanceof FieldRef)) {
+		return;
+	}
+	// System.out.println("leftOp is a fieldRef:"+s);
       SootField field = ((FieldRef) leftOp).getField();
-      // check if this is a final field
+	// check if this is a final field
       if (field.isFinal()) {
         // System.out.println("the field is a final variable");
         finalFieldDefined = true;
       }
-    }
 
   }
 

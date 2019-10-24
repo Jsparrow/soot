@@ -68,11 +68,11 @@ public class FastDexTrapTightener extends BodyTransformer {
   }
 
   private boolean isDexInstruction(Unit unit) {
-    if (unit instanceof IdentityStmt) {
-      IdentityStmt is = (IdentityStmt) unit;
-      return !(is.getRightOp() instanceof ThisRef || is.getRightOp() instanceof ParameterRef);
-    }
-    return true;
+    if (!(unit instanceof IdentityStmt)) {
+		return true;
+	}
+	IdentityStmt is = (IdentityStmt) unit;
+	return !(is.getRightOp() instanceof ThisRef || is.getRightOp() instanceof ParameterRef);
   }
 
 }

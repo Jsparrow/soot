@@ -17,6 +17,8 @@ import java.io.IOException;
  */
 public abstract class Scanner
 {
+	public abstract Symbol nextToken() throws IOException, Scanner.Exception;
+
 	public static class Exception extends java.lang.Exception
 	{
 		public final int line;
@@ -34,6 +36,4 @@ public abstract class Scanner
 			this.column = column;
 		}
 	}
-
-	public abstract Symbol nextToken() throws IOException, Scanner.Exception;
 }

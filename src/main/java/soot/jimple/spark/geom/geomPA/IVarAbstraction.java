@@ -62,7 +62,8 @@ public abstract class IVarAbstraction implements Numberable {
   // top_value: the topological value for this node on the symbolic assignment graph
   // lrf_value: the number of processing times for this pointer
   // top_value will be modified in the offlineProcessor and every pointer has a different value
-  public int top_value = 1, lrf_value = 0;
+  public int top_value = 1;
+public int lrf_value = 0;
   // union-find tree link
   protected IVarAbstraction parent;
 

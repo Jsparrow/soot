@@ -47,16 +47,15 @@ public enum InvokeArgumentValidator implements BodyValidator {
 
   @Override
   public void validate(Body body, List<ValidationException> exceptions) {
-    for (Unit u : body.getUnits()) {
-      Stmt s = (Stmt) u;
-      if (s.containsInvokeExpr()) {
-        InvokeExpr iinvExpr = s.getInvokeExpr();
-        SootMethod callee = iinvExpr.getMethod();
-        if (callee != null && iinvExpr.getArgCount() != callee.getParameterCount()) {
-          exceptions.add(new ValidationException(s, "Invalid number of arguments"));
-        }
-      }
-    }
+    body.getUnits().stream().map(u -> (Stmt) u).forEach(s -> {
+		if (s.containsInvokeExpr()) {
+		    InvokeExpr iinvExpr = s.getInvokeExpr();
+		    SootMethod callee = iinvExpr.getMethod();
+		    if (callee != null && iinvExpr.getArgCount() != callee.getParameterCount()) {
+		      exceptions.add(new ValidationException(s, "Invalid number of arguments"));
+		    }
+		  }
+	});
   }
 
   @Override

@@ -68,11 +68,12 @@ public class CoffiClassSource extends ClassSource {
     this.foundFile = null;
   }
 
-  public Dependencies resolve(SootClass sc) {
+  @Override
+public Dependencies resolve(SootClass sc) {
     if (Options.v().verbose()) {
       logger.debug("resolving [from .class]: " + className);
     }
-    List<Type> references = new ArrayList<Type>();
+    List<Type> references = new ArrayList<>();
 
     try {
       soot.coffi.Util.v().resolveFromClassFile(sc, classFile, fileName, references);
@@ -101,10 +102,11 @@ public class CoffiClassSource extends ClassSource {
     }
 
     // Sets sourceFile only when it hasn't been set before
-    if (tag.getSourceFile() == null) {
-      String name = zipFileName == null ? new File(fileName).getName() : new File(zipFileName).getName();
-      tag.setSourceFile(name);
-    }
+	if (tag.getSourceFile() != null) {
+		return;
+	}
+	String name = zipFileName == null ? new File(fileName).getName() : new File(zipFileName).getName();
+	tag.setSourceFile(name);
   }
 
   @Override

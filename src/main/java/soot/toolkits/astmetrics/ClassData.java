@@ -36,7 +36,7 @@ public class ClassData {
 
   public ClassData(String name) {
     className = name;
-    metricData = new ArrayList<MetricData>();
+    metricData = new ArrayList<>();
   }
 
   public String getClassName() {
@@ -54,9 +54,7 @@ public class ClassData {
    * Only add new metric if this is not already present Else dont add
    */
   public void addMetric(MetricData data) {
-    Iterator<MetricData> it = metricData.iterator();
-    while (it.hasNext()) {
-      MetricData temp = it.next();
+    for (MetricData temp : metricData) {
       if (temp.metricName.equals(data.metricName)) {
         // System.out.println("Not adding same metric again......"+temp.metricName);
         return;
@@ -65,14 +63,12 @@ public class ClassData {
     metricData.add(data);
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
     b.append("<Class>\n");
-    b.append("<ClassName>" + className + "</ClassName>\n");
-    Iterator<MetricData> it = metricData.iterator();
-    while (it.hasNext()) {
-      b.append(it.next().toString());
-    }
+    b.append(new StringBuilder().append("<ClassName>").append(className).append("</ClassName>\n").toString());
+    metricData.forEach(aMetricData -> b.append(aMetricData.toString()));
     b.append("</Class>");
     return b.toString();
   }

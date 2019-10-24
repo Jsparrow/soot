@@ -74,7 +74,7 @@ public class FoundFile {
   }
 
   private FoundFile() {
-    this.openedInputStreams = new ArrayList<InputStream>();
+    this.openedInputStreams = new ArrayList<>();
   }
 
   public String getFilePath() {
@@ -95,7 +95,7 @@ public class FoundFile {
       try {
         ret = new FileInputStream(file);
       } catch (Exception e) {
-        throw new RuntimeException("Error: Failed to open a InputStream for the file at path '" + file.getPath() + "'.", e);
+        throw new RuntimeException(new StringBuilder().append("Error: Failed to open a InputStream for the file at path '").append(file.getPath()).append("'.").toString(), e);
       }
     } else {
       if (zipFile == null) {
@@ -105,12 +105,12 @@ public class FoundFile {
           if (zipEntry == null) {
             silentClose();
             throw new RuntimeException(
-                "Error: Failed to find entry '" + entryName + "' in the archive file at path '" + file.getPath() + "'.");
+                new StringBuilder().append("Error: Failed to find entry '").append(entryName).append("' in the archive file at path '").append(file.getPath()).append("'.").toString());
           }
         } catch (Exception e) {
           silentClose();
           throw new RuntimeException(
-              "Error: Failed to open the archive file at path '" + file.getPath() + "' for entry '" + entryName + "'.", e);
+              new StringBuilder().append("Error: Failed to open the archive file at path '").append(file.getPath()).append("' for entry '").append(entryName).append("'.").toString(), e);
         }
       }
 
@@ -119,8 +119,7 @@ public class FoundFile {
         stream = zipFile.getInputStream(zipEntry);
         ret = doJDKBugWorkaround(stream, zipEntry.getSize());
       } catch (Exception e) {
-        throw new RuntimeException("Error: Failed to open a InputStream for the entry '" + zipEntry.getName()
-            + "' of the archive at path '" + zipFile.getName() + "'.", e);
+        throw new RuntimeException(new StringBuilder().append("Error: Failed to open a InputStream for the entry '").append(zipEntry.getName()).append("' of the archive at path '").append(zipFile.getName()).append("'.").toString(), e);
       } finally {
         if (stream != null) {
           try {
@@ -147,7 +146,7 @@ public class FoundFile {
 
   public void close() {
     // Try to close all opened input streams
-    List<Exception> errs = new ArrayList<Exception>(0);
+    List<Exception> errs = new ArrayList<>(0);
     for (InputStream is : openedInputStreams) {
       try {
         is.close();
@@ -159,11 +158,13 @@ public class FoundFile {
     closeZipFile(errs);
 
     // Throw single exception combining all errors
-    if (!errs.isEmpty()) {
-      String msg = null;
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      PrintStream ps = null;
-      try {
+	if (errs.isEmpty()) {
+		return;
+	}
+	String msg = null;
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	PrintStream ps = null;
+	try {
         ps = new PrintStream(baos, true, "utf-8");
         ps.println("Error: Failed to close all opened resources. The following exceptions were thrown in the process: ");
         int i = 0;
@@ -175,27 +176,28 @@ public class FoundFile {
         }
         msg = new String(baos.toByteArray(), StandardCharsets.UTF_8);
       } catch (Exception e) {
+		logger.error(e.getMessage(), e);
         // Do nothing as this will never occur
       } finally {
         ps.close();
       }
-      throw new RuntimeException(msg);
-    }
+	throw new RuntimeException(msg);
   }
 
   protected void closeZipFile(List<Exception> errs) {
     // Try to close the opened zip file if it exists
-    if (zipFile != null) {
-      try {
+	if (zipFile == null) {
+		return;
+	}
+	try {
         zipFile.close();
         errs.clear();// Successfully closed the archive so all input
         // streams were closed successfully also
       } catch (Exception e) {
         errs.add(e);
       }
-      zipFile = null;// set to null no matter what
-      zipEntry = null;// set to null no matter what
-    }
+	zipFile = null;// set to null no matter what
+	zipEntry = null;// set to null no matter what
   }
 
   private InputStream doJDKBugWorkaround(InputStream is, long size) throws IOException {

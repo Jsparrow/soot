@@ -27,15 +27,15 @@ import java.util.List;
 import soot.Unit;
 
 public interface LookupSwitchStmt extends SwitchStmt {
-  public void setLookupValues(List<IntConstant> lookupValues);
+  void setLookupValues(List<IntConstant> lookupValues);
 
-  public void setLookupValue(int index, int value);
+  void setLookupValue(int index, int value);
 
-  public int getLookupValue(int index);
+  int getLookupValue(int index);
 
-  public List<IntConstant> getLookupValues();
+  List<IntConstant> getLookupValues();
 
-  public int getTargetCount();
+  int getTargetCount();
 
-  public void setTargets(Unit[] targets);
+  void setTargets(Unit[] targets);
 }

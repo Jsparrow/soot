@@ -35,30 +35,34 @@ public class NormalUnitPrinter extends LabeledUnitPrinter {
     super(body);
   }
 
-  public void type(Type t) {
+  @Override
+public void type(Type t) {
     handleIndent();
     String s = t == null ? "<null>" : t.toQuotedString();
     output.append(s);
   }
 
-  public void methodRef(SootMethodRef m) {
+  @Override
+public void methodRef(SootMethodRef m) {
     handleIndent();
     output.append(m.getSignature());
   }
 
-  public void fieldRef(SootFieldRef f) {
+  @Override
+public void fieldRef(SootFieldRef f) {
     handleIndent();
     output.append(f.getSignature());
   }
 
-  public void identityRef(IdentityRef r) {
+  @Override
+public void identityRef(IdentityRef r) {
     handleIndent();
     if (r instanceof ThisRef) {
       literal("@this: ");
       type(r.getType());
     } else if (r instanceof ParameterRef) {
       ParameterRef pr = (ParameterRef) r;
-      literal("@parameter" + pr.getIndex() + ": ");
+      literal(new StringBuilder().append("@parameter").append(pr.getIndex()).append(": ").toString());
       type(r.getType());
     } else if (r instanceof CaughtExceptionRef) {
       literal("@caughtexception");
@@ -67,7 +71,8 @@ public class NormalUnitPrinter extends LabeledUnitPrinter {
     }
   }
 
-  public void literal(String s) {
+  @Override
+public void literal(String s) {
     handleIndent();
     output.append(s);
   }

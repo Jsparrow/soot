@@ -43,22 +43,6 @@ public class BPrimitiveCastInst extends AbstractInst implements PrimitiveCastIns
 
   protected Type toType;
 
-  public int getInCount() {
-    return 1;
-  }
-
-  public int getInMachineCount() {
-    return AbstractJasminClass.sizeOfType(fromType);
-  }
-
-  public int getOutCount() {
-    return 1;
-  }
-
-  public int getOutMachineCount() {
-    return AbstractJasminClass.sizeOfType(toType);
-  }
-
   public BPrimitiveCastInst(Type fromType, Type toType) {
 
     if (fromType instanceof NullType) {
@@ -68,36 +52,64 @@ public class BPrimitiveCastInst extends AbstractInst implements PrimitiveCastIns
     this.toType = toType;
   }
 
-  public Object clone() {
+@Override
+public int getInCount() {
+    return 1;
+  }
+
+@Override
+public int getInMachineCount() {
+    return AbstractJasminClass.sizeOfType(fromType);
+  }
+
+@Override
+public int getOutCount() {
+    return 1;
+  }
+
+@Override
+public int getOutMachineCount() {
+    return AbstractJasminClass.sizeOfType(toType);
+  }
+
+@Override
+public Object clone() {
     return new BPrimitiveCastInst(getFromType(), toType);
   }
 
-  // after changing the types, use getName to check validity
-  public Type getFromType() {
+// after changing the types, use getName to check validity
+  @Override
+public Type getFromType() {
     return fromType;
   }
 
-  public void setFromType(Type t) {
+@Override
+public void setFromType(Type t) {
     fromType = t;
   }
 
-  public Type getToType() {
+@Override
+public Type getToType() {
     return toType;
   }
 
-  public void setToType(Type t) {
+@Override
+public void setToType(Type t) {
     toType = t;
   }
 
-  final public String getName() {
+@Override
+public final String getName() {
     TypeSwitch sw;
 
     fromType.apply(sw = new TypeSwitch() {
-      public void defaultCase(Type ty) {
+      @Override
+	public void defaultCase(Type ty) {
         throw new RuntimeException("invalid fromType " + fromType);
       }
 
-      public void caseDoubleType(DoubleType ty) {
+      @Override
+	public void caseDoubleType(DoubleType ty) {
         if (toType.equals(IntType.v())) {
           setResult("d2i");
         } else if (toType.equals(LongType.v())) {
@@ -109,7 +121,8 @@ public class BPrimitiveCastInst extends AbstractInst implements PrimitiveCastIns
         }
       }
 
-      public void caseFloatType(FloatType ty) {
+      @Override
+	public void caseFloatType(FloatType ty) {
         if (toType.equals(IntType.v())) {
           setResult("f2i");
         } else if (toType.equals(LongType.v())) {
@@ -121,23 +134,28 @@ public class BPrimitiveCastInst extends AbstractInst implements PrimitiveCastIns
         }
       }
 
-      public void caseIntType(IntType ty) {
+      @Override
+	public void caseIntType(IntType ty) {
         emitIntToTypeCast();
       }
 
-      public void caseBooleanType(BooleanType ty) {
+      @Override
+	public void caseBooleanType(BooleanType ty) {
         emitIntToTypeCast();
       }
 
-      public void caseByteType(ByteType ty) {
+      @Override
+	public void caseByteType(ByteType ty) {
         emitIntToTypeCast();
       }
 
-      public void caseCharType(CharType ty) {
+      @Override
+	public void caseCharType(CharType ty) {
         emitIntToTypeCast();
       }
 
-      public void caseShortType(ShortType ty) {
+      @Override
+	public void caseShortType(ShortType ty) {
         emitIntToTypeCast();
       }
 
@@ -163,7 +181,8 @@ public class BPrimitiveCastInst extends AbstractInst implements PrimitiveCastIns
         }
       }
 
-      public void caseLongType(LongType ty) {
+      @Override
+	public void caseLongType(LongType ty) {
         if (toType.equals(IntType.v())) {
           setResult("l2i");
         } else if (toType.equals(FloatType.v())) {
@@ -179,12 +198,14 @@ public class BPrimitiveCastInst extends AbstractInst implements PrimitiveCastIns
     return (String) sw.getResult();
   }
 
-  /* override toString with our own, *not* including types */
-  public String toString() {
+/* override toString with our own, *not* including types */
+  @Override
+public String toString() {
     return getName() + getParameters();
   }
 
-  public void apply(Switch sw) {
+@Override
+public void apply(Switch sw) {
     ((InstSwitch) sw).casePrimitiveCastInst(this);
   }
 }

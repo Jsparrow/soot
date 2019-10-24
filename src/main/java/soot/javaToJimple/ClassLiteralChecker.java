@@ -30,15 +30,16 @@ public class ClassLiteralChecker extends polyglot.visit.NodeVisitor {
 
   private final ArrayList<Node> list;
 
-  public ArrayList<Node> getList() {
+  public ClassLiteralChecker() {
+    list = new ArrayList<>();
+  }
+
+public ArrayList<Node> getList() {
     return list;
   }
 
-  public ClassLiteralChecker() {
-    list = new ArrayList<Node>();
-  }
-
-  public polyglot.ast.Node override(polyglot.ast.Node parent, polyglot.ast.Node n) {
+@Override
+public polyglot.ast.Node override(polyglot.ast.Node parent, polyglot.ast.Node n) {
     if (n instanceof polyglot.ast.ClassDecl) {
       return n;
     }
@@ -48,7 +49,8 @@ public class ClassLiteralChecker extends polyglot.visit.NodeVisitor {
     return null;
   }
 
-  public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
+@Override
+public polyglot.visit.NodeVisitor enter(polyglot.ast.Node parent, polyglot.ast.Node n) {
 
     if (n instanceof polyglot.ast.ClassLit) {
       polyglot.ast.ClassLit lit = (polyglot.ast.ClassLit) n;

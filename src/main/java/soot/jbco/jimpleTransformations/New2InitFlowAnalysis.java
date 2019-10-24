@@ -61,12 +61,11 @@ public class New2InitFlowAnalysis extends BackwardFlowAnalysis<Unit, FlowSet> {
         }
       }
     } else {
-      for (ValueBox useBox : d.getUseBoxes()) {
-        Value v = useBox.getValue();
-        if (v instanceof Local) {
+      d.getUseBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+		if (v instanceof Local) {
           out.add(v);
         }
-      }
+	});
     }
     /*
      * else if (d instanceof InvokeStmt) { InvokeExpr ie = ((InvokeStmt)d).getInvokeExpr(); if (ie instanceof

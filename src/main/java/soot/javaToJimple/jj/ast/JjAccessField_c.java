@@ -34,7 +34,7 @@ import polyglot.util.Position;
 import polyglot.visit.CFGBuilder;
 import polyglot.visit.NodeVisitor;
 
-public class JjAccessField_c extends Expr_c implements Expr {
+public class JjAccessField_c extends Expr_c {
 
   private Call getMeth;
   private Call setMeth;
@@ -59,19 +59,23 @@ public class JjAccessField_c extends Expr_c implements Expr {
     return field;
   }
 
-  public String toString() {
-    return field + " " + getMeth + " " + setMeth;
+  @Override
+public String toString() {
+    return new StringBuilder().append(field).append(" ").append(getMeth).append(" ").append(setMeth).toString();
   }
 
-  public List acceptCFG(CFGBuilder v, List succs) {
+  @Override
+public List acceptCFG(CFGBuilder v, List succs) {
     return succs;
   }
 
-  public Term entry() {
+  @Override
+public Term entry() {
     return field.entry();
   }
 
-  public Node visitChildren(NodeVisitor v) {
+  @Override
+public Node visitChildren(NodeVisitor v) {
     visitChild(field, v);
     visitChild(getMeth, v);
     visitChild(setMeth, v);

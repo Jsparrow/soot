@@ -59,16 +59,12 @@ public class OnFlyCallGraph {
   protected final QueueReader<MethodOrMethodContext> reachablesReader;
   protected final QueueReader<Edge> callEdges;
   protected final CallGraph callGraph;
+/* End of public methods. */
+  /* End of package methods. */
 
-  public ReachableMethods reachableMethods() {
-    return reachableMethods;
-  }
+  private PAG pag;
 
-  public CallGraph callGraph() {
-    return callGraph;
-  }
-
-  public OnFlyCallGraph(PAG pag, boolean appOnly) {
+public OnFlyCallGraph(PAG pag, boolean appOnly) {
     this.pag = pag;
     callGraph = Scene.v().internalMakeCallGraph();
     Scene.v().setCallGraph(callGraph);
@@ -79,13 +75,21 @@ public class OnFlyCallGraph {
     callEdges = cm.callGraph().listener();
   }
 
-  public void build() {
+public ReachableMethods reachableMethods() {
+    return reachableMethods;
+  }
+
+public CallGraph callGraph() {
+    return callGraph;
+  }
+
+public void build() {
     ofcgb.processReachables();
     processReachables();
     processCallEdges();
   }
 
-  private void processReachables() {
+private void processReachables() {
     reachableMethods.update();
     while (reachablesReader.hasNext()) {
       MethodOrMethodContext m = reachablesReader.next();
@@ -95,7 +99,7 @@ public class OnFlyCallGraph {
     }
   }
 
-  private void processCallEdges() {
+private void processCallEdges() {
     while (callEdges.hasNext()) {
       Edge e = callEdges.next();
       MethodPAG amp = MethodPAG.v(pag, e.tgt());
@@ -105,11 +109,11 @@ public class OnFlyCallGraph {
     }
   }
 
-  public OnFlyCallGraphBuilder ofcgb() {
+public OnFlyCallGraphBuilder ofcgb() {
     return ofcgb;
   }
 
-  public void updatedFieldRef(final AllocDotField df, PointsToSetInternal ptsi) {
+public void updatedFieldRef(final AllocDotField df, PointsToSetInternal ptsi) {
     if (df.getField() != ArrayElement.v()) {
       return;
     }
@@ -123,7 +127,7 @@ public class OnFlyCallGraph {
     }
   }
 
-  public void updatedNode(VarNode vn) {
+public void updatedNode(VarNode vn) {
     Object r = vn.getVariable();
     if (!(r instanceof Local)) {
       return;
@@ -134,7 +138,8 @@ public class OnFlyCallGraph {
     PointsToSetInternal p2set = vn.getP2Set().getNewSet();
     if (ofcgb.wantTypes(receiver)) {
       p2set.forall(new P2SetVisitor() {
-        public final void visit(Node n) {
+        @Override
+		public final void visit(Node n) {
           if (n instanceof AllocNode) {
             ofcgb.addType(receiver, context, n.getType(), (AllocNode) n);
           }
@@ -143,7 +148,8 @@ public class OnFlyCallGraph {
     }
     if (ofcgb.wantStringConstants(receiver)) {
       p2set.forall(new P2SetVisitor() {
-        public final void visit(Node n) {
+        @Override
+		public final void visit(Node n) {
           if (n instanceof StringConstantNode) {
             String constant = ((StringConstantNode) n).getString();
             ofcgb.addStringConstant(receiver, context, constant);
@@ -153,36 +159,31 @@ public class OnFlyCallGraph {
         }
       });
     }
-    if (ofcgb.wantInvokeArg(receiver)) {
-      p2set.forall(new P2SetVisitor() {
+    if (!ofcgb.wantInvokeArg(receiver)) {
+		return;
+	}
+	p2set.forall(new P2SetVisitor() {
         @Override
         public void visit(Node n) {
-          if (n instanceof AllocNode) {
-            AllocNode an = ((AllocNode) n);
-            ofcgb.addInvokeArgDotField(receiver, pag.makeAllocDotField(an, ArrayElement.v()));
-            assert an.getNewExpr() instanceof NewArrayExpr;
-            NewArrayExpr nae = (NewArrayExpr) an.getNewExpr();
-            if (!(nae.getSize() instanceof IntConstant)) {
-              ofcgb.setArgArrayNonDetSize(receiver, context);
-            } else {
-              IntConstant sizeConstant = (IntConstant) nae.getSize();
-              ofcgb.addPossibleArgArraySize(receiver, sizeConstant.value, context);
-            }
-          }
+          if (!(n instanceof AllocNode)) {
+			return;
+		}
+		AllocNode an = ((AllocNode) n);
+		ofcgb.addInvokeArgDotField(receiver, pag.makeAllocDotField(an, ArrayElement.v()));
+		assert an.getNewExpr() instanceof NewArrayExpr;
+		NewArrayExpr nae = (NewArrayExpr) an.getNewExpr();
+		if (!(nae.getSize() instanceof IntConstant)) {
+		  ofcgb.setArgArrayNonDetSize(receiver, context);
+		} else {
+		  IntConstant sizeConstant = (IntConstant) nae.getSize();
+		  ofcgb.addPossibleArgArraySize(receiver, sizeConstant.value, context);
+		}
         }
       });
-      for (Type ty : pag.reachingObjectsOfArrayElement(p2set).possibleTypes()) {
-        ofcgb.addInvokeArgType(receiver, context, ty);
-      }
-    }
+	pag.reachingObjectsOfArrayElement(p2set).possibleTypes().forEach(ty -> ofcgb.addInvokeArgType(receiver, context, ty));
   }
 
-  /** Node uses this to notify PAG that n2 has been merged into n1. */
+/** Node uses this to notify PAG that n2 has been merged into n1. */
   public void mergedWith(Node n1, Node n2) {
   }
-
-  /* End of public methods. */
-  /* End of package methods. */
-
-  private PAG pag;
 }

@@ -35,8 +35,103 @@ import soot.util.Switch;
 public class MethodHandle extends Constant {
 
   private static final long serialVersionUID = -7948291265532721191L;
-  
-  public static enum Kind {
+protected final SootFieldRef fieldRef;
+protected final SootMethodRef methodRef;
+protected final int kind;
+
+private MethodHandle(SootMethodRef ref, int kind) {
+    this.methodRef = ref;
+    this.kind = kind;
+    this.fieldRef = null;
+  }
+
+private MethodHandle(SootFieldRef ref, int kind) {
+    this.fieldRef = ref;
+    this.kind = kind;
+    this.methodRef = null;
+  }
+
+public static MethodHandle v(SootMethodRef ref, int tag) {
+    return new MethodHandle(ref, tag);
+  }
+
+public static MethodHandle v(SootFieldRef ref, int kind) {
+    return new MethodHandle(ref, kind);
+  }
+
+@Override
+public String toString() {
+    return new StringBuilder().append("methodhandle: \"").append(getKindString()).append("\" ").append(methodRef == null ? Objects.toString(fieldRef) : Objects.toString(methodRef)).toString();
+  }
+
+@Override
+public Type getType() {
+    return RefType.v("java.lang.invoke.MethodHandle");
+  }
+
+public SootMethodRef getMethodRef() {
+    return methodRef;
+  }
+
+public SootFieldRef getFieldRef() {
+    return fieldRef;
+  }
+
+public int getKind() {
+    return kind;
+  }
+
+public String getKindString() {
+    return Kind.getKind(kind).toString();
+  }
+
+public boolean isFieldRef() {
+    return isFieldRef(kind);
+  }
+
+public static boolean isFieldRef(int kind) {
+    return kind == Kind.REF_GET_FIELD.getValue() || kind == Kind.REF_GET_FIELD_STATIC.getValue() 
+        || kind == Kind.REF_PUT_FIELD.getValue() || kind == Kind.REF_PUT_FIELD_STATIC.getValue();
+  }
+
+public boolean isMethodRef() {
+    return isMethodRef(kind);
+  }
+
+public static boolean isMethodRef(int kind) {
+    return kind == Kind.REF_INVOKE_VIRTUAL.getValue() || kind == Kind.REF_INVOKE_STATIC.getValue()
+        || kind == Kind.REF_INVOKE_SPECIAL.getValue() || kind == Kind.REF_INVOKE_CONSTRUCTOR.getValue()
+        || kind == Kind.REF_INVOKE_INTERFACE.getValue();
+  }
+
+@Override
+public void apply(Switch sw) {
+    ((ConstantSwitch) sw).caseMethodHandle(this);
+  }
+
+@Override
+  public int hashCode() {
+    final int prime = 17;
+    int result = 31;
+    result = prime * result + Objects.hashCode(methodRef);
+    result = prime * result + Objects.hashCode(fieldRef);
+    result = prime * result + kind;
+    return result;
+  }
+
+@Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    MethodHandle other = (MethodHandle) obj;
+    return Objects.equals(methodRef, other.methodRef) && Objects.equals(fieldRef, other.fieldRef);
+  }
+
+public static enum Kind {
     REF_GET_FIELD(Opcodes.H_GETFIELD, "REF_GET_FIELD"), 
     REF_GET_FIELD_STATIC(Opcodes.H_GETSTATIC, "REF_GET_FIELD_STATIC"), 
     REF_PUT_FIELD(Opcodes.H_PUTFIELD, "REF_PUT_FIELD"), 
@@ -70,7 +165,7 @@ public class MethodHandle extends Constant {
           return k;
         }
       }
-      throw new RuntimeException("Error: No method handle kind for value '" + kind + "'.");
+      throw new RuntimeException(new StringBuilder().append("Error: No method handle kind for value '").append(kind).append("'.").toString());
     }
     
     public static Kind getKind(String kind) {
@@ -79,102 +174,8 @@ public class MethodHandle extends Constant {
           return k;
         }
       }
-      throw new RuntimeException("Error: No method handle kind for value '" + kind + "'.");
+      throw new RuntimeException(new StringBuilder().append("Error: No method handle kind for value '").append(kind).append("'.").toString());
     }
     
-  }
-  
-  protected final SootFieldRef fieldRef;
-  protected final SootMethodRef methodRef;
-  protected final int kind;
-
-  private MethodHandle(SootMethodRef ref, int kind) {
-    this.methodRef = ref;
-    this.kind = kind;
-    this.fieldRef = null;
-  }
-  
-  private MethodHandle(SootFieldRef ref, int kind) {
-    this.fieldRef = ref;
-    this.kind = kind;
-    this.methodRef = null;
-  }
-
-  public static MethodHandle v(SootMethodRef ref, int tag) {
-    return new MethodHandle(ref, tag);
-  }
-  
-  public static MethodHandle v(SootFieldRef ref, int kind) {
-    return new MethodHandle(ref, kind);
-  }
-
-  public String toString() {
-    return "methodhandle: \"" + getKindString() + "\" " 
-        + (methodRef == null ? Objects.toString(fieldRef) : Objects.toString(methodRef));
-  }
-
-  public Type getType() {
-    return RefType.v("java.lang.invoke.MethodHandle");
-  }
-
-  public SootMethodRef getMethodRef() {
-    return methodRef;
-  }
-  
-  public SootFieldRef getFieldRef() {
-    return fieldRef;
-  }
-  
-  public int getKind() {
-    return kind;
-  }
-  
-  public String getKindString() {
-    return Kind.getKind(kind).toString();
-  }
-  
-  public boolean isFieldRef() {
-    return isFieldRef(kind);
-  }
-  
-  public static boolean isFieldRef(int kind) {
-    return kind == Kind.REF_GET_FIELD.getValue() || kind == Kind.REF_GET_FIELD_STATIC.getValue() 
-        || kind == Kind.REF_PUT_FIELD.getValue() || kind == Kind.REF_PUT_FIELD_STATIC.getValue();
-  }
-  
-  public boolean isMethodRef() {
-    return isMethodRef(kind);
-  }
-  
-  public static boolean isMethodRef(int kind) {
-    return kind == Kind.REF_INVOKE_VIRTUAL.getValue() || kind == Kind.REF_INVOKE_STATIC.getValue()
-        || kind == Kind.REF_INVOKE_SPECIAL.getValue() || kind == Kind.REF_INVOKE_CONSTRUCTOR.getValue()
-        || kind == Kind.REF_INVOKE_INTERFACE.getValue();
-  }
-
-  public void apply(Switch sw) {
-    ((ConstantSwitch) sw).caseMethodHandle(this);
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 17;
-    int result = 31;
-    result = prime * result + Objects.hashCode(methodRef);
-    result = prime * result + Objects.hashCode(fieldRef);
-    result = prime * result + kind;
-    return result;
-  }
-  
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    MethodHandle other = (MethodHandle) obj;
-    return Objects.equals(methodRef, other.methodRef) && Objects.equals(fieldRef, other.fieldRef);
   }
 }

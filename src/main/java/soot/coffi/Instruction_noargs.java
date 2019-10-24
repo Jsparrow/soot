@@ -58,11 +58,13 @@ class Instruction_noargs extends Instruction {
     super(c);
   }
 
-  public int parse(byte bc[], int index) {
+  @Override
+public int parse(byte bc[], int index) {
     return index;
   }
 
-  public int compile(byte bc[], int index) {
+  @Override
+public int compile(byte bc[], int index) {
     bc[index++] = code;
     return index;
   }

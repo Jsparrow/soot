@@ -43,6 +43,8 @@ import org.objectweb.asm.Type;
 
 import soot.G;
 import soot.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Alex Betra,
@@ -50,7 +52,9 @@ import soot.Main;
 
 public class MethodHandleTest {
 
-  @Test
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandleTest.class);
+
+@Test
   public void testConstant() throws Throwable {
 
     // First generate a classfile with a MethodHnadle
@@ -77,7 +81,7 @@ public class MethodHandleTest {
 
     String[] commandLine = { "-pp", "-cp", tempDir.getAbsolutePath(), "-O", "HelloMethodHandles", };
 
-    System.out.println("Command Line: " + Arrays.toString(commandLine));
+    logger.info("Command Line: " + Arrays.toString(commandLine));
 
     Main.main(commandLine);
 
@@ -123,7 +127,7 @@ public class MethodHandleTest {
 
     String[] commandLine = { "-pp", "-cp", tempDir.getAbsolutePath(), "-O", "UniformDistribution" };
 
-    System.out.println("Command Line: " + Arrays.toString(commandLine));
+    logger.info("Command Line: " + Arrays.toString(commandLine));
 
     Main.main(commandLine);
     validateClassFile("UniformDistribution");

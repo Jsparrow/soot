@@ -35,34 +35,40 @@ import soot.ValueBox;
 import soot.jimple.InvokeExpr;
 
 @SuppressWarnings("serial")
-abstract public class AbstractInvokeExpr implements InvokeExpr {
+public abstract class AbstractInvokeExpr implements InvokeExpr {
   protected SootMethodRef methodRef;
-  final protected ValueBox[] argBoxes;
+  protected final ValueBox[] argBoxes;
 
   protected AbstractInvokeExpr(SootMethodRef methodRef, ValueBox[] argBoxes) {
     this.methodRef = methodRef;
     this.argBoxes = argBoxes.length == 0 ? null : argBoxes;
   }
 
-  public void setMethodRef(SootMethodRef methodRef) {
+  @Override
+public void setMethodRef(SootMethodRef methodRef) {
     this.methodRef = methodRef;
   }
 
-  public SootMethodRef getMethodRef() {
+  @Override
+public SootMethodRef getMethodRef() {
     return methodRef;
   }
 
-  public SootMethod getMethod() {
+  @Override
+public SootMethod getMethod() {
     return methodRef.resolve();
   }
 
-  public abstract Object clone();
+  @Override
+public abstract Object clone();
 
-  public Value getArg(int index) {
+  @Override
+public Value getArg(int index) {
     return argBoxes[index].getValue();
   }
 
-  public List<Value> getArgs() {
+  @Override
+public List<Value> getArgs() {
     List<Value> l = new ArrayList<>();
     if (argBoxes != null) {
       for (ValueBox element : argBoxes) {
@@ -72,19 +78,23 @@ abstract public class AbstractInvokeExpr implements InvokeExpr {
     return l;
   }
 
-  public int getArgCount() {
+  @Override
+public int getArgCount() {
     return argBoxes == null ? 0 : argBoxes.length;
   }
 
-  public void setArg(int index, Value arg) {
+  @Override
+public void setArg(int index, Value arg) {
     argBoxes[index].setValue(arg);
   }
 
-  public ValueBox getArgBox(int index) {
+  @Override
+public ValueBox getArgBox(int index) {
     return argBoxes[index];
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return methodRef.returnType();
   }
 
@@ -94,7 +104,7 @@ abstract public class AbstractInvokeExpr implements InvokeExpr {
       return Collections.emptyList();
     }
 
-    List<ValueBox> list = new ArrayList<ValueBox>();
+    List<ValueBox> list = new ArrayList<>();
     Collections.addAll(list, argBoxes);
 
     for (ValueBox element : argBoxes) {

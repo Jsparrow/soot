@@ -68,14 +68,14 @@ public class Hierarchy {
     {
       Chain<SootClass> allClasses = sc.getClasses();
 
-      classToSubclasses = new HashMap<SootClass, List<SootClass>>(allClasses.size() * 2 + 1, 0.7f);
-      interfaceToSubinterfaces = new HashMap<SootClass, List<SootClass>>(allClasses.size() * 2 + 1, 0.7f);
-      interfaceToSuperinterfaces = new HashMap<SootClass, List<SootClass>>(allClasses.size() * 2 + 1, 0.7f);
+      classToSubclasses = new HashMap<>(allClasses.size() * 2 + 1, 0.7f);
+      interfaceToSubinterfaces = new HashMap<>(allClasses.size() * 2 + 1, 0.7f);
+      interfaceToSuperinterfaces = new HashMap<>(allClasses.size() * 2 + 1, 0.7f);
 
-      classToDirSubclasses = new HashMap<SootClass, List<SootClass>>(allClasses.size() * 2 + 1, 0.7f);
-      interfaceToDirSubinterfaces = new HashMap<SootClass, List<SootClass>>(allClasses.size() * 2 + 1, 0.7f);
-      interfaceToDirSuperinterfaces = new HashMap<SootClass, List<SootClass>>(allClasses.size() * 2 + 1, 0.7f);
-      interfaceToDirImplementers = new HashMap<SootClass, List<SootClass>>(allClasses.size() * 2 + 1, 0.7f);
+      classToDirSubclasses = new HashMap<>(allClasses.size() * 2 + 1, 0.7f);
+      interfaceToDirSubinterfaces = new HashMap<>(allClasses.size() * 2 + 1, 0.7f);
+      interfaceToDirSuperinterfaces = new HashMap<>(allClasses.size() * 2 + 1, 0.7f);
+      interfaceToDirImplementers = new HashMap<>(allClasses.size() * 2 + 1, 0.7f);
 
       initializeHierarchy(allClasses);
     }
@@ -94,11 +94,11 @@ public class Hierarchy {
       }
 
       if (c.isInterface()) {
-        interfaceToDirSubinterfaces.put(c, new ArrayList<SootClass>());
-        interfaceToDirSuperinterfaces.put(c, new ArrayList<SootClass>());
-        interfaceToDirImplementers.put(c, new ArrayList<SootClass>());
+        interfaceToDirSubinterfaces.put(c, new ArrayList<>());
+        interfaceToDirSuperinterfaces.put(c, new ArrayList<>());
+        interfaceToDirImplementers.put(c, new ArrayList<>());
       } else {
-        classToDirSubclasses.put(c, new ArrayList<SootClass>());
+        classToDirSubclasses.put(c, new ArrayList<>());
       }
     }
 
@@ -148,7 +148,7 @@ public class Hierarchy {
       }
       if (c.isInterface()) {
         List<SootClass> imp = interfaceToDirImplementers.get(c);
-        Set<SootClass> s = new ArraySet<SootClass>();
+        Set<SootClass> s = new ArraySet<>();
         for (SootClass c0 : imp) {
           if (c.resolvingLevel() < SootClass.HIERARCHY) {
             continue;
@@ -175,7 +175,7 @@ public class Hierarchy {
       throw new RuntimeException("class needed!");
     }
 
-    List<SootClass> l = new ArrayList<SootClass>();
+    List<SootClass> l = new ArrayList<>();
     l.addAll(getSubclassesOf(c));
     l.add(c);
 
@@ -197,7 +197,7 @@ public class Hierarchy {
     }
 
     // Otherwise, build up the hashmap.
-    List<SootClass> l = new ArrayList<SootClass>();
+    List<SootClass> l = new ArrayList<>();
 
     for (SootClass cls : classToDirSubclasses.get(c)) {
       if (cls.resolvingLevel() < SootClass.HIERARCHY) {
@@ -313,9 +313,7 @@ public class Hierarchy {
     }
     
     final List<SootClass> result = new ArrayList<>();
-    for (SootClass si : directSubInterfaces) {
-      result.addAll(getSubinterfacesOfIncluding(si));
-    }
+    directSubInterfaces.forEach(si -> result.addAll(getSubinterfacesOfIncluding(si)));
 
     final List<SootClass> unmodifiableResult = Collections.unmodifiableList(result);
 
@@ -331,7 +329,7 @@ public class Hierarchy {
       throw new RuntimeException("interface needed!");
     }
 
-    List<SootClass> l = new ArrayList<SootClass>();
+    List<SootClass> l = new ArrayList<>();
     l.addAll(getSuperinterfacesOf(c));
     l.add(c);
 
@@ -354,11 +352,9 @@ public class Hierarchy {
     }
 
     // Otherwise, build up the hashmap.
-    List<SootClass> l = new ArrayList<SootClass>();
+    List<SootClass> l = new ArrayList<>();
 
-    for (SootClass si : interfaceToDirSuperinterfaces.get(c)) {
-      l.addAll(getSuperinterfacesOfIncluding(si));
-    }
+    interfaceToDirSuperinterfaces.get(c).forEach(si -> l.addAll(getSuperinterfacesOfIncluding(si)));
 
     interfaceToSuperinterfaces.put(c, Collections.unmodifiableList(l));
 
@@ -392,7 +388,7 @@ public class Hierarchy {
 
     checkState();
 
-    List<SootClass> l = new ArrayList<SootClass>();
+    List<SootClass> l = new ArrayList<>();
     l.addAll(classToDirSubclasses.get(c));
     l.add(c);
 
@@ -425,7 +421,7 @@ public class Hierarchy {
 
     checkState();
 
-    List<SootClass> l = new ArrayList<SootClass>();
+    List<SootClass> l = new ArrayList<>();
     l.addAll(interfaceToDirSubinterfaces.get(c));
     l.add(c);
 
@@ -453,12 +449,10 @@ public class Hierarchy {
 
     checkState();
 
-    ArraySet<SootClass> set = new ArraySet<SootClass>();
-    for (SootClass c : getSubinterfacesOfIncluding(i)) {
-      set.addAll(getDirectImplementersOf(c));
-    }
+    ArraySet<SootClass> set = new ArraySet<>();
+    getSubinterfacesOfIncluding(i).forEach(c -> set.addAll(getDirectImplementersOf(c)));
 
-    ArrayList<SootClass> l = new ArrayList<SootClass>();
+    ArrayList<SootClass> l = new ArrayList<>();
     l.addAll(set);
 
     return Collections.unmodifiableList(l);
@@ -476,13 +470,7 @@ public class Hierarchy {
       return true;
     }
 
-    for (SootClass sc : parentClasses) {
-      if (sc.isPhantom()) {
-        return true;
-      }
-    }
-
-    return false;
+    return parentClasses.stream().anyMatch(SootClass::isPhantom);
   }
 
   /**
@@ -497,13 +485,7 @@ public class Hierarchy {
       return true;
     }
 
-    for (SootClass sc : parentClasses) {
-      if (sc.isPhantom()) {
-        return true;
-      }
-    }
-
-    return false;
+    return parentClasses.stream().anyMatch(SootClass::isPhantom);
   }
 
   /** Returns true if child is a direct subclass of possibleParent. */
@@ -626,7 +608,7 @@ public class Hierarchy {
         return sm;
       }
     }
-    throw new RuntimeException("could not resolve concrete dispatch!\nType: " + concreteType + "\nMethod: " + m);
+    throw new RuntimeException(new StringBuilder().append("could not resolve concrete dispatch!\nType: ").append(concreteType).append("\nMethod: ").append(m).toString());
   }
 
   /**
@@ -636,7 +618,7 @@ public class Hierarchy {
     m.getDeclaringClass().checkLevel(SootClass.HIERARCHY);
     checkState();
 
-    Set<SootMethod> s = new ArraySet<SootMethod>();
+    Set<SootMethod> s = new ArraySet<>();
     for (Type cls : classes) {
       if (cls instanceof RefType) {
         s.add(resolveConcreteDispatch(((RefType) cls).getSootClass(), m));
@@ -659,24 +641,18 @@ public class Hierarchy {
     m.getDeclaringClass().checkLevel(SootClass.HIERARCHY);
     checkState();
 
-    Set<SootMethod> s = new ArraySet<SootMethod>();
+    Set<SootMethod> s = new ArraySet<>();
     Collection<SootClass> classesIt;
 
     if (c.isInterface()) {
-      Set<SootClass> classes = new HashSet<SootClass>();
-      for (SootClass sootClass : getImplementersOf(c)) {
-        classes.addAll(getSubclassesOfIncluding(sootClass));
-      }
+      Set<SootClass> classes = new HashSet<>();
+      getImplementersOf(c).forEach(sootClass -> classes.addAll(getSubclassesOfIncluding(sootClass)));
       classesIt = classes;
     } else {
       classesIt = getSubclassesOfIncluding(c);
     }
 
-    for (SootClass cl : classesIt) {
-      if (!Modifier.isAbstract(cl.getModifiers())) {
-        s.add(resolveConcreteDispatch(cl, m));
-      }
-    }
+    classesIt.stream().filter(cl -> !Modifier.isAbstract(cl.getModifiers())).forEach(cl -> s.add(resolveConcreteDispatch(cl, m)));
 
     return Collections.unmodifiableList(new ArrayList<SootMethod>(s));
   }
@@ -687,10 +663,8 @@ public class Hierarchy {
    */
   public List<SootMethod> resolveAbstractDispatch(List<SootClass> classes, SootMethod m) {
     m.getDeclaringClass().checkLevel(SootClass.HIERARCHY);
-    Set<SootMethod> s = new ArraySet<SootMethod>();
-    for (SootClass sootClass : classes) {
-      s.addAll(resolveAbstractDispatch(sootClass, m));
-    }
+    Set<SootMethod> s = new ArraySet<>();
+    classes.forEach(sootClass -> s.addAll(resolveAbstractDispatch(sootClass, m)));
 
     return Collections.unmodifiableList(new ArrayList<SootMethod>(s));
   }

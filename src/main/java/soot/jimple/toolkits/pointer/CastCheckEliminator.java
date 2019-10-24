@@ -96,16 +96,15 @@ public class CastCheckEliminator extends ForwardBranchedFlowAnalysis<LocalTypeSe
   protected void makeInitialSet() {
     // Find all locals of reference type
     Collection<Local> locals = ((UnitGraph) graph).getBody().getLocals();
-    List<Local> refLocals = new ArrayList<Local>();
-    for (Iterator<Local> lIt = locals.iterator(); lIt.hasNext();) {
-      final Local l = (Local) lIt.next();
-      if (l.getType() instanceof RefType) {
-        refLocals.add(l);
-      }
-    }
+    List<Local> refLocals = new ArrayList<>();
+    locals.stream().map(local -> (Local) local).forEach(l -> {
+		if (l.getType() instanceof RefType) {
+		    refLocals.add(l);
+		  }
+	});
 
     // Find types of all casts
-    List<Type> types = new ArrayList<Type>();
+    List<Type> types = new ArrayList<>();
     for (Iterator<Unit> sIt = ((UnitGraph) graph).getBody().getUnits().iterator(); sIt.hasNext();) {
       final Stmt s = (Stmt) sIt.next();
       if (s instanceof AssignStmt) {

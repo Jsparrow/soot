@@ -49,7 +49,8 @@ public class AvailExprTagger extends BodyTransformer {
     return G.v().soot_jimple_toolkits_annotation_AvailExprTagger();
   }
 
-  protected void internalTransform(Body b, String phaseName, Map opts) {
+  @Override
+protected void internalTransform(Body b, String phaseName, Map opts) {
 
     SideEffectTester sideEffect;
     if (Scene.v().hasCallGraph() && !PhaseOptions.getBoolean(opts, "naive-side-effect")) {

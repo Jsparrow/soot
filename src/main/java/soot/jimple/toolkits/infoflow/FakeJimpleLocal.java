@@ -51,7 +51,8 @@ public class FakeJimpleLocal extends JimpleLocal {
   }
 
   /** Returns true if the given object is structurally equal to this one. */
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (o == null) {
       return false;
     }
@@ -69,12 +70,14 @@ public class FakeJimpleLocal extends JimpleLocal {
     return false;
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     return equivTo(o);
   }
 
   /** Returns a clone of the current JimpleLocal. */
-  public Object clone() {
+  @Override
+public Object clone() {
     return new FakeJimpleLocal(getName(), getType(), realLocal, info);
   }
 

@@ -24,19 +24,22 @@ package soot.tagkit;
 
 import soot.G;
 import soot.Singletons;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Utility functions for tags. */
 public class TagManager {
-  public TagManager(Singletons.Global g) {
+  private static final Logger logger = LoggerFactory.getLogger(TagManager.class);
+private TagPrinter tagPrinter = new StdTagPrinter();
+
+public TagManager(Singletons.Global g) {
   }
 
-  public static TagManager v() {
+public static TagManager v() {
     return G.v().soot_tagkit_TagManager();
   }
 
-  private TagPrinter tagPrinter = new StdTagPrinter();
-
-  /**
+/**
    * Returns the Tag class with the given name.
    *
    * (This does not seem to be necessary.)
@@ -46,20 +49,22 @@ public class TagManager {
       Class<?> cc = Class.forName("soot.tagkit." + tagName);
       return (Tag) cc.newInstance();
     } catch (ClassNotFoundException e) {
-      return null;
+      logger.error(e.getMessage(), e);
+	return null;
     } catch (IllegalAccessException e) {
-      throw new RuntimeException();
+      logger.error(e.getMessage(), e);
+	throw new RuntimeException();
     } catch (InstantiationException e) {
       throw new RuntimeException(e.toString());
     }
   }
 
-  /** Sets the default tag printer. */
+/** Sets the default tag printer. */
   public void setTagPrinter(TagPrinter p) {
     tagPrinter = p;
   }
 
-  /** Prints the given Tag, assuming that it belongs to the given class and field or method. */
+/** Prints the given Tag, assuming that it belongs to the given class and field or method. */
   public String print(String aClassName, String aFieldOrMtdSignature, Tag aTag) {
     return tagPrinter.print(aClassName, aFieldOrMtdSignature, aTag);
   }

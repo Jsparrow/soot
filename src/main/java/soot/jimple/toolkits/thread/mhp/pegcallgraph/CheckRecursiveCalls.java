@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 
 import soot.jimple.toolkits.thread.mhp.SCC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // *** USE AT YOUR OWN RISK ***
 // May Happen in Parallel (MHP) analysis by Lin Li.
@@ -41,7 +43,8 @@ import soot.jimple.toolkits.thread.mhp.SCC;
 // -Richard L. Halpert, 2006-11-30
 
 public class CheckRecursiveCalls {
-  List<List> newSccList = null;
+  private static final Logger logger = LoggerFactory.getLogger(CheckRecursiveCalls.class);
+List<List> newSccList = null;
 
   public CheckRecursiveCalls(PegCallGraph pcg, Set<Object> methodNeedExtent) {
     Iterator it = pcg.iterator();
@@ -57,7 +60,7 @@ public class CheckRecursiveCalls {
   }
 
   private List<List> updateScc(List<List<Object>> sccList, PegCallGraph pcg) {
-    List<List> newList = new ArrayList<List>();
+    List<List> newList = new ArrayList<>();
     Iterator<List<Object>> listIt = sccList.iterator();
     while (listIt.hasNext()) {
       List s = listIt.next();
@@ -76,9 +79,7 @@ public class CheckRecursiveCalls {
   }
 
   private void check(List<List> sccList, Set<Object> methodNeedExtent) {
-    Iterator<List> listIt = sccList.iterator();
-    while (listIt.hasNext()) {
-      List s = listIt.next();
+    for (List s : sccList) {
       // printSCC(s);
       if (s.size() > 0) {
         Iterator it = s.iterator();
@@ -86,8 +87,8 @@ public class CheckRecursiveCalls {
           Object o = it.next();
           if (methodNeedExtent.contains(o)) {
             // if (((Boolean)methodsNeedingInlining.get(o)).booleanValue() == true){
-            System.err.println("Fail to compute MHP because interested method call relate to recursive calls!");
-            System.err.println("interested method: " + o);
+            logger.error("Fail to compute MHP because interested method call relate to recursive calls!");
+            logger.error("interested method: " + o);
             throw new RuntimeException("Fail to compute MHP because interested method call relate to recursive calls!");
             // }
           }

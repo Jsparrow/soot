@@ -61,7 +61,7 @@ public abstract class TaggedInstruction extends DexlibAbstractInstruction {
   public Tag getTag() {
     if (instructionTag == null) {
       throw new RuntimeException(
-          "Must tag instruction first! (0x" + Integer.toHexString(codeAddress) + ": " + instruction + ")");
+          new StringBuilder().append("Must tag instruction first! (0x").append(Integer.toHexString(codeAddress)).append(": ").append(instruction).append(")").toString());
     }
     return instructionTag;
   }

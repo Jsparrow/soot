@@ -42,74 +42,75 @@ import soot.options.CGOptions;
  * @author Ondrej Lhotak
  */
 public class AllocNode extends Node implements Context {
-  /** Returns the new expression of this allocation site. */
-  public Object getNewExpr() {
-    return newExpr;
-  }
-
-  /** Returns all field ref nodes having this node as their base. */
-  public Collection<AllocDotField> getAllFieldRefs() {
-    if (fields == null) {
-      return Collections.emptySet();
-    }
-    return fields.values();
-  }
-
-  /**
-   * Returns the field ref node having this node as its base, and field as its field; null if nonexistent.
-   */
-  public AllocDotField dot(SparkField field) {
-    return fields == null ? null : fields.get(field);
-  }
-
-  public String toString() {
-    return "AllocNode " + getNumber() + " " + newExpr + " in method " + method;
-  }
-
-  /* End of public methods. */
-
-  AllocNode(PAG pag, Object newExpr, Type t, SootMethod m) {
-    super(pag, t);
-    this.method = m;
-    if (t instanceof RefType) {
-      RefType rt = (RefType) t;
-      if (rt.getSootClass().isAbstract()) {
-        boolean usesReflectionLog = new CGOptions(PhaseOptions.v().getPhaseOptions("cg")).reflection_log() != null;
-        if (!usesReflectionLog) {
-          throw new RuntimeException("Attempt to create allocnode with abstract type " + t);
-        }
-      }
-    }
-    this.newExpr = newExpr;
-    if (newExpr instanceof ContextVarNode) {
-      throw new RuntimeException();
-    }
-    pag.getAllocNodeNumberer().add(this);
-  }
-
-  /** Registers a AllocDotField as having this node as its base. */
-  void addField(AllocDotField adf, SparkField field) {
-    if (fields == null) {
-      fields = new HashMap<SparkField, AllocDotField>();
-    }
-    fields.put(field, adf);
-  }
-
-  public Set<AllocDotField> getFields() {
-    if (fields == null) {
-      return Collections.emptySet();
-    }
-    return new HashSet<AllocDotField>(fields.values());
-  }
-
   /* End of package methods. */
+	
+	  protected Object newExpr;
+	protected Map<SparkField, AllocDotField> fields;
+	private SootMethod method;
 
-  protected Object newExpr;
-  protected Map<SparkField, AllocDotField> fields;
+	/* End of public methods. */
+	
+	  AllocNode(PAG pag, Object newExpr, Type t, SootMethod m) {
+	    super(pag, t);
+	    this.method = m;
+	    if (t instanceof RefType) {
+	      RefType rt = (RefType) t;
+	      if (rt.getSootClass().isAbstract()) {
+	        boolean usesReflectionLog = new CGOptions(PhaseOptions.v().getPhaseOptions("cg")).reflection_log() != null;
+	        if (!usesReflectionLog) {
+	          throw new RuntimeException("Attempt to create allocnode with abstract type " + t);
+	        }
+	      }
+	    }
+	    this.newExpr = newExpr;
+	    if (newExpr instanceof ContextVarNode) {
+	      throw new RuntimeException();
+	    }
+	    pag.getAllocNodeNumberer().add(this);
+	  }
 
-  private SootMethod method;
+	/** Returns the new expression of this allocation site. */
+	  public Object getNewExpr() {
+	    return newExpr;
+	  }
 
-  public SootMethod getMethod() {
-    return method;
-  }
+	/** Returns all field ref nodes having this node as their base. */
+	  public Collection<AllocDotField> getAllFieldRefs() {
+	    if (fields == null) {
+	      return Collections.emptySet();
+	    }
+	    return fields.values();
+	  }
+
+	/**
+	   * Returns the field ref node having this node as its base, and field as its field; null if nonexistent.
+	   */
+	  public AllocDotField dot(SparkField field) {
+	    return fields == null ? null : fields.get(field);
+	  }
+
+	@Override
+	public String toString() {
+	    return new StringBuilder().append("AllocNode ").append(getNumber()).append(" ").append(newExpr).append(" in method ").append(method)
+				.toString();
+	  }
+
+	/** Registers a AllocDotField as having this node as its base. */
+	  void addField(AllocDotField adf, SparkField field) {
+	    if (fields == null) {
+	      fields = new HashMap<>();
+	    }
+	    fields.put(field, adf);
+	  }
+
+	public Set<AllocDotField> getFields() {
+	    if (fields == null) {
+	      return Collections.emptySet();
+	    }
+	    return new HashSet<>(fields.values());
+	  }
+
+	public SootMethod getMethod() {
+	    return method;
+	  }
 }

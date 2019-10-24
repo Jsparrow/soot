@@ -75,10 +75,10 @@ public class SimpleLocalUses implements LocalUses {
     }
 
     if (options.verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "]     Constructing SimpleLocalUses...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("]     Constructing SimpleLocalUses...").toString());
     }
 
-    unitToUses = new HashMap<Unit, List<UnitValueBoxPair>>(body.getUnits().size() * 2 + 1, 0.7f);
+    unitToUses = new HashMap<>(body.getUnits().size() * 2 + 1, 0.7f);
 
     // Initialize this map to empty sets
 
@@ -87,29 +87,25 @@ public class SimpleLocalUses implements LocalUses {
       Timers.v().usePhase2Timer.start();
     }
 
-    // Traverse units and associate uses with definitions
-    for (Unit unit : body.getUnits()) {
-      for (ValueBox useBox : unit.getUseBoxes()) {
-        Value v = useBox.getValue();
-        if (v instanceof Local) {
-          // Add this statement to the uses of the definition of the local
-          Local l = (Local) v;
-
-          UnitValueBoxPair newPair = new UnitValueBoxPair(unit, useBox);
-
-          List<Unit> defs = localDefs.getDefsOfAt(l, unit);
-          if (defs != null) {
-            for (Unit def : defs) {
-              List<UnitValueBoxPair> lst = unitToUses.get(def);
-              if (lst == null) {
-                unitToUses.put(def, lst = new ArrayList<UnitValueBoxPair>());
-              }
-              lst.add(newPair);
-            }
-          }
-        }
-      }
-    }
+    // Add this statement to the uses of the definition of the local
+	// Traverse units and associate uses with definitions
+	body.getUnits().forEach(unit -> unit.getUseBoxes().forEach(useBox -> {
+		Value v = useBox.getValue();
+		if (v instanceof Local) {
+			Local l = (Local) v;
+			UnitValueBoxPair newPair = new UnitValueBoxPair(unit, useBox);
+			List<Unit> defs = localDefs.getDefsOfAt(l, unit);
+			if (defs != null) {
+				defs.forEach(def -> {
+					List<UnitValueBoxPair> lst = unitToUses.get(def);
+					if (lst == null) {
+						unitToUses.put(def, lst = new ArrayList<>());
+					}
+					lst.add(newPair);
+				});
+			}
+		}
+	}));
 
     if (options.time()) {
       Timers.v().usePhase2Timer.end();
@@ -117,7 +113,7 @@ public class SimpleLocalUses implements LocalUses {
     }
 
     if (options.verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "]     finished SimpleLocalUses...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("]     finished SimpleLocalUses...").toString());
     }
   }
 
@@ -145,12 +141,8 @@ public class SimpleLocalUses implements LocalUses {
    * @return The list of variables used in this body
    */
   public Set<Local> getUsedVariables() {
-    Set<Local> res = new HashSet<Local>();
-    for (List<UnitValueBoxPair> vals : unitToUses.values()) {
-      for (UnitValueBoxPair val : vals) {
-        res.add((Local) val.valueBox.getValue());
-      }
-    }
+    Set<Local> res = new HashSet<>();
+    unitToUses.values().stream().flatMap(List::stream).forEach(val -> res.add((Local) val.valueBox.getValue()));
     return res;
   }
 
@@ -160,7 +152,7 @@ public class SimpleLocalUses implements LocalUses {
    * @return The list of variables declared, but not used in this body
    */
   public Set<Local> getUnusedVariables() {
-    Set<Local> res = new HashSet<Local>(body.getLocals());
+    Set<Local> res = new HashSet<>(body.getLocals());
     res.retainAll(getUsedVariables());
     return res;
   }

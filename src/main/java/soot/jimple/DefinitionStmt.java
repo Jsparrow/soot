@@ -26,11 +26,11 @@ import soot.Value;
 import soot.ValueBox;
 
 public interface DefinitionStmt extends Stmt {
-  public Value getLeftOp();
+  Value getLeftOp();
 
-  public Value getRightOp();
+  Value getRightOp();
 
-  public ValueBox getLeftOpBox();
+  ValueBox getLeftOpBox();
 
-  public ValueBox getRightOpBox();
+  ValueBox getRightOpBox();
 }

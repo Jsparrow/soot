@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AModBinop extends PBinop
 {
-    private TMod _mod_;
+    private TMod mod;
 
     public AModBinop()
     {
@@ -26,7 +26,7 @@ public final class AModBinop extends PBinop
     public Object clone()
     {
         return new AModBinop(
-            cloneNode(this._mod_));
+            cloneNode(this.mod));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AModBinop extends PBinop
 
     public TMod getMod()
     {
-        return this._mod_;
+        return this.mod;
     }
 
     public void setMod(TMod node)
     {
-        if(this._mod_ != null)
+        if(this.mod != null)
         {
-            this._mod_.parent(null);
+            this.mod.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AModBinop extends PBinop
             node.parent(this);
         }
 
-        this._mod_ = node;
+        this.mod = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._mod_);
+            + toString(this.mod);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._mod_ == child)
+        if(this.mod == child)
         {
-            this._mod_ = null;
+            this.mod = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AModBinop extends PBinop
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._mod_ == oldChild)
+        if(this.mod == oldChild)
         {
             setMod((TMod) newChild);
             return;

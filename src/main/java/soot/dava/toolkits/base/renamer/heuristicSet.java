@@ -27,12 +27,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import soot.Local;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class heuristicSet {
-  HashMap<Local, heuristicTuple> set;
+  private static final Logger logger = LoggerFactory.getLogger(heuristicSet.class);
+HashMap<Local, heuristicTuple> set;
 
   public heuristicSet() {
-    set = new HashMap<Local, heuristicTuple>();
+    set = new HashMap<>();
   }
 
   private heuristicTuple getTuple(Local var) {
@@ -105,7 +108,7 @@ public class heuristicSet {
       Object local = it.next();
       heuristicTuple temp = set.get(local);
       String tuple = temp.getPrint();
-      System.out.println(local + "  " + tuple + " DefinedType: " + ((Local) local).getType());
+      logger.info(new StringBuilder().append(local).append("  ").append(tuple).append(" DefinedType: ").append(((Local) local).getType()).toString());
     }
   }
 

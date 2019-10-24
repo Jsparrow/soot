@@ -30,20 +30,23 @@ import java.util.*;
 @javax.annotation.Generated(value = "Saxonica v3.0", comments = "from soot_options.xml")
 public class CGOptions {
 
-    private Map<String, String> options;
+    public static final int library_disabled = 1;
+	public static final int library_any_subtype = 2;
+	public static final int library_signature_resolution = 3;
+	private Map<String, String> options;
 
-    public CGOptions(Map<String, String> options) {
+	public CGOptions(Map<String, String> options) {
         this.options = options;
     }
 
-    /**
+	/**
      * Enabled
      */
     public boolean enabled() {
         return soot.PhaseOptions.getBoolean(options, "enabled");
     }
 
-    /**
+	/**
      * Safe forName --
      * Handle Class.forName() calls conservatively.
      *
@@ -61,7 +64,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "safe-forname");
     }
 
-    /**
+	/**
      * Safe newInstance --
      * Handle Class.newInstance() calls conservatively.
      *
@@ -78,7 +81,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "safe-newinstance");
     }
 
-    /**
+	/**
      * Verbose --
      * Print warnings about where the call graph may be incomplete.
      *
@@ -92,7 +95,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "verbose");
     }
 
-    /**
+	/**
      * All Application Class Methods Reachable --
      * Assume all methods of application classes are reachable.
      *
@@ -112,7 +115,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "all-reachable");
     }
 
-    /**
+	/**
      * Implicit Entry Points --
      * Include methods called implicitly by the VM as entry points.
      *
@@ -125,7 +128,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "implicit-entry");
     }
 
-    /**
+	/**
      * Trim Static Initializer Edges --
      * Removes redundant static initializer calls.
      *
@@ -143,7 +146,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "trim-clinit");
     }
 
-    /**
+	/**
      * Types for invoke --
      * Uses reaching types inferred by the pointer analysis to resolve 
      * reflective calls..
@@ -159,7 +162,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "types-for-invoke");
     }
 
-    /**
+	/**
      * Resolve Abstract Classes with No Children --
      * Causes methods invoked on abstract classes to be resolved even 
      * if there are no non-abstract children of the classes in the 
@@ -183,7 +186,7 @@ public class CGOptions {
         return soot.PhaseOptions.getBoolean(options, "resolve-all-abstract-invokes");
     }
 
-    /**
+	/**
      * JDK version --
      * JDK version for native methods.
      *
@@ -196,7 +199,7 @@ public class CGOptions {
         return soot.PhaseOptions.getInt(options, "jdkver");
     }
 
-    /**
+	/**
      * Reflection Log --
      * Uses a reflection log to resolve reflective calls.
      *
@@ -209,7 +212,7 @@ public class CGOptions {
         return soot.PhaseOptions.getString(options, "reflection-log");
     }
 
-    /**
+	/**
      * Guarding strategy --
      * Describes how to guard the program from unsound assumptions.
      *
@@ -229,11 +232,7 @@ public class CGOptions {
         return soot.PhaseOptions.getString(options, "guards");
     }
 
-    public static final int library_disabled = 1;
-    public static final int library_any_subtype = 2;
-    public static final int library_signature_resolution = 3;
-
-    /**
+	/**
      * Library mode --
      * Specifies whether the target classes should be treated as an 
      * application or a library..
@@ -253,15 +252,19 @@ public class CGOptions {
      */
     public int library() {
         String s = soot.PhaseOptions.getString(options, "library");
-        if (s == null || s.isEmpty())
-        	return library_disabled;
+        if (s == null || s.isEmpty()) {
+			return library_disabled;
+		}
 	
-        if (s.equalsIgnoreCase("disabled"))
-            return library_disabled;
-        if (s.equalsIgnoreCase("any-subtype"))
-            return library_any_subtype;
-        if (s.equalsIgnoreCase("signature-resolution"))
-            return library_signature_resolution;
+        if ("disabled".equalsIgnoreCase(s)) {
+			return library_disabled;
+		}
+        if ("any-subtype".equalsIgnoreCase(s)) {
+			return library_any_subtype;
+		}
+        if ("signature-resolution".equalsIgnoreCase(s)) {
+			return library_signature_resolution;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option library", s));
     }

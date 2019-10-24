@@ -35,7 +35,8 @@ public class FloatConstantValueTag extends ConstantValueTag {
     return value;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "ConstantValue: " + Float.toString(value);
   }
 

@@ -147,7 +147,7 @@ public class ExprVisitor implements ExprSwitch {
   public void defaultCase(Object o) {
     // rsub-int and rsub-int/lit8 aren't generated, since we cannot detect
     // there usage in jimple
-    throw new Error("unknown Object (" + o.getClass() + ") as Expression: " + o);
+    throw new Error(new StringBuilder().append("unknown Object (").append(o.getClass()).append(") as Expression: ").append(o).toString());
   }
 
   @Override
@@ -184,7 +184,7 @@ public class ExprVisitor implements ExprSwitch {
       invokeInsn = new Insn3rc(opc, argumentRegs, (short) regCountForArguments, method);
     } else {
       throw new Error(
-          "too many parameter registers for invoke-* (> 255): " + regCountForArguments + " or registers too big (> 4 bits)");
+          new StringBuilder().append("too many parameter registers for invoke-* (> 255): ").append(regCountForArguments).append(" or registers too big (> 4 bits)").toString());
     }
     // save the return type for the move-result insn
     stmtV.setLastReturnTypeDescriptor(method.getReturnType());
@@ -213,7 +213,7 @@ public class ExprVisitor implements ExprSwitch {
         // If we're dealing with phantom classes, we might not actually
         // arrive at java.lang.Object. In this case, we should not fail
         // the check
-        if (currentClass.isPhantom() && !currentClass.getName().equals("java.lang.Object")) {
+        if (currentClass.isPhantom() && !"java.lang.Object".equals(currentClass.getName())) {
           return true;
         }
       }
@@ -237,11 +237,8 @@ public class ExprVisitor implements ExprSwitch {
 
   private List<Register> getInvokeArgumentRegs(InvokeExpr ie) {
     constantV.setOrigStmt(origStmt);
-    List<Register> argumentRegs = new ArrayList<Register>();
-    for (Value arg : ie.getArgs()) {
-      Register currentReg = regAlloc.asImmediate(arg, constantV);
-      argumentRegs.add(currentReg);
-    }
+    List<Register> argumentRegs = new ArrayList<>();
+    ie.getArgs().stream().map(arg -> regAlloc.asImmediate(arg, constantV)).forEach(argumentRegs::add);
     return argumentRegs;
   }
 
@@ -305,20 +302,20 @@ public class ExprVisitor implements ExprSwitch {
     // second op is
     // an integer literal and the opc is not sub (no sub*/lit opc available)
     if (destinationReg.getType() instanceof IntType && secondOperand instanceof IntConstant
-        && !binaryOperation.equals("SUB")) {
+        && !"SUB".equals(binaryOperation)) {
       int secondOpConstant = ((IntConstant) secondOperand).value;
       if (SootToDexUtils.fitsSigned8(secondOpConstant)) {
         stmtV.addInsn(buildLit8BinaryInsn(binaryOperation, firstOpReg, (byte) secondOpConstant), origStmt);
         return;
       }
-      if (SootToDexUtils.fitsSigned16(secondOpConstant)) {
-        if (!binaryOperation.equals("SHL") && !binaryOperation.equals("SHR") && !binaryOperation.equals("USHR")) {
-          // no shift opc available for /lit16
-          stmtV.addInsn(buildLit16BinaryInsn(binaryOperation, firstOpReg, (short) secondOpConstant), origStmt);
-          return;
-        }
-      }
-      // constant is too big, so use it as second op and build normally
+      boolean condition = SootToDexUtils.fitsSigned16(secondOpConstant) && !"SHL".equals(binaryOperation) && !"SHR".equals(binaryOperation) && !"USHR".equals(binaryOperation);
+	// constant is too big, so use it as second op and build normally
+	if (condition)
+	 {
+	  // no shift opc available for /lit16
+	  stmtV.addInsn(buildLit16BinaryInsn(binaryOperation, firstOpReg, (short) secondOpConstant), origStmt);
+	  return;
+	}
     }
 
     // Double-check that we are not carrying out any arithmetic operations
@@ -356,17 +353,18 @@ public class ExprVisitor implements ExprSwitch {
     }
 
     // If we have used a temporary register, we must copy over the result
-    if (orgDestReg != destinationReg) {
-      Register tempReg = destinationReg.clone();
-      destinationReg = orgDestReg.clone();
-      castPrimitive(tempReg, originalExpr, destinationReg.getType());
-    }
+	if (orgDestReg == destinationReg) {
+		return;
+	}
+	Register tempReg = destinationReg.clone();
+	destinationReg = orgDestReg.clone();
+	castPrimitive(tempReg, originalExpr, destinationReg.getType());
 
   }
 
   private String fixIntTypeString(String typeString) {
-    if (typeString.equals("boolean") || typeString.equals("byte") || typeString.equals("char")
-        || typeString.equals("short")) {
+    if ("boolean".equals(typeString) || "byte".equals(typeString) || "char".equals(typeString)
+        || "short".equals(typeString)) {
       return "int";
     }
     return typeString;
@@ -375,14 +373,14 @@ public class ExprVisitor implements ExprSwitch {
   private Insn build2AddrBinaryInsn(final String binaryOperation, Register secondOpReg) {
     String localTypeString = destinationReg.getTypeString();
     localTypeString = fixIntTypeString(localTypeString);
-    Opcode opc = Opcode.valueOf(binaryOperation + "_" + localTypeString.toUpperCase() + "_2ADDR");
+    Opcode opc = Opcode.valueOf(new StringBuilder().append(binaryOperation).append("_").append(localTypeString.toUpperCase()).append("_2ADDR").toString());
     return new Insn12x(opc, destinationReg, secondOpReg);
   }
 
   private Insn buildNormalBinaryInsn(String binaryOperation, Register firstOpReg, Register secondOpReg) {
     String localTypeString = firstOpReg.getTypeString();
     localTypeString = fixIntTypeString(localTypeString);
-    Opcode opc = Opcode.valueOf(binaryOperation + "_" + localTypeString.toUpperCase());
+    Opcode opc = Opcode.valueOf(new StringBuilder().append(binaryOperation).append("_").append(localTypeString.toUpperCase()).toString());
     return new Insn23x(opc, destinationReg, firstOpReg, secondOpReg);
   }
 
@@ -495,7 +493,7 @@ public class ExprVisitor implements ExprSwitch {
     boolean secondOpIsInt = realSecondOperand instanceof IntConstant;
     boolean secondOpIsZero = secondOpIsInt && ((IntConstant) realSecondOperand).value == 0;
     if (secondOpIsZero) {
-      Opcode opc = Opcode.valueOf(opcodeName.concat("Z"));
+      Opcode opc = Opcode.valueOf((opcodeName + "Z"));
       comparingBinaryInsn = new Insn21t(opc, firstOpReg);
       comparingBinaryInsn.setTarget(targetForOffset);
     } else {
@@ -572,7 +570,7 @@ public class ExprVisitor implements ExprSwitch {
     Opcode opc = null;
     // we assume that the type of the operands are equal and use only the
     // first one
-    if (opcodePrefix.equals("CMP_LONG")) {
+    if ("CMP_LONG".equals(opcodePrefix)) {
       opc = Opcode.CMP_LONG;
     } else if (firstReg.isFloat()) {
       opc = Opcode.valueOf(opcodePrefix + "_FLOAT");
@@ -681,7 +679,7 @@ public class ExprVisitor implements ExprSwitch {
     // type
     Type srcType = source.getType();
     if (srcType instanceof RefType) {
-      throw new RuntimeException("Trying to cast reference type " + srcType + " to a primitive");
+      throw new RuntimeException(new StringBuilder().append("Trying to cast reference type ").append(srcType).append(" to a primitive").toString());
     }
     PrimitiveType sourceType = PrimitiveType.getByName(srcType.toString());
     if (castType == PrimitiveType.BOOLEAN) {
@@ -768,9 +766,9 @@ public class ExprVisitor implements ExprSwitch {
   }
 
   private Opcode getCastOpc(PrimitiveType sourceType, PrimitiveType castType) {
-    Opcode opc = Opcode.valueOf(sourceType.getName().toUpperCase() + "_TO_" + castType.getName().toUpperCase());
+    Opcode opc = Opcode.valueOf(new StringBuilder().append(sourceType.getName().toUpperCase()).append("_TO_").append(castType.getName().toUpperCase()).toString());
     if (opc == null) {
-      throw new RuntimeException("unsupported cast from " + sourceType + " to " + castType);
+      throw new RuntimeException(new StringBuilder().append("unsupported cast from ").append(sourceType).append(" to ").append(castType).toString());
     }
     return opc;
   }
@@ -808,7 +806,7 @@ public class ExprVisitor implements ExprSwitch {
     ArrayType arrayType = ArrayType.v(nmae.getBaseType().baseType, dimensions);
     TypeReference arrayTypeItem = DexPrinter.toTypeReference(arrayType);
     // get the dimension size registers
-    List<Register> dimensionSizeRegs = new ArrayList<Register>();
+    List<Register> dimensionSizeRegs = new ArrayList<>();
     for (int i = 0; i < dimensions; i++) {
       Value currentDimensionSize = nmae.getSize(i);
       Register currentReg = regAlloc.asImmediate(currentDimensionSize, constantV);

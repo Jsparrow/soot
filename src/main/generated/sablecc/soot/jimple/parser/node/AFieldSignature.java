@@ -7,12 +7,12 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFieldSignature extends PFieldSignature
 {
-    private TCmplt _cmplt_;
-    private PClassName _className_;
-    private TColon _first_;
-    private PType _type_;
-    private PName _fieldName_;
-    private TCmpgt _cmpgt_;
+    private TCmplt cmplt;
+    private PClassName className;
+    private TColon first;
+    private PType type;
+    private PName fieldName;
+    private TCmpgt cmpgt;
 
     public AFieldSignature()
     {
@@ -46,12 +46,12 @@ public final class AFieldSignature extends PFieldSignature
     public Object clone()
     {
         return new AFieldSignature(
-            cloneNode(this._cmplt_),
-            cloneNode(this._className_),
-            cloneNode(this._first_),
-            cloneNode(this._type_),
-            cloneNode(this._fieldName_),
-            cloneNode(this._cmpgt_));
+            cloneNode(this.cmplt),
+            cloneNode(this.className),
+            cloneNode(this.first),
+            cloneNode(this.type),
+            cloneNode(this.fieldName),
+            cloneNode(this.cmpgt));
     }
 
     @Override
@@ -62,14 +62,14 @@ public final class AFieldSignature extends PFieldSignature
 
     public TCmplt getCmplt()
     {
-        return this._cmplt_;
+        return this.cmplt;
     }
 
     public void setCmplt(TCmplt node)
     {
-        if(this._cmplt_ != null)
+        if(this.cmplt != null)
         {
-            this._cmplt_.parent(null);
+            this.cmplt.parent(null);
         }
 
         if(node != null)
@@ -82,19 +82,19 @@ public final class AFieldSignature extends PFieldSignature
             node.parent(this);
         }
 
-        this._cmplt_ = node;
+        this.cmplt = node;
     }
 
     public PClassName getClassName()
     {
-        return this._className_;
+        return this.className;
     }
 
     public void setClassName(PClassName node)
     {
-        if(this._className_ != null)
+        if(this.className != null)
         {
-            this._className_.parent(null);
+            this.className.parent(null);
         }
 
         if(node != null)
@@ -107,19 +107,19 @@ public final class AFieldSignature extends PFieldSignature
             node.parent(this);
         }
 
-        this._className_ = node;
+        this.className = node;
     }
 
     public TColon getFirst()
     {
-        return this._first_;
+        return this.first;
     }
 
     public void setFirst(TColon node)
     {
-        if(this._first_ != null)
+        if(this.first != null)
         {
-            this._first_.parent(null);
+            this.first.parent(null);
         }
 
         if(node != null)
@@ -132,19 +132,19 @@ public final class AFieldSignature extends PFieldSignature
             node.parent(this);
         }
 
-        this._first_ = node;
+        this.first = node;
     }
 
     public PType getType()
     {
-        return this._type_;
+        return this.type;
     }
 
     public void setType(PType node)
     {
-        if(this._type_ != null)
+        if(this.type != null)
         {
-            this._type_.parent(null);
+            this.type.parent(null);
         }
 
         if(node != null)
@@ -157,19 +157,19 @@ public final class AFieldSignature extends PFieldSignature
             node.parent(this);
         }
 
-        this._type_ = node;
+        this.type = node;
     }
 
     public PName getFieldName()
     {
-        return this._fieldName_;
+        return this.fieldName;
     }
 
     public void setFieldName(PName node)
     {
-        if(this._fieldName_ != null)
+        if(this.fieldName != null)
         {
-            this._fieldName_.parent(null);
+            this.fieldName.parent(null);
         }
 
         if(node != null)
@@ -182,19 +182,19 @@ public final class AFieldSignature extends PFieldSignature
             node.parent(this);
         }
 
-        this._fieldName_ = node;
+        this.fieldName = node;
     }
 
     public TCmpgt getCmpgt()
     {
-        return this._cmpgt_;
+        return this.cmpgt;
     }
 
     public void setCmpgt(TCmpgt node)
     {
-        if(this._cmpgt_ != null)
+        if(this.cmpgt != null)
         {
-            this._cmpgt_.parent(null);
+            this.cmpgt.parent(null);
         }
 
         if(node != null)
@@ -207,58 +207,53 @@ public final class AFieldSignature extends PFieldSignature
             node.parent(this);
         }
 
-        this._cmpgt_ = node;
+        this.cmpgt = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._cmplt_)
-            + toString(this._className_)
-            + toString(this._first_)
-            + toString(this._type_)
-            + toString(this._fieldName_)
-            + toString(this._cmpgt_);
+        return new StringBuilder().append("").append(toString(this.cmplt)).append(toString(this.className)).append(toString(this.first)).append(toString(this.type))
+				.append(toString(this.fieldName)).append(toString(this.cmpgt)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._cmplt_ == child)
+        if(this.cmplt == child)
         {
-            this._cmplt_ = null;
+            this.cmplt = null;
             return;
         }
 
-        if(this._className_ == child)
+        if(this.className == child)
         {
-            this._className_ = null;
+            this.className = null;
             return;
         }
 
-        if(this._first_ == child)
+        if(this.first == child)
         {
-            this._first_ = null;
+            this.first = null;
             return;
         }
 
-        if(this._type_ == child)
+        if(this.type == child)
         {
-            this._type_ = null;
+            this.type = null;
             return;
         }
 
-        if(this._fieldName_ == child)
+        if(this.fieldName == child)
         {
-            this._fieldName_ = null;
+            this.fieldName = null;
             return;
         }
 
-        if(this._cmpgt_ == child)
+        if(this.cmpgt == child)
         {
-            this._cmpgt_ = null;
+            this.cmpgt = null;
             return;
         }
 
@@ -269,37 +264,37 @@ public final class AFieldSignature extends PFieldSignature
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._cmplt_ == oldChild)
+        if(this.cmplt == oldChild)
         {
             setCmplt((TCmplt) newChild);
             return;
         }
 
-        if(this._className_ == oldChild)
+        if(this.className == oldChild)
         {
             setClassName((PClassName) newChild);
             return;
         }
 
-        if(this._first_ == oldChild)
+        if(this.first == oldChild)
         {
             setFirst((TColon) newChild);
             return;
         }
 
-        if(this._type_ == oldChild)
+        if(this.type == oldChild)
         {
             setType((PType) newChild);
             return;
         }
 
-        if(this._fieldName_ == oldChild)
+        if(this.fieldName == oldChild)
         {
             setFieldName((PName) newChild);
             return;
         }
 
-        if(this._cmpgt_ == oldChild)
+        if(this.cmpgt == oldChild)
         {
             setCmpgt((TCmpgt) newChild);
             return;

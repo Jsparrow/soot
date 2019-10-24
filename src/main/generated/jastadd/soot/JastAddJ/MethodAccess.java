@@ -18,16 +18,110 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production MethodAccess : {@link Access} ::= <span class="component">&lt;ID:String&gt;</span> <span class="component">Arg:{@link Expr}*</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:20
  */
-public class MethodAccess extends Access implements Cloneable {
+public class MethodAccess extends Access {
+  private static final Logger logger = LoggerFactory.getLogger(MethodAccess.class);
+/**
+   * @apilevel internal
+   * @ast method 
+   * 
+   */
+  
   /**
+   * @apilevel internal
+   */
+  protected String tokenString_ID;
+/**
+   * @ast method 
+   * 
+   */
+  
+  public int IDstart;
+/**
+   * @ast method 
+   * 
+   */
+  
+  public int IDend;
+protected java.util.Map computeDAbefore_int_Variable_values;
+/**
+   * @apilevel internal
+   */
+  protected boolean exceptionCollection_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected Collection exceptionCollection_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean decls_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected SimpleSet decls_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean decl_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected MethodDecl decl_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+protected java.util.Map typeArguments_MethodDecl_values;
+/**
+   * @ast method 
+   * @aspect NodeConstructors
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NodeConstructors.jrag:56
+   */
+  public MethodAccess(String name, List args, int start, int end) {
+    this(name, args);
+    setStart(start);
+    setEnd(end);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public MethodAccess() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public MethodAccess(String p0, List<Expr> p1) {
+    setID(p0);
+    setChild(p1, 0);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public MethodAccess(beaver.Symbol p0, List<Expr> p1) {
+    setID(p0);
+    setChild(p1, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     computeDAbefore_int_Variable_values = null;
     exceptionCollection_computed = false;
@@ -40,16 +134,18 @@ public class MethodAccess extends Access implements Cloneable {
     type_value = null;
     typeArguments_MethodDecl_values = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public MethodAccess clone() throws CloneNotSupportedException {
     MethodAccess node = (MethodAccess)super.clone();
     node.computeDAbefore_int_Variable_values = null;
@@ -66,29 +162,33 @@ public class MethodAccess extends Access implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public MethodAccess copy() {
     try {
       MethodAccess node = (MethodAccess) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public MethodAccess fullCopy() {
     MethodAccess tree = (MethodAccess) copy();
     if (children != null) {
@@ -102,42 +202,49 @@ public class MethodAccess extends Access implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect AnonymousClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/AnonymousClasses.jrag:215
    */
-  protected void collectExceptions(Collection c, ASTNode target) {
+  @Override
+protected void collectExceptions(Collection c, ASTNode target) {
     super.collectExceptions(c, target);
-    for(int i = 0; i < decl().getNumException(); i++)
-      c.add(decl().getException(i).type());
+    for(int i = 0; i < decl().getNumException(); i++) {
+		c.add(decl().getException(i).type());
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:57
    */
-  public void exceptionHandling() {
+  @Override
+public void exceptionHandling() {
     for(Iterator iter = exceptionCollection().iterator(); iter.hasNext(); ) {
       TypeDecl exceptionType = (TypeDecl)iter.next();
-      if(!handlesException(exceptionType))
-        error("" + decl().hostType().fullName() + "." + this + " invoked in " + hostType().fullName() + " may throw uncaught exception " + exceptionType.fullName());
+      if(!handlesException(exceptionType)) {
+		error(new StringBuilder().append("").append(decl().hostType().fullName()).append(".").append(this).append(" invoked in ").append(hostType().fullName()).append(" may throw uncaught exception ")
+				.append(exceptionType.fullName()).toString());
+	}
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:253
    */
-  protected boolean reachedException(TypeDecl catchType) {
+  @Override
+protected boolean reachedException(TypeDecl catchType) {
     for(Iterator iter = exceptionCollection().iterator(); iter.hasNext(); ) {
       TypeDecl exceptionType = (TypeDecl)iter.next();
-      if(catchType.mayCatch(exceptionType))
-        return true;
+      if(catchType.mayCatch(exceptionType)) {
+		return true;
+	}
     }
     return super.reachedException(catchType);
   }
-  /**
+/**
    * @ast method 
    * @aspect LookupMethod
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:119
@@ -146,43 +253,38 @@ public class MethodAccess extends Access implements Cloneable {
     SimpleSet set = SimpleSet.emptySet;
     for(Iterator iter = c.iterator(); iter.hasNext(); ) {
       MethodDecl m = (MethodDecl)iter.next();
-      if(m.isStatic())
-        set = set.add(m);
+      if(m.isStatic()) {
+		set = set.add(m);
+	}
     }
     return set;
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:158
    */
   public boolean applicable(MethodDecl decl) {
-    if(getNumArg() != decl.getNumParameter())
-      return false;
-    if(!name().equals(decl.name()))
-      return false;
+    if(getNumArg() != decl.getNumParameter()) {
+		return false;
+	}
+    if(!name().equals(decl.name())) {
+		return false;
+	}
     for(int i = 0; i < getNumArg(); i++) {
-      if(!getArg(i).type().instanceOf(decl.getParameter(i).type()))
-        return false;
+      if(!getArg(i).type().instanceOf(decl.getParameter(i).type())) {
+		return false;
+	}
     }
     return true;
   }
-  /**
-   * @ast method 
-   * @aspect NodeConstructors
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NodeConstructors.jrag:56
-   */
-  public MethodAccess(String name, List args, int start, int end) {
-    this(name, args);
-    setStart(start);
-    setEnd(end);
-  }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:457
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     s.append(name());
     s.append("(");
     if(getNumArg() > 0) {
@@ -194,63 +296,70 @@ public class MethodAccess extends Access implements Cloneable {
     }
     s.append(")");
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeHierarchyCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:23
    */
-  public void nameCheck() {
-    if(isQualified() && qualifier().isPackageAccess() && !qualifier().isUnknown())
-      error("The method " + decl().signature() + 
-          " can not be qualified by a package name.");
-    if(isQualified() && decl().isAbstract() && qualifier().isSuperAccess())
-      error("may not access abstract methods in superclass");
+  @Override
+public void nameCheck() {
+    if(isQualified() && qualifier().isPackageAccess() && !qualifier().isUnknown()) {
+		error(new StringBuilder().append("The method ").append(decl().signature()).append(" can not be qualified by a package name.").toString());
+	}
+    if(isQualified() && decl().isAbstract() && qualifier().isSuperAccess()) {
+		error("may not access abstract methods in superclass");
+	}
     if(decls().isEmpty() && (!isQualified() || !qualifier().isUnknown())) {
       StringBuffer s = new StringBuffer();
       s.append("no method named " + name());
       s.append("(");
       for(int i = 0; i < getNumArg(); i++) {
-        if(i != 0)
-          s.append(", ");
+        if(i != 0) {
+			s.append(", ");
+		}
         s.append(getArg(i).type().typeName());
       }
-      s.append(")" + " in " + methodHost() + " matches.");
-      if(singleCandidateDecl() != null)
-        s.append(" However, there is a method " + singleCandidateDecl().signature());
+      s.append(new StringBuilder().append(")").append(" in ").append(methodHost()).append(" matches.").toString());
+      if(singleCandidateDecl() != null) {
+		s.append(" However, there is a method " + singleCandidateDecl().signature());
+	}
       error(s.toString());
     }
-    if(decls().size() > 1) {
-      boolean allAbstract = true;
-      for(Iterator iter = decls().iterator(); iter.hasNext() && allAbstract; ) {
+    if (decls().size() <= 1) {
+		return;
+	}
+	boolean allAbstract = true;
+	for(Iterator iter = decls().iterator(); iter.hasNext() && allAbstract; ) {
          MethodDecl m = (MethodDecl)iter.next();
-        if(!m.isAbstract() && !m.hostType().isObject())
-          allAbstract = false;
+        if(!m.isAbstract() && !m.hostType().isObject()) {
+			allAbstract = false;
+		}
       }
-      if(!allAbstract && validArgs()) {
+	if(!allAbstract && validArgs()) {
         StringBuffer s = new StringBuffer();
-        s.append("several most specific methods for " + this + "\n");
+        s.append(new StringBuilder().append("several most specific methods for ").append(this).append("\n").toString());
         for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
           MethodDecl m = (MethodDecl)iter.next();
-          s.append("    " + m.signature() + " in " + m.hostType().typeName() + "\n");
+          s.append(new StringBuilder().append("    ").append(m.signature()).append(" in ").append(m.hostType().typeName()).append("\n").toString());
         }
         error(s.toString());
       }
-       
-    }
   }
-  /**
+/**
    * @ast method 
    * @aspect Annotations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:336
    */
-  public void checkModifiers() {
+  @Override
+public void checkModifiers() {
     if(decl().isDeprecated() &&
       !withinDeprecatedAnnotation() &&
       hostType().topLevelType() != decl().hostType().topLevelType() &&
-      !withinSuppressWarnings("deprecation"))
-        warning(decl().signature() + " in " + decl().hostType().typeName() + " has been deprecated");
+      !withinSuppressWarnings("deprecation")) {
+		warning(new StringBuilder().append(decl().signature()).append(" in ").append(decl().hostType().typeName()).append(" has been deprecated").toString());
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericMethodsInference
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/GenericMethodsInference.jrag:46
@@ -258,8 +367,9 @@ public class MethodAccess extends Access implements Cloneable {
   public Collection computeConstraints(GenericMethodDecl decl) {
     Constraints c = new Constraints();
     // store type parameters
-    for(int i = 0; i < decl.original().getNumTypeParameter(); i++)
-      c.addTypeVariable(decl.original().getTypeParameter(i));
+    for(int i = 0; i < decl.original().getNumTypeParameter(); i++) {
+		c.addTypeVariable(decl.original().getTypeParameter(i));
+	}
     
     // add initial constraints
     for(int i = 0; i < getNumArg(); i++) {
@@ -272,8 +382,9 @@ public class MethodAccess extends Access implements Cloneable {
       }
       c.convertibleTo(A, F);
     }
-    if(c.rawAccess)
-      return new ArrayList();
+    if(c.rawAccess) {
+		return new ArrayList();
+	}
     
     //c.printConstraints();
     //System.err.println("Resolving equality constraints");
@@ -290,13 +401,15 @@ public class MethodAccess extends Access implements Cloneable {
 
     if(c.unresolvedTypeArguments()) {
       TypeDecl S = assignConvertedType();
-      if(S.isUnboxedPrimitive())
-        S = S.boxed();
+      if(S.isUnboxedPrimitive()) {
+		S = S.boxed();
+	}
       TypeDecl R = decl.type();
       // TODO: replace all uses of type variables in R with their inferred types
       TypeDecl Rprime = R;
-      if(R.isVoid())
-        R = typeObject();
+      if(R.isVoid()) {
+		R = typeObject();
+	}
       c.convertibleFrom(S, R);
       // TODO: additional constraints
 
@@ -309,7 +422,7 @@ public class MethodAccess extends Access implements Cloneable {
 
     return c.typeArguments();
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:23
@@ -328,7 +441,7 @@ public class MethodAccess extends Access implements Cloneable {
     }
     return potentiallyApplicable;
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:38
@@ -337,12 +450,13 @@ public class MethodAccess extends Access implements Cloneable {
     SimpleSet maxSpecific = SimpleSet.emptySet;
     for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
       MethodDecl decl = (MethodDecl)iter.next();
-      if(applicableBySubtyping(decl))
-        maxSpecific = mostSpecific(maxSpecific, decl);
+      if(applicableBySubtyping(decl)) {
+		maxSpecific = mostSpecific(maxSpecific, decl);
+	}
     }
     return maxSpecific;
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:48
@@ -351,13 +465,14 @@ public class MethodAccess extends Access implements Cloneable {
     if(maxSpecific.isEmpty()) {
       for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
         MethodDecl decl = (MethodDecl)iter.next();
-        if(applicableByMethodInvocationConversion(decl))
-          maxSpecific = mostSpecific(maxSpecific, decl);
+        if(applicableByMethodInvocationConversion(decl)) {
+			maxSpecific = mostSpecific(maxSpecific, decl);
+		}
       }
     }
     return maxSpecific;
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:59
@@ -366,44 +481,49 @@ public class MethodAccess extends Access implements Cloneable {
     if(maxSpecific.isEmpty()) {
       for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
         MethodDecl decl = (MethodDecl)iter.next();
-        if(decl.isVariableArity() && applicableVariableArity(decl))
-          maxSpecific = mostSpecific(maxSpecific, decl);
+        if(decl.isVariableArity() && applicableVariableArity(decl)) {
+			maxSpecific = mostSpecific(maxSpecific, decl);
+		}
       }
     }
     return maxSpecific;
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:140
    */
   private static SimpleSet mostSpecific(SimpleSet maxSpecific, MethodDecl decl) {
-    if(maxSpecific.isEmpty())
-      maxSpecific = maxSpecific.add(decl);
-    else {
-      if(decl.moreSpecificThan((MethodDecl)maxSpecific.iterator().next()))
-        maxSpecific = SimpleSet.emptySet.add(decl);
-      else if(!((MethodDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
-        maxSpecific = maxSpecific.add(decl);
+    if(maxSpecific.isEmpty()) {
+		maxSpecific = maxSpecific.add(decl);
+	} else {
+      if(decl.moreSpecificThan((MethodDecl)maxSpecific.iterator().next())) {
+		maxSpecific = SimpleSet.emptySet.add(decl);
+	} else if(!((MethodDecl)maxSpecific.iterator().next()).moreSpecificThan(decl)) {
+		maxSpecific = maxSpecific.add(decl);
+	}
     }
     return maxSpecific;
   }
-  /**
+/**
    * @ast method 
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:48
    */
   private TypeDecl refined_InnerClasses_MethodAccess_methodQualifierType() {
-    if(hasPrevExpr())
-      return prevExpr().type();
+    if(hasPrevExpr()) {
+		return prevExpr().type();
+	}
     TypeDecl typeDecl = hostType();
-    while(typeDecl != null && !typeDecl.hasMethod(name()))
-      typeDecl = typeDecl.enclosingType();
-    if(typeDecl != null)
-      return typeDecl;
+    while(typeDecl != null && !typeDecl.hasMethod(name())) {
+		typeDecl = typeDecl.enclosingType();
+	}
+    if(typeDecl != null) {
+		return typeDecl;
+	}
     return decl().hostType();
   }
-  /**
+/**
    * @ast method 
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:113
@@ -416,7 +536,7 @@ public class MethodAccess extends Access implements Cloneable {
     } while (!enclosing.instanceOf(targetDecl));
     return enclosing;
   }
-  /**
+/**
    * @ast method 
    * @aspect Transformations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/Transformations.jrag:69
@@ -453,45 +573,42 @@ public class MethodAccess extends Access implements Cloneable {
     }
     super.transformation();
   }
-  /**
+/**
    * @ast method 
    * @aspect SafeVarargs
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/SafeVarargs.jrag:73
    */
-  public void checkWarnings() {
+  @Override
+public void checkWarnings() {
 
 		MethodDecl decl = decl();
-		if (decl.getNumParameter() == 0) return;
-		if (decl.getNumParameter() > getNumArg()) return;
+		if (decl.getNumParameter() == 0) {
+			return;
+		}
+		if (decl.getNumParameter() > getNumArg()) {
+			return;
+		}
 
 		ParameterDeclaration param = decl.getParameter(
 				decl.getNumParameter()-1);
 		if (!withinSuppressWarnings("unchecked") &&
 				!decl.hasAnnotationSafeVarargs() &&
 				param.isVariableArity() &&
-				!param.type().isReifiable())
-			warning("unchecked array creation for variable " +
-				"arity parameter of " + decl().name());
+				!param.type().isReifiable()) {
+			warning(new StringBuilder().append("unchecked array creation for variable ").append("arity parameter of ").append(decl().name()).toString());
+		}
 	}
-  /**
+/**
    * @ast method 
    * @aspect EmitJimpleRefinements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/SootJastAddJ/EmitJimpleRefinements.jrag:227
    */
-  public void collectTypesToSignatures(Collection<Type> set) {
+  @Override
+public void collectTypesToSignatures(Collection<Type> set) {
 	 super.collectTypesToSignatures(set);
    addDependencyIfNeeded(set, methodQualifierType());
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public MethodAccess() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -499,43 +616,30 @@ public class MethodAccess extends Access implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[1];
     setChild(new List(), 0);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public MethodAccess(String p0, List<Expr> p1) {
-    setID(p0);
-    setChild(p1, 0);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public MethodAccess(beaver.Symbol p0, List<Expr> p1) {
-    setID(p0);
-    setChild(p1, 0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 1;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the lexeme ID.
    * @param value The new value for the lexeme ID.
    * @apilevel high-level
@@ -545,42 +649,21 @@ public class MethodAccess extends Access implements Cloneable {
   public void setID(String value) {
     tokenString_ID = value;
   }
-  /**
-   * @apilevel internal
-   * @ast method 
-   * 
-   */
-  
-  /**
-   * @apilevel internal
-   */
-  protected String tokenString_ID;
-  /**
-   * @ast method 
-   * 
-   */
-  
-  public int IDstart;
-  /**
-   * @ast method 
-   * 
-   */
-  
-  public int IDend;
-  /**
+/**
    * JastAdd-internal setter for lexeme ID using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
   public void setID(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setID is only valid for String lexemes");
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setID is only valid for String lexemes");
+	}
     tokenString_ID = (String)symbol.value;
     IDstart = symbol.getStart();
     IDend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme ID.
    * @return The value for the lexeme ID.
    * @apilevel high-level
@@ -590,7 +673,7 @@ public class MethodAccess extends Access implements Cloneable {
   public String getID() {
     return tokenString_ID != null ? tokenString_ID : "";
   }
-  /**
+/**
    * Replaces the Arg list.
    * @param list The new list node to be used as the Arg list.
    * @apilevel high-level
@@ -600,7 +683,7 @@ public class MethodAccess extends Access implements Cloneable {
   public void setArgList(List<Expr> list) {
     setChild(list, 0);
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * @return Number of children in the Arg list.
    * @apilevel high-level
@@ -610,7 +693,7 @@ public class MethodAccess extends Access implements Cloneable {
   public int getNumArg() {
     return getArgList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the Arg list.
@@ -621,7 +704,7 @@ public class MethodAccess extends Access implements Cloneable {
   public int getNumArgNoTransform() {
     return getArgListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the Arg list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the Arg list.
@@ -633,7 +716,7 @@ public class MethodAccess extends Access implements Cloneable {
   public Expr getArg(int i) {
     return (Expr)getArgList().getChild(i);
   }
-  /**
+/**
    * Append an element to the Arg list.
    * @param node The element to append to the Arg list.
    * @apilevel high-level
@@ -644,7 +727,7 @@ public class MethodAccess extends Access implements Cloneable {
     List<Expr> list = (parent == null || state == null) ? getArgListNoTransform() : getArgList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -653,7 +736,7 @@ public class MethodAccess extends Access implements Cloneable {
     List<Expr> list = getArgListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the Arg list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -665,7 +748,7 @@ public class MethodAccess extends Access implements Cloneable {
     List<Expr> list = getArgList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -675,7 +758,7 @@ public class MethodAccess extends Access implements Cloneable {
   public List<Expr> getArgs() {
     return getArgList();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -686,7 +769,7 @@ public class MethodAccess extends Access implements Cloneable {
   public List<Expr> getArgsNoTransform() {
     return getArgListNoTransform();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -699,7 +782,7 @@ public class MethodAccess extends Access implements Cloneable {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -711,7 +794,7 @@ public class MethodAccess extends Access implements Cloneable {
   public List<Expr> getArgListNoTransform() {
     return (List<Expr>)getChildNoTransform(0);
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:11
@@ -727,91 +810,100 @@ public class MethodAccess extends Access implements Cloneable {
     maxSpecific = applicableVariableArity(potentiallyApplicable, maxSpecific);
     return maxSpecific;
   }
-  /**
+/**
    * @ast method 
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:331
    */
-    public void typeCheck() {
-    if(isQualified() && decl().isAbstract() && qualifier().isSuperAccess())
-      error("may not access abstract methods in superclass");
+    @Override
+	public void typeCheck() {
+    if(isQualified() && decl().isAbstract() && qualifier().isSuperAccess()) {
+		error("may not access abstract methods in superclass");
+	}
     if(!decl().isVariableArity() || invokesVariableArityAsArray()) {
       for(int i = 0; i < decl().getNumParameter(); i++) {
         TypeDecl exprType = getArg(i).type();
         TypeDecl parmType = decl().getParameter(i).type();
         if(!exprType.methodInvocationConversionTo(parmType) && !exprType.isUnknown() && !parmType.isUnknown()) {
-          error("#The type " + exprType.typeName() + " of expr " +
-            getArg(i) + " is not compatible with the method parameter " +
-            decl().getParameter(i));
+          error(new StringBuilder().append("#The type ").append(exprType.typeName()).append(" of expr ").append(getArg(i)).append(" is not compatible with the method parameter ").append(decl().getParameter(i))
+				.toString());
         }
       }
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:300
    */
     protected TypeDecl refined_GenericsCodegen_MethodAccess_methodQualifierType() {
     TypeDecl typeDecl = refined_InnerClasses_MethodAccess_methodQualifierType();
-    if(typeDecl == null)
-      return null;
+    if(typeDecl == null) {
+		return null;
+	}
     typeDecl = typeDecl.erasure();
     MethodDecl m = decl().sourceMethodDecl();
     Collection methods = typeDecl.memberMethods(m.name());
-    if(!methods.contains(decl()) && !methods.contains(m))
-      return m.hostType();
+    if(!methods.contains(decl()) && !methods.contains(m)) {
+		return m.hostType();
+	}
     return typeDecl.erasure();
   }
-  /**
+/**
    * @ast method 
    * @aspect VariableArityParametersCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/VariableArityParametersCodegen.jrag:16
    */
-    public void transformation() {
+    @Override
+	public void transformation() {
     if(decl().isVariableArity() && !invokesVariableArityAsArray()) {
       // arguments to normal parameters
       List list = new List();
-      for(int i = 0; i < decl().getNumParameter() - 1; i++)
-        list.add(getArg(i).fullCopy());
+      for(int i = 0; i < decl().getNumParameter() - 1; i++) {
+		list.add(getArg(i).fullCopy());
+	}
       // arguments to variable arity parameters
       List last = new List();
-      for(int i = decl().getNumParameter() - 1; i < getNumArg(); i++)
-        last.add(getArg(i).fullCopy());
+      for(int i = decl().getNumParameter() - 1; i < getNumArg(); i++) {
+		last.add(getArg(i).fullCopy());
+	}
       // build an array holding arguments
       Access typeAccess = decl().lastParameter().type().elementType().createQualifiedAccess();
-      for(int i = 0; i < decl().lastParameter().type().dimension(); i++)
-        typeAccess = new ArrayTypeAccess(typeAccess);
+      for(int i = 0; i < decl().lastParameter().type().dimension(); i++) {
+		typeAccess = new ArrayTypeAccess(typeAccess);
+	}
       list.add(new ArrayCreationExpr(typeAccess, new Opt(new ArrayInit(last))));
       // replace argument list with augemented argument list
       setArgList(list);
     }
     refined_Transformations_MethodAccess_transformation();
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:127
    */
     private ArrayList buildArgList(Body b) {
     ArrayList list = new ArrayList();
-    for(int i = 0; i < getNumArg(); i++)
-      list.add(
-        asImmediate(b,
-          getArg(i).type().emitCastTo(b, // MethodInvocationConversion
-            getArg(i),
-            decl().getParameter(i).type()
-          )
-        )
-      );
+    for(int i = 0; i < getNumArg(); i++) {
+		list.add(
+		    asImmediate(b,
+		      getArg(i).type().emitCastTo(b, // MethodInvocationConversion
+		        getArg(i),
+		        decl().getParameter(i).type()
+		      )
+		    )
+		  );
+	}
     return list;
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:141
    */
-    public soot.Value eval(Body b) {
+    @Override
+	public soot.Value eval(Body b) {
     MethodDecl decl = decl().erasedMethod();
     if(!decl().isStatic() && isQualified() && prevExpr().isSuperAccess()) {
       Local left = asLocal(b, createLoadQualifier(b));
@@ -819,15 +911,17 @@ public class MethodAccess extends Access implements Cloneable {
       soot.Value result;
       if(!hostType().instanceOf(prevExpr().type())) {
         MethodDecl m = decl.createSuperAccessor(superAccessorTarget());
-        if(methodQualifierType().isInterfaceDecl())
-          result = b.newInterfaceInvokeExpr(left, m.sootRef(), list, this);
-        else
-          result = b.newVirtualInvokeExpr(left, m.sootRef(), list, this);
-      }
-      else
-        result = b.newSpecialInvokeExpr(left, sootRef(), list, this);
-      if(decl.type() != decl().type())
-        result = decl.type().emitCastTo(b, result, decl().type(), this);
+        if(methodQualifierType().isInterfaceDecl()) {
+			result = b.newInterfaceInvokeExpr(left, m.sootRef(), list, this);
+		} else {
+			result = b.newVirtualInvokeExpr(left, m.sootRef(), list, this);
+		}
+      } else {
+		result = b.newSpecialInvokeExpr(left, sootRef(), list, this);
+	}
+      if(decl.type() != decl().type()) {
+		result = decl.type().emitCastTo(b, result, decl().type(), this);
+	}
       return type().isVoid() ? result : asLocal(b, result);
     }
     else {
@@ -835,23 +929,26 @@ public class MethodAccess extends Access implements Cloneable {
       if(!decl().isStatic()) {
         Local left = asLocal(b, createLoadQualifier(b));
         ArrayList list = buildArgList(b);
-        if(methodQualifierType().isInterfaceDecl())
-          result = b.newInterfaceInvokeExpr(left, sootRef(), list, this);
-        else
-          result = b.newVirtualInvokeExpr(left, sootRef(), list, this);
+        if(methodQualifierType().isInterfaceDecl()) {
+			result = b.newInterfaceInvokeExpr(left, sootRef(), list, this);
+		} else {
+			result = b.newVirtualInvokeExpr(left, sootRef(), list, this);
+		}
       }
       else {
-        if(isQualified() && !qualifier().isTypeAccess())
-          b.newTemp(qualifier().eval(b));
+        if(isQualified() && !qualifier().isTypeAccess()) {
+			b.newTemp(qualifier().eval(b));
+		}
         ArrayList list = buildArgList(b);
         result = b.newStaticInvokeExpr(sootRef(), list, this);
       }
-      if(decl.type() != decl().type())
-        result = decl.type().emitCastTo(b, result, decl().type(), this);
+      if(decl.type() != decl().type()) {
+		result = decl.type().emitCastTo(b, result, decl().type(), this);
+	}
       return type().isVoid() ? result : asLocal(b, result);
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:182
@@ -859,8 +956,9 @@ public class MethodAccess extends Access implements Cloneable {
     private SootMethodRef sootRef() {
     MethodDecl decl = decl().erasedMethod();
     ArrayList parameters = new ArrayList();
-    for(int i = 0; i < decl.getNumParameter(); i++)
-      parameters.add(decl.getParameter(i).type().getSootType());
+    for(int i = 0; i < decl.getNumParameter(); i++) {
+		parameters.add(decl.getParameter(i).type().getSootType());
+	}
     SootMethodRef ref = Scene.v().makeMethodRef(
       methodQualifierType().getSootClassDecl(),
       decl.name(),
@@ -870,7 +968,7 @@ public class MethodAccess extends Access implements Cloneable {
     );
     return ref;
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:197
@@ -880,8 +978,9 @@ public class MethodAccess extends Access implements Cloneable {
     if(hasPrevExpr()) {
       // load explicit qualifier
       soot.Value v = prevExpr().eval(b);
-      if(v ==  null)
-        throw new Error("Problems evaluating " + prevExpr().getClass().getName());
+      if(v ==  null) {
+		throw new Error("Problems evaluating " + prevExpr().getClass().getName());
+	}
       Local qualifier = asLocal(b, v /*prevExpr().eval(b)*/);
       // pop qualifier stack element for class variables
       // this qualifier must be computed to ensure side effects
@@ -893,26 +992,26 @@ public class MethodAccess extends Access implements Cloneable {
     }
     throw new Error("createLoadQualifier not supported for " + m.getClass().getName());
   }
-  /**
+/**
    * @ast method 
    * @aspect StaticImportsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/StaticImportsCodegen.jrag:18
    */
     protected TypeDecl methodQualifierType() {
     TypeDecl typeDecl = refined_GenericsCodegen_MethodAccess_methodQualifierType();
-    if(typeDecl != null)
-      return typeDecl;
+    if(typeDecl != null) {
+		return typeDecl;
+	}
     return decl().hostType();
   }
-  /**
+/**
    * @ast method 
    * @aspect TypeAnalysis
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:284
    */
   private TypeDecl refined_TypeAnalysis_MethodAccess_type()
 { return decl().type(); }
-  protected java.util.Map computeDAbefore_int_Variable_values;
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:410
@@ -922,7 +1021,9 @@ public class MethodAccess extends Access implements Cloneable {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(Integer.valueOf(i));
     _parameters.add(v);
-    if(computeDAbefore_int_Variable_values == null) computeDAbefore_int_Variable_values = new java.util.HashMap(4);
+    if(computeDAbefore_int_Variable_values == null) {
+		computeDAbefore_int_Variable_values = new java.util.HashMap(4);
+	}
     if(computeDAbefore_int_Variable_values.containsKey(_parameters)) {
       return ((Boolean)computeDAbefore_int_Variable_values.get(_parameters)).booleanValue();
     }
@@ -930,25 +1031,28 @@ public class MethodAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     boolean computeDAbefore_int_Variable_value = computeDAbefore_compute(i, v);
-      if(isFinal && num == state().boundariesCrossed) computeDAbefore_int_Variable_values.put(_parameters, Boolean.valueOf(computeDAbefore_int_Variable_value));
+      if(isFinal && num == state().boundariesCrossed) {
+		computeDAbefore_int_Variable_values.put(_parameters, Boolean.valueOf(computeDAbefore_int_Variable_value));
+	}
     return computeDAbefore_int_Variable_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private boolean computeDAbefore_compute(int i, Variable v) {  return i == 0 ? isDAbefore(v) : getArg(i-1).isDAafter(v);  }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:235
    */
-  public boolean isDAafter(Variable v) {
+  @Override
+public boolean isDAafter(Variable v) {
     ASTNode$State state = state();
     try {  return getNumArg() == 0 ? isDAbefore(v) : getArg(getNumArg()-1).isDAafter(v);  }
     finally {
     }
   }
-  /*eq Stmt.isDAafter(Variable v) {
+/*eq Stmt.isDAafter(Variable v) {
     //System.out.println("### isDAafter reached in " + getClass().getName());
     //throw new NullPointerException();
     throw new Error("Can not compute isDAafter for " + getClass().getName() + " at " + errorPrefix());
@@ -956,32 +1060,26 @@ public class MethodAccess extends Access implements Cloneable {
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:332
    */
-  public boolean isDAafterTrue(Variable v) {
+  @Override
+public boolean isDAafterTrue(Variable v) {
     ASTNode$State state = state();
     try {  return (getNumArg() == 0 ? isDAbefore(v) : getArg(getNumArg()-1).isDAafter(v)) || isFalse();  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:333
    */
-  public boolean isDAafterFalse(Variable v) {
+  @Override
+public boolean isDAafterFalse(Variable v) {
     ASTNode$State state = state();
     try {  return (getNumArg() == 0 ? isDAbefore(v) : getArg(getNumArg()-1).isDAafter(v)) || isTrue();  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean exceptionCollection_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected Collection exceptionCollection_value;
-  /**
+/**
    * @attribute syn
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:65
@@ -995,18 +1093,21 @@ public class MethodAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     exceptionCollection_value = exceptionCollection_compute();
-      if(isFinal && num == state().boundariesCrossed) exceptionCollection_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		exceptionCollection_computed = true;
+	}
     return exceptionCollection_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private Collection exceptionCollection_compute() {
     //System.out.println("Computing exceptionCollection for " + name());
     HashSet set = new HashSet();
     Iterator iter = decls().iterator();
-    if(!iter.hasNext())
-      return set;
+    if(!iter.hasNext()) {
+		return set;
+	}
 
     MethodDecl m = (MethodDecl)iter.next();
     //System.out.println("Processing first found method " + m.signature() + " in " + m.hostType().fullName());
@@ -1041,7 +1142,7 @@ public class MethodAccess extends Access implements Cloneable {
     }
     return set;
   }
-  /**
+/**
    * @attribute syn
    * @aspect LookupMethod
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:66
@@ -1052,25 +1153,18 @@ public class MethodAccess extends Access implements Cloneable {
     MethodDecl result = null;
     for(Iterator iter = lookupMethod(name()).iterator(); iter.hasNext(); ) {
       MethodDecl m = (MethodDecl)iter.next();
-      if(result == null)
-        result = m;
-      else if(m.getNumParameter() == getNumArg() && result.getNumParameter() != getNumArg())
-        result = m;
+      if(result == null) {
+		result = m;
+	} else if(m.getNumParameter() == getNumArg() && result.getNumParameter() != getNumArg()) {
+		result = m;
+	}
     }
     return result;
   }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean decls_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected SimpleSet decls_value;
-  /**
+/**
    * @attribute syn
    * @aspect LookupMethod
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:96
@@ -1084,27 +1178,22 @@ public class MethodAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     decls_value = decls_compute();
-      if(isFinal && num == state().boundariesCrossed) decls_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		decls_computed = true;
+	}
     return decls_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private SimpleSet decls_compute() {
     SimpleSet maxSpecific = maxSpecific(lookupMethod(name()));
-    if(isQualified() ? qualifier().staticContextQualifier() : inStaticContext())
-      maxSpecific = removeInstanceMethods(maxSpecific);
+    if(isQualified() ? qualifier().staticContextQualifier() : inStaticContext()) {
+		maxSpecific = removeInstanceMethods(maxSpecific);
+	}
     return maxSpecific;
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean decl_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected MethodDecl decl_value;
-  /**
+/**
    * @attribute syn
    * @aspect LookupMethod
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:103
@@ -1118,29 +1207,34 @@ public class MethodAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     decl_value = decl_compute();
-      if(isFinal && num == state().boundariesCrossed) decl_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		decl_computed = true;
+	}
     return decl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private MethodDecl decl_compute() {
     SimpleSet decls = decls();
-    if(decls.size() == 1)
-      return (MethodDecl)decls.iterator().next();
+    if(decls.size() == 1) {
+		return (MethodDecl)decls.iterator().next();
+	}
 
     // 8.4.6.4 - only return the first method in case of multply inherited abstract methods
     boolean allAbstract = true;
     for(Iterator iter = decls.iterator(); iter.hasNext() && allAbstract; ) {
       MethodDecl m = (MethodDecl)iter.next();
-      if(!m.isAbstract() && !m.hostType().isObject())
-        allAbstract = false;
+      if(!m.isAbstract() && !m.hostType().isObject()) {
+		allAbstract = false;
+	}
     }
-    if(decls.size() > 1 && allAbstract)
-      return (MethodDecl)decls.iterator().next();
+    if(decls.size() > 1 && allAbstract) {
+		return (MethodDecl)decls.iterator().next();
+	}
     return unknownMethod();
   }
-  /**
+/**
    * @attribute syn
    * @aspect MethodDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:170
@@ -1148,13 +1242,16 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean accessible(MethodDecl m) {
     ASTNode$State state = state();
     try {
-    if(!isQualified())
-      return true;
-    if(!m.accessibleFrom(hostType()))
-      return false;
+    if(!isQualified()) {
+		return true;
+	}
+    if(!m.accessibleFrom(hostType())) {
+		return false;
+	}
     // the method is not accessible if the type is not accessible
-    if(!qualifier().type().accessibleFrom(hostType()))
-      return false;
+    if(!qualifier().type().accessibleFrom(hostType())) {
+		return false;
+	}
     // 6.6.2.1 -  include qualifier type for protected access
     if(m.isProtected() && !m.hostPackage().equals(hostPackage())
         && !m.isStatic() && !qualifier().isSuperAccess()) {
@@ -1165,7 +1262,7 @@ public class MethodAccess extends Access implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:65
@@ -1173,26 +1270,29 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean validArgs() {
     ASTNode$State state = state();
     try {
-    for(int i = 0; i < getNumArg(); i++)
-      if(getArg(i).type().isUnknown())
-        return false;
+    for(int i = 0; i < getNumArg(); i++) {
+		if(getArg(i).type().isUnknown()) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:800
    */
-  public String dumpString() {
+  @Override
+public String dumpString() {
     ASTNode$State state = state();
-    try {  return getClass().getName() + " [" + getID() + "]";  }
+    try {  return new StringBuilder().append(getClass().getName()).append(" [").append(getID()).append("]").toString();  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Names
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/QualifiedNames.jrag:18
@@ -1203,42 +1303,37 @@ public class MethodAccess extends Access implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect AccessTypes
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ResolveAmbiguousNames.jrag:17
    */
-  public boolean isMethodAccess() {
+  @Override
+public boolean isMethodAccess() {
     ASTNode$State state = state();
     try {  return true;  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect SyntacticClassification
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:56
    */
-  public NameType predNameType() {
+  @Override
+public NameType predNameType() {
     ASTNode$State state = state();
     try {  return NameType.AMBIGUOUS_NAME;  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
    * @attribute syn
    * @aspect Generics
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:32
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -1247,23 +1342,24 @@ public class MethodAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {
-    if(getNumArg() == 0 && name().equals("getClass") && decl().hostType().isObject()) {
-      TypeDecl bound = isQualified() ? qualifier().type() : hostType();
-      ArrayList args = new ArrayList();
-      args.add(bound.erasure().asWildcardExtends());
-      return ((GenericClassDecl)lookupType("java.lang", "Class")).lookupParTypeDecl(args);
-    }
-    else
-      return refined_TypeAnalysis_MethodAccess_type();
+    if (!(getNumArg() == 0 && "getClass".equals(name()) && decl().hostType().isObject())) {
+		return refined_TypeAnalysis_MethodAccess_type();
+	}
+	TypeDecl bound = isQualified() ? qualifier().type() : hostType();
+	ArrayList args = new ArrayList();
+	args.add(bound.erasure().asWildcardExtends());
+	return ((GenericClassDecl)lookupType("java.lang", "Class")).lookupParTypeDecl(args);
   }
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:181
@@ -1271,17 +1367,20 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean applicableBySubtyping(MethodDecl m) {
     ASTNode$State state = state();
     try {
-    if(m.getNumParameter() != getNumArg())
-      return false;
-    for(int i = 0; i < m.getNumParameter(); i++)
-      if(!getArg(i).type().instanceOf(m.getParameter(i).type()))
-        return false;
+    if(m.getNumParameter() != getNumArg()) {
+		return false;
+	}
+    for(int i = 0; i < m.getNumParameter(); i++) {
+		if(!getArg(i).type().instanceOf(m.getParameter(i).type())) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:201
@@ -1289,17 +1388,20 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean applicableByMethodInvocationConversion(MethodDecl m) {
     ASTNode$State state = state();
     try {
-    if(m.getNumParameter() != getNumArg())
-      return false;
-    for(int i = 0; i < m.getNumParameter(); i++)
-      if(!getArg(i).type().methodInvocationConversionTo(m.getParameter(i).type()))
-        return false;
+    if(m.getNumParameter() != getNumArg()) {
+		return false;
+	}
+    for(int i = 0; i < m.getNumParameter(); i++) {
+		if(!getArg(i).type().methodInvocationConversionTo(m.getParameter(i).type())) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:221
@@ -1307,18 +1409,22 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean applicableVariableArity(MethodDecl m) {
     ASTNode$State state = state();
     try {
-    for(int i = 0; i < m.getNumParameter() - 1; i++)
-      if(!getArg(i).type().methodInvocationConversionTo(m.getParameter(i).type()))
-        return false;
-    for(int i = m.getNumParameter() - 1; i < getNumArg(); i++)
-      if(!getArg(i).type().methodInvocationConversionTo(m.lastParameter().type().componentType()))
-        return false;
+    for(int i = 0; i < m.getNumParameter() - 1; i++) {
+		if(!getArg(i).type().methodInvocationConversionTo(m.getParameter(i).type())) {
+			return false;
+		}
+	}
+    for(int i = m.getNumParameter() - 1; i < getNumArg(); i++) {
+		if(!getArg(i).type().methodInvocationConversionTo(m.lastParameter().type().componentType())) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:262
@@ -1326,23 +1432,30 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean potentiallyApplicable(MethodDecl m) {
     ASTNode$State state = state();
     try {
-    if(!m.name().equals(name()))
-      return false;
-    if(!m.accessibleFrom(hostType()))
-      return false;
-    if(m.isVariableArity() && !(arity() >= m.arity()-1))
-      return false;
-    if(!m.isVariableArity() && !(m.arity() == arity()))
-      return false;
+    if(!m.name().equals(name())) {
+		return false;
+	}
+    if(!m.accessibleFrom(hostType())) {
+		return false;
+	}
+    if(m.isVariableArity() && !(arity() >= m.arity()-1)) {
+		return false;
+	}
+    if(!m.isVariableArity() && !(m.arity() == arity())) {
+		return false;
+	}
     if(m instanceof GenericMethodDecl) {
       GenericMethodDecl gm = (GenericMethodDecl)m;
       ArrayList list = typeArguments(m);
       if(list.size() != 0) {
-        if(gm.getNumTypeParameter() != list.size())
-          return false;
-        for(int i = 0; i < gm.getNumTypeParameter(); i++)
-          if(!((TypeDecl)list.get(i)).subtype(gm.original().getTypeParameter(i)))
-            return false;
+        if(gm.getNumTypeParameter() != list.size()) {
+			return false;
+		}
+        for(int i = 0; i < gm.getNumTypeParameter(); i++) {
+			if(!((TypeDecl)list.get(i)).subtype(gm.original().getTypeParameter(i))) {
+				return false;
+			}
+		}
       }
     }
     return true;
@@ -1350,7 +1463,7 @@ public class MethodAccess extends Access implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:285
@@ -1361,8 +1474,7 @@ public class MethodAccess extends Access implements Cloneable {
     finally {
     }
   }
-  protected java.util.Map typeArguments_MethodDecl_values;
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:287
@@ -1370,7 +1482,9 @@ public class MethodAccess extends Access implements Cloneable {
   @SuppressWarnings({"unchecked", "cast"})
   public ArrayList typeArguments(MethodDecl m) {
     Object _parameters = m;
-    if(typeArguments_MethodDecl_values == null) typeArguments_MethodDecl_values = new java.util.HashMap(4);
+    if(typeArguments_MethodDecl_values == null) {
+		typeArguments_MethodDecl_values = new java.util.HashMap(4);
+	}
     if(typeArguments_MethodDecl_values.containsKey(_parameters)) {
       return (ArrayList)typeArguments_MethodDecl_values.get(_parameters);
     }
@@ -1378,10 +1492,12 @@ public class MethodAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     ArrayList typeArguments_MethodDecl_value = typeArguments_compute(m);
-      if(isFinal && num == state().boundariesCrossed) typeArguments_MethodDecl_values.put(_parameters, typeArguments_MethodDecl_value);
+      if(isFinal && num == state().boundariesCrossed) {
+		typeArguments_MethodDecl_values.put(_parameters, typeArguments_MethodDecl_value);
+	}
     return typeArguments_MethodDecl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private ArrayList typeArguments_compute(MethodDecl m) {
@@ -1389,26 +1505,28 @@ public class MethodAccess extends Access implements Cloneable {
     if(m instanceof GenericMethodDecl) {
       GenericMethodDecl g = (GenericMethodDecl)m;
       Collection arguments = computeConstraints(g);
-      if(arguments.isEmpty())
-        return typeArguments;
+      if(arguments.isEmpty()) {
+		return typeArguments;
+	}
       int i = 0;
       for(Iterator iter = arguments.iterator(); iter.hasNext(); i++) {
         TypeDecl typeDecl = (TypeDecl)iter.next();
         if(typeDecl == null) {
           TypeVariable v = g.original().getTypeParameter(i);
-          if(v.getNumTypeBound() == 0)
-            typeDecl = typeObject();
-          else if(v.getNumTypeBound() == 1)
-            typeDecl = v.getTypeBound(0).type();
-          else
-            typeDecl = v.lubType();
+          if(v.getNumTypeBound() == 0) {
+			typeDecl = typeObject();
+		} else if(v.getNumTypeBound() == 1) {
+			typeDecl = v.getTypeBound(0).type();
+		} else {
+			typeDecl = v.lubType();
+		}
         }
         typeArguments.add(typeDecl);
       }
     }
     return typeArguments;
   }
-  /**
+/**
    * @attribute syn
    * @aspect VariableArityParameters
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/VariableArityParameters.jrag:40
@@ -1416,16 +1534,18 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean invokesVariableArityAsArray() {
     ASTNode$State state = state();
     try {
-    if(!decl().isVariableArity())
-      return false;
-    if(arity() != decl().arity())
-      return false;
+    if(!decl().isVariableArity()) {
+		return false;
+	}
+    if(arity() != decl().arity()) {
+		return false;
+	}
     return getArg(getNumArg()-1).type().methodInvocationConversionTo(decl().lastParameter().type());
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:385
@@ -1434,16 +1554,18 @@ public class MethodAccess extends Access implements Cloneable {
     ASTNode$State state = state();
     try {
     MethodDecl m = decl();
-    if(m.isPrivate() && m.hostType() != hostType())
-      return true;
-    if(m.isProtected() && !m.hostPackage().equals(hostPackage()) && !hostType().hasMethod(m.name()))
-      return true;
+    if(m.isPrivate() && m.hostType() != hostType()) {
+		return true;
+	}
+    if(m.isProtected() && !m.hostPackage().equals(hostPackage()) && !hostType().hasMethod(m.name())) {
+		return true;
+	}
     return false;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute inh
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:43
@@ -1454,7 +1576,7 @@ public class MethodAccess extends Access implements Cloneable {
     boolean handlesException_TypeDecl_value = getParent().Define_boolean_handlesException(this, null, exceptionType);
     return handlesException_TypeDecl_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect LookupMethod
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:15
@@ -1465,18 +1587,19 @@ public class MethodAccess extends Access implements Cloneable {
     MethodDecl unknownMethod_value = getParent().Define_MethodDecl_unknownMethod(this, null);
     return unknownMethod_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect TypeHierarchyCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:123
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean inExplicitConstructorInvocation() {
     ASTNode$State state = state();
     boolean inExplicitConstructorInvocation_value = getParent().Define_boolean_inExplicitConstructorInvocation(this, null);
     return inExplicitConstructorInvocation_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect GenericMethodsInference
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/GenericMethodsInference.jrag:43
@@ -1487,22 +1610,24 @@ public class MethodAccess extends Access implements Cloneable {
     TypeDecl typeObject_value = getParent().Define_TypeDecl_typeObject(this, null);
     return typeObject_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect SuppressWarnings
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java7Frontend/SuppressWarnings.jrag:18
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public boolean withinSuppressWarnings(String s) {
     ASTNode$State state = state();
     boolean withinSuppressWarnings_String_value = getParent().Define_boolean_withinSuppressWarnings(this, null, s);
     return withinSuppressWarnings_String_value;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:409
    * @apilevel internal
    */
-  public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
+  @Override
+public boolean Define_boolean_isDAbefore(ASTNode caller, ASTNode child, Variable v) {
     if(caller == getArgListNoTransform())  {
     int i = caller.getIndexOfChild(child);
     return computeDAbefore(i, v);
@@ -1510,11 +1635,12 @@ public class MethodAccess extends Access implements Cloneable {
     else {      return getParent().Define_boolean_isDAbefore(this, caller, v);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:28
    * @apilevel internal
    */
-  public Collection Define_Collection_lookupMethod(ASTNode caller, ASTNode child, String name) {
+  @Override
+public Collection Define_Collection_lookupMethod(ASTNode caller, ASTNode child, String name) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().lookupMethod(name);
@@ -1522,11 +1648,12 @@ public class MethodAccess extends Access implements Cloneable {
     else {      return getParent().Define_Collection_lookupMethod(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:87
    * @apilevel internal
    */
-  public boolean Define_boolean_hasPackage(ASTNode caller, ASTNode child, String packageName) {
+  @Override
+public boolean Define_boolean_hasPackage(ASTNode caller, ASTNode child, String packageName) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().hasPackage(packageName);
@@ -1534,11 +1661,12 @@ public class MethodAccess extends Access implements Cloneable {
     else {      return getParent().Define_boolean_hasPackage(this, caller, packageName);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:253
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().lookupType(name);
@@ -1546,11 +1674,12 @@ public class MethodAccess extends Access implements Cloneable {
     else {      return getParent().Define_SimpleSet_lookupType(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupVariable.jrag:132
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().lookupVariable(name);
@@ -1558,11 +1687,12 @@ public class MethodAccess extends Access implements Cloneable {
     else {      return getParent().Define_SimpleSet_lookupVariable(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:120
    * @apilevel internal
    */
-  public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
+  @Override
+public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return NameType.EXPRESSION_NAME;
@@ -1570,21 +1700,23 @@ public class MethodAccess extends Access implements Cloneable {
     else {      return getParent().Define_NameType_nameType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:17
    * @apilevel internal
    */
-  public String Define_String_methodHost(ASTNode caller, ASTNode child) {
+  @Override
+public String Define_String_methodHost(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return unqualifiedScope().methodHost();
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/GenericMethodsInference.jrag:41
    * @apilevel internal
    */
-  public TypeDecl Define_TypeDecl_assignConvertedType(ASTNode caller, ASTNode child) {
+  @Override
+public TypeDecl Define_TypeDecl_assignConvertedType(ASTNode caller, ASTNode child) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return typeObject();
@@ -1592,10 +1724,11 @@ public class MethodAccess extends Access implements Cloneable {
     else {      return getParent().Define_TypeDecl_assignConvertedType(this, caller);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

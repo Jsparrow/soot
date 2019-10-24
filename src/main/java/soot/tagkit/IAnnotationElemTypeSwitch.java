@@ -25,26 +25,26 @@ package soot.tagkit;
 import soot.util.Switch;
 
 public interface IAnnotationElemTypeSwitch extends Switch {
-  public abstract void caseAnnotationAnnotationElem(AnnotationAnnotationElem v);
+  abstract void caseAnnotationAnnotationElem(AnnotationAnnotationElem v);
 
-  public abstract void caseAnnotationArrayElem(AnnotationArrayElem v);
+  abstract void caseAnnotationArrayElem(AnnotationArrayElem v);
 
-  public abstract void caseAnnotationBooleanElem(AnnotationBooleanElem v);
+  abstract void caseAnnotationBooleanElem(AnnotationBooleanElem v);
 
-  public abstract void caseAnnotationClassElem(AnnotationClassElem v);
+  abstract void caseAnnotationClassElem(AnnotationClassElem v);
 
-  public abstract void caseAnnotationDoubleElem(AnnotationDoubleElem v);
+  abstract void caseAnnotationDoubleElem(AnnotationDoubleElem v);
 
-  public abstract void caseAnnotationEnumElem(AnnotationEnumElem v);
+  abstract void caseAnnotationEnumElem(AnnotationEnumElem v);
 
-  public abstract void caseAnnotationFloatElem(AnnotationFloatElem v);
+  abstract void caseAnnotationFloatElem(AnnotationFloatElem v);
 
-  public abstract void caseAnnotationIntElem(AnnotationIntElem v);
+  abstract void caseAnnotationIntElem(AnnotationIntElem v);
 
-  public abstract void caseAnnotationLongElem(AnnotationLongElem v);
+  abstract void caseAnnotationLongElem(AnnotationLongElem v);
 
-  public abstract void caseAnnotationStringElem(AnnotationStringElem v);
+  abstract void caseAnnotationStringElem(AnnotationStringElem v);
 
-  public abstract void defaultCase(Object object);
+  abstract void defaultCase(Object object);
 
 }

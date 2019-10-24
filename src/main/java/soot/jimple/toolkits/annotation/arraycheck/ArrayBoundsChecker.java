@@ -55,22 +55,22 @@ import soot.util.Chain;
 
 public class ArrayBoundsChecker extends BodyTransformer {
   private static final Logger logger = LoggerFactory.getLogger(ArrayBoundsChecker.class);
+protected boolean takeClassField = false;
+protected boolean takeFieldRef = false;
+protected boolean takeArrayRef = false;
+protected boolean takeCSE = false;
+protected boolean takeRectArray = false;
+protected boolean addColorTags = false;
 
-  public ArrayBoundsChecker(Singletons.Global g) {
+public ArrayBoundsChecker(Singletons.Global g) {
   }
 
-  public static ArrayBoundsChecker v() {
+public static ArrayBoundsChecker v() {
     return G.v().soot_jimple_toolkits_annotation_arraycheck_ArrayBoundsChecker();
   }
 
-  protected boolean takeClassField = false;
-  protected boolean takeFieldRef = false;
-  protected boolean takeArrayRef = false;
-  protected boolean takeCSE = false;
-  protected boolean takeRectArray = false;
-  protected boolean addColorTags = false;
-
-  protected void internalTransform(Body body, String phaseName, Map opts) {
+@Override
+protected void internalTransform(Body body, String phaseName, Map opts) {
     ABCOptions options = new ABCOptions(opts);
     if (options.with_all()) {
       takeClassField = true;
@@ -161,11 +161,9 @@ public class ArrayBoundsChecker extends BodyTransformer {
               boolean keysAdded = false;
               while (keysIt.hasNext()) {
                 Object next = keysIt.next();
-                if (next instanceof KeyTag) {
-                  if (((KeyTag) next).analysisType().equals("ArrayCheckTag")) {
+                if (next instanceof KeyTag && "ArrayCheckTag".equals(((KeyTag) next).analysisType())) {
                     keysAdded = true;
                   }
-                }
               }
               if (!keysAdded) {
                 bodyClass.addTag(new KeyTag(255, 0, 0, "ArrayBounds: Unsafe Lower and Unsafe Upper", "ArrayCheckTag"));
@@ -257,12 +255,13 @@ public class ArrayBoundsChecker extends BodyTransformer {
       if (Options.v().verbose()) {
         long runtime = finish.getTime() - start.getTime();
         logger.debug(
-            "[abc] ended on " + finish + ". It took " + (runtime / 60000) + " min. " + ((runtime % 60000) / 1000) + " sec.");
+            new StringBuilder().append("[abc] ended on ").append(finish).append(". It took ").append(runtime / 60000).append(" min. ")
+					.append((runtime % 60000) / 1000).append(" sec.").toString());
       }
     }
   }
 
-  private boolean hasArrayLocals(Body body) {
+private boolean hasArrayLocals(Body body) {
     Iterator localIt = body.getLocals().iterator();
 
     while (localIt.hasNext()) {
@@ -275,18 +274,17 @@ public class ArrayBoundsChecker extends BodyTransformer {
     return false;
   }
 
-  protected int interpretGraph(WeightedDirectedSparseGraph vgraph, ArrayRef aref, Stmt stmt, IntContainer zero) {
+protected int interpretGraph(WeightedDirectedSparseGraph vgraph, ArrayRef aref, Stmt stmt, IntContainer zero) {
 
     boolean lowercheck = true;
     boolean uppercheck = true;
 
     {
-      if (Options.v().debug()) {
-        if (!vgraph.makeShortestPathGraph()) {
-          logger.debug("" + stmt + " :");
-          logger.debug("" + vgraph);
-        }
-      }
+      boolean condition = Options.v().debug() && !vgraph.makeShortestPathGraph();
+	if (condition) {
+	  logger.debug(new StringBuilder().append("").append(stmt).append(" :").toString());
+	  logger.debug("" + vgraph);
+	}
 
       Value base = aref.getBase();
       Value index = aref.getIndex();

@@ -58,10 +58,10 @@ public class ClassHierarchy {
   // public final TypeNode ERROR;
 
   /** All type node instances **/
-  private final List<TypeNode> typeNodeList = new ArrayList<TypeNode>();
+  private final List<TypeNode> typeNodeList = new ArrayList<>();
 
   /** Map: Type -> TypeNode **/
-  private final HashMap<Type, TypeNode> typeNodeMap = new HashMap<Type, TypeNode>();
+  private final HashMap<Type, TypeNode> typeNodeMap = new HashMap<>();
 
   /** Used to transform boolean, byte, short and char to int **/
   private final ToInt transform = new ToInt();
@@ -130,8 +130,9 @@ public class ClassHierarchy {
   }
 
   /** Returns a string representation of this object **/
-  public String toString() {
-    StringBuffer s = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder s = new StringBuilder();
     boolean colon = false;
 
     s.append("ClassHierarchy:{");
@@ -165,23 +166,28 @@ public class ClassHierarchy {
       return result;
     }
 
-    public void caseBooleanType(BooleanType type) {
+    @Override
+	public void caseBooleanType(BooleanType type) {
       result = intType;
     }
 
-    public void caseByteType(ByteType type) {
+    @Override
+	public void caseByteType(ByteType type) {
       result = intType;
     }
 
-    public void caseShortType(ShortType type) {
+    @Override
+	public void caseShortType(ShortType type) {
       result = intType;
     }
 
-    public void caseCharType(CharType type) {
+    @Override
+	public void caseCharType(CharType type) {
       result = intType;
     }
 
-    public void defaultCase(Type type) {
+    @Override
+	public void defaultCase(Type type) {
       result = type;
     }
   }
@@ -212,15 +218,18 @@ public class ClassHierarchy {
       return result;
     }
 
-    public void caseRefType(RefType type) {
+    @Override
+	public void caseRefType(RefType type) {
       result = new TypeNode(id, type, hierarchy);
     }
 
-    public void caseArrayType(ArrayType type) {
+    @Override
+	public void caseArrayType(ArrayType type) {
       result = new TypeNode(id, type, hierarchy);
     }
 
-    public void defaultCase(Type type) {
+    @Override
+	public void defaultCase(Type type) {
       result = new TypeNode(id, type, hierarchy);
     }
   }

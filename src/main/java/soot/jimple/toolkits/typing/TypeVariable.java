@@ -36,6 +36,7 @@ import soot.ArrayType;
 import soot.RefType;
 import soot.options.Options;
 import soot.util.BitVector;
+import java.util.stream.Collectors;
 
 /** Represents a type variable. **/
 class TypeVariable implements Comparable<Object> {
@@ -84,7 +85,8 @@ class TypeVariable implements Comparable<Object> {
     }
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     if (rep != this) {
       return ecr().hashCode();
     }
@@ -92,7 +94,8 @@ class TypeVariable implements Comparable<Object> {
     return id;
   }
 
-  public boolean equals(Object obj) {
+  @Override
+public boolean equals(Object obj) {
     if (rep != this) {
       return ecr().equals(obj);
     }
@@ -114,7 +117,8 @@ class TypeVariable implements Comparable<Object> {
     return true;
   }
 
-  public int compareTo(Object o) {
+  @Override
+public int compareTo(Object o) {
     if (rep != this) {
       return ecr().compareTo(o);
     }
@@ -186,7 +190,7 @@ class TypeVariable implements Comparable<Object> {
 
     // Merge parents
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(parents);
+      Set<TypeVariable> set = new TreeSet<>(parents);
       set.addAll(var.parents);
       set.remove(this);
       parents = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
@@ -194,7 +198,7 @@ class TypeVariable implements Comparable<Object> {
 
     // Merge children
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(children);
+      Set<TypeVariable> set = new TreeSet<>(children);
       set.addAll(var.children);
       set.remove(this);
       children = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
@@ -208,35 +212,34 @@ class TypeVariable implements Comparable<Object> {
     }
 
     // Validate relations.
-    if (type != null) {
-      for (TypeVariable typeVariable : parents) {
+	if (type == null) {
+		return;
+	}
+	for (TypeVariable typeVariable : parents) {
         TypeVariable parent = typeVariable.ecr();
 
-        if (parent.type != null) {
-          if (!type.hasAncestor(parent.type)) {
+        boolean condition = parent.type != null && !type.hasAncestor(parent.type);
+		if (condition) {
             if (DEBUG) {
-              logger.debug("" + parent.type + " is not a parent of " + type);
+              logger.debug(new StringBuilder().append("").append(parent.type).append(" is not a parent of ").append(type).toString());
             }
 
             error("Type Error(2): Parent type is not a valid ancestor.");
           }
-        }
       }
-
-      for (TypeVariable typeVariable : children) {
+	for (TypeVariable typeVariable : children) {
         TypeVariable child = typeVariable.ecr();
 
-        if (child.type != null) {
-          if (!type.hasDescendant(child.type)) {
+        boolean condition1 = child.type != null && !type.hasDescendant(child.type);
+		if (condition1) {
             if (DEBUG) {
-              logger.debug("" + child.type + "(" + child + ") is not a child of " + type + "(" + this + ")");
+              logger.debug(new StringBuilder().append("").append(child.type).append("(").append(child).append(") is not a child of ").append(type)
+					.append("(").append(this).append(")").toString());
             }
 
             error("Type Error(3): Child type is not a valid descendant.");
           }
-        }
       }
-    }
   }
 
   public void removeIndirectRelations() {
@@ -249,35 +252,24 @@ class TypeVariable implements Comparable<Object> {
       fixAncestors();
     }
 
-    List<TypeVariable> parentsToRemove = new LinkedList<TypeVariable>();
+    List<TypeVariable> parentsToRemove = new LinkedList<>();
 
-    for (TypeVariable parent : parents) {
+    parentsToRemove.addAll(parents.stream().filter(parent -> indirectAncestors.get(parent.id())).collect(Collectors.toList()));
 
-      if (indirectAncestors.get(parent.id())) {
-        parentsToRemove.add(parent);
-      }
-    }
-
-    for (TypeVariable parent : parentsToRemove) {
-
-      removeParent(parent);
-    }
+    parentsToRemove.forEach(this::removeParent);
   }
 
   private void fixAncestors() {
     BitVector ancestors = new BitVector(0);
     BitVector indirectAncestors = new BitVector(0);
-    for (TypeVariable typeVariable : parents) {
-      TypeVariable parent = typeVariable.ecr();
-
-      if (parent.ancestors == null) {
-        parent.fixAncestors();
-      }
-
-      ancestors.set(parent.id);
-      ancestors.or(parent.ancestors);
-      indirectAncestors.or(parent.ancestors);
-    }
+    parents.stream().map(TypeVariable::ecr).forEach(parent -> {
+		if (parent.ancestors == null) {
+		    parent.fixAncestors();
+		  }
+		ancestors.set(parent.id);
+		ancestors.or(parent.ancestors);
+		indirectAncestors.or(parent.ancestors);
+	});
 
     this.ancestors = ancestors;
     this.indirectAncestors = indirectAncestors;
@@ -304,13 +296,13 @@ class TypeVariable implements Comparable<Object> {
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(parents);
+      Set<TypeVariable> set = new TreeSet<>(parents);
       set.add(var);
       parents = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(var.children);
+      Set<TypeVariable> set = new TreeSet<>(var.children);
       set.add(this);
       var.children = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
@@ -325,13 +317,13 @@ class TypeVariable implements Comparable<Object> {
     TypeVariable var = variable.ecr();
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(parents);
+      Set<TypeVariable> set = new TreeSet<>(parents);
       set.remove(var);
       parents = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(var.children);
+      Set<TypeVariable> set = new TreeSet<>(var.children);
       set.remove(this);
       var.children = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
@@ -350,13 +342,13 @@ class TypeVariable implements Comparable<Object> {
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(children);
+      Set<TypeVariable> set = new TreeSet<>(children);
       set.add(var);
       children = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(var.parents);
+      Set<TypeVariable> set = new TreeSet<>(var.parents);
       set.add(this);
       var.parents = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
@@ -371,13 +363,13 @@ class TypeVariable implements Comparable<Object> {
     TypeVariable var = variable.ecr();
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(children);
+      Set<TypeVariable> set = new TreeSet<>(children);
       set.remove(var);
       children = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(var.parents);
+      Set<TypeVariable> set = new TreeSet<>(var.parents);
       set.remove(this);
       var.parents = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
@@ -397,10 +389,11 @@ class TypeVariable implements Comparable<Object> {
       return;
     }
 
-    if (element == null) {
-      element = resolver.typeVariable();
-      element.array = this;
-    }
+    if (element != null) {
+		return;
+	}
+	element = resolver.typeVariable();
+	element.array = this;
   }
 
   public TypeVariable element() {
@@ -485,7 +478,7 @@ class TypeVariable implements Comparable<Object> {
 
       if (element != null) {
         if (!approx.hasElement()) {
-          logger.debug("*** " + this + " ***");
+          logger.debug(new StringBuilder().append("*** ").append(this).append(" ***").toString());
 
           error("Type Error(4)");
         }
@@ -608,42 +601,36 @@ class TypeVariable implements Comparable<Object> {
       return;
     }
 
-    for (TypeVariable typeVariable : parents) {
-      TypeVariable var = typeVariable.ecr();
+    parents.stream().map(TypeVariable::ecr).forEach(var -> {
+		if (var.depth() == depth) {
+		    element().addParent(var.element());
+		  } else if (var.depth() == 0) {
+		    boolean condition = var.type() == null && !Options.v().j2me();
+			// hack for J2ME library, reported by Stephen Cheng
+			if (condition) {
+		        var.addChild(resolver.typeVariable(resolver.hierarchy().CLONEABLE));
+		        var.addChild(resolver.typeVariable(resolver.hierarchy().SERIALIZABLE));
+		      }
+		  } else {
+		    boolean condition1 = var.type() == null && !Options.v().j2me();
+			// hack for J2ME library, reported by Stephen Cheng
+			if (condition1) {
+		        var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.lang.Cloneable"), var.depth())));
+		        var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.io.Serializable"), var.depth())));
+		      }
+		  }
+	});
 
-      if (var.depth() == depth) {
-        element().addParent(var.element());
-      } else if (var.depth() == 0) {
-        if (var.type() == null) {
-          // hack for J2ME library, reported by Stephen Cheng
-          if (!Options.v().j2me()) {
-            var.addChild(resolver.typeVariable(resolver.hierarchy().CLONEABLE));
-            var.addChild(resolver.typeVariable(resolver.hierarchy().SERIALIZABLE));
-          }
-        }
-      } else {
-        if (var.type() == null) {
-          // hack for J2ME library, reported by Stephen Cheng
-          if (!Options.v().j2me()) {
-            var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.lang.Cloneable"), var.depth())));
-            var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.io.Serializable"), var.depth())));
-          }
-        }
-      }
-    }
-
-    for (TypeVariable var : parents) {
-
-      removeParent(var);
-    }
+    parents.forEach(this::removeParent);
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     if (rep != this) {
       return ecr().toString();
     }
 
-    StringBuffer s = new StringBuffer();
+    StringBuilder s = new StringBuilder();
     s.append(",[parents:");
 
     {
@@ -675,8 +662,8 @@ class TypeVariable implements Comparable<Object> {
     }
 
     s.append("]");
-    return "[id:" + id + ",depth:" + depth + ((type != null) ? (",type:" + type) : "") + ",approx:" + approx + s
-        + (element == null ? "" : ",arrayof:" + element.id()) + "]";
+    return new StringBuilder().append("[id:").append(id).append(",depth:").append(depth).append((type != null) ? (",type:" + type) : "")
+			.append(",approx:").append(approx).append(s).append(element == null ? "" : ",arrayof:" + element.id()).append("]").toString();
   }
 
   public void fixParents() {
@@ -686,7 +673,7 @@ class TypeVariable implements Comparable<Object> {
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(parents);
+      Set<TypeVariable> set = new TreeSet<>(parents);
       parents = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
   }
@@ -698,7 +685,7 @@ class TypeVariable implements Comparable<Object> {
     }
 
     {
-      Set<TypeVariable> set = new TreeSet<TypeVariable>(children);
+      Set<TypeVariable> set = new TreeSet<>(children);
       children = Collections.unmodifiableList(new LinkedList<TypeVariable>(set));
     }
   }

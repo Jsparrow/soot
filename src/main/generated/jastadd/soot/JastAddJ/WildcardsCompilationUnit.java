@@ -18,16 +18,86 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production WildcardsCompilationUnit : {@link CompilationUnit};
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.ast:49
  */
-public class WildcardsCompilationUnit extends CompilationUnit implements Cloneable {
-  /**
+public class WildcardsCompilationUnit extends CompilationUnit {
+  private static final Logger logger = LoggerFactory.getLogger(WildcardsCompilationUnit.class);
+/**
+   * @apilevel internal
+   */
+  protected boolean typeWildcard_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl typeWildcard_value;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map lookupWildcardExtends_TypeDecl_values;
+/**
+   * @apilevel internal
+   */
+  protected List lookupWildcardExtends_TypeDecl_list;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map lookupWildcardSuper_TypeDecl_values;
+/**
+   * @apilevel internal
+   */
+  protected List lookupWildcardSuper_TypeDecl_list;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map lookupLUBType_Collection_values;
+/**
+   * @apilevel internal
+   */
+  protected List lookupLUBType_Collection_list;
+/**
+   * @apilevel internal
+   */
+  protected java.util.Map lookupGLBType_ArrayList_values;
+/**
+   * @apilevel internal
+   */
+  protected List lookupGLBType_ArrayList_list;
+/**
+   * @ast method 
+   * 
+   */
+  public WildcardsCompilationUnit() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public WildcardsCompilationUnit(java.lang.String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
+    setPackageDecl(p0);
+    setChild(p1, 0);
+    setChild(p2, 1);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public WildcardsCompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
+    setPackageDecl(p0);
+    setChild(p1, 0);
+    setChild(p2, 1);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     typeWildcard_computed = false;
     typeWildcard_value = null;
@@ -36,16 +106,18 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     lookupWildcardSuper_TypeDecl_list = null;    lookupLUBType_Collection_values = null;
     lookupLUBType_Collection_list = null;    lookupGLBType_ArrayList_values = null;
     lookupGLBType_ArrayList_list = null;  }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public WildcardsCompilationUnit clone() throws CloneNotSupportedException {
     WildcardsCompilationUnit node = (WildcardsCompilationUnit)super.clone();
     node.typeWildcard_computed = false;
@@ -58,29 +130,33 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public WildcardsCompilationUnit copy() {
     try {
       WildcardsCompilationUnit node = (WildcardsCompilationUnit) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public WildcardsCompilationUnit fullCopy() {
     WildcardsCompilationUnit tree = (WildcardsCompilationUnit) copy();
     if (children != null) {
@@ -94,14 +170,14 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1414
    */
   public static LUBType createLUBType(Collection bounds) {
     List boundList = new List();
-    StringBuffer name = new StringBuffer();
+    StringBuilder name = new StringBuilder();
     for(Iterator iter = bounds.iterator(); iter.hasNext(); ) {
       TypeDecl typeDecl = (TypeDecl)iter.next();
       boundList.add(typeDecl.createBoundAccess());
@@ -115,16 +191,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     );
     return decl;
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public WildcardsCompilationUnit() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -132,99 +199,90 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[2];
     setChild(new List(), 0);
     setChild(new List(), 1);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public WildcardsCompilationUnit(java.lang.String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
-    setPackageDecl(p0);
-    setChild(p1, 0);
-    setChild(p2, 1);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public WildcardsCompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
-    setPackageDecl(p0);
-    setChild(p1, 0);
-    setChild(p2, 1);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 2;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the lexeme PackageDecl.
    * @param value The new value for the lexeme PackageDecl.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setPackageDecl(java.lang.String value) {
+  @Override
+public void setPackageDecl(java.lang.String value) {
     tokenjava_lang_String_PackageDecl = value;
   }
-  /**
+/**
    * JastAdd-internal setter for lexeme PackageDecl using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
-  public void setPackageDecl(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setPackageDecl is only valid for String lexemes");
+  @Override
+public void setPackageDecl(beaver.Symbol symbol) {
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setPackageDecl is only valid for String lexemes");
+	}
     tokenjava_lang_String_PackageDecl = (String)symbol.value;
     PackageDeclstart = symbol.getStart();
     PackageDeclend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme PackageDecl.
    * @return The value for the lexeme PackageDecl.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public java.lang.String getPackageDecl() {
+  @Override
+public java.lang.String getPackageDecl() {
     return tokenjava_lang_String_PackageDecl != null ? tokenjava_lang_String_PackageDecl : "";
   }
-  /**
+/**
    * Replaces the ImportDecl list.
    * @param list The new list node to be used as the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setImportDeclList(List<ImportDecl> list) {
+  @Override
+public void setImportDeclList(List<ImportDecl> list) {
     setChild(list, 0);
   }
-  /**
+/**
    * Retrieves the number of children in the ImportDecl list.
    * @return Number of children in the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public int getNumImportDecl() {
+  @Override
+public int getNumImportDecl() {
     return getImportDeclList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the ImportDecl list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the ImportDecl list.
@@ -232,10 +290,11 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public int getNumImportDeclNoTransform() {
+  @Override
+public int getNumImportDeclNoTransform() {
     return getImportDeclListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the ImportDecl list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the ImportDecl list.
@@ -243,31 +302,34 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ImportDecl getImportDecl(int i) {
     return (ImportDecl)getImportDeclList().getChild(i);
   }
-  /**
+/**
    * Append an element to the ImportDecl list.
    * @param node The element to append to the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void addImportDecl(ImportDecl node) {
+  @Override
+public void addImportDecl(ImportDecl node) {
     List<ImportDecl> list = (parent == null || state == null) ? getImportDeclListNoTransform() : getImportDeclList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  public void addImportDeclNoTransform(ImportDecl node) {
+  @Override
+public void addImportDeclNoTransform(ImportDecl node) {
     List<ImportDecl> list = getImportDeclListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the ImportDecl list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -275,21 +337,23 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public void setImportDecl(ImportDecl node, int i) {
+  @Override
+public void setImportDecl(ImportDecl node, int i) {
     List<ImportDecl> list = getImportDeclList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * @return The node representing the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public List<ImportDecl> getImportDecls() {
+  @Override
+public List<ImportDecl> getImportDecls() {
     return getImportDeclList();
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the ImportDecl list.
@@ -297,23 +361,25 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public List<ImportDecl> getImportDeclsNoTransform() {
+  @Override
+public List<ImportDecl> getImportDeclsNoTransform() {
     return getImportDeclListNoTransform();
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * @return The node representing the ImportDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<ImportDecl> getImportDeclList() {
     List<ImportDecl> list = (List<ImportDecl>)getChild(0);
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the ImportDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the ImportDecl list.
@@ -321,31 +387,34 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<ImportDecl> getImportDeclListNoTransform() {
     return (List<ImportDecl>)getChildNoTransform(0);
   }
-  /**
+/**
    * Replaces the TypeDecl list.
    * @param list The new list node to be used as the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void setTypeDeclList(List<TypeDecl> list) {
+  @Override
+public void setTypeDeclList(List<TypeDecl> list) {
     setChild(list, 1);
   }
-  /**
+/**
    * Retrieves the number of children in the TypeDecl list.
    * @return Number of children in the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public int getNumTypeDecl() {
+  @Override
+public int getNumTypeDecl() {
     return getTypeDeclList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the TypeDecl list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the TypeDecl list.
@@ -353,10 +422,11 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public int getNumTypeDeclNoTransform() {
+  @Override
+public int getNumTypeDeclNoTransform() {
     return getTypeDeclListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the TypeDecl list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the TypeDecl list.
@@ -364,31 +434,34 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl getTypeDecl(int i) {
     return (TypeDecl)getTypeDeclList().getChild(i);
   }
-  /**
+/**
    * Append an element to the TypeDecl list.
    * @param node The element to append to the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public void addTypeDecl(TypeDecl node) {
+  @Override
+public void addTypeDecl(TypeDecl node) {
     List<TypeDecl> list = (parent == null || state == null) ? getTypeDeclListNoTransform() : getTypeDeclList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  public void addTypeDeclNoTransform(TypeDecl node) {
+  @Override
+public void addTypeDeclNoTransform(TypeDecl node) {
     List<TypeDecl> list = getTypeDeclListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the TypeDecl list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -396,21 +469,23 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public void setTypeDecl(TypeDecl node, int i) {
+  @Override
+public void setTypeDecl(TypeDecl node, int i) {
     List<TypeDecl> list = getTypeDeclList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * @return The node representing the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  public List<TypeDecl> getTypeDecls() {
+  @Override
+public List<TypeDecl> getTypeDecls() {
     return getTypeDeclList();
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the TypeDecl list.
@@ -418,23 +493,25 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  public List<TypeDecl> getTypeDeclsNoTransform() {
+  @Override
+public List<TypeDecl> getTypeDeclsNoTransform() {
     return getTypeDeclListNoTransform();
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * @return The node representing the TypeDecl list.
    * @apilevel high-level
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<TypeDecl> getTypeDeclList() {
     List<TypeDecl> list = (List<TypeDecl>)getChild(1);
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the TypeDecl list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the TypeDecl list.
@@ -442,19 +519,12 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @ast method 
    * 
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public List<TypeDecl> getTypeDeclListNoTransform() {
     return (List<TypeDecl>)getChildNoTransform(1);
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean typeWildcard_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl typeWildcard_value;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1376
@@ -470,10 +540,12 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     typeWildcard_value = typeWildcard_compute();
     typeWildcard_value.setParent(this);
     typeWildcard_value.is$Final = true;
-      if(true) typeWildcard_computed = true;
+      if(true) {
+		typeWildcard_computed = true;
+	}
     return typeWildcard_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl typeWildcard_compute() {
@@ -484,15 +556,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     );
     return decl;
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map lookupWildcardExtends_TypeDecl_values;
-  /**
-   * @apilevel internal
-   */
-  protected List lookupWildcardExtends_TypeDecl_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1387
@@ -500,7 +564,9 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   @SuppressWarnings({"unchecked", "cast"})
   public TypeDecl lookupWildcardExtends(TypeDecl bound) {
     Object _parameters = bound;
-    if(lookupWildcardExtends_TypeDecl_values == null) lookupWildcardExtends_TypeDecl_values = new java.util.HashMap(4);
+    if(lookupWildcardExtends_TypeDecl_values == null) {
+		lookupWildcardExtends_TypeDecl_values = new java.util.HashMap(4);
+	}
     if(lookupWildcardExtends_TypeDecl_values.containsKey(_parameters)) {
       return (TypeDecl)lookupWildcardExtends_TypeDecl_values.get(_parameters);
     }
@@ -517,10 +583,12 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     if(lookupWildcardExtends_TypeDecl_value != null) {
       lookupWildcardExtends_TypeDecl_value.is$Final = true;
     }
-      if(true) lookupWildcardExtends_TypeDecl_values.put(_parameters, lookupWildcardExtends_TypeDecl_value);
+      if(true) {
+		lookupWildcardExtends_TypeDecl_values.put(_parameters, lookupWildcardExtends_TypeDecl_value);
+	}
     return lookupWildcardExtends_TypeDecl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl lookupWildcardExtends_compute(TypeDecl bound) {
@@ -532,15 +600,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     );
     return decl;
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map lookupWildcardSuper_TypeDecl_values;
-  /**
-   * @apilevel internal
-   */
-  protected List lookupWildcardSuper_TypeDecl_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1400
@@ -548,7 +608,9 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   @SuppressWarnings({"unchecked", "cast"})
   public TypeDecl lookupWildcardSuper(TypeDecl bound) {
     Object _parameters = bound;
-    if(lookupWildcardSuper_TypeDecl_values == null) lookupWildcardSuper_TypeDecl_values = new java.util.HashMap(4);
+    if(lookupWildcardSuper_TypeDecl_values == null) {
+		lookupWildcardSuper_TypeDecl_values = new java.util.HashMap(4);
+	}
     if(lookupWildcardSuper_TypeDecl_values.containsKey(_parameters)) {
       return (TypeDecl)lookupWildcardSuper_TypeDecl_values.get(_parameters);
     }
@@ -565,10 +627,12 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     if(lookupWildcardSuper_TypeDecl_value != null) {
       lookupWildcardSuper_TypeDecl_value.is$Final = true;
     }
-      if(true) lookupWildcardSuper_TypeDecl_values.put(_parameters, lookupWildcardSuper_TypeDecl_value);
+      if(true) {
+		lookupWildcardSuper_TypeDecl_values.put(_parameters, lookupWildcardSuper_TypeDecl_value);
+	}
     return lookupWildcardSuper_TypeDecl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl lookupWildcardSuper_compute(TypeDecl bound) {
@@ -580,15 +644,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     );
     return decl;
   }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map lookupLUBType_Collection_values;
-  /**
-   * @apilevel internal
-   */
-  protected List lookupLUBType_Collection_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1413
@@ -596,7 +652,9 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   @SuppressWarnings({"unchecked", "cast"})
   public LUBType lookupLUBType(Collection bounds) {
     Object _parameters = bounds;
-    if(lookupLUBType_Collection_values == null) lookupLUBType_Collection_values = new java.util.HashMap(4);
+    if(lookupLUBType_Collection_values == null) {
+		lookupLUBType_Collection_values = new java.util.HashMap(4);
+	}
     if(lookupLUBType_Collection_values.containsKey(_parameters)) {
       return (LUBType)lookupLUBType_Collection_values.get(_parameters);
     }
@@ -613,22 +671,16 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     if(lookupLUBType_Collection_value != null) {
       lookupLUBType_Collection_value.is$Final = true;
     }
-      if(true) lookupLUBType_Collection_values.put(_parameters, lookupLUBType_Collection_value);
+      if(true) {
+		lookupLUBType_Collection_values.put(_parameters, lookupLUBType_Collection_value);
+	}
     return lookupLUBType_Collection_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private LUBType lookupLUBType_compute(Collection bounds) {  return createLUBType(bounds);  }
-  /**
-   * @apilevel internal
-   */
-  protected java.util.Map lookupGLBType_ArrayList_values;
-  /**
-   * @apilevel internal
-   */
-  protected List lookupGLBType_ArrayList_list;
-  /**
+/**
    * @attribute syn
    * @aspect LookupParTypeDecl
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Generics.jrag:1452
@@ -636,7 +688,9 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   @SuppressWarnings({"unchecked", "cast"})
   public GLBType lookupGLBType(ArrayList bounds) {
     Object _parameters = bounds;
-    if(lookupGLBType_ArrayList_values == null) lookupGLBType_ArrayList_values = new java.util.HashMap(4);
+    if(lookupGLBType_ArrayList_values == null) {
+		lookupGLBType_ArrayList_values = new java.util.HashMap(4);
+	}
     if(lookupGLBType_ArrayList_values.containsKey(_parameters)) {
       return (GLBType)lookupGLBType_ArrayList_values.get(_parameters);
     }
@@ -653,15 +707,17 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     if(lookupGLBType_ArrayList_value != null) {
       lookupGLBType_ArrayList_value.is$Final = true;
     }
-      if(true) lookupGLBType_ArrayList_values.put(_parameters, lookupGLBType_ArrayList_value);
+      if(true) {
+		lookupGLBType_ArrayList_values.put(_parameters, lookupGLBType_ArrayList_value);
+	}
     return lookupGLBType_ArrayList_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private GLBType lookupGLBType_compute(ArrayList bounds) {
     List boundList = new List();
-    StringBuffer name = new StringBuffer();
+    StringBuilder name = new StringBuilder();
     for(Iterator iter = bounds.iterator(); iter.hasNext(); ) {
       TypeDecl typeDecl = (TypeDecl)iter.next();
       boundList.add(typeDecl.createBoundAccess());
@@ -675,10 +731,11 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     );
     return decl;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

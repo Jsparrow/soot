@@ -34,16 +34,17 @@ public class JavaLangReflectFieldNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
 
     String subSignature = method.getSubSignature();
 
-    if (subSignature.equals("void set(java.lang.Object,java.lang.Object)")) {
+    if ("void set(java.lang.Object,java.lang.Object)".equals(subSignature)) {
       java_lang_reflect_Field_set(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object get(java.lang.Object)")) {
+    } else if ("java.lang.Object get(java.lang.Object)".equals(subSignature)) {
       java_lang_reflect_Field_get(method, thisVar, returnVar, params);
       return;
 

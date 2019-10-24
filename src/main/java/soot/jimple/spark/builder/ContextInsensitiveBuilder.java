@@ -51,8 +51,16 @@ import soot.util.queue.QueueReader;
  */
 public class ContextInsensitiveBuilder {
   private static final Logger logger = LoggerFactory.getLogger(ContextInsensitiveBuilder.class);
+protected PAG pag;
+protected CallGraphBuilder cgb;
+protected OnFlyCallGraph ofcg;
+protected ReachableMethods reachables;
+int classes = 0;
+int totalMethods = 0;
+int analyzedMethods = 0;
+int stmts = 0;
 
-  public void preJimplify() {
+public void preJimplify() {
     boolean change = true;
     while (change) {
       change = false;
@@ -77,7 +85,7 @@ public class ContextInsensitiveBuilder {
     }
   }
 
-  /** Creates an empty pointer assignment graph. */
+/** Creates an empty pointer assignment graph. */
   public PAG setup(SparkOptions opts) {
     pag = opts.geom_pta() ? new GeomPointsTo(opts) : new PAG(opts);
     if (opts.simulate_natives()) {
@@ -92,7 +100,7 @@ public class ContextInsensitiveBuilder {
     return pag;
   }
 
-  /** Fills in the pointer assignment graph returned by setup. */
+/** Fills in the pointer assignment graph returned by setup. */
   public void build() {
     QueueReader<Edge> callEdges;
     if (ofcg != null) {
@@ -105,9 +113,7 @@ public class ContextInsensitiveBuilder {
       cgb.build();
       reachables = cgb.reachables();
     }
-    for (final SootClass c : Scene.v().getClasses()) {
-      handleClass(c);
-    }
+    Scene.v().getClasses().forEach(this::handleClass);
     while (callEdges.hasNext()) {
       Edge e = callEdges.next();
       if (e.getTgt().method().getDeclaringClass().isConcrete()) {
@@ -118,14 +124,15 @@ public class ContextInsensitiveBuilder {
       }
     }
 
-    if (pag.getOpts().verbose()) {
-      logger.debug("Total methods: " + totalMethods);
-      logger.debug("Initially reachable methods: " + analyzedMethods);
-      logger.debug("Classes with at least one reachable method: " + classes);
-    }
+    if (!pag.getOpts().verbose()) {
+		return;
+	}
+	logger.debug("Total methods: " + totalMethods);
+	logger.debug("Initially reachable methods: " + analyzedMethods);
+	logger.debug("Classes with at least one reachable method: " + classes);
   }
 
-  /* End of public methods. */
+/* End of public methods. */
   /* End of package methods. */
   protected void handleClass(SootClass c) {
     boolean incedClasses = false;
@@ -148,13 +155,4 @@ public class ContextInsensitiveBuilder {
       }
     }
   }
-
-  protected PAG pag;
-  protected CallGraphBuilder cgb;
-  protected OnFlyCallGraph ofcg;
-  protected ReachableMethods reachables;
-  int classes = 0;
-  int totalMethods = 0;
-  int analyzedMethods = 0;
-  int stmts = 0;
 }

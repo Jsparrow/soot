@@ -45,63 +45,27 @@ import org.slf4j.LoggerFactory;
  */
 public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLabelledDirectedGraph<N, L> {
   private static final Logger logger = LoggerFactory.getLogger(HashMutableEdgeLabelledDirectedGraph.class);
+protected Map<N, List<N>> nodeToPreds;
+protected Map<N, List<N>> nodeToSuccs;
+protected Map<DGEdge<N>, List<L>> edgeToLabels;
+protected Map<L, List<DGEdge<N>>> labelToEdges;
+protected Set<N> heads;
+protected Set<N> tails;
 
-  private static class DGEdge<N> {
-
-    N from;
-    N to;
-
-    public DGEdge(N from, N to) {
-      this.from = from;
-      this.to = to;
-    }
-
-    public N from() {
-      return from;
-    }
-
-    public N to() {
-      return to;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o instanceof DGEdge) {
-        DGEdge<?> other = (DGEdge<?>) o;
-        return from.equals(other.from) && to.equals(other.to);
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return Arrays.hashCode(new Object[] { from, to });
-    }
+public HashMutableEdgeLabelledDirectedGraph() {
+    nodeToPreds = new HashMap<>();
+    nodeToSuccs = new HashMap<>();
+    edgeToLabels = new HashMap<>();
+    labelToEdges = new HashMap<>();
+    heads = new HashSet<>();
+    tails = new HashSet<>();
   }
 
-  private static <T> List<T> getCopy(Collection<? extends T> c) {
+private static <T> List<T> getCopy(Collection<? extends T> c) {
     return Collections.unmodifiableList(new ArrayList<T>(c));
   }
 
-  protected Map<N, List<N>> nodeToPreds;
-  protected Map<N, List<N>> nodeToSuccs;
-
-  protected Map<DGEdge<N>, List<L>> edgeToLabels;
-  protected Map<L, List<DGEdge<N>>> labelToEdges;
-
-  protected Set<N> heads;
-  protected Set<N> tails;
-
-  public HashMutableEdgeLabelledDirectedGraph() {
-    nodeToPreds = new HashMap<N, List<N>>();
-    nodeToSuccs = new HashMap<N, List<N>>();
-    edgeToLabels = new HashMap<DGEdge<N>, List<L>>();
-    labelToEdges = new HashMap<L, List<DGEdge<N>>>();
-    heads = new HashSet<N>();
-    tails = new HashSet<N>();
-  }
-
-  /**
+/**
    * Removes all nodes and edges.
    */
   public void clearAll() {
@@ -113,9 +77,9 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
     tails.clear();
   }
 
-  @Override
+@Override
   public HashMutableEdgeLabelledDirectedGraph<N, L> clone() {
-    HashMutableEdgeLabelledDirectedGraph<N, L> g = new HashMutableEdgeLabelledDirectedGraph<N, L>();
+    HashMutableEdgeLabelledDirectedGraph<N, L> g = new HashMutableEdgeLabelledDirectedGraph<>();
     g.nodeToPreds.putAll(nodeToPreds);
     g.nodeToSuccs.putAll(nodeToSuccs);
     g.edgeToLabels.putAll(edgeToLabels);
@@ -125,19 +89,19 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
     return g;
   }
 
-  /* Returns an unbacked list of heads for this graph. */
+/* Returns an unbacked list of heads for this graph. */
   @Override
   public List<N> getHeads() {
     return getCopy(heads);
   }
 
-  /* Returns an unbacked list of tails for this graph. */
+/* Returns an unbacked list of tails for this graph. */
   @Override
   public List<N> getTails() {
     return getCopy(tails);
   }
 
-  @Override
+@Override
   public List<N> getPredsOf(N s) {
     List<N> preds = nodeToPreds.get(s);
     if (preds != null) {
@@ -147,7 +111,7 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
     throw new RuntimeException(s + "not in graph!");
   }
 
-  @Override
+@Override
   public List<N> getSuccsOf(N s) {
     List<N> succs = nodeToSuccs.get(s);
     if (succs != null) {
@@ -157,17 +121,17 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
     throw new RuntimeException(s + "not in graph!");
   }
 
-  @Override
+@Override
   public int size() {
     return nodeToPreds.keySet().size();
   }
 
-  @Override
+@Override
   public Iterator<N> iterator() {
     return nodeToPreds.keySet().iterator();
   }
 
-  @Override
+@Override
   public void addEdge(N from, N to, L label) {
     if (from == null || to == null) {
       throw new RuntimeException("edge from or to null");
@@ -201,15 +165,11 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
       predsList.add(from);
     }
 
-    DGEdge<N> edge = new DGEdge<N>(from, to);
-    if (!edgeToLabels.containsKey(edge)) {
-      edgeToLabels.put(edge, new ArrayList<L>());
-    }
+    DGEdge<N> edge = new DGEdge<>(from, to);
+    edgeToLabels.putIfAbsent(edge, new ArrayList<>());
     List<L> labels = edgeToLabels.get(edge);
 
-    if (!labelToEdges.containsKey(label)) {
-      labelToEdges.put(label, new ArrayList<DGEdge<N>>());
-    }
+    labelToEdges.putIfAbsent(label, new ArrayList<>());
     List<DGEdge<N>> edges = labelToEdges.get(label);
 
     // if(!labels.contains(label))
@@ -218,20 +178,20 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
     edges.add(edge);
   }
 
-  @Override
+@Override
   public List<L> getLabelsForEdges(N from, N to) {
-    DGEdge<N> edge = new DGEdge<N>(from, to);
+    DGEdge<N> edge = new DGEdge<>(from, to);
     return edgeToLabels.get(edge);
   }
 
-  @Override
+@Override
   public MutableDirectedGraph<N> getEdgesForLabel(L label) {
     List<DGEdge<N>> edges = labelToEdges.get(label);
-    MutableDirectedGraph<N> ret = new HashMutableDirectedGraph<N>();
+    MutableDirectedGraph<N> ret = new HashMutableDirectedGraph<>();
     if (edges == null) {
       return ret;
     }
-    for (DGEdge<N> edge : edges) {
+    edges.forEach(edge -> {
       if (!ret.containsNode(edge.from())) {
         ret.addNode(edge.from());
       }
@@ -239,25 +199,25 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
         ret.addNode(edge.to());
       }
       ret.addEdge(edge.from(), edge.to());
-    }
+    });
     return ret;
   }
 
-  @Override
+@Override
   public void removeEdge(N from, N to, L label) {
     if (!containsEdge(from, to, label)) {
       return;
     }
 
-    DGEdge<N> edge = new DGEdge<N>(from, to);
+    DGEdge<N> edge = new DGEdge<>(from, to);
     List<L> labels = edgeToLabels.get(edge);
     if (labels == null) {
-      throw new RuntimeException("edge " + edge + " not in graph!");
+      throw new RuntimeException(new StringBuilder().append("edge ").append(edge).append(" not in graph!").toString());
     }
 
     List<DGEdge<N>> edges = labelToEdges.get(label);
     if (edges == null) {
-      throw new RuntimeException("label " + label + " not in graph!");
+      throw new RuntimeException(new StringBuilder().append("label ").append(label).append(" not in graph!").toString());
     }
 
     labels.remove(label);
@@ -295,24 +255,22 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
     }
   }
 
-  @Override
+@Override
   public void removeAllEdges(N from, N to) {
     if (!containsAnyEdge(from, to)) {
       return;
     }
 
-    DGEdge<N> edge = new DGEdge<N>(from, to);
+    DGEdge<N> edge = new DGEdge<>(from, to);
     List<L> labels = edgeToLabels.get(edge);
     if (labels == null) {
-      throw new RuntimeException("edge " + edge + " not in graph!");
+      throw new RuntimeException(new StringBuilder().append("edge ").append(edge).append(" not in graph!").toString());
     }
 
-    for (L label : getCopy(labels)) {
-      removeEdge(from, to, label);
-    }
+    getCopy(labels).forEach(label -> removeEdge(from, to, label));
   }
 
-  @Override
+@Override
   public void removeAllEdges(L label) {
     if (!containsAnyEdge(label)) {
       return;
@@ -320,85 +278,112 @@ public class HashMutableEdgeLabelledDirectedGraph<N, L> implements MutableEdgeLa
 
     List<DGEdge<N>> edges = labelToEdges.get(label);
     if (edges == null) {
-      throw new RuntimeException("label " + label + " not in graph!");
+      throw new RuntimeException(new StringBuilder().append("label ").append(label).append(" not in graph!").toString());
     }
 
-    for (DGEdge<N> edge : getCopy(edges)) {
-      removeEdge(edge.from(), edge.to(), label);
-    }
+    getCopy(edges).forEach(edge -> removeEdge(edge.from(), edge.to(), label));
   }
 
-  @Override
+@Override
 
   public boolean containsEdge(N from, N to, L label) {
     List<L> labels = edgeToLabels.get(new DGEdge<>(from, to));
     return labels != null && labels.contains(label);
   }
 
-  @Override
+@Override
 
   public boolean containsAnyEdge(N from, N to) {
     List<L> labels = edgeToLabels.get(new DGEdge<>(from, to));
     return labels != null && !labels.isEmpty();
   }
 
-  @Override
+@Override
 
   public boolean containsAnyEdge(L label) {
     List<DGEdge<N>> edges = labelToEdges.get(label);
     return edges != null && !edges.isEmpty();
   }
 
-  @Override
+@Override
   public boolean containsNode(N node) {
     return nodeToPreds.keySet().contains(node);
   }
 
-  @Override
+@Override
   public void addNode(N node) {
     if (containsNode(node)) {
       throw new RuntimeException("Node already in graph");
     }
 
-    nodeToSuccs.put(node, new ArrayList<N>());
-    nodeToPreds.put(node, new ArrayList<N>());
+    nodeToSuccs.put(node, new ArrayList<>());
+    nodeToPreds.put(node, new ArrayList<>());
     heads.add(node);
     tails.add(node);
   }
 
-  @Override
+@Override
   public void removeNode(N node) {
-    for (N n : new ArrayList<N>(nodeToSuccs.get(node))) {
-      removeAllEdges(node, n);
-    }
+    new ArrayList<N>(nodeToSuccs.get(node)).forEach(n -> removeAllEdges(node, n));
     nodeToSuccs.remove(node);
 
-    for (N n : new ArrayList<N>(nodeToPreds.get(node))) {
-      removeAllEdges(n, node);
-    }
+    new ArrayList<N>(nodeToPreds.get(node)).forEach(n -> removeAllEdges(n, node));
     nodeToPreds.remove(node);
 
     heads.remove(node);
     tails.remove(node);
   }
 
-  public void printGraph() {
+public void printGraph() {
     for (N node : this) {
       logger.debug("Node = " + node);
 
       logger.debug("Preds:");
-      for (N pred : getPredsOf(node)) {
-        DGEdge<N> edge = new DGEdge<N>(pred, node);
+      getPredsOf(node).forEach(pred -> {
+        DGEdge<N> edge = new DGEdge<>(pred, node);
         List<L> labels = edgeToLabels.get(edge);
-        logger.debug("     " + pred + " [" + labels + "]");
-      }
+        logger.debug(new StringBuilder().append("     ").append(pred).append(" [").append(labels).append("]").toString());
+      });
 
       logger.debug("Succs:");
-      for (N succ : getSuccsOf(node)) {
-        DGEdge<N> edge = new DGEdge<N>(node, succ);
+      getSuccsOf(node).forEach(succ -> {
+        DGEdge<N> edge = new DGEdge<>(node, succ);
         List<L> labels = edgeToLabels.get(edge);
-        logger.debug("     " + succ + " [" + labels + "]");
-      }
+        logger.debug(new StringBuilder().append("     ").append(succ).append(" [").append(labels).append("]").toString());
+      });
+    }
+  }
+
+  private static class DGEdge<N> {
+
+    N from;
+    N to;
+
+    public DGEdge(N from, N to) {
+      this.from = from;
+      this.to = to;
+    }
+
+    public N from() {
+      return from;
+    }
+
+    public N to() {
+      return to;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof DGEdge)) {
+		return false;
+	}
+	DGEdge<?> other = (DGEdge<?>) o;
+	return from.equals(other.from) && to.equals(other.to);
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.hashCode(new Object[] { from, to });
     }
   }
 }

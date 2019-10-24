@@ -107,8 +107,7 @@ public class InvokeCustomInstruction extends MethodInvocationInstruction {
       // boot strap method. 
       throw new RuntimeException("Error: Unexpected FieldReference type for boot strap method.");
     } else {
-      throw new RuntimeException("Error: Unhandled MethodHandleReference of type '" 
-          + callSiteReference.getMethodHandle().getMethodHandleType() + "'");
+      throw new RuntimeException(new StringBuilder().append("Error: Unhandled MethodHandleReference of type '").append(callSiteReference.getMethodHandle().getMethodHandleType()).append("'").toString());
     }
   }
   
@@ -156,12 +155,11 @@ public class InvokeCustomInstruction extends MethodInvocationInstruction {
         } else if (ref instanceof FieldReference) {
           handle = MethodHandle.v(getSootFieldRef((FieldReference) ref, kind), kind.getValue());
         } else {
-          throw new RuntimeException("Error: Unhandled method reference type " + ref.getClass().toString() + ".");
+          throw new RuntimeException(new StringBuilder().append("Error: Unhandled method reference type ").append(ref.getClass().toString()).append(".").toString());
         }
         out.add(handle);
       } else {
-        throw new RuntimeException("Error: Unhandled constant type '" + ev.getClass().toString() 
-		    + "' when parsing bootstrap arguments in the call site reference.");
+        throw new RuntimeException(new StringBuilder().append("Error: Unhandled constant type '").append(ev.getClass().toString()).append("' when parsing bootstrap arguments in the call site reference.").toString());
       }
     }
     return out;
@@ -188,7 +186,7 @@ public class InvokeCustomInstruction extends MethodInvocationInstruction {
       case MethodHandleType.INVOKE_INTERFACE:
         return MethodHandle.Kind.REF_INVOKE_INTERFACE;
       default:
-        throw new RuntimeException("Error: Unknown kind '" + kind + "' for method handle");
+        throw new RuntimeException(new StringBuilder().append("Error: Unknown kind '").append(kind).append("' for method handle").toString());
     }
   }
   

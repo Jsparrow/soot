@@ -37,8 +37,9 @@ public class GlobalVarNode extends VarNode {
     super(pag, variable, t);
   }
 
-  public String toString() {
-    return "GlobalVarNode " + getNumber() + " " + variable;
+  @Override
+public String toString() {
+    return new StringBuilder().append("GlobalVarNode ").append(getNumber()).append(" ").append(variable).toString();
   }
 
   public SootClass getDeclaringClass() {

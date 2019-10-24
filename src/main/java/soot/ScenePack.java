@@ -30,7 +30,8 @@ public class ScenePack extends Pack {
     super(name);
   }
 
-  protected void internalApply() {
+  @Override
+protected void internalApply() {
     for (Transform t : this) {
       t.apply();
     }

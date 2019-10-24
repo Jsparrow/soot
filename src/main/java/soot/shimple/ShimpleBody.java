@@ -61,8 +61,13 @@ public class ShimpleBody extends StmtBody {
   protected ShimpleBodyBuilder sbb;
 
   protected boolean isExtendedSSA = false;
+/**
+   * Set isSSA boolean to indicate whether a ShimpleBody is still in SSA form or not. Could be useful for book-keeping
+   * purposes.
+   **/
+  protected boolean isSSA = false;
 
-  /**
+/**
    * Construct an empty ShimpleBody associated with m.
    **/
   ShimpleBody(SootMethod m, Map options) {
@@ -77,7 +82,7 @@ public class ShimpleBody extends StmtBody {
     sbb = new ShimpleBodyBuilder(this);
   }
 
-  /**
+/**
    * Constructs a ShimpleBody from the given Body and options.
    *
    * <p>
@@ -92,7 +97,7 @@ public class ShimpleBody extends StmtBody {
     }
 
     if (Options.v().verbose()) {
-      logger.debug("[" + getMethod().getName() + "] Constructing ShimpleBody...");
+      logger.debug(new StringBuilder().append("[").append(getMethod().getName()).append("] Constructing ShimpleBody...").toString());
     }
 
     // must happen before SPatchingChain gets created
@@ -111,7 +116,7 @@ public class ShimpleBody extends StmtBody {
     }
   }
 
-  /**
+/**
    * Recompute SSA form.
    *
    * <p>
@@ -122,7 +127,7 @@ public class ShimpleBody extends StmtBody {
     rebuild(true);
   }
 
-  /**
+/**
    * Rebuild SSA form.
    *
    * <p>
@@ -139,7 +144,7 @@ public class ShimpleBody extends StmtBody {
     setSSA(true);
   }
 
-  /**
+/**
    * Returns an equivalent unbacked JimpleBody of the current Body by eliminating the Phi nodes.
    *
    * <p>
@@ -161,7 +166,7 @@ public class ShimpleBody extends StmtBody {
     return jBody;
   }
 
-  /**
+/**
    * Remove Phi nodes from body. SSA form is no longer a given once done.
    *
    * <p>
@@ -178,11 +183,11 @@ public class ShimpleBody extends StmtBody {
     setSSA(false);
   }
 
-  public void eliminatePiNodes() {
+public void eliminatePiNodes() {
     sbb.eliminatePiNodes();
   }
 
-  public void eliminateNodes() {
+public void eliminateNodes() {
     sbb.preElimOpt();
     sbb.eliminatePhiNodes();
     if (isExtendedSSA) {
@@ -192,22 +197,17 @@ public class ShimpleBody extends StmtBody {
     setSSA(false);
   }
 
-  /**
+/**
    * Returns a copy of the current ShimpleBody.
    **/
-  public Object clone() {
+  @Override
+public Object clone() {
     Body b = Shimple.v().newBody(getMethod());
     b.importBodyContentsFrom(this);
     return b;
   }
 
-  /**
-   * Set isSSA boolean to indicate whether a ShimpleBody is still in SSA form or not. Could be useful for book-keeping
-   * purposes.
-   **/
-  protected boolean isSSA = false;
-
-  /**
+/**
    * Sets a flag that indicates whether ShimpleBody is still in SSA form after a transformation or not. It is often up to the
    * user to indicate if a body is no longer in SSA form.
    **/
@@ -215,7 +215,7 @@ public class ShimpleBody extends StmtBody {
     this.isSSA = isSSA;
   }
 
-  /**
+/**
    * Returns value of, optional, user-maintained SSA boolean.
    *
    * @see #setSSA(boolean)
@@ -224,18 +224,18 @@ public class ShimpleBody extends StmtBody {
     return isSSA;
   }
 
-  public boolean isExtendedSSA() {
+public boolean isExtendedSSA() {
     return isExtendedSSA;
   }
 
-  /**
+/**
    * Returns the Shimple options applicable to this body.
    **/
   public ShimpleOptions getOptions() {
     return options;
   }
 
-  /**
+/**
    * Make sure the locals in this body all have unique String names. If the standard-local-names option is specified to
    * Shimple, this results in the LocalNameStandardizer being applied. Otherwise, renaming is kept to a minimum and an
    * underscore notation is used to differentiate locals previously of the same name.

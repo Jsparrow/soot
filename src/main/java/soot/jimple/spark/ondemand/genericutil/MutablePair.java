@@ -30,46 +30,49 @@ package soot.jimple.spark.ondemand.genericutil;
  */
 public class MutablePair<T, U> {
 
-  public MutablePair(T o1, U o2) {
-    this.o1 = o1;
-    this.o2 = o2;
-  }
-
-  public int hashCode() {
-    return o1.hashCode() + o2.hashCode();
-  }
-
-  public boolean equals(Object other) {
-    if (other instanceof MutablePair) {
-      MutablePair p = (MutablePair) other;
-      return o1.equals(p.o1) && o2.equals(p.o2);
-    } else {
-      return false;
-    }
-  }
-
-  public String toString() {
-    return "Pair " + o1 + "," + o2;
-  }
-
-  public T getO1() {
-    return o1;
-  }
-
-  public U getO2() {
-    return o2;
-  }
-
   private T o1;
 
-  private U o2;
+	private U o2;
 
-  public void setO1(T o1) {
-    this.o1 = o1;
-  }
+	public MutablePair(T o1, U o2) {
+	    this.o1 = o1;
+	    this.o2 = o2;
+	  }
 
-  public void setO2(U o2) {
-    this.o2 = o2;
-  }
+	@Override
+	public int hashCode() {
+	    return o1.hashCode() + o2.hashCode();
+	  }
+
+	@Override
+	public boolean equals(Object other) {
+	    if (other instanceof MutablePair) {
+	      MutablePair p = (MutablePair) other;
+	      return o1.equals(p.o1) && o2.equals(p.o2);
+	    } else {
+	      return false;
+	    }
+	  }
+
+	@Override
+	public String toString() {
+	    return new StringBuilder().append("Pair ").append(o1).append(",").append(o2).toString();
+	  }
+
+	public T getO1() {
+	    return o1;
+	  }
+
+	public U getO2() {
+	    return o2;
+	  }
+
+	public void setO1(T o1) {
+	    this.o1 = o1;
+	  }
+
+	public void setO2(U o2) {
+	    this.o2 = o2;
+	  }
 
 }

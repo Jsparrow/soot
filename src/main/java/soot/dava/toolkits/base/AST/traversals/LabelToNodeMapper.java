@@ -52,12 +52,12 @@ public class LabelToNodeMapper extends DepthFirstAdapter {
   private final HashMap<String, ASTLabeledNode> labelsToNode;
 
   public LabelToNodeMapper() {
-    labelsToNode = new HashMap<String, ASTLabeledNode>();
+    labelsToNode = new HashMap<>();
   }
 
   public LabelToNodeMapper(boolean verbose) {
     super(verbose);
-    labelsToNode = new HashMap<String, ASTLabeledNode>();
+    labelsToNode = new HashMap<>();
   }
 
   /*
@@ -74,43 +74,53 @@ public class LabelToNodeMapper extends DepthFirstAdapter {
     }
   }
 
-  public void inASTLabeledBlockNode(ASTLabeledBlockNode node) {
+  @Override
+public void inASTLabeledBlockNode(ASTLabeledBlockNode node) {
     addToMap(node);
   }
 
-  public void inASTTryNode(ASTTryNode node) {
+  @Override
+public void inASTTryNode(ASTTryNode node) {
     addToMap(node);
   }
 
-  public void inASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
+  @Override
+public void inASTUnconditionalLoopNode(ASTUnconditionalLoopNode node) {
     addToMap(node);
   }
 
-  public void inASTDoWhileNode(ASTDoWhileNode node) {
+  @Override
+public void inASTDoWhileNode(ASTDoWhileNode node) {
     addToMap(node);
   }
 
-  public void inASTForLoopNode(ASTForLoopNode node) {
+  @Override
+public void inASTForLoopNode(ASTForLoopNode node) {
     addToMap(node);
   }
 
-  public void inASTIfElseNode(ASTIfElseNode node) {
+  @Override
+public void inASTIfElseNode(ASTIfElseNode node) {
     addToMap(node);
   }
 
-  public void inASTIfNode(ASTIfNode node) {
+  @Override
+public void inASTIfNode(ASTIfNode node) {
     addToMap(node);
   }
 
-  public void inASTWhileNode(ASTWhileNode node) {
+  @Override
+public void inASTWhileNode(ASTWhileNode node) {
     addToMap(node);
   }
 
-  public void inASTSwitchNode(ASTSwitchNode node) {
+  @Override
+public void inASTSwitchNode(ASTSwitchNode node) {
     addToMap(node);
   }
 
-  public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
+  @Override
+public void inASTSynchronizedBlockNode(ASTSynchronizedBlockNode node) {
     addToMap(node);
   }
 }

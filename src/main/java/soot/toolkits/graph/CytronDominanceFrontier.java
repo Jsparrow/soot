@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to compute the DominanceFrontier using Cytron's celebrated efficient algorithm.
@@ -36,34 +38,34 @@ import java.util.Map;
  *      the Control Dependence Graph</a>
  **/
 public class CytronDominanceFrontier<N> implements DominanceFrontier<N> {
-  protected DominatorTree<N> dt;
+  private static final Logger logger = LoggerFactory.getLogger(CytronDominanceFrontier.class);
+protected DominatorTree<N> dt;
   protected Map<DominatorNode<N>, List<DominatorNode<N>>> nodeToFrontier;
 
   public CytronDominanceFrontier(DominatorTree<N> dt) {
     this.dt = dt;
-    nodeToFrontier = new HashMap<DominatorNode<N>, List<DominatorNode<N>>>();
-    for (DominatorNode<N> head : dt.getHeads()) {
-      bottomUpDispatch(head);
-    }
+    nodeToFrontier = new HashMap<>();
+    dt.getHeads().forEach(head -> bottomUpDispatch(head));
     for (N gode : dt.graph) {
       DominatorNode<N> dode = dt.fetchDode(gode);
       if (dode == null) {
         throw new RuntimeException("dode == null");
       } else if (!isFrontierKnown(dode)) {
-        System.out.print("'");
-        System.out.print(dode);
-        System.out.println("'");
+        logger.info("'");
+        logger.info(String.valueOf(dode));
+        logger.info("'");
         throw new RuntimeException("frontier did not have dode> ");
       }
     }
   }
 
-  public List<DominatorNode<N>> getDominanceFrontierOf(DominatorNode<N> node) {
+  @Override
+public List<DominatorNode<N>> getDominanceFrontierOf(DominatorNode<N> node) {
     List<DominatorNode<N>> frontier = nodeToFrontier.get(node);
     if (frontier == null) {
       throw new RuntimeException("Frontier not defined for node: " + node);
     }
-    return new ArrayList<DominatorNode<N>>(frontier);
+    return new ArrayList<>(frontier);
   }
 
   protected boolean isFrontierKnown(DominatorNode<N> node) {
@@ -82,11 +84,7 @@ public class CytronDominanceFrontier<N> implements DominanceFrontier<N> {
       return;
     }
 
-    for (DominatorNode<N> child : dt.getChildrenOf(node)) {
-      if (!isFrontierKnown(child)) {
-        bottomUpDispatch(child);
-      }
-    }
+    dt.getChildrenOf(node).stream().filter(child -> !isFrontierKnown(child)).forEach(child -> bottomUpDispatch(child));
 
     processNode(node);
   }
@@ -112,7 +110,7 @@ public class CytronDominanceFrontier<N> implements DominanceFrontier<N> {
    * </pre>
    **/
   protected void processNode(DominatorNode<N> node) {
-    List<DominatorNode<N>> dominanceFrontier = new ArrayList<DominatorNode<N>>();
+    List<DominatorNode<N>> dominanceFrontier = new ArrayList<>();
 
     // local
     {
@@ -129,13 +127,8 @@ public class CytronDominanceFrontier<N> implements DominanceFrontier<N> {
 
     // up
     {
-      for (DominatorNode<N> child : dt.getChildrenOf(node)) {
-        for (DominatorNode<N> childFront : getDominanceFrontierOf(child)) {
-          if (!dt.isImmediateDominatorOf(node, childFront)) {
-            dominanceFrontier.add(childFront);
-          }
-        }
-      }
+      dt.getChildrenOf(node).forEach(child -> getDominanceFrontierOf(child).stream().filter(childFront -> !dt.isImmediateDominatorOf(node, childFront))
+			.forEach(dominanceFrontier::add));
     }
 
     nodeToFrontier.put(node, dominanceFrontier);

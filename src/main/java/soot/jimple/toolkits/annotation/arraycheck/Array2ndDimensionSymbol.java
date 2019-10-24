@@ -27,7 +27,11 @@ import soot.G;
 public class Array2ndDimensionSymbol {
   private Object var;
 
-  public static Array2ndDimensionSymbol v(Object which) {
+  private Array2ndDimensionSymbol(Object which) {
+    this.var = which;
+  }
+
+public static Array2ndDimensionSymbol v(Object which) {
     Array2ndDimensionSymbol tdal = G.v().Array2ndDimensionSymbol_pool.get(which);
     if (tdal == null) {
       tdal = new Array2ndDimensionSymbol(which);
@@ -37,19 +41,17 @@ public class Array2ndDimensionSymbol {
     return tdal;
   }
 
-  private Array2ndDimensionSymbol(Object which) {
-    this.var = which;
-  }
-
-  public Object getVar() {
+public Object getVar() {
     return this.var;
   }
 
-  public int hashCode() {
+@Override
+public int hashCode() {
     return var.hashCode() + 1;
   }
 
-  public boolean equals(Object other) {
+@Override
+public boolean equals(Object other) {
     if (other instanceof Array2ndDimensionSymbol) {
       Array2ndDimensionSymbol another = (Array2ndDimensionSymbol) other;
 
@@ -59,7 +61,8 @@ public class Array2ndDimensionSymbol {
     }
   }
 
-  public String toString() {
+@Override
+public String toString() {
     return var + "[";
   }
 }

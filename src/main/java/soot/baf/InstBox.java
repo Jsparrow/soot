@@ -30,7 +30,8 @@ class InstBox extends AbstractUnitBox {
     setUnit(s);
   }
 
-  public boolean canContainUnit(Unit u) {
+  @Override
+public boolean canContainUnit(Unit u) {
     return u instanceof Inst || u == null;
   }
 }

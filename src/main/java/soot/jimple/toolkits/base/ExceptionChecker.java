@@ -113,9 +113,7 @@ public class ExceptionChecker extends BodyTransformer {
     // handles case when a super type of the exception is thrown
     List<SootClass> exceptions = b.getMethod().getExceptionsUnsafe();
     if (exceptions != null) {
-      Iterator<SootClass> it = exceptions.iterator();
-      while (it.hasNext()) {
-        SootClass nextEx = it.next();
+      for (SootClass nextEx : exceptions) {
         if (hierarchy.isSubclass(throwClass, nextEx)) {
           return true;
         }
@@ -140,12 +138,11 @@ public class ExceptionChecker extends BodyTransformer {
     Iterator it = b.getTraps().iterator();
     while (it.hasNext()) {
       Trap trap = (Trap) it.next();
-      if (trap.getException().getType().equals(throwType)
-          || hierarchy.isSubclass(throwType.getSootClass(), (trap.getException().getType()).getSootClass())) {
-        if (isThrowInStmtRange(b, (Stmt) trap.getBeginUnit(), (Stmt) trap.getEndUnit(), s)) {
-          return true;
-        }
-      }
+      boolean condition = (trap.getException().getType().equals(throwType)
+          || hierarchy.isSubclass(throwType.getSootClass(), (trap.getException().getType()).getSootClass())) && isThrowInStmtRange(b, (Stmt) trap.getBeginUnit(), (Stmt) trap.getEndUnit(), s);
+	if (condition) {
+	  return true;
+	}
     }
     return false;
   }
@@ -183,7 +180,7 @@ public class ExceptionChecker extends BodyTransformer {
       return Collections.emptyList();
     }
     if (sm != null) {
-      result = new Vector<SootClass>(sm.getExceptions());
+      result = new Vector<>(sm.getExceptions());
     }
     for (SootClass suprintr : intrface.getInterfaces()) {
       List<SootClass> other = getExceptionSpec(suprintr, sig);
@@ -200,7 +197,7 @@ public class ExceptionChecker extends BodyTransformer {
 
   protected void checkInvokeExpr(Body b, InvokeExpr ie, Stmt s) {
     if (ie instanceof InstanceInvokeExpr && ((InstanceInvokeExpr) ie).getBase().getType() instanceof ArrayType
-        && ie.getMethodRef().name().equals("clone") && ie.getMethodRef().parameterTypes().size() == 0) {
+        && "clone".equals(ie.getMethodRef().name()) && ie.getMethodRef().parameterTypes().size() == 0) {
       return; // the call is to the clone() method of an array type, which
               // is defined not to throw any exceptions; if we left this to
               // normal resolution we'd get the method in Object which does

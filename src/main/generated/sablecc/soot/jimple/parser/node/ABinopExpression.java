@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class ABinopExpression extends PExpression
 {
-    private PBinopExpr _binopExpr_;
+    private PBinopExpr binopExpr;
 
     public ABinopExpression()
     {
@@ -26,7 +26,7 @@ public final class ABinopExpression extends PExpression
     public Object clone()
     {
         return new ABinopExpression(
-            cloneNode(this._binopExpr_));
+            cloneNode(this.binopExpr));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class ABinopExpression extends PExpression
 
     public PBinopExpr getBinopExpr()
     {
-        return this._binopExpr_;
+        return this.binopExpr;
     }
 
     public void setBinopExpr(PBinopExpr node)
     {
-        if(this._binopExpr_ != null)
+        if(this.binopExpr != null)
         {
-            this._binopExpr_.parent(null);
+            this.binopExpr.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class ABinopExpression extends PExpression
             node.parent(this);
         }
 
-        this._binopExpr_ = node;
+        this.binopExpr = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._binopExpr_);
+            + toString(this.binopExpr);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._binopExpr_ == child)
+        if(this.binopExpr == child)
         {
-            this._binopExpr_ = null;
+            this.binopExpr = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class ABinopExpression extends PExpression
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._binopExpr_ == oldChild)
+        if(this.binopExpr == oldChild)
         {
             setBinopExpr((PBinopExpr) newChild);
             return;

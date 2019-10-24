@@ -35,17 +35,18 @@ public class JavaLangObjectNative extends NativeMethodClass {
   /**
    * Implements the abstract method simulateMethod. It distributes the request to the corresponding methods by signatures.
    */
-  public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
+  @Override
+public void simulateMethod(SootMethod method, ReferenceVariable thisVar, ReferenceVariable returnVar,
       ReferenceVariable params[]) {
     String subSignature = method.getSubSignature();
 
     /* Driver */
 
-    if (subSignature.equals("java.lang.Class getClass()")) {
+    if ("java.lang.Class getClass()".equals(subSignature)) {
       java_lang_Object_getClass(method, thisVar, returnVar, params);
       return;
 
-    } else if (subSignature.equals("java.lang.Object clone()")) {
+    } else if ("java.lang.Object clone()".equals(subSignature)) {
       java_lang_Object_clone(method, thisVar, returnVar, params);
       return;
 

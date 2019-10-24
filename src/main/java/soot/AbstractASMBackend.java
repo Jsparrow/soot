@@ -94,7 +94,7 @@ public abstract class AbstractASMBackend {
   // The Java version to be used for generating this class
   protected int javaVersion;
 
-  private final Map<SootMethod, BafBody> bafBodyCache = new HashMap<SootMethod, BafBody>();
+  private final Map<SootMethod, BafBody> bafBodyCache = new HashMap<>();
 
   /**
    * Creates a new ASM backend
@@ -115,8 +115,7 @@ public abstract class AbstractASMBackend {
     }
 
     if (javaVersion != Options.java_version_default && javaVersion < minVersion) {
-      throw new IllegalArgumentException("Enforced Java version " + translateJavaVersion(javaVersion)
-          + " too low to support required features (" + translateJavaVersion(minVersion) + " required)");
+      throw new IllegalArgumentException(new StringBuilder().append("Enforced Java version ").append(translateJavaVersion(javaVersion)).append(" too low to support required features (").append(translateJavaVersion(minVersion)).append(" required)").toString());
     }
 
     javaVersion = Math.max(javaVersion, minVersion);
@@ -188,11 +187,9 @@ public abstract class AbstractASMBackend {
   private int getMinJavaVersion(SootClass sc) {
     int minVersion = Options.java_version_1_1;
 
-    if (sc.hasTag("SignatureTag")) {
-      if (((SignatureTag) sc.getTag("SignatureTag")).getSignature().contains("<")) {
+    if (sc.hasTag("SignatureTag") && ((SignatureTag) sc.getTag("SignatureTag")).getSignature().contains("<")) {
         minVersion = Options.java_version_1_5;
       }
-    }
     if (sc.hasTag("VisibilityAnnotationTag")) {
       minVersion = Options.java_version_1_5;
     }
@@ -205,11 +202,9 @@ public abstract class AbstractASMBackend {
       if (minVersion >= Options.java_version_1_5) {
         break;
       }
-      if (sf.hasTag("SignatureTag")) {
-        if (((SignatureTag) sf.getTag("SignatureTag")).getSignature().contains("<")) {
-          minVersion = Options.java_version_1_5;
-        }
-      }
+      if (sf.hasTag("SignatureTag") && ((SignatureTag) sf.getTag("SignatureTag")).getSignature().contains("<")) {
+	  minVersion = Options.java_version_1_5;
+	}
       if (sf.hasTag("VisibilityAnnotationTag")) {
         minVersion = Options.java_version_1_5;
       }
@@ -223,11 +218,9 @@ public abstract class AbstractASMBackend {
       if (minVersion >= Options.java_version_1_8) {
         break;
       }
-      if (sm.hasTag("SignatureTag")) {
-        if (((SignatureTag) sm.getTag("SignatureTag")).getSignature().contains("<")) {
-          minVersion = Math.max(minVersion, Options.java_version_1_5);
-        }
-      }
+      if (sm.hasTag("SignatureTag") && ((SignatureTag) sm.getTag("SignatureTag")).getSignature().contains("<")) {
+	  minVersion = Math.max(minVersion, Options.java_version_1_5);
+	}
       if (sm.hasTag("VisibilityAnnotationTag") || sm.hasTag("VisibilityParameterAnnotationTag")) {
         minVersion = Math.max(minVersion, Options.java_version_1_5);
       }
@@ -315,27 +308,11 @@ public abstract class AbstractASMBackend {
   }
 
   /**
-   * Comparatator that is used to sort the methods before they are written out. This is mainly used to enforce a
-   * deterministic output between runs which we need for testing.
-   *
-   * @author Steven Arzt
-   *
-   */
-  private class SootMethodComparator implements Comparator<SootMethod> {
-
-    @Override
-    public int compare(SootMethod o1, SootMethod o2) {
-      return o1.getName().compareTo(o2.getName());
-    }
-
-  }
-
-  /**
    * Emits the bytecode for all methods of the class
    */
   protected void generateMethods() {
-    List<SootMethod> sortedMethods = new ArrayList<SootMethod>(sc.getMethods());
-    Collections.sort(sortedMethods, new SootMethodComparator());
+    List<SootMethod> sortedMethods = new ArrayList<>(sc.getMethods());
+    sortedMethods.sort(new SootMethodComparator());
     for (SootMethod sm : sortedMethods) {
       if (sm.isPhantom()) {
         continue;
@@ -345,9 +322,7 @@ public abstract class AbstractASMBackend {
       String name = sm.getName();
       StringBuilder descBuilder = new StringBuilder(5);
       descBuilder.append('(');
-      for (Type t : sm.getParameterTypes()) {
-        descBuilder.append(toTypeDesc(t));
-      }
+      sm.getParameterTypes().forEach(t -> descBuilder.append(toTypeDesc(t)));
       descBuilder.append(')');
       descBuilder.append(toTypeDesc(sm.getReturnType()));
 
@@ -408,7 +383,7 @@ public abstract class AbstractASMBackend {
     }
   }
 
-  /**
+/**
    * Emits the bytecode for all fields of the class
    */
   protected void generateFields() {
@@ -434,52 +409,33 @@ public abstract class AbstractASMBackend {
     }
   }
 
-  /**
-   * Comparatator that is used to sort the inner class references before they are written out. This is mainly used to enforce
-   * a deterministic output between runs which we need for testing.
-   *
-   * @author Steven Arzt
-   *
-   */
-  private class SootInnerClassComparator implements Comparator<InnerClassTag> {
-
-    @Override
-    public int compare(InnerClassTag o1, InnerClassTag o2) {
-      return o1.getInnerClass() == null ? 0 : o1.getInnerClass().compareTo(o2.getInnerClass());
-    }
-
-  }
-
-  /**
+/**
    * Emits the bytecode for all references to inner classes if present
    */
   protected void generateInnerClassReferences() {
-    if (sc.hasTag("InnerClassAttribute") && !Options.v().no_output_inner_classes_attribute()) {
-      InnerClassAttribute ica = (InnerClassAttribute) sc.getTag("InnerClassAttribute");
-      List<InnerClassTag> sortedTags = new ArrayList<InnerClassTag>(ica.getSpecs());
-      Collections.sort(sortedTags, new SootInnerClassComparator());
-      for (InnerClassTag ict : sortedTags) {
+    if (!(sc.hasTag("InnerClassAttribute") && !Options.v().no_output_inner_classes_attribute())) {
+		return;
+	}
+	InnerClassAttribute ica = (InnerClassAttribute) sc.getTag("InnerClassAttribute");
+	List<InnerClassTag> sortedTags = new ArrayList<>(ica.getSpecs());
+	sortedTags.sort(new SootInnerClassComparator());
+	sortedTags.forEach(ict -> {
         String name = slashify(ict.getInnerClass());
         String outerClassName = slashify(ict.getOuterClass());
         String innerName = slashify(ict.getShortName());
         int access = ict.getAccessFlags();
         cv.visitInnerClass(name, outerClassName, innerName, access);
-      }
-    }
+      });
   }
 
-  /**
+/**
    * Emits the bytecode for all attributes of the class
    */
   protected void generateAttributes() {
-    for (Tag t : sc.getTags()) {
-      if (t instanceof Attribute) {
-        cv.visitAttribute(createASMAttribute((Attribute) t));
-      }
-    }
+    sc.getTags().stream().filter(t -> t instanceof Attribute).forEach(t -> cv.visitAttribute(createASMAttribute((Attribute) t)));
   }
 
-  /**
+/**
    * Emits the bytecode for all attributes of a field
    *
    * @param fv
@@ -488,15 +444,10 @@ public abstract class AbstractASMBackend {
    *          The SootField the bytecode is to be emitted for
    */
   protected void generateAttributes(FieldVisitor fv, SootField f) {
-    for (Tag t : f.getTags()) {
-      if (t instanceof Attribute) {
-        org.objectweb.asm.Attribute a = createASMAttribute((Attribute) t);
-        fv.visitAttribute(a);
-      }
-    }
+    f.getTags().stream().filter(t -> t instanceof Attribute).map(t -> createASMAttribute((Attribute) t)).forEach(fv::visitAttribute);
   }
 
-  /**
+/**
    * Emits the bytecode for all attributes of a method
    *
    * @param fv
@@ -505,15 +456,10 @@ public abstract class AbstractASMBackend {
    *          The SootMethod the bytecode is to be emitted for
    */
   protected void generateAttributes(MethodVisitor mv, SootMethod m) {
-    for (Tag t : m.getTags()) {
-      if (t instanceof Attribute) {
-        org.objectweb.asm.Attribute a = createASMAttribute((Attribute) t);
-        mv.visitAttribute(a);
-      }
-    }
+    m.getTags().stream().filter(t -> t instanceof Attribute).map(t -> createASMAttribute((Attribute) t)).forEach(mv::visitAttribute);
   }
 
-  /**
+/**
    * Emits the bytecode for all annotations of a class, field or method
    *
    * @param visitor
@@ -522,12 +468,12 @@ public abstract class AbstractASMBackend {
    *          A Host (SootClass, SootField or SootMethod) the bytecode is to be emitted for, has to match the visitor
    */
   protected void generateAnnotations(Object visitor, Host host) {
-    for (Tag t : host.getTags()) {
+    host.getTags().forEach(t -> {
       // Find all VisibilityAnnotationTags
       if (t instanceof VisibilityAnnotationTag) {
         VisibilityAnnotationTag vat = (VisibilityAnnotationTag) t;
         boolean runTimeVisible = (vat.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE);
-        for (AnnotationTag at : vat.getAnnotations()) {
+        vat.getAnnotations().forEach(at -> {
           AnnotationVisitor av = null;
           if (visitor instanceof ClassVisitor) {
             av = ((ClassVisitor) visitor).visitAnnotation(at.getType(), runTimeVisible);
@@ -538,7 +484,7 @@ public abstract class AbstractASMBackend {
           }
 
           generateAnnotationElems(av, at.getElems(), true);
-        }
+        });
       }
       /*
        * Here TypeAnnotations could be visited potentially. Currently (2015/02/03) they are not supported by the
@@ -552,10 +498,10 @@ public abstract class AbstractASMBackend {
         generateAnnotationElems(av, Collections.singleton(adt.getDefaultVal()), true);
       }
 
-    }
+    });
   }
 
-  /**
+/**
    * Emits the bytecode for the values of an annotation
    *
    * @param av
@@ -566,10 +512,10 @@ public abstract class AbstractASMBackend {
    *          True, if the name of the annotation has to be added, false otherwise (should be false only in recursive calls!)
    */
   protected void generateAnnotationElems(AnnotationVisitor av, Collection<AnnotationElem> elements, boolean addName) {
-    if (av != null) {
-      Iterator<AnnotationElem> it = elements.iterator();
-      while (it.hasNext()) {
-        AnnotationElem elem = it.next();
+    if (av == null) {
+		return;
+	}
+	for (AnnotationElem elem : elements) {
         if (elem instanceof AnnotationEnumElem) {
           AnnotationEnumElem enumElem = (AnnotationEnumElem) elem;
           av.visitEnum(enumElem.getName(), enumElem.getTypeName(), enumElem.getConstantName());
@@ -627,11 +573,10 @@ public abstract class AbstractASMBackend {
 
         }
       }
-      av.visitEnd();
-    }
+	av.visitEnd();
   }
 
-  /**
+/**
    * Emits the bytecode for a reference to an outer class if necessary
    */
   protected void generateOuterClassReference() {
@@ -653,7 +598,7 @@ public abstract class AbstractASMBackend {
     cv.visitOuterClass(outerClassName, enclosingMethod, enclosingMethodSig);
   }
 
-  /**
+/**
    * Emits the bytecode for the class itself, including its signature
    */
   protected void generateClassHeader() {
@@ -692,7 +637,7 @@ public abstract class AbstractASMBackend {
     cv.visit(javaVersion, modifier, className, signature, superClass, interfaces);
   }
 
-  /**
+/**
    * Utility method to get the access modifiers of a Host
    *
    * @param modVal
@@ -770,7 +715,7 @@ public abstract class AbstractASMBackend {
     return modifier;
   }
 
-  /**
+/**
    * Emits the bytecode for the body of a single method Has to be implemented by subclasses to suit their needs
    *
    * @param mv
@@ -778,6 +723,38 @@ public abstract class AbstractASMBackend {
    * @param method
    *          The SootMethod the bytecode is to be emitted for
    */
-  abstract protected void generateMethodBody(MethodVisitor mv, SootMethod method);
+  protected abstract void generateMethodBody(MethodVisitor mv, SootMethod method);
+
+/**
+   * Comparatator that is used to sort the methods before they are written out. This is mainly used to enforce a
+   * deterministic output between runs which we need for testing.
+   *
+   * @author Steven Arzt
+   *
+   */
+  private class SootMethodComparator implements Comparator<SootMethod> {
+
+    @Override
+    public int compare(SootMethod o1, SootMethod o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+
+  }
+
+  /**
+   * Comparatator that is used to sort the inner class references before they are written out. This is mainly used to enforce
+   * a deterministic output between runs which we need for testing.
+   *
+   * @author Steven Arzt
+   *
+   */
+  private class SootInnerClassComparator implements Comparator<InnerClassTag> {
+
+    @Override
+    public int compare(InnerClassTag o1, InnerClassTag o2) {
+      return o1.getInnerClass() == null ? 0 : o1.getInnerClass().compareTo(o2.getInnerClass());
+    }
+
+  }
 
 }

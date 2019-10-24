@@ -52,7 +52,8 @@ public class UnitValueBoxPair {
    *          another UnitValueBoxPair
    * @return true if equal.
    */
-  public boolean equals(Object other) {
+  @Override
+public boolean equals(Object other) {
     if (other instanceof UnitValueBoxPair) {
       UnitValueBoxPair otherPair = (UnitValueBoxPair) other;
 
@@ -64,12 +65,14 @@ public class UnitValueBoxPair {
     return false;
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return unit.hashCode() + valueBox.hashCode();
   }
 
-  public String toString() {
-    return valueBox + " in " + unit;
+  @Override
+public String toString() {
+    return new StringBuilder().append(valueBox).append(" in ").append(unit).toString();
   }
 
   public Unit getUnit() {

@@ -49,22 +49,19 @@ public enum TypesValidator implements BodyValidator {
     if (method != null) {
       if (!method.getReturnType().isAllowedInFinalCode()) {
         exceptions.add(new ValidationException(method, "Return type not allowed in final code: " + method.getReturnType(),
-            "return type not allowed in final code:" + method.getReturnType() + "\n method: " + method));
+            new StringBuilder().append("return type not allowed in final code:").append(method.getReturnType()).append("\n method: ").append(method).toString()));
       }
-      for (Type t : method.getParameterTypes()) {
-        if (!t.isAllowedInFinalCode()) {
-          exceptions.add(new ValidationException(method, "Parameter type not allowed in final code: " + t,
-              "parameter type not allowed in final code:" + t + "\n method: " + method));
-        }
-      }
+      method.getParameterTypes().stream().filter(t -> !t.isAllowedInFinalCode()).forEach(t -> exceptions.add(new ValidationException(method, "Parameter type not allowed in final code: " + t,
+			new StringBuilder().append("parameter type not allowed in final code:").append(t).append("\n method: ").append(method).toString())));
     }
-    for (Local l : body.getLocals()) {
+    body.getLocals().forEach(l -> {
       Type t = l.getType();
       if (!t.isAllowedInFinalCode()) {
         exceptions.add(new ValidationException(l, "Local type not allowed in final code: " + t,
-            "(" + method + ") local type not allowed in final code: " + t + " local: " + l));
+            new StringBuilder().append("(").append(method).append(") local type not allowed in final code: ").append(t).append(" local: ").append(l)
+					.toString()));
       }
-    }
+    });
   }
 
   @Override

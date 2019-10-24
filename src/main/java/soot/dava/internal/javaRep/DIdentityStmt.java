@@ -31,13 +31,15 @@ public class DIdentityStmt extends GIdentityStmt {
     super(local, identityValue);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     getLeftOpBox().toString(up);
     up.literal(" := ");
     getRightOpBox().toString(up);
   }
 
-  public String toString() {
-    return getLeftOpBox().getValue().toString() + " = " + getRightOpBox().getValue().toString();
+  @Override
+public String toString() {
+    return new StringBuilder().append(getLeftOpBox().getValue().toString()).append(" = ").append(getRightOpBox().getValue().toString()).toString();
   }
 }

@@ -42,11 +42,13 @@ public abstract class AbstractOpTypeBranchInst extends AbstractBranchInst {
     this.opType = opType;
   }
 
-  public int getInCount() {
+  @Override
+public int getInCount() {
     return 2;
   }
 
-  public int getOutCount() {
+  @Override
+public int getOutCount() {
     return 0;
   }
 
@@ -61,13 +63,15 @@ public abstract class AbstractOpTypeBranchInst extends AbstractBranchInst {
     }
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     // do stuff with opType later.
-    return getName() + "." + Baf.bafDescriptorOf(opType) + " " + getTarget();
+    return new StringBuilder().append(getName()).append(".").append(Baf.bafDescriptorOf(opType)).append(" ").append(getTarget()).toString();
 
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(getName());
     up.literal(".");
     up.literal(Baf.bafDescriptorOf(opType));

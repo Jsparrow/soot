@@ -44,53 +44,60 @@ public class ExtensionInfo extends polyglot.ext.jl.ExtensionInfo {
     new Topics();
   }
 
-  public String defaultFileExtension() {
+private HashMap<Source, Job> sourceJobMap;
+
+@Override
+public String defaultFileExtension() {
     return "jj";
   }
 
-  public String compilerName() {
+@Override
+public String compilerName() {
     return "jjc";
   }
 
-  /*
+/*
    * public Parser parser(Reader reader, FileSource source, ErrorQueue eq) { Lexer lexer = new Lexer_c(reader, source.name(),
    * eq); Grm grm = new Grm(lexer, ts, nf, eq); return new CupParser(grm, source, eq); }
    */
 
-  protected NodeFactory createNodeFactory() {
+  @Override
+protected NodeFactory createNodeFactory() {
     return new JjNodeFactory_c();
   }
 
-  protected TypeSystem createTypeSystem() {
+@Override
+protected TypeSystem createTypeSystem() {
     return new JjTypeSystem_c();
   }
 
-  public List passes(Job job) {
+@Override
+public List passes(Job job) {
     List passes = super.passes(job);
     // TODO: add passes as needed by your compiler
     return passes;
   }
 
-  private HashMap<Source, Job> sourceJobMap;
-
-  public HashMap<Source, Job> sourceJobMap() {
+public HashMap<Source, Job> sourceJobMap() {
     return sourceJobMap;
   }
 
-  public void sourceJobMap(HashMap<Source, Job> map) {
+public void sourceJobMap(HashMap<Source, Job> map) {
     sourceJobMap = map;
   }
 
-  /**
+/**
    * Appends the soot classpath to the default system classpath.
    */
-  protected Options createOptions() {
+  @Override
+protected Options createOptions() {
     return new Options(this) {
 
       /**
        * Appends the soot classpath to the default system classpath.
        */
-      public String constructFullClasspath() {
+      @Override
+	public String constructFullClasspath() {
         String cp = super.constructFullClasspath();
         cp += File.pathSeparator + soot.options.Options.v().soot_classpath();
         return cp;

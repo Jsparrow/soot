@@ -39,15 +39,15 @@ public class CPHelper {
    */
   public static Object wrapperClassCloner(Object value) {
     if (value instanceof Double) {
-      return new Double(((Double) value).doubleValue());
+      return Double.valueOf(((Double) value).doubleValue());
     } else if (value instanceof Float) {
-      return new Float(((Float) value).floatValue());
+      return Float.valueOf(((Float) value).floatValue());
     } else if (value instanceof Long) {
-      return new Long(((Long) value).longValue());
+      return Long.valueOf(((Long) value).longValue());
     } else if (value instanceof Boolean) {
-      return new Boolean(((Boolean) value).booleanValue());
+      return Boolean.valueOf(((Boolean) value).booleanValue());
     } else if (value instanceof Integer) {
-      return new Integer(((Integer) value).intValue());
+      return Integer.valueOf(((Integer) value).intValue());
     } else {
       return null;
     }
@@ -63,14 +63,14 @@ public class CPHelper {
     Object value = null;
 
     if (toCheck instanceof LongConstant) {
-      value = new Long(((LongConstant) toCheck).value);
+      value = Long.valueOf(((LongConstant) toCheck).value);
     } else if (toCheck instanceof DoubleConstant) {
-      value = new Double(((DoubleConstant) toCheck).value);
+      value = Double.valueOf(((DoubleConstant) toCheck).value);
     } else if (toCheck instanceof FloatConstant) {
-      value = new Float(((FloatConstant) toCheck).value);
+      value = Float.valueOf(((FloatConstant) toCheck).value);
     } else if (toCheck instanceof IntConstant) {
       int val = ((IntConstant) toCheck).value;
-      value = new Integer(val);
+      value = Integer.valueOf(val);
     }
     return value;
   }

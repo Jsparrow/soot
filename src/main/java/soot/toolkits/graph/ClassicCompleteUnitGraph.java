@@ -93,7 +93,8 @@ public class ClassicCompleteUnitGraph extends TrapUnitGraph {
    *          <tt>buildExceptionalEdges</tt> will add a mapping for every {@link Trap} handler to all the <tt>Unit</tt>s
    *          within the scope of that <tt>Trap</tt>.
    */
-  protected void buildExceptionalEdges(Map<Unit, List<Unit>> unitToSuccs, Map<Unit, List<Unit>> unitToPreds) {
+  @Override
+protected void buildExceptionalEdges(Map<Unit, List<Unit>> unitToSuccs, Map<Unit, List<Unit>> unitToPreds) {
     // First, add the same edges as TrapUnitGraph.
     super.buildExceptionalEdges(unitToSuccs, unitToPreds);
     // Then add edges from the predecessors of the first
@@ -109,11 +110,8 @@ public class ClassicCompleteUnitGraph extends TrapUnitGraph {
       // possibility, we should iterate here until we reach a fixed
       // point; but the old UnitGraph that we are attempting to
       // duplicate did not do that, so we won't either.
-      List<Unit> origPredsOfTrapped = new ArrayList<Unit>(getPredsOf(firstTrapped));
-      for (Iterator<Unit> unitIt = origPredsOfTrapped.iterator(); unitIt.hasNext();) {
-        Unit pred = unitIt.next();
-        addEdge(unitToSuccs, unitToPreds, pred, catcher);
-      }
+      List<Unit> origPredsOfTrapped = new ArrayList<>(getPredsOf(firstTrapped));
+      origPredsOfTrapped.forEach(pred -> addEdge(unitToSuccs, unitToPreds, pred, catcher));
     }
   }
 }

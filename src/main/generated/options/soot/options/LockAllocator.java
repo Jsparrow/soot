@@ -30,20 +30,24 @@ import java.util.*;
 @javax.annotation.Generated(value = "Saxonica v3.0", comments = "from soot_options.xml")
 public class LockAllocator {
 
-    private Map<String, String> options;
+    public static final int locking_scheme_medium_grained = 1;
+	public static final int locking_scheme_coarse_grained = 2;
+	public static final int locking_scheme_single_static = 3;
+	public static final int locking_scheme_leave_original = 4;
+	private Map<String, String> options;
 
-    public LockAllocator(Map<String, String> options) {
+	public LockAllocator(Map<String, String> options) {
         this.options = options;
     }
 
-    /**
+	/**
      * Enabled
      */
     public boolean enabled() {
         return soot.PhaseOptions.getBoolean(options, "enabled");
     }
 
-    /**
+	/**
      * Perform Deadlock Avoidance --
      * Perform Deadlock Avoidance.
      *
@@ -54,7 +58,7 @@ public class LockAllocator {
         return soot.PhaseOptions.getBoolean(options, "avoid-deadlock");
     }
 
-    /**
+	/**
      * Use Open Nesting --
      * Use an open nesting model.
      *
@@ -65,7 +69,7 @@ public class LockAllocator {
         return soot.PhaseOptions.getBoolean(options, "open-nesting");
     }
 
-    /**
+	/**
      * Perform May-Happen-in-Parallel Analysis --
      * Perform a May-Happen-in-Parallel analysis.
      *
@@ -76,7 +80,7 @@ public class LockAllocator {
         return soot.PhaseOptions.getBoolean(options, "do-mhp");
     }
 
-    /**
+	/**
      * Perform Local Objects Analysis --
      * Perform a Local-Objects analysis.
      *
@@ -86,7 +90,7 @@ public class LockAllocator {
         return soot.PhaseOptions.getBoolean(options, "do-tlo");
     }
 
-    /**
+	/**
      * Print Topological Graph --
      * Print topological graph of transactions.
      *
@@ -97,7 +101,7 @@ public class LockAllocator {
         return soot.PhaseOptions.getBoolean(options, "print-graph");
     }
 
-    /**
+	/**
      * Print Table --
      * Print table of transactions.
      *
@@ -107,7 +111,7 @@ public class LockAllocator {
         return soot.PhaseOptions.getBoolean(options, "print-table");
     }
 
-    /**
+	/**
      * Print Debugging Info --
      * Print debugging info.
      *
@@ -117,12 +121,7 @@ public class LockAllocator {
         return soot.PhaseOptions.getBoolean(options, "print-debug");
     }
 
-    public static final int locking_scheme_medium_grained = 1;
-    public static final int locking_scheme_coarse_grained = 2;
-    public static final int locking_scheme_single_static = 3;
-    public static final int locking_scheme_leave_original = 4;
-
-    /**
+	/**
      * Locking Scheme --
      * Selects the granularity of the generated lock allocation.
      *
@@ -130,17 +129,22 @@ public class LockAllocator {
      */
     public int locking_scheme() {
         String s = soot.PhaseOptions.getString(options, "locking-scheme");
-        if (s == null || s.isEmpty())
-        	return locking_scheme_medium_grained;
+        if (s == null || s.isEmpty()) {
+			return locking_scheme_medium_grained;
+		}
 	
-        if (s.equalsIgnoreCase("medium-grained"))
-            return locking_scheme_medium_grained;
-        if (s.equalsIgnoreCase("coarse-grained"))
-            return locking_scheme_coarse_grained;
-        if (s.equalsIgnoreCase("single-static"))
-            return locking_scheme_single_static;
-        if (s.equalsIgnoreCase("leave-original"))
-            return locking_scheme_leave_original;
+        if ("medium-grained".equalsIgnoreCase(s)) {
+			return locking_scheme_medium_grained;
+		}
+        if ("coarse-grained".equalsIgnoreCase(s)) {
+			return locking_scheme_coarse_grained;
+		}
+        if ("single-static".equalsIgnoreCase(s)) {
+			return locking_scheme_single_static;
+		}
+        if ("leave-original".equalsIgnoreCase(s)) {
+			return locking_scheme_leave_original;
+		}
 
         throw new RuntimeException(String.format("Invalid value %s of phase option locking-scheme", s));
     }

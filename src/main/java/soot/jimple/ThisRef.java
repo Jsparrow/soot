@@ -38,22 +38,26 @@ public class ThisRef implements IdentityRef {
     this.thisType = thisType;
   }
 
-  public boolean equivTo(Object o) {
+  @Override
+public boolean equivTo(Object o) {
     if (o instanceof ThisRef) {
       return thisType.equals(((ThisRef) o).thisType);
     }
     return false;
   }
 
-  public int equivHashCode() {
+  @Override
+public int equivHashCode() {
     return thisType.hashCode();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "@this: " + thisType;
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.identityRef(this);
   }
 
@@ -62,15 +66,18 @@ public class ThisRef implements IdentityRef {
     return Collections.emptyList();
   }
 
-  public Type getType() {
+  @Override
+public Type getType() {
     return thisType;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((RefSwitch) sw).caseThisRef(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ThisRef(thisType);
   }
 

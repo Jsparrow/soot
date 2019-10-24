@@ -61,17 +61,16 @@ import soot.util.Chain;
  */
 public class RenameDuplicatedClasses extends SceneTransformer {
   private static final Logger logger = LoggerFactory.getLogger(RenameDuplicatedClasses.class);
+private static final String FIXED_CLASS_NAME_SPERATOR = "-";
 
-  public RenameDuplicatedClasses(Singletons.Global g) {
+public RenameDuplicatedClasses(Singletons.Global g) {
   }
 
-  public static RenameDuplicatedClasses v() {
+public static RenameDuplicatedClasses v() {
     return G.v().soot_jimple_toolkits_base_RenameDuplicatedClasses();
   }
 
-  private static final String FIXED_CLASS_NAME_SPERATOR = "-";
-
-  @Override
+@Override
   protected void internalTransform(String phaseName, Map<String, String> options) {
     // If the file system is case sensitive, no need to rename the classes
     if (isFileSystemCaseSensitive()) {
@@ -88,7 +87,7 @@ public class RenameDuplicatedClasses extends SceneTransformer {
     }
 
     Chain<SootClass> sootClasses = Scene.v().getClasses();
-    Map<String, String> lowerCaseClassNameToReal = new HashMap<String, String>();
+    Map<String, String> lowerCaseClassNameToReal = new HashMap<>();
 
     int count = 0;
 
@@ -107,7 +106,7 @@ public class RenameDuplicatedClasses extends SceneTransformer {
 
         // if(Options.v().verbose())
         // {
-        logger.debug("Rename duplicated class " + className + " to class " + newClassName);
+        logger.debug(new StringBuilder().append("Rename duplicated class ").append(className).append(" to class ").append(newClassName).toString());
         // }
       } else {
         lowerCaseClassNameToReal.put(className.toLowerCase(), className);
@@ -115,8 +114,8 @@ public class RenameDuplicatedClasses extends SceneTransformer {
     }
   }
 
-  public void duplicatedCheck(List<String> classNames) {
-    Set<String> classNameSet = new HashSet<String>();
+public void duplicatedCheck(List<String> classNames) {
+    Set<String> classNameSet = new HashSet<>();
     for (String className : classNames) {
       if (classNameSet.contains(className.toLowerCase())) {
         throw new RuntimeException("The fixed class names cannot contain duplicated class names.");
@@ -126,7 +125,7 @@ public class RenameDuplicatedClasses extends SceneTransformer {
     }
   }
 
-  /**
+/**
    * An naive approach to check whether the file system is case sensitive or not
    *
    * @return

@@ -66,15 +66,20 @@ public class AndAggregator extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
+  @Override
+public void caseASTStatementSequenceNode(ASTStatementSequenceNode node) {
   }
 
-  public void outASTIfNode(ASTIfNode node) {
+  @Override
+public void outASTIfNode(ASTIfNode node) {
     List<Object> bodies = node.get_SubBodies();
-    if (bodies.size() == 1) { // this should always be one since there is
-      // only one body of an if statement
+    // this should always be one since there is
+	if (bodies.size() != 1) {
+		return;
+	}
+	// only one body of an if statement
       List body = (List) bodies.get(0);
-      // this is the if body check to see if this is a single if Node
+	// this is the if body check to see if this is a single if Node
       if (body.size() == 1) {
         // size is good
         ASTNode bodyNode = (ASTNode) body.get(0);
@@ -125,7 +130,6 @@ public class AndAggregator extends DepthFirstAdapter {
         }
       } else { // IfBody has more than 1 nodes cant do AND aggregation
       }
-    }
   }
 
   private void changeUses(String to, String from, ASTNode node) {
@@ -139,26 +143,23 @@ public class AndAggregator extends DepthFirstAdapter {
         // check for abrupt stmts
 
         ASTStatementSequenceNode stmtSeq = (ASTStatementSequenceNode) node;
-        for (AugmentedStmt as : stmtSeq.getStatements()) {
-          Stmt s = as.get_Stmt();
+        stmtSeq.getStatements().stream().map(AugmentedStmt::get_Stmt).forEach(s -> {
+			if (s instanceof DAbruptStmt) {
+			    DAbruptStmt abStmt = (DAbruptStmt) s;
+			    if (abStmt.is_Break() || abStmt.is_Continue()) {
+			      SETNodeLabel label = abStmt.getLabel();
+			      String labelBroken = label.toString();
 
-          if (s instanceof DAbruptStmt) {
-            DAbruptStmt abStmt = (DAbruptStmt) s;
-            if (abStmt.is_Break() || abStmt.is_Continue()) {
-              SETNodeLabel label = abStmt.getLabel();
-              String labelBroken = label.toString();
-
-              if (labelBroken != null) {
-                // stmt breaks some label
-                if (labelBroken.compareTo(from) == 0) {
-                  // have to replace the "from" label to "to"
-                  // label
-                  label.set_Name(to);
-                }
-              }
-            }
-          }
-        }
+			      boolean condition = labelBroken != null && labelBroken.compareTo(from) == 0;
+				// stmt breaks some label
+				if (condition) {
+				  // have to replace the "from" label to "to"
+				  // label
+				  label.set_Name(to);
+				}
+			    }
+			  }
+		});
       } else {
         // need to recursively call changeUses
         List subBodyNodes = null;

@@ -76,17 +76,27 @@ public class PurityIntraproceduralAnalysis extends ForwardFlowAnalysis<Unit, Pur
 
   AbstractInterproceduralAnalysis<PurityGraphBox> inter;
 
-  @Override
+  /**
+   * Perform purity analysis on the Jimple unit graph g, as part of a larger interprocedural analysis. Once constructed, you
+   * may call copyResult and drawAsOneDot to query the analysis result.
+   */
+  PurityIntraproceduralAnalysis(UnitGraph g, AbstractInterproceduralAnalysis<PurityGraphBox> inter) {
+    super(g);
+    this.inter = inter;
+    doAnalysis();
+  }
+
+@Override
   protected PurityGraphBox newInitialFlow() {
     return new PurityGraphBox();
   }
 
-  @Override
+@Override
   protected PurityGraphBox entryInitialFlow() {
     return new PurityGraphBox();
   }
 
-  @Override
+@Override
   protected void merge(PurityGraphBox in1, PurityGraphBox in2, PurityGraphBox out) {
     if (out != in1) {
       out.g = new PurityGraph(in1.g);
@@ -94,12 +104,12 @@ public class PurityIntraproceduralAnalysis extends ForwardFlowAnalysis<Unit, Pur
     out.g.union(in2.g);
   }
 
-  @Override
+@Override
   protected void copy(PurityGraphBox source, PurityGraphBox dest) {
     dest.g = new PurityGraph(source.g);
   }
 
-  @Override
+@Override
   protected void flowThrough(PurityGraphBox inValue, Unit unit, PurityGraphBox outValue) {
     Stmt stmt = (Stmt) unit;
 
@@ -327,7 +337,7 @@ public class PurityIntraproceduralAnalysis extends ForwardFlowAnalysis<Unit, Pur
     // outValue.g.updateStat();
   }
 
-  /**
+/**
    * Draw the result of the intra-procedural analysis as one big dot file, named className.methodName.dot, containing one
    * purity graph for each statement in the method.
    *
@@ -339,7 +349,7 @@ public class PurityIntraproceduralAnalysis extends ForwardFlowAnalysis<Unit, Pur
     dot.setGraphLabel(name);
     dot.setGraphAttribute("compound", "true");
     dot.setGraphAttribute("rankdir", "LR");
-    Map<Unit, Integer> node = new HashMap<Unit, Integer>();
+    Map<Unit, Integer> node = new HashMap<>();
     int id = 0;
     for (Unit stmt : graph) {
       PurityGraphBox ref = getFlowAfter(stmt);
@@ -361,18 +371,18 @@ public class PurityIntraproceduralAnalysis extends ForwardFlowAnalysis<Unit, Pur
       id++;
     }
     for (Unit src : graph) {
-      for (Unit dst : graph.getSuccsOf(src)) {
+      graph.getSuccsOf(src).forEach(dst -> {
         DotGraphEdge edge = dot.drawEdge("head" + node.get(src), "head" + node.get(dst));
         edge.setAttribute("ltail", "cluster" + node.get(src));
         edge.setAttribute("lhead", "cluster" + node.get(dst));
-      }
+      });
     }
 
-    File f = new File(SourceLocator.v().getOutputDir(), prefix + name + DotGraph.DOT_EXTENSION);
+    File f = new File(SourceLocator.v().getOutputDir(), new StringBuilder().append(prefix).append(name).append(DotGraph.DOT_EXTENSION).toString());
     dot.plot(f.getPath());
   }
 
-  /**
+/**
    * Put into dst the purity graph obtained by merging all purity graphs at the method return. It is a valid summary that can
    * be used in methodCall if you do interprocedural analysis.
    *
@@ -380,23 +390,11 @@ public class PurityIntraproceduralAnalysis extends ForwardFlowAnalysis<Unit, Pur
    */
   public void copyResult(PurityGraphBox dst) {
     PurityGraph r = new PurityGraph();
-    for (Unit u : graph.getTails()) {
-      r.union(getFlowAfter(u).g);
-    }
+    graph.getTails().forEach(u -> r.union(getFlowAfter(u).g));
     r.removeLocals();
     // r.simplifyLoad();
     // r.simplifyInside();
     // r.updateStat();
     dst.g = r;
-  }
-
-  /**
-   * Perform purity analysis on the Jimple unit graph g, as part of a larger interprocedural analysis. Once constructed, you
-   * may call copyResult and drawAsOneDot to query the analysis result.
-   */
-  PurityIntraproceduralAnalysis(UnitGraph g, AbstractInterproceduralAnalysis<PurityGraphBox> inter) {
-    super(g);
-    this.inter = inter;
-    doAnalysis();
   }
 }

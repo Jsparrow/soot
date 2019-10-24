@@ -40,7 +40,8 @@ public class GNewMultiArrayExpr extends AbstractNewMultiArrayExpr {
     }
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     List clonedSizes = new ArrayList(getSizeCount());
 
     for (int i = 0; i < getSizeCount(); i++) {

@@ -7,7 +7,7 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AArrayReference extends PReference
 {
-    private PArrayRef _arrayRef_;
+    private PArrayRef arrayRef;
 
     public AArrayReference()
     {
@@ -26,7 +26,7 @@ public final class AArrayReference extends PReference
     public Object clone()
     {
         return new AArrayReference(
-            cloneNode(this._arrayRef_));
+            cloneNode(this.arrayRef));
     }
 
     @Override
@@ -37,14 +37,14 @@ public final class AArrayReference extends PReference
 
     public PArrayRef getArrayRef()
     {
-        return this._arrayRef_;
+        return this.arrayRef;
     }
 
     public void setArrayRef(PArrayRef node)
     {
-        if(this._arrayRef_ != null)
+        if(this.arrayRef != null)
         {
-            this._arrayRef_.parent(null);
+            this.arrayRef.parent(null);
         }
 
         if(node != null)
@@ -57,23 +57,23 @@ public final class AArrayReference extends PReference
             node.parent(this);
         }
 
-        this._arrayRef_ = node;
+        this.arrayRef = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._arrayRef_);
+            + toString(this.arrayRef);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._arrayRef_ == child)
+        if(this.arrayRef == child)
         {
-            this._arrayRef_ = null;
+            this.arrayRef = null;
             return;
         }
 
@@ -84,7 +84,7 @@ public final class AArrayReference extends PReference
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._arrayRef_ == oldChild)
+        if(this.arrayRef == oldChild)
         {
             setArrayRef((PArrayRef) newChild);
             return;

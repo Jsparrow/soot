@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AIdentArrayRef extends PArrayRef
 {
-    private TIdentifier _identifier_;
-    private PFixedArrayDescriptor _fixedArrayDescriptor_;
+    private TIdentifier identifier;
+    private PFixedArrayDescriptor fixedArrayDescriptor;
 
     public AIdentArrayRef()
     {
@@ -30,8 +30,8 @@ public final class AIdentArrayRef extends PArrayRef
     public Object clone()
     {
         return new AIdentArrayRef(
-            cloneNode(this._identifier_),
-            cloneNode(this._fixedArrayDescriptor_));
+            cloneNode(this.identifier),
+            cloneNode(this.fixedArrayDescriptor));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class AIdentArrayRef extends PArrayRef
 
     public TIdentifier getIdentifier()
     {
-        return this._identifier_;
+        return this.identifier;
     }
 
     public void setIdentifier(TIdentifier node)
     {
-        if(this._identifier_ != null)
+        if(this.identifier != null)
         {
-            this._identifier_.parent(null);
+            this.identifier.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class AIdentArrayRef extends PArrayRef
             node.parent(this);
         }
 
-        this._identifier_ = node;
+        this.identifier = node;
     }
 
     public PFixedArrayDescriptor getFixedArrayDescriptor()
     {
-        return this._fixedArrayDescriptor_;
+        return this.fixedArrayDescriptor;
     }
 
     public void setFixedArrayDescriptor(PFixedArrayDescriptor node)
     {
-        if(this._fixedArrayDescriptor_ != null)
+        if(this.fixedArrayDescriptor != null)
         {
-            this._fixedArrayDescriptor_.parent(null);
+            this.fixedArrayDescriptor.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class AIdentArrayRef extends PArrayRef
             node.parent(this);
         }
 
-        this._fixedArrayDescriptor_ = node;
+        this.fixedArrayDescriptor = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._identifier_)
-            + toString(this._fixedArrayDescriptor_);
+        return new StringBuilder().append("").append(toString(this.identifier)).append(toString(this.fixedArrayDescriptor)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._identifier_ == child)
+        if(this.identifier == child)
         {
-            this._identifier_ = null;
+            this.identifier = null;
             return;
         }
 
-        if(this._fixedArrayDescriptor_ == child)
+        if(this.fixedArrayDescriptor == child)
         {
-            this._fixedArrayDescriptor_ = null;
+            this.fixedArrayDescriptor = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class AIdentArrayRef extends PArrayRef
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._identifier_ == oldChild)
+        if(this.identifier == oldChild)
         {
             setIdentifier((TIdentifier) newChild);
             return;
         }
 
-        if(this._fixedArrayDescriptor_ == oldChild)
+        if(this.fixedArrayDescriptor == oldChild)
         {
             setFixedArrayDescriptor((PFixedArrayDescriptor) newChild);
             return;

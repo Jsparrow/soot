@@ -41,7 +41,7 @@ public abstract class AbstractSwitchStmt extends AbstractStmt implements SwitchS
 
   final List<UnitBox> stmtBoxes;
 
-  final protected UnitBox[] targetBoxes;
+  protected final UnitBox[] targetBoxes;
 
   protected AbstractSwitchStmt(ValueBox keyBox, UnitBox defaultTargetBox, UnitBox... targetBoxes) {
     this.keyBox = keyBox;
@@ -49,7 +49,7 @@ public abstract class AbstractSwitchStmt extends AbstractStmt implements SwitchS
     this.targetBoxes = targetBoxes;
 
     // Build up stmtBoxes
-    List<UnitBox> list = new ArrayList<UnitBox>();
+    List<UnitBox> list = new ArrayList<>();
     stmtBoxes = Collections.unmodifiableList(list);
 
     Collections.addAll(list, targetBoxes);
@@ -57,38 +57,38 @@ public abstract class AbstractSwitchStmt extends AbstractStmt implements SwitchS
   }
 
   @Override
-  final public Unit getDefaultTarget() {
+  public final Unit getDefaultTarget() {
     return defaultTargetBox.getUnit();
   }
 
   @Override
-  final public void setDefaultTarget(Unit defaultTarget) {
+  public final void setDefaultTarget(Unit defaultTarget) {
     defaultTargetBox.setUnit(defaultTarget);
   }
 
   @Override
-  final public UnitBox getDefaultTargetBox() {
+  public final UnitBox getDefaultTargetBox() {
     return defaultTargetBox;
   }
 
   @Override
-  final public Value getKey() {
+  public final Value getKey() {
     return keyBox.getValue();
   }
 
   @Override
-  final public void setKey(Value key) {
+  public final void setKey(Value key) {
     keyBox.setValue(key);
   }
 
   @Override
-  final public ValueBox getKeyBox() {
+  public final ValueBox getKeyBox() {
     return keyBox;
   }
 
   @Override
-  final public List<ValueBox> getUseBoxes() {
-    List<ValueBox> list = new ArrayList<ValueBox>();
+  public final List<ValueBox> getUseBoxes() {
+    List<ValueBox> list = new ArrayList<>();
 
     list.addAll(keyBox.getValue().getUseBoxes());
     list.add(keyBox);
@@ -96,28 +96,28 @@ public abstract class AbstractSwitchStmt extends AbstractStmt implements SwitchS
     return list;
   }
 
-  final public int getTargetCount() {
+  public final int getTargetCount() {
     return targetBoxes.length;
   }
 
   @Override
-  final public Unit getTarget(int index) {
+  public final Unit getTarget(int index) {
     return targetBoxes[index].getUnit();
   }
 
   @Override
-  final public UnitBox getTargetBox(int index) {
+  public final UnitBox getTargetBox(int index) {
     return targetBoxes[index];
   }
 
   @Override
-  final public void setTarget(int index, Unit target) {
+  public final void setTarget(int index, Unit target) {
     targetBoxes[index].setUnit(target);
   }
 
   @Override
-  final public List<Unit> getTargets() {
-    List<Unit> targets = new ArrayList<Unit>();
+  public final List<Unit> getTargets() {
+    List<Unit> targets = new ArrayList<>();
 
     for (UnitBox element : targetBoxes) {
       targets.add(element.getUnit());
@@ -126,20 +126,20 @@ public abstract class AbstractSwitchStmt extends AbstractStmt implements SwitchS
     return targets;
   }
 
-  final public void setTargets(List<? extends Unit> targets) {
+  public final void setTargets(List<? extends Unit> targets) {
     for (int i = 0; i < targets.size(); i++) {
       targetBoxes[i].setUnit(targets.get(i));
     }
   }
 
-  final public void setTargets(Unit[] targets) {
+  public final void setTargets(Unit[] targets) {
     for (int i = 0; i < targets.length; i++) {
       targetBoxes[i].setUnit(targets[i]);
     }
   }
 
   @Override
-  final public List<UnitBox> getUnitBoxes() {
+  public final List<UnitBox> getUnitBoxes() {
     return stmtBoxes;
   }
 

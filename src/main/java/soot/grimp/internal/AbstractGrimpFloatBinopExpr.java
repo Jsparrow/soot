@@ -30,38 +30,43 @@ import soot.jimple.DivExpr;
 import soot.jimple.SubExpr;
 import soot.jimple.internal.AbstractFloatBinopExpr;
 
-abstract public class AbstractGrimpFloatBinopExpr extends AbstractFloatBinopExpr implements Precedence {
-  AbstractGrimpFloatBinopExpr(Value op1, Value op2) {
-    this(Grimp.v().newArgBox(op1), Grimp.v().newArgBox(op2));
-  }
-
+public abstract class AbstractGrimpFloatBinopExpr extends AbstractFloatBinopExpr implements Precedence {
   protected AbstractGrimpFloatBinopExpr(ValueBox op1Box, ValueBox op2Box) {
-    this.op1Box = op1Box;
-    this.op2Box = op2Box;
-  }
+	    this.op1Box = op1Box;
+	    this.op2Box = op2Box;
+	  }
 
-  abstract public int getPrecedence();
+	AbstractGrimpFloatBinopExpr(Value op1, Value op2) {
+	    this(Grimp.v().newArgBox(op1), Grimp.v().newArgBox(op2));
+	  }
 
-  private String toString(Value op1, Value op2, String leftOp, String rightOp) {
-    if (op1 instanceof Precedence && ((Precedence) op1).getPrecedence() < getPrecedence()) {
-      leftOp = "(" + leftOp + ")";
-    }
+	@Override
+	public abstract int getPrecedence();
 
-    if (op2 instanceof Precedence) {
-      int opPrec = ((Precedence) op2).getPrecedence(), myPrec = getPrecedence();
+	private String toString(Value op1, Value op2, String leftOp, String rightOp) {
+	    if (op1 instanceof Precedence && ((Precedence) op1).getPrecedence() < getPrecedence()) {
+	      leftOp = new StringBuilder().append("(").append(leftOp).append(")").toString();
+	    }
+	
+	    if (op2 instanceof Precedence) {
+	      int opPrec = ((Precedence) op2).getPrecedence();
+		int myPrec = getPrecedence();
+	
+	      if ((opPrec < myPrec) || ((opPrec == myPrec) && ((this instanceof SubExpr) || (this instanceof DivExpr)))) {
+	        rightOp = new StringBuilder().append("(").append(rightOp).append(")").toString();
+	      }
+	    }
+	
+	    return new StringBuilder().append(leftOp).append(getSymbol()).append(rightOp).toString();
+	  }
 
-      if ((opPrec < myPrec) || ((opPrec == myPrec) && ((this instanceof SubExpr) || (this instanceof DivExpr)))) {
-        rightOp = "(" + rightOp + ")";
-      }
-    }
-
-    return leftOp + getSymbol() + rightOp;
-  }
-
-  public String toString() {
-    Value op1 = op1Box.getValue(), op2 = op2Box.getValue();
-    String leftOp = op1.toString(), rightOp = op2.toString();
-
-    return toString(op1, op2, leftOp, rightOp);
-  }
+	@Override
+	public String toString() {
+	    Value op1 = op1Box.getValue();
+		Value op2 = op2Box.getValue();
+	    String leftOp = op1.toString();
+		String rightOp = op2.toString();
+	
+	    return toString(op1, op2, leftOp, rightOp);
+	  }
 }

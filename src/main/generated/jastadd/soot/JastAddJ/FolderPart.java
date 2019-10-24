@@ -17,6 +17,8 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
   * @ast class
@@ -25,12 +27,16 @@ import soot.coffi.CoffiMethodSource;
 public class FolderPart extends PathPart {
 
 
-    /**
+    private static final Logger logger = LoggerFactory.getLogger(FolderPart.class);
+
+
+
+	/**
      * Maps package names to a collection of the names of files in
      * the corresponding package directory.
      */
     private Map<String, Collection<String>> packageMap =
-      new HashMap<String, Collection<String>>();
+      new HashMap<>();
 
 
 
@@ -52,7 +58,8 @@ public class FolderPart extends PathPart {
      * @return <code>true</code> if the given package exists in this source
      * folder
      */
-    public boolean hasPackage(String name) {
+    @Override
+	public boolean hasPackage(String name) {
       return !filesInPackage(name).isEmpty();
     }
 
@@ -93,13 +100,14 @@ public class FolderPart extends PathPart {
                 canonical.getName().equals(name))) {
             String[] files = canonical.list();
             if (files.length > 0) {
-              fileSet = new HashSet<String>();
+              fileSet = new HashSet<>();
               for (String file: files) {
                 fileSet.add(file);
               }
             }
           }
         } catch (Exception e) {
+			logger.error(e.getMessage(), e);
           // Catch IOExceptions etc.
           // if the exception was thrown by getCanonicalFile we will put
           // the empty list in the packageMap, indicating that the package
@@ -112,7 +120,8 @@ public class FolderPart extends PathPart {
 
 
     
-    public boolean selectCompilationUnit(String canonicalName) throws IOException {
+    @Override
+	public boolean selectCompilationUnit(String canonicalName) throws IOException {
       if(hasCompilationUnit(canonicalName)) {
         String typeName = canonicalName.replace('.', File.separatorChar);
         String fileName = typeName + fileSuffix();

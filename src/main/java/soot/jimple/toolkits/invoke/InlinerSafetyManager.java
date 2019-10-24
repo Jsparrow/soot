@@ -44,7 +44,7 @@ public class InlinerSafetyManager {
   public static boolean checkSpecialInlineRestrictions(SootMethod container, SootMethod target, String options) {
     // Check the body of the method to inline for specialinvoke's
 
-    boolean accessors = options.equals("accessors");
+    boolean accessors = "accessors".equals(options);
 
     Body inlineeBody = target.getActiveBody();
 
@@ -63,17 +63,13 @@ public class InlinerSafetyManager {
 
           SootMethod specialTarget = ie1.getMethod();
 
-          if (specialTarget.isPrivate()) {
-            if (specialTarget.getDeclaringClass() != container.getDeclaringClass()) {
-              // Do not inline a call which contains a specialinvoke call to a private method outside
-              // the current class. This avoids a verifier error and we assume will not have a big
-              // impact because we are inlining methods bottom-up, so such a call will be rare
-
-              if (!accessors) {
-                return false;
-              }
-            }
-          }
+          boolean condition = specialTarget.isPrivate() && specialTarget.getDeclaringClass() != container.getDeclaringClass() && !accessors;
+		// Do not inline a call which contains a specialinvoke call to a private method outside
+		// the current class. This avoids a verifier error and we assume will not have a big
+		// impact because we are inlining methods bottom-up, so such a call will be rare
+		if (condition) {
+		    return false;
+		  }
         }
       }
     }
@@ -160,7 +156,7 @@ public class InlinerSafetyManager {
     /* first, check the simple (one-line) safety criteria. */
 
     // Rule 0: Don't inline constructors.
-    if (inlinee.getName().equals("<init>")) {
+    if ("<init>".equals(inlinee.getName())) {
       return false;
     }
 
@@ -228,12 +224,11 @@ public class InlinerSafetyManager {
       return true;
     }
 
-    // Condition 2. Check the package names.
-    if (!inlinee.isPrivate() && !inlinee.isProtected() && !inlinee.isPublic()) {
-      if (!inlineeClass.getPackageName().equals(containerClass.getPackageName())) {
+    boolean condition = !inlinee.isPrivate() && !inlinee.isProtected() && !inlinee.isPublic() && !inlineeClass.getPackageName().equals(containerClass.getPackageName());
+	// Condition 2. Check the package names.
+    if (condition) {
         return true;
       }
-    }
 
     // Condition 3.
     if (inlinee.isProtected()) {
@@ -261,7 +256,7 @@ public class InlinerSafetyManager {
     // If all of the conditions are true, a lookup is performed.
     SootMethod m = ie.getMethod();
 
-    if (m.getName().equals("<init>")) {
+    if ("<init>".equals(m.getName())) {
       return false;
     }
 

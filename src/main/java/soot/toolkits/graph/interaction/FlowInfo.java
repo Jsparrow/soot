@@ -58,8 +58,9 @@ public class FlowInfo<I, U> {
     before = b;
   }
 
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
     sb.append("unit: " + unit);
     sb.append(" info: " + info);
     sb.append(" before: " + before);

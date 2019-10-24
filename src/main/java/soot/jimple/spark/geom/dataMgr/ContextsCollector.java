@@ -46,8 +46,8 @@ public class ContextsCollector {
   protected int nBudget = -1;
 
   public ContextsCollector() {
-    bars = new ArrayList<SimpleInterval>();
-    backupList = new ArrayList<SimpleInterval>();
+    bars = new ArrayList<>();
+    backupList = new ArrayList<>();
     tmp_si = new SimpleInterval();
   }
 

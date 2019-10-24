@@ -43,45 +43,47 @@ import soot.jimple.EnterMonitorStmt;
 import soot.jimple.MonitorStmt;
 
 public class MonitorConverter {
-  public MonitorConverter(Singletons.Global g) {
-    SootClass davaMonitor = new SootClass("soot.dava.toolkits.base.DavaMonitor.DavaMonitor", Modifier.PUBLIC);
-    davaMonitor.setSuperclass(Scene.v().loadClassAndSupport("java.lang.Object"));
+  private final SootMethod v;
+private final SootMethod enter;
+private final SootMethod exit;
 
-    LinkedList objectSingleton = new LinkedList();
-    objectSingleton.add(RefType.v("java.lang.Object"));
-    v = Scene.v().makeSootMethod("v", new LinkedList(), RefType.v("soot.dava.toolkits.base.DavaMonitor.DavaMonitor"),
-        Modifier.PUBLIC | Modifier.STATIC);
-    enter = Scene.v().makeSootMethod("enter", objectSingleton, VoidType.v(), Modifier.PUBLIC | Modifier.SYNCHRONIZED);
-    exit = Scene.v().makeSootMethod("exit", objectSingleton, VoidType.v(), Modifier.PUBLIC | Modifier.SYNCHRONIZED);
-    davaMonitor.addMethod(v);
-    davaMonitor.addMethod(enter);
-    davaMonitor.addMethod(exit);
+	public MonitorConverter(Singletons.Global g) {
+	    SootClass davaMonitor = new SootClass("soot.dava.toolkits.base.DavaMonitor.DavaMonitor", Modifier.PUBLIC);
+	    davaMonitor.setSuperclass(Scene.v().loadClassAndSupport("java.lang.Object"));
+	
+	    LinkedList objectSingleton = new LinkedList();
+	    objectSingleton.add(RefType.v("java.lang.Object"));
+	    v = Scene.v().makeSootMethod("v", new LinkedList(), RefType.v("soot.dava.toolkits.base.DavaMonitor.DavaMonitor"),
+	        Modifier.PUBLIC | Modifier.STATIC);
+	    enter = Scene.v().makeSootMethod("enter", objectSingleton, VoidType.v(), Modifier.PUBLIC | Modifier.SYNCHRONIZED);
+	    exit = Scene.v().makeSootMethod("exit", objectSingleton, VoidType.v(), Modifier.PUBLIC | Modifier.SYNCHRONIZED);
+	    davaMonitor.addMethod(v);
+	    davaMonitor.addMethod(enter);
+	    davaMonitor.addMethod(exit);
+	
+	    Scene.v().addClass(davaMonitor);
+	  }
 
-    Scene.v().addClass(davaMonitor);
-  }
+	public static MonitorConverter v() {
+	    return G.v().soot_dava_toolkits_base_misc_MonitorConverter();
+	  }
 
-  public static MonitorConverter v() {
-    return G.v().soot_dava_toolkits_base_misc_MonitorConverter();
-  }
-
-  private final SootMethod v, enter, exit;
-
-  public void convert(DavaBody body) {
-    for (AugmentedStmt mas : body.get_MonitorFacts()) {
-      MonitorStmt ms = (MonitorStmt) mas.get_Stmt();
-
-      body.addToImportList("soot.dava.toolkits.base.DavaMonitor.DavaMonitor");
-
-      ArrayList arg = new ArrayList();
-      arg.add(ms.getOp());
-
-      if (ms instanceof EnterMonitorStmt) {
-        mas.set_Stmt(new GInvokeStmt(new DVirtualInvokeExpr(new DStaticInvokeExpr(v.makeRef(), new ArrayList()),
-            enter.makeRef(), arg, new HashSet<Object>())));
-      } else {
-        mas.set_Stmt(new GInvokeStmt(new DVirtualInvokeExpr(new DStaticInvokeExpr(v.makeRef(), new ArrayList()),
-            exit.makeRef(), arg, new HashSet<Object>())));
-      }
-    }
-  }
+	public void convert(DavaBody body) {
+	    body.get_MonitorFacts().forEach(mas -> {
+	      MonitorStmt ms = (MonitorStmt) mas.get_Stmt();
+	
+	      body.addToImportList("soot.dava.toolkits.base.DavaMonitor.DavaMonitor");
+	
+	      ArrayList arg = new ArrayList();
+	      arg.add(ms.getOp());
+	
+	      if (ms instanceof EnterMonitorStmt) {
+	        mas.set_Stmt(new GInvokeStmt(new DVirtualInvokeExpr(new DStaticInvokeExpr(v.makeRef(), new ArrayList()),
+	            enter.makeRef(), arg, new HashSet<Object>())));
+	      } else {
+	        mas.set_Stmt(new GInvokeStmt(new DVirtualInvokeExpr(new DStaticInvokeExpr(v.makeRef(), new ArrayList()),
+	            exit.makeRef(), arg, new HashSet<Object>())));
+	      }
+	    });
+	  }
 }

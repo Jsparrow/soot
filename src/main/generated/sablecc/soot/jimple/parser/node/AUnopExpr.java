@@ -7,8 +7,8 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AUnopExpr extends PUnopExpr
 {
-    private PUnop _unop_;
-    private PImmediate _immediate_;
+    private PUnop unop;
+    private PImmediate immediate;
 
     public AUnopExpr()
     {
@@ -30,8 +30,8 @@ public final class AUnopExpr extends PUnopExpr
     public Object clone()
     {
         return new AUnopExpr(
-            cloneNode(this._unop_),
-            cloneNode(this._immediate_));
+            cloneNode(this.unop),
+            cloneNode(this.immediate));
     }
 
     @Override
@@ -42,14 +42,14 @@ public final class AUnopExpr extends PUnopExpr
 
     public PUnop getUnop()
     {
-        return this._unop_;
+        return this.unop;
     }
 
     public void setUnop(PUnop node)
     {
-        if(this._unop_ != null)
+        if(this.unop != null)
         {
-            this._unop_.parent(null);
+            this.unop.parent(null);
         }
 
         if(node != null)
@@ -62,19 +62,19 @@ public final class AUnopExpr extends PUnopExpr
             node.parent(this);
         }
 
-        this._unop_ = node;
+        this.unop = node;
     }
 
     public PImmediate getImmediate()
     {
-        return this._immediate_;
+        return this.immediate;
     }
 
     public void setImmediate(PImmediate node)
     {
-        if(this._immediate_ != null)
+        if(this.immediate != null)
         {
-            this._immediate_.parent(null);
+            this.immediate.parent(null);
         }
 
         if(node != null)
@@ -87,30 +87,28 @@ public final class AUnopExpr extends PUnopExpr
             node.parent(this);
         }
 
-        this._immediate_ = node;
+        this.immediate = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._unop_)
-            + toString(this._immediate_);
+        return new StringBuilder().append("").append(toString(this.unop)).append(toString(this.immediate)).toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._unop_ == child)
+        if(this.unop == child)
         {
-            this._unop_ = null;
+            this.unop = null;
             return;
         }
 
-        if(this._immediate_ == child)
+        if(this.immediate == child)
         {
-            this._immediate_ = null;
+            this.immediate = null;
             return;
         }
 
@@ -121,13 +119,13 @@ public final class AUnopExpr extends PUnopExpr
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._unop_ == oldChild)
+        if(this.unop == oldChild)
         {
             setUnop((PUnop) newChild);
             return;
         }
 
-        if(this._immediate_ == oldChild)
+        if(this.immediate == oldChild)
         {
             setImmediate((PImmediate) newChild);
             return;

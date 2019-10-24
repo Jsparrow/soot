@@ -38,11 +38,13 @@ package soot.toolkits.scalar;
 
 public abstract class AbstractBoundedFlowSet<T> extends AbstractFlowSet<T> implements BoundedFlowSet<T> {
 
-  public void complement() {
+  @Override
+public void complement() {
     complement(this);
   }
 
-  public void complement(FlowSet<T> dest) {
+  @Override
+public void complement(FlowSet<T> dest) {
     if (this == dest) {
       complement();
     } else {
@@ -51,7 +53,8 @@ public abstract class AbstractBoundedFlowSet<T> extends AbstractFlowSet<T> imple
     }
   }
 
-  public FlowSet<T> topSet() {
+  @Override
+public FlowSet<T> topSet() {
     BoundedFlowSet<T> tmp = (BoundedFlowSet<T>) emptySet();
     tmp.complement();
     return tmp;

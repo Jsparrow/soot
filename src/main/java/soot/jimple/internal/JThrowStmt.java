@@ -46,25 +46,30 @@ public class JThrowStmt extends AbstractOpStmt implements ThrowStmt {
     super(opBox);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new JThrowStmt(Jimple.cloneIfNecessary(getOp()));
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "throw " + opBox.getValue().toString();
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     up.literal(Jimple.THROW);
     up.literal(" ");
     opBox.toString(up);
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((StmtSwitch) sw).caseThrowStmt(this);
   }
 
-  public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
+  @Override
+public void convertToBaf(JimpleToBafContext context, List<Unit> out) {
     ((ConvertToBaf) getOp()).convertToBaf(context, out);
 
     Unit u = Baf.v().newThrowInst();
@@ -72,11 +77,13 @@ public class JThrowStmt extends AbstractOpStmt implements ThrowStmt {
     out.add(u);
   }
 
-  public boolean fallsThrough() {
+  @Override
+public boolean fallsThrough() {
     return false;
   }
 
-  public boolean branches() {
+  @Override
+public boolean branches() {
     return false;
   }
 

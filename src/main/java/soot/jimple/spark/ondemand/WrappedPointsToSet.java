@@ -34,16 +34,16 @@ public class WrappedPointsToSet implements EqualsSupportingPointsToSet {
 
   final PointsToSetInternal wrapped;
 
-  public PointsToSetInternal getWrapped() {
-    return wrapped;
-  }
-
   public WrappedPointsToSet(final PointsToSetInternal wrapped) {
-    super();
     this.wrapped = wrapped;
   }
 
-  public boolean hasNonEmptyIntersection(PointsToSet other) {
+public PointsToSetInternal getWrapped() {
+    return wrapped;
+  }
+
+@Override
+public boolean hasNonEmptyIntersection(PointsToSet other) {
     if (other instanceof AllocAndContextSet) {
       return other.hasNonEmptyIntersection(this);
     } else if (other instanceof WrappedPointsToSet) {
@@ -53,30 +53,36 @@ public class WrappedPointsToSet implements EqualsSupportingPointsToSet {
     }
   }
 
-  public boolean isEmpty() {
+@Override
+public boolean isEmpty() {
     return wrapped.isEmpty();
   }
 
-  public Set<ClassConstant> possibleClassConstants() {
+@Override
+public Set<ClassConstant> possibleClassConstants() {
     return wrapped.possibleClassConstants();
   }
 
-  public Set<String> possibleStringConstants() {
+@Override
+public Set<String> possibleStringConstants() {
     return wrapped.possibleStringConstants();
   }
 
-  public Set<Type> possibleTypes() {
+@Override
+public Set<Type> possibleTypes() {
     return wrapped.possibleTypes();
   }
 
-  public String toString() {
+@Override
+public String toString() {
     return wrapped.toString();
   }
 
-  /**
+/**
    * {@inheritDoc}
    */
-  public boolean equals(Object obj) {
+  @Override
+public boolean equals(Object obj) {
     if (obj == null) {
       return false;
     }
@@ -85,26 +91,26 @@ public class WrappedPointsToSet implements EqualsSupportingPointsToSet {
     }
 
     // have to get around the tyranny of reference losing equality
-    if (obj instanceof WrappedPointsToSet) {
-      WrappedPointsToSet wrapper = (WrappedPointsToSet) obj;
-
-      return wrapped.equals(wrapper.wrapped);
-    }
-
-    return obj.equals(wrapped);
+	if (!(obj instanceof WrappedPointsToSet)) {
+		return obj.equals(wrapped);
+	}
+	WrappedPointsToSet wrapper = (WrappedPointsToSet) obj;
+	return wrapped.equals(wrapper.wrapped);
   }
 
-  /**
+/**
    * {@inheritDoc}
    */
-  public int hashCode() {
+  @Override
+public int hashCode() {
     return wrapped.hashCode();
   }
 
-  /**
+/**
    * {@inheritDoc}
    */
-  public boolean pointsToSetEquals(Object other) {
+  @Override
+public boolean pointsToSetEquals(Object other) {
     if (!(other instanceof EqualsSupportingPointsToSet)) {
       return false;
     }
@@ -112,14 +118,15 @@ public class WrappedPointsToSet implements EqualsSupportingPointsToSet {
     return wrapped.pointsToSetEquals(otherPts);
   }
 
-  /**
+/**
    * {@inheritDoc}
    */
-  public int pointsToSetHashCode() {
+  @Override
+public int pointsToSetHashCode() {
     return wrapped.pointsToSetHashCode();
   }
 
-  protected Object unwrapIfNecessary(Object obj) {
+protected Object unwrapIfNecessary(Object obj) {
     if (obj instanceof WrappedPointsToSet) {
       WrappedPointsToSet wrapper = (WrappedPointsToSet) obj;
       obj = wrapper.wrapped;

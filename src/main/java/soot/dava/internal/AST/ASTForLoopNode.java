@@ -85,15 +85,17 @@ public class ASTForLoopNode extends ASTControlFlowNode {
 
   public void replaceBody(List<Object> body) {
     this.body = body;
-    subBodies = new ArrayList<Object>();
+    subBodies = new ArrayList<>();
     subBodies.add(body);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new ASTForLoopNode(get_Label(), init, get_Condition(), update, body);
   }
 
-  public void toString(UnitPrinter up) {
+  @Override
+public void toString(UnitPrinter up) {
     label_toString(up);
 
     up.literal("for");
@@ -140,8 +142,9 @@ public class ASTForLoopNode extends ASTControlFlowNode {
 
   }
 
-  public String toString() {
-    StringBuffer b = new StringBuffer();
+  @Override
+public String toString() {
+    StringBuilder b = new StringBuilder();
 
     b.append(label_toString());
     b.append("for (");
@@ -180,7 +183,8 @@ public class ASTForLoopNode extends ASTControlFlowNode {
     return b.toString();
   }
 
-  public void apply(Analysis a) {
+  @Override
+public void apply(Analysis a) {
     a.caseASTForLoopNode(this);
   }
 

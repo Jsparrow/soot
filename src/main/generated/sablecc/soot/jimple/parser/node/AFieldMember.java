@@ -8,10 +8,10 @@ import soot.jimple.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFieldMember extends PMember
 {
-    private final LinkedList<PModifier> _modifier_ = new LinkedList<PModifier>();
-    private PType _type_;
-    private PName _name_;
-    private TSemicolon _semicolon_;
+    private final LinkedList<PModifier> modifier = new LinkedList<>();
+    private PType type;
+    private PName name;
+    private TSemicolon semicolon;
 
     public AFieldMember()
     {
@@ -39,10 +39,10 @@ public final class AFieldMember extends PMember
     public Object clone()
     {
         return new AFieldMember(
-            cloneList(this._modifier_),
-            cloneNode(this._type_),
-            cloneNode(this._name_),
-            cloneNode(this._semicolon_));
+            cloneList(this.modifier),
+            cloneNode(this.type),
+            cloneNode(this.name),
+            cloneNode(this.semicolon));
     }
 
     @Override
@@ -53,40 +53,34 @@ public final class AFieldMember extends PMember
 
     public LinkedList<PModifier> getModifier()
     {
-        return this._modifier_;
+        return this.modifier;
     }
 
     public void setModifier(List<?> list)
     {
-        for(PModifier e : this._modifier_)
-        {
-            e.parent(null);
-        }
-        this._modifier_.clear();
+        this.modifier.forEach(e -> e.parent(null));
+        this.modifier.clear();
 
-        for(Object obj_e : list)
-        {
-            PModifier e = (PModifier) obj_e;
-            if(e.parent() != null)
+        list.stream().map(obj_e -> (PModifier) obj_e).forEach(e -> {
+			if(e.parent() != null)
             {
                 e.parent().removeChild(e);
             }
-
-            e.parent(this);
-            this._modifier_.add(e);
-        }
+			e.parent(this);
+			this.modifier.add(e);
+		});
     }
 
     public PType getType()
     {
-        return this._type_;
+        return this.type;
     }
 
     public void setType(PType node)
     {
-        if(this._type_ != null)
+        if(this.type != null)
         {
-            this._type_.parent(null);
+            this.type.parent(null);
         }
 
         if(node != null)
@@ -99,19 +93,19 @@ public final class AFieldMember extends PMember
             node.parent(this);
         }
 
-        this._type_ = node;
+        this.type = node;
     }
 
     public PName getName()
     {
-        return this._name_;
+        return this.name;
     }
 
     public void setName(PName node)
     {
-        if(this._name_ != null)
+        if(this.name != null)
         {
-            this._name_.parent(null);
+            this.name.parent(null);
         }
 
         if(node != null)
@@ -124,19 +118,19 @@ public final class AFieldMember extends PMember
             node.parent(this);
         }
 
-        this._name_ = node;
+        this.name = node;
     }
 
     public TSemicolon getSemicolon()
     {
-        return this._semicolon_;
+        return this.semicolon;
     }
 
     public void setSemicolon(TSemicolon node)
     {
-        if(this._semicolon_ != null)
+        if(this.semicolon != null)
         {
-            this._semicolon_.parent(null);
+            this.semicolon.parent(null);
         }
 
         if(node != null)
@@ -149,43 +143,40 @@ public final class AFieldMember extends PMember
             node.parent(this);
         }
 
-        this._semicolon_ = node;
+        this.semicolon = node;
     }
 
     @Override
     public String toString()
     {
-        return ""
-            + toString(this._modifier_)
-            + toString(this._type_)
-            + toString(this._name_)
-            + toString(this._semicolon_);
+        return new StringBuilder().append("").append(toString(this.modifier)).append(toString(this.type)).append(toString(this.name)).append(toString(this.semicolon))
+				.toString();
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._modifier_.remove(child))
+        if(this.modifier.remove(child))
         {
             return;
         }
 
-        if(this._type_ == child)
+        if(this.type == child)
         {
-            this._type_ = null;
+            this.type = null;
             return;
         }
 
-        if(this._name_ == child)
+        if(this.name == child)
         {
-            this._name_ = null;
+            this.name = null;
             return;
         }
 
-        if(this._semicolon_ == child)
+        if(this.semicolon == child)
         {
-            this._semicolon_ = null;
+            this.semicolon = null;
             return;
         }
 
@@ -196,7 +187,7 @@ public final class AFieldMember extends PMember
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        for(ListIterator<PModifier> i = this._modifier_.listIterator(); i.hasNext();)
+        for(ListIterator<PModifier> i = this.modifier.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)
             {
@@ -214,19 +205,19 @@ public final class AFieldMember extends PMember
             }
         }
 
-        if(this._type_ == oldChild)
+        if(this.type == oldChild)
         {
             setType((PType) newChild);
             return;
         }
 
-        if(this._name_ == oldChild)
+        if(this.name == oldChild)
         {
             setName((PName) newChild);
             return;
         }
 
-        if(this._semicolon_ == oldChild)
+        if(this.semicolon == oldChild)
         {
             setSemicolon((TSemicolon) newChild);
             return;

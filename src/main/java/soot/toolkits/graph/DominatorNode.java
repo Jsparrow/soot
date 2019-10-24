@@ -38,7 +38,7 @@ public class DominatorNode<N> {
 
   protected DominatorNode(N gode) {
     this.gode = gode;
-    children = new ArrayList<DominatorNode<N>>();
+    children = new ArrayList<>();
   }
 
   /**
@@ -95,7 +95,8 @@ public class DominatorNode<N> {
     return children.isEmpty();
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     // *** FIXME: Print info about parent and children
     return gode.toString();
   }

@@ -25,29 +25,39 @@ package soot.rtlib.tamiflex;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultHandler implements IUnexpectedReflectiveCallHandler {
-  public void methodInvoke(Object receiver, Method m) {
-    System.err.println("Unexpected reflective call to method " + m);
+  private static final Logger logger = LoggerFactory.getLogger(DefaultHandler.class);
+
+@Override
+public void methodInvoke(Object receiver, Method m) {
+    logger.error("Unexpected reflective call to method " + m);
   }
 
-  public void constructorNewInstance(Constructor<?> c) {
-    System.err.println("Unexpected reflective instantiation via constructor " + c);
+  @Override
+public void constructorNewInstance(Constructor<?> c) {
+    logger.error("Unexpected reflective instantiation via constructor " + c);
   }
 
-  public void classNewInstance(Class<?> c) {
-    System.err.println("Unexpected reflective instantiation via Class.newInstance on class " + c);
+  @Override
+public void classNewInstance(Class<?> c) {
+    logger.error("Unexpected reflective instantiation via Class.newInstance on class " + c);
   }
 
-  public void classForName(String typeName) {
-    System.err.println("Unexpected reflective loading of class " + typeName);
+  @Override
+public void classForName(String typeName) {
+    logger.error("Unexpected reflective loading of class " + typeName);
   }
 
-  public void fieldSet(Object receiver, Field f) {
-    System.err.println("Unexpected reflective field set: " + f);
+  @Override
+public void fieldSet(Object receiver, Field f) {
+    logger.error("Unexpected reflective field set: " + f);
   }
 
-  public void fieldGet(Object receiver, Field f) {
-    System.err.println("Unexpected reflective field get: " + f);
+  @Override
+public void fieldGet(Object receiver, Field f) {
+    logger.error("Unexpected reflective field get: " + f);
   }
 }

@@ -73,7 +73,7 @@ public class DirectedCallGraph implements DirectedGraph<SootMethod> {
    */
   public DirectedCallGraph(CallGraph cg, SootMethodFilter filter, Iterator<SootMethod> heads, boolean verbose) {
     // filter heads by filter
-    List<SootMethod> filteredHeads = new LinkedList<SootMethod>();
+    List<SootMethod> filteredHeads = new LinkedList<>();
     while (heads.hasNext()) {
       SootMethod m = heads.next();
       if (m.isConcrete() && filter.want(m)) {
@@ -81,22 +81,22 @@ public class DirectedCallGraph implements DirectedGraph<SootMethod> {
       }
     }
 
-    this.nodes = new HashSet<SootMethod>(filteredHeads);
+    this.nodes = new HashSet<>(filteredHeads);
 
-    MultiMap<SootMethod, SootMethod> s = new HashMultiMap<SootMethod, SootMethod>();
-    MultiMap<SootMethod, SootMethod> p = new HashMultiMap<SootMethod, SootMethod>();
+    MultiMap<SootMethod, SootMethod> s = new HashMultiMap<>();
+    MultiMap<SootMethod, SootMethod> p = new HashMultiMap<>();
 
     // simple breadth-first visit
-    Set<SootMethod> remain = new HashSet<SootMethod>(filteredHeads);
+    Set<SootMethod> remain = new HashSet<>(filteredHeads);
     int nb = 0;
     if (verbose) {
       logger.debug("[AM] dumping method dependencies");
     }
     while (!remain.isEmpty()) {
-      Set<SootMethod> newRemain = new HashSet<SootMethod>();
+      Set<SootMethod> newRemain = new HashSet<>();
       for (SootMethod m : remain) {
         if (verbose) {
-          logger.debug(" |- " + m.toString() + " calls");
+          logger.debug(new StringBuilder().append(" |- ").append(m.toString()).append(" calls").toString());
         }
 
         for (Iterator<Edge> itt = cg.edgesOutOf(m); itt.hasNext();) {
@@ -104,7 +104,7 @@ public class DirectedCallGraph implements DirectedGraph<SootMethod> {
           SootMethod mm = edge.tgt();
           boolean keep = mm.isConcrete() && filter.want(mm);
           if (verbose) {
-            logger.debug(" |  |- " + mm.toString() + (keep ? "" : " (filtered out)"));
+            logger.debug(new StringBuilder().append(" |  |- ").append(mm.toString()).append(keep ? "" : " (filtered out)").toString());
           }
           if (keep) {
             if (this.nodes.add(mm)) {
@@ -121,22 +121,22 @@ public class DirectedCallGraph implements DirectedGraph<SootMethod> {
     logger.debug("[AM] number of methods to be analysed: " + nb);
 
     // MultiMap -> Map of List
-    this.succ = new HashMap<SootMethod, List<SootMethod>>();
-    this.pred = new HashMap<SootMethod, List<SootMethod>>();
-    this.tails = new LinkedList<SootMethod>();
-    this.heads = new LinkedList<SootMethod>();
-    for (SootMethod x : this.nodes) {
+    this.succ = new HashMap<>();
+    this.pred = new HashMap<>();
+    this.tails = new LinkedList<>();
+    this.heads = new LinkedList<>();
+    this.nodes.forEach(x -> {
       Set<SootMethod> ss = s.get(x);
       Set<SootMethod> pp = p.get(x);
-      this.succ.put(x, new LinkedList<SootMethod>(ss));
-      this.pred.put(x, new LinkedList<SootMethod>(pp));
+      this.succ.put(x, new LinkedList<>(ss));
+      this.pred.put(x, new LinkedList<>(pp));
       if (ss.isEmpty()) {
         this.tails.add(x);
       }
       if (pp.isEmpty()) {
         this.heads.add(x);
       }
-    }
+    });
 
     this.size = this.nodes.size();
   }

@@ -79,18 +79,21 @@ class WholeObject {
     this.type = null;
   }
 
-  public String toString() {
+  @Override
+public String toString() {
     return "All Fields" + (type == null ? "" : " (" + type + ")");
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     if (type == null) {
       return 1;
     }
     return type.hashCode();
   }
 
-  public boolean equals(Object o) {
+  @Override
+public boolean equals(Object o) {
     if (type == null) {
       return true;
     }
@@ -116,8 +119,8 @@ class WholeObject {
 public class CriticalSectionAwareSideEffectAnalysis {
   PointsToAnalysis pa;
   CallGraph cg;
-  Map<SootMethod, CodeBlockRWSet> methodToNTReadSet = new HashMap<SootMethod, CodeBlockRWSet>();
-  Map<SootMethod, CodeBlockRWSet> methodToNTWriteSet = new HashMap<SootMethod, CodeBlockRWSet>();
+  Map<SootMethod, CodeBlockRWSet> methodToNTReadSet = new HashMap<>();
+  Map<SootMethod, CodeBlockRWSet> methodToNTWriteSet = new HashMap<>();
   int rwsetcount = 0;
   CriticalSectionVisibleEdgesPred tve;
   TransitiveTargets tt;
@@ -131,8 +134,61 @@ public class CriticalSectionAwareSideEffectAnalysis {
   public Vector sigReadGraylist;
   public Vector sigWriteGraylist;
   public Vector subSigBlacklist;
+private HashMap<Stmt, RWSet> rCache = new HashMap<>();
+private HashMap<Stmt, RWSet> wCache = new HashMap<>();
 
-  public void findNTRWSets(SootMethod method) {
+public CriticalSectionAwareSideEffectAnalysis(PointsToAnalysis pa, CallGraph cg,
+      Collection<CriticalSection> criticalSections, ThreadLocalObjectsAnalysis tlo) {
+    this.pa = pa;
+    this.cg = cg;
+    this.tve = new CriticalSectionVisibleEdgesPred(criticalSections);
+    this.tt = new TransitiveTargets(cg, new Filter(tve));
+    this.normaltt = new TransitiveTargets(cg, null);
+    this.normalsea = new SideEffectAnalysis(pa, cg);
+    this.criticalSections = criticalSections;
+    this.eoa = new EncapsulatedObjectAnalysis();
+    this.tlo = tlo; // can be null
+
+    sigBlacklist = new Vector(); // Signatures of methods known to have effective read/write sets of size 0
+    // Math does not have any synchronization risks, we think :-)
+    /*
+     * sigBlacklist.add("<java.lang.Math: double abs(double)>");
+     * sigBlacklist.add("<java.lang.Math: double min(double,double)>");
+     * sigBlacklist.add("<java.lang.Math: double sqrt(double)>");
+     * sigBlacklist.add("<java.lang.Math: double pow(double,double)>"); //
+     */
+    // sigBlacklist.add("");
+
+    sigReadGraylist = new Vector(); // Signatures of methods whose effects must be approximated
+    sigWriteGraylist = new Vector();
+
+    /*
+     * sigReadGraylist.add("<java.util.Vector: boolean remove(java.lang.Object)>");
+     * sigWriteGraylist.add("<java.util.Vector: boolean remove(java.lang.Object)>");
+     *
+     * sigReadGraylist.add("<java.util.Vector: boolean add(java.lang.Object)>");
+     * sigWriteGraylist.add("<java.util.Vector: boolean add(java.lang.Object)>");
+     *
+     * sigReadGraylist.add("<java.util.Vector: java.lang.Object clone()>"); //
+     * sigWriteGraylist.add("<java.util.Vector: java.lang.Object clone()>");
+     *
+     * sigReadGraylist.add("<java.util.Vector: java.lang.Object get(int)>"); //
+     * sigWriteGraylist.add("<java.util.Vector: java.lang.Object get(int)>");
+     *
+     * sigReadGraylist.add("<java.util.Vector: java.util.List subList(int,int)>"); //
+     * sigWriteGraylist.add("<java.util.Vector: java.util.List subList(int,int)>");
+     *
+     * sigReadGraylist.add("<java.util.List: void clear()>"); sigWriteGraylist.add("<java.util.List: void clear()>"); //
+     */
+    subSigBlacklist = new Vector(); // Subsignatures of methods on all objects known to have read/write sets of size 0
+    /*
+     * subSigBlacklist.add("java.lang.Class class$(java.lang.String)"); subSigBlacklist.add("void notify()");
+     * subSigBlacklist.add("void notifyAll()"); subSigBlacklist.add("void wait()"); subSigBlacklist.add("void <clinit>()");
+     * //
+     */
+  }
+
+public void findNTRWSets(SootMethod method) {
     if (methodToNTReadSet.containsKey(method) && methodToNTWriteSet.containsKey(method)) {
       return;
     }
@@ -146,9 +202,7 @@ public class CriticalSectionAwareSideEffectAnalysis {
 
       // Ignore Reads/Writes inside another transaction
       if (criticalSections != null) {
-        Iterator<CriticalSection> tnIt = criticalSections.iterator();
-        while (tnIt.hasNext()) {
-          CriticalSection tn = tnIt.next();
+        for (CriticalSection tn : criticalSections) {
           if (tn.units.contains(s) || tn.prepStmt == s) {
             ignore = true;
             break;
@@ -224,86 +278,33 @@ public class CriticalSectionAwareSideEffectAnalysis {
     methodToNTWriteSet.put(method, write);
   }
 
-  public void setExemptTransaction(CriticalSection tn) {
+public void setExemptTransaction(CriticalSection tn) {
     tve.setExemptTransaction(tn);
   }
 
-  public RWSet nonTransitiveReadSet(SootMethod method) {
+public RWSet nonTransitiveReadSet(SootMethod method) {
     findNTRWSets(method);
     return methodToNTReadSet.get(method);
   }
 
-  public RWSet nonTransitiveWriteSet(SootMethod method) {
+public RWSet nonTransitiveWriteSet(SootMethod method) {
     findNTRWSets(method);
     return methodToNTWriteSet.get(method);
   }
 
-  public CriticalSectionAwareSideEffectAnalysis(PointsToAnalysis pa, CallGraph cg,
-      Collection<CriticalSection> criticalSections, ThreadLocalObjectsAnalysis tlo) {
-    this.pa = pa;
-    this.cg = cg;
-    this.tve = new CriticalSectionVisibleEdgesPred(criticalSections);
-    this.tt = new TransitiveTargets(cg, new Filter(tve));
-    this.normaltt = new TransitiveTargets(cg, null);
-    this.normalsea = new SideEffectAnalysis(pa, cg);
-    this.criticalSections = criticalSections;
-    this.eoa = new EncapsulatedObjectAnalysis();
-    this.tlo = tlo; // can be null
-
-    sigBlacklist = new Vector(); // Signatures of methods known to have effective read/write sets of size 0
-    // Math does not have any synchronization risks, we think :-)
-    /*
-     * sigBlacklist.add("<java.lang.Math: double abs(double)>");
-     * sigBlacklist.add("<java.lang.Math: double min(double,double)>");
-     * sigBlacklist.add("<java.lang.Math: double sqrt(double)>");
-     * sigBlacklist.add("<java.lang.Math: double pow(double,double)>"); //
-     */
-    // sigBlacklist.add("");
-
-    sigReadGraylist = new Vector(); // Signatures of methods whose effects must be approximated
-    sigWriteGraylist = new Vector();
-
-    /*
-     * sigReadGraylist.add("<java.util.Vector: boolean remove(java.lang.Object)>");
-     * sigWriteGraylist.add("<java.util.Vector: boolean remove(java.lang.Object)>");
-     *
-     * sigReadGraylist.add("<java.util.Vector: boolean add(java.lang.Object)>");
-     * sigWriteGraylist.add("<java.util.Vector: boolean add(java.lang.Object)>");
-     *
-     * sigReadGraylist.add("<java.util.Vector: java.lang.Object clone()>"); //
-     * sigWriteGraylist.add("<java.util.Vector: java.lang.Object clone()>");
-     *
-     * sigReadGraylist.add("<java.util.Vector: java.lang.Object get(int)>"); //
-     * sigWriteGraylist.add("<java.util.Vector: java.lang.Object get(int)>");
-     *
-     * sigReadGraylist.add("<java.util.Vector: java.util.List subList(int,int)>"); //
-     * sigWriteGraylist.add("<java.util.Vector: java.util.List subList(int,int)>");
-     *
-     * sigReadGraylist.add("<java.util.List: void clear()>"); sigWriteGraylist.add("<java.util.List: void clear()>"); //
-     */
-    subSigBlacklist = new Vector(); // Subsignatures of methods on all objects known to have read/write sets of size 0
-    /*
-     * subSigBlacklist.add("java.lang.Class class$(java.lang.String)"); subSigBlacklist.add("void notify()");
-     * subSigBlacklist.add("void notifyAll()"); subSigBlacklist.add("void wait()"); subSigBlacklist.add("void <clinit>()");
-     * //
-     */
-  }
-
-  private RWSet ntReadSet(SootMethod method, Stmt stmt) {
-    if (stmt instanceof AssignStmt) {
-      AssignStmt a = (AssignStmt) stmt;
-      Value r = a.getRightOp();
-      if (r instanceof NewExpr) {
+private RWSet ntReadSet(SootMethod method, Stmt stmt) {
+    if (!(stmt instanceof AssignStmt)) {
+		return null;
+	}
+	AssignStmt a = (AssignStmt) stmt;
+	Value r = a.getRightOp();
+	if (r instanceof NewExpr) {
         return null;
       }
-      return addValue(r, method, stmt);
-    }
-    return null;
+	return addValue(r, method, stmt);
   }
 
-  private HashMap<Stmt, RWSet> RCache = new HashMap<Stmt, RWSet>();
-
-  public RWSet approximatedReadSet(SootMethod method, Stmt stmt, Value specialRead, boolean allFields) { // used for stmts
+public RWSet approximatedReadSet(SootMethod method, Stmt stmt, Value specialRead, boolean allFields) { // used for stmts
                                                                                                          // with method calls
                                                                                                          // where the
                                                                                                          // effect of the
@@ -351,11 +352,11 @@ public class CriticalSectionAwareSideEffectAnalysis {
           CodeBlockRWSet allRW = ret;
           ret = new CodeBlockRWSet();
           RWSet normalRW;
-          if (RCache.containsKey(stmt)) {
-            normalRW = RCache.get(stmt);
+          if (rCache.containsKey(stmt)) {
+            normalRW = rCache.get(stmt);
           } else {
             normalRW = normalsea.readSet(method, stmt);
-            RCache.put(stmt, normalRW);
+            rCache.put(stmt, normalRW);
           }
           if (normalRW != null) {
             for (Iterator fieldsIt = normalRW.getFields().iterator(); fieldsIt.hasNext();) {
@@ -391,7 +392,7 @@ public class CriticalSectionAwareSideEffectAnalysis {
     return ret;
   }
 
-  public RWSet readSet(SootMethod method, Stmt stmt, CriticalSection tn, Set uses) {
+public RWSet readSet(SootMethod method, Stmt stmt, CriticalSection tn, Set uses) {
     boolean ignore = false;
     if (stmt.containsInvokeExpr()) {
       InvokeExpr ie = stmt.getInvokeExpr();
@@ -503,18 +504,16 @@ public class CriticalSectionAwareSideEffectAnalysis {
     return ret;
   }
 
-  private RWSet ntWriteSet(SootMethod method, Stmt stmt) {
-    if (stmt instanceof AssignStmt) {
-      AssignStmt a = (AssignStmt) stmt;
-      Value l = a.getLeftOp();
-      return addValue(l, method, stmt);
-    }
-    return null;
+private RWSet ntWriteSet(SootMethod method, Stmt stmt) {
+    if (!(stmt instanceof AssignStmt)) {
+		return null;
+	}
+	AssignStmt a = (AssignStmt) stmt;
+	Value l = a.getLeftOp();
+	return addValue(l, method, stmt);
   }
 
-  private HashMap<Stmt, RWSet> WCache = new HashMap<Stmt, RWSet>();
-
-  public RWSet approximatedWriteSet(SootMethod method, Stmt stmt, Value v, boolean allFields) { // used for stmts with method
+public RWSet approximatedWriteSet(SootMethod method, Stmt stmt, Value v, boolean allFields) { // used for stmts with method
                                                                                                 // calls where the effect
                                                                                                 // of
                                                                                                 // the method call should be
@@ -557,11 +556,11 @@ public class CriticalSectionAwareSideEffectAnalysis {
           CodeBlockRWSet allRW = ret;
           ret = new CodeBlockRWSet();
           RWSet normalRW;
-          if (WCache.containsKey(stmt)) {
-            normalRW = WCache.get(stmt);
+          if (wCache.containsKey(stmt)) {
+            normalRW = wCache.get(stmt);
           } else {
             normalRW = normalsea.writeSet(method, stmt);
-            WCache.put(stmt, normalRW);
+            wCache.put(stmt, normalRW);
           }
           if (normalRW != null) {
             for (Iterator fieldsIt = normalRW.getFields().iterator(); fieldsIt.hasNext();) {
@@ -591,7 +590,7 @@ public class CriticalSectionAwareSideEffectAnalysis {
     return ret;
   }
 
-  public RWSet writeSet(SootMethod method, Stmt stmt, CriticalSection tn, Set uses) {
+public RWSet writeSet(SootMethod method, Stmt stmt, CriticalSection tn, Set uses) {
     boolean ignore = false;
     if (stmt.containsInvokeExpr()) {
       InvokeExpr ie = stmt.getInvokeExpr();
@@ -694,7 +693,7 @@ public class CriticalSectionAwareSideEffectAnalysis {
     return ret;
   }
 
-  public RWSet valueRWSet(Value v, SootMethod m, Stmt s, CriticalSection tn) {
+public RWSet valueRWSet(Value v, SootMethod m, Stmt s, CriticalSection tn) {
     RWSet ret = null;
 
     if (tlo != null) {
@@ -757,7 +756,7 @@ public class CriticalSectionAwareSideEffectAnalysis {
     return ret;
   }
 
-  protected RWSet addValue(Value v, SootMethod m, Stmt s) {
+protected RWSet addValue(Value v, SootMethod m, Stmt s) {
     RWSet ret = null;
 
     if (tlo != null) {
@@ -808,7 +807,8 @@ public class CriticalSectionAwareSideEffectAnalysis {
     return ret;
   }
 
-  public String toString() {
-    return "TransactionAwareSideEffectAnalysis: PA=" + pa + " CG=" + cg;
+@Override
+public String toString() {
+    return new StringBuilder().append("TransactionAwareSideEffectAnalysis: PA=").append(pa).append(" CG=").append(cg).toString();
   }
 }

@@ -42,52 +42,49 @@ public class PhaseOptions {
    * PackManager), and returns. OK.
    */
   private PackManager pm;
+private final Map<HasPhaseOptions, Map<String, String>> phaseToOptionMap
+      = new HashMap<>();
 
-  public void setPackManager(PackManager m) {
+public PhaseOptions(Singletons.Global g) {
+  }
+
+public void setPackManager(PackManager m) {
     this.pm = m;
   }
 
-  PackManager getPM() {
+PackManager getPM() {
     if (pm == null) {
       PackManager.v();
     }
     return pm;
   }
 
-  public PhaseOptions(Singletons.Global g) {
-  }
-
-  public static PhaseOptions v() {
+public static PhaseOptions v() {
     return G.v().soot_PhaseOptions();
   }
 
-  private final Map<HasPhaseOptions, Map<String, String>> phaseToOptionMap
-      = new HashMap<HasPhaseOptions, Map<String, String>>();
-
-  public Map<String, String> getPhaseOptions(String phaseName) {
+public Map<String, String> getPhaseOptions(String phaseName) {
     return getPhaseOptions(getPM().getPhase(phaseName));
   }
 
-  public Map<String, String> getPhaseOptions(HasPhaseOptions phase) {
+public Map<String, String> getPhaseOptions(HasPhaseOptions phase) {
     Map<String, String> ret = phaseToOptionMap.get(phase);
     if (ret == null) {
-      ret = new HashMap<String, String>();
+      ret = new HashMap<>();
     } else {
-      ret = new HashMap<String, String>(ret);
+      ret = new HashMap<>(ret);
     }
     StringTokenizer st = new StringTokenizer(phase.getDefaultOptions());
     while (st.hasMoreTokens()) {
       String opt = st.nextToken();
       String key = getKey(opt);
       String value = getValue(opt);
-      if (!ret.containsKey(key)) {
-        ret.put(key, value);
-      }
+      ret.putIfAbsent(key, value);
     }
     return Collections.unmodifiableMap(ret);
   }
 
-  public boolean processPhaseOptions(String phaseName, String option) {
+public boolean processPhaseOptions(String phaseName, String option) {
     StringTokenizer st = new StringTokenizer(option, ",");
     while (st.hasMoreTokens()) {
       if (!setPhaseOption(phaseName, st.nextToken())) {
@@ -97,15 +94,15 @@ public class PhaseOptions {
     return true;
   }
 
-  /**
+/**
    * This method returns true iff key "name" is in options and maps to "true".
    */
   public static boolean getBoolean(Map<String, String> options, String name) {
     String val = options.get(name);
-    return val != null && val.equals("true");
+    return val != null && "true".equals(val);
   }
 
-  /**
+/**
    * If key "name" is in options, this method returns true iff it maps to "true". If the key "name" is not in options, the
    * given default value is returned.
    */
@@ -114,10 +111,10 @@ public class PhaseOptions {
     if (val == null) {
       return defaultValue;
     }
-    return val.equals("true");
+    return "true".equals(val);
   }
 
-  /**
+/**
    * This method returns the value of "name" in options or "" if "name" is not found.
    */
   public static String getString(Map<String, String> options, String name) {
@@ -125,21 +122,21 @@ public class PhaseOptions {
     return val != null ? val : "";
   }
 
-  /**
+/**
    * This method returns the float value of "name" in options or 1.0 if "name" is not found.
    */
   public static float getFloat(Map<String, String> options, String name) {
-    return options.containsKey(name) ? new Float(options.get(name)).floatValue() : 1.0f;
+    return options.containsKey(name) ? Float.valueOf(options.get(name)).floatValue() : 1.0f;
   }
 
-  /**
+/**
    * This method returns the integer value of "name" in options or 0 if "name" is not found.
    */
   public static int getInt(Map<String, String> options, String name) {
-    return options.containsKey(name) ? new Integer(options.get(name)).intValue() : 0;
+    return options.containsKey(name) ? Integer.valueOf(options.get(name)).intValue() : 0;
   }
 
-  private Map<String, String> mapForPhase(String phaseName) {
+private Map<String, String> mapForPhase(String phaseName) {
     HasPhaseOptions phase = getPM().getPhase(phaseName);
     if (phase == null) {
       return null;
@@ -147,18 +144,18 @@ public class PhaseOptions {
     return mapForPhase(phase);
   }
 
-  private Map<String, String> mapForPhase(HasPhaseOptions phase) {
+private Map<String, String> mapForPhase(HasPhaseOptions phase) {
     Map<String, String> optionMap = phaseToOptionMap.get(phase);
     if (optionMap == null) {
-      phaseToOptionMap.put(phase, optionMap = new HashMap<String, String>());
+      phaseToOptionMap.put(phase, optionMap = new HashMap<>());
     }
     return optionMap;
   }
 
-  private String getKey(String option) {
+private String getKey(String option) {
     int delimLoc = option.indexOf(":");
     if (delimLoc < 0) {
-      if (option.equals("on") || option.equals("off")) {
+      if ("on".equals(option) || "off".equals(option)) {
         return "enabled";
       }
       return option;
@@ -167,10 +164,10 @@ public class PhaseOptions {
     }
   }
 
-  private String getValue(String option) {
+private String getValue(String option) {
     int delimLoc = option.indexOf(":");
     if (delimLoc < 0) {
-      if (option.equals("off")) {
+      if ("off".equals(option)) {
         return "false";
       }
       return "true";
@@ -179,7 +176,7 @@ public class PhaseOptions {
     }
   }
 
-  private void resetRadioPack(String phaseName) {
+private void resetRadioPack(String phaseName) {
     for (Pack p : getPM().allPacks()) {
       if (!(p instanceof RadioScenePack)) {
         continue;
@@ -187,14 +184,14 @@ public class PhaseOptions {
       if (p.get(phaseName) == null) {
         continue;
       }
-      for (Iterator<Transform> tIt = p.iterator(); tIt.hasNext();) {
-        final Transform t = (Transform) tIt.next();
+      for (Transform aP : p) {
+        final Transform t = (Transform) aP;
         setPhaseOption(t.getPhaseName(), "enabled:false");
       }
     }
   }
 
-  private boolean checkParentEnabled(String phaseName) {
+private boolean checkParentEnabled() {
     /*
      * if( true ) return true; for (Pack p : getPM().allPacks()) { if( getBoolean( getPhaseOptions( p ), "enabled" ) )
      * continue; for( Iterator tIt = p.iterator(); tIt.hasNext(); ) { final Transform t = (Transform) tIt.next(); if(
@@ -206,42 +203,42 @@ public class PhaseOptions {
     return true;
   }
 
-  public boolean setPhaseOption(String phaseName, String option) {
+public boolean setPhaseOption(String phaseName, String option) {
     HasPhaseOptions phase = getPM().getPhase(phaseName);
-    if (phase == null) {
-      logger.debug("" + "Option " + option + " given for nonexistent" + " phase " + phaseName);
-      return false;
-    }
-    return setPhaseOption(phase, option);
+    if (phase != null) {
+		return setPhaseOption(phase, option);
+	}
+	logger.debug(new StringBuilder().append("").append("Option ").append(option).append(" given for nonexistent").append(" phase ").append(phaseName).toString());
+	return false;
   }
 
-  public boolean setPhaseOption(HasPhaseOptions phase, String option) {
+public boolean setPhaseOption(HasPhaseOptions phase, String option) {
     Map<String, String> optionMap = mapForPhase(phase);
-    if (!checkParentEnabled(phase.getPhaseName())) {
+    if (!checkParentEnabled()) {
       return false;
     }
     if (optionMap == null) {
-      logger.debug("" + "Option " + option + " given for nonexistent" + " phase " + phase.getPhaseName());
+      logger.debug(new StringBuilder().append("").append("Option ").append(option).append(" given for nonexistent").append(" phase ").append(phase.getPhaseName()).toString());
       return false;
     }
     String key = getKey(option);
-    if (key.equals("enabled") && getValue(option).equals("true")) {
+    if ("enabled".equals(key) && "true".equals(getValue(option))) {
       resetRadioPack(phase.getPhaseName());
     }
     if (declaresOption(phase, key)) {
       optionMap.put(key, getValue(option));
       return true;
     }
-    logger.debug("" + "Invalid option " + option + " for phase " + phase.getPhaseName());
+    logger.debug(new StringBuilder().append("").append("Invalid option ").append(option).append(" for phase ").append(phase.getPhaseName()).toString());
     return false;
   }
 
-  private boolean declaresOption(String phaseName, String option) {
+private boolean declaresOption(String phaseName, String option) {
     HasPhaseOptions phase = getPM().getPhase(phaseName);
     return declaresOption(phase, option);
   }
 
-  private boolean declaresOption(HasPhaseOptions phase, String option) {
+private boolean declaresOption(HasPhaseOptions phase, String option) {
     String declareds = phase.getDeclaredOptions();
     for (StringTokenizer st = new StringTokenizer(declareds); st.hasMoreTokens();) {
       if (st.nextToken().equals(option)) {
@@ -251,7 +248,7 @@ public class PhaseOptions {
     return false;
   }
 
-  public void setPhaseOptionIfUnset(String phaseName, String option) {
+public void setPhaseOptionIfUnset(String phaseName, String option) {
     Map<String, String> optionMap = mapForPhase(phaseName);
     if (optionMap == null) {
       throw new RuntimeException("No such phase " + phaseName);
@@ -260,7 +257,7 @@ public class PhaseOptions {
       return;
     }
     if (!declaresOption(phaseName, getKey(option))) {
-      throw new RuntimeException("No option " + option + " for phase " + phaseName);
+      throw new RuntimeException(new StringBuilder().append("No option ").append(option).append(" for phase ").append(phaseName).toString());
     }
     optionMap.put(getKey(option), getValue(option));
   }

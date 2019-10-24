@@ -70,12 +70,6 @@ public class GrimpBody extends StmtBody {
     super(m);
   }
 
-  public Object clone() {
-    Body b = Grimp.v().newBody(getMethod());
-    b.importBodyContentsFrom(this);
-    return b;
-  }
-
   /**
    * Constructs a GrimpBody from the given Body.
    */
@@ -84,7 +78,7 @@ public class GrimpBody extends StmtBody {
     super(body.getMethod());
 
     if (Options.v().verbose()) {
-      logger.debug("[" + getMethod().getName() + "] Constructing GrimpBody...");
+      logger.debug(new StringBuilder().append("[").append(getMethod().getName()).append("] Constructing GrimpBody...").toString());
     }
 
     JimpleBody jBody = null;
@@ -103,8 +97,8 @@ public class GrimpBody extends StmtBody {
 
     Iterator<Unit> it = jBody.getUnits().iterator();
 
-    final HashMap<Stmt, Stmt> oldToNew = new HashMap<Stmt, Stmt>(getUnits().size() * 2 + 1, 0.7f);
-    List<Unit> updates = new LinkedList<Unit>();
+    final HashMap<Stmt, Stmt> oldToNew = new HashMap<>(getUnits().size() * 2 + 1, 0.7f);
+    List<Unit> updates = new LinkedList<>();
 
     /* we should Grimpify the Stmt's here... */
     while (it.hasNext()) {
@@ -115,63 +109,77 @@ public class GrimpBody extends StmtBody {
       /* we can't have a general StmtSwapper on Grimp.v() */
       /* because we need to collect a list of updates */
       oldStmt.apply(new AbstractStmtSwitch() {
-        public void caseAssignStmt(AssignStmt s) {
+        @Override
+		public void caseAssignStmt(AssignStmt s) {
           newStmtBox.setUnit(Grimp.v().newAssignStmt(s));
         }
 
-        public void caseIdentityStmt(IdentityStmt s) {
+        @Override
+		public void caseIdentityStmt(IdentityStmt s) {
           newStmtBox.setUnit(Grimp.v().newIdentityStmt(s));
         }
 
-        public void caseBreakpointStmt(BreakpointStmt s) {
+        @Override
+		public void caseBreakpointStmt(BreakpointStmt s) {
           newStmtBox.setUnit(Grimp.v().newBreakpointStmt(s));
         }
 
-        public void caseInvokeStmt(InvokeStmt s) {
+        @Override
+		public void caseInvokeStmt(InvokeStmt s) {
           newStmtBox.setUnit(Grimp.v().newInvokeStmt(s));
         }
 
-        public void caseEnterMonitorStmt(EnterMonitorStmt s) {
+        @Override
+		public void caseEnterMonitorStmt(EnterMonitorStmt s) {
           newStmtBox.setUnit(Grimp.v().newEnterMonitorStmt(s));
         }
 
-        public void caseExitMonitorStmt(ExitMonitorStmt s) {
+        @Override
+		public void caseExitMonitorStmt(ExitMonitorStmt s) {
           newStmtBox.setUnit(Grimp.v().newExitMonitorStmt(s));
         }
 
-        public void caseGotoStmt(GotoStmt s) {
+        @Override
+		public void caseGotoStmt(GotoStmt s) {
           newStmtBox.setUnit(Grimp.v().newGotoStmt(s));
           updateStmtBox.setUnit(s);
         }
 
-        public void caseIfStmt(IfStmt s) {
+        @Override
+		public void caseIfStmt(IfStmt s) {
           newStmtBox.setUnit(Grimp.v().newIfStmt(s));
           updateStmtBox.setUnit(s);
         }
 
-        public void caseLookupSwitchStmt(LookupSwitchStmt s) {
+        @Override
+		public void caseLookupSwitchStmt(LookupSwitchStmt s) {
           newStmtBox.setUnit(Grimp.v().newLookupSwitchStmt(s));
           updateStmtBox.setUnit(s);
         }
 
-        public void caseNopStmt(NopStmt s) {
+        @Override
+		public void caseNopStmt(NopStmt s) {
           newStmtBox.setUnit(Grimp.v().newNopStmt(s));
         }
 
-        public void caseReturnStmt(ReturnStmt s) {
+        @Override
+		public void caseReturnStmt(ReturnStmt s) {
           newStmtBox.setUnit(Grimp.v().newReturnStmt(s));
         }
 
-        public void caseReturnVoidStmt(ReturnVoidStmt s) {
+        @Override
+		public void caseReturnVoidStmt(ReturnVoidStmt s) {
           newStmtBox.setUnit(Grimp.v().newReturnVoidStmt(s));
         }
 
-        public void caseTableSwitchStmt(TableSwitchStmt s) {
+        @Override
+		public void caseTableSwitchStmt(TableSwitchStmt s) {
           newStmtBox.setUnit(Grimp.v().newTableSwitchStmt(s));
           updateStmtBox.setUnit(s);
         }
 
-        public void caseThrowStmt(ThrowStmt s) {
+        @Override
+		public void caseThrowStmt(ThrowStmt s) {
           newStmtBox.setUnit(Grimp.v().newThrowStmt(s));
         }
       });
@@ -209,17 +217,20 @@ public class GrimpBody extends StmtBody {
       Stmt stmt = (Stmt) (it.next());
 
       stmt.apply(new AbstractStmtSwitch() {
-        public void caseGotoStmt(GotoStmt s) {
+        @Override
+		public void caseGotoStmt(GotoStmt s) {
           GotoStmt newStmt = (GotoStmt) (oldToNew.get(s));
           newStmt.setTarget(oldToNew.get(newStmt.getTarget()));
         }
 
-        public void caseIfStmt(IfStmt s) {
+        @Override
+		public void caseIfStmt(IfStmt s) {
           IfStmt newStmt = (IfStmt) (oldToNew.get(s));
           newStmt.setTarget(oldToNew.get(newStmt.getTarget()));
         }
 
-        public void caseLookupSwitchStmt(LookupSwitchStmt s) {
+        @Override
+		public void caseLookupSwitchStmt(LookupSwitchStmt s) {
           LookupSwitchStmt newStmt = (LookupSwitchStmt) (oldToNew.get(s));
           newStmt.setDefaultTarget((oldToNew.get(newStmt.getDefaultTarget())));
           Unit[] newTargList = new Unit[newStmt.getTargetCount()];
@@ -229,11 +240,12 @@ public class GrimpBody extends StmtBody {
           newStmt.setTargets(newTargList);
         }
 
-        public void caseTableSwitchStmt(TableSwitchStmt s) {
+        @Override
+		public void caseTableSwitchStmt(TableSwitchStmt s) {
           TableSwitchStmt newStmt = (TableSwitchStmt) (oldToNew.get(s));
           newStmt.setDefaultTarget((oldToNew.get(newStmt.getDefaultTarget())));
           int tc = newStmt.getHighIndex() - newStmt.getLowIndex() + 1;
-          LinkedList<Unit> newTargList = new LinkedList<Unit>();
+          LinkedList<Unit> newTargList = new LinkedList<>();
           for (int i = 0; i < tc; i++) {
             newTargList.add(oldToNew.get(newStmt.getTarget(i)));
           }
@@ -250,5 +262,12 @@ public class GrimpBody extends StmtBody {
     }
 
     PackManager.v().getPack("gb").apply(this);
+  }
+
+@Override
+public Object clone() {
+    Body b = Grimp.v().newBody(getMethod());
+    b.importBodyContentsFrom(this);
+    return b;
   }
 }

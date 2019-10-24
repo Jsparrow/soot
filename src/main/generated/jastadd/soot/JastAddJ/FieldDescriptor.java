@@ -34,8 +34,9 @@ public class FieldDescriptor extends java.lang.Object {
       p = parser;
       int descriptor_index = p.u2();
       typeDescriptor = ((CONSTANT_Utf8_Info) p.constantPool[descriptor_index]).string();
-      if(BytecodeParser.VERBOSE)
-        p.println("  Field: " + name + ", " + typeDescriptor);
+      if(BytecodeParser.VERBOSE) {
+		p.println(new StringBuilder().append("  Field: ").append(name).append(", ").append(typeDescriptor).toString());
+	}
     }
 
 

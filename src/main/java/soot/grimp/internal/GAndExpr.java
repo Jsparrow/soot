@@ -33,19 +33,23 @@ public class GAndExpr extends AbstractGrimpIntLongBinopExpr implements AndExpr {
     super(op1, op2);
   }
 
-  public final String getSymbol() {
+  @Override
+public final String getSymbol() {
     return " & ";
   }
 
-  public final int getPrecedence() {
+  @Override
+public final int getPrecedence() {
     return 500;
   }
 
-  public void apply(Switch sw) {
+  @Override
+public void apply(Switch sw) {
     ((ExprSwitch) sw).caseAndExpr(this);
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GAndExpr(Grimp.cloneIfNecessary(getOp1()), Grimp.cloneIfNecessary(getOp2()));
   }
 

@@ -48,7 +48,7 @@ public class ModifiersTest extends AbstractASMBackendTest {
 		fv.visitEnd();
 		}
 		{
-		fv = cw.visitField(ACC_PRIVATE + ACC_FINAL, "j", "I", null, new Integer(213));
+		fv = cw.visitField(ACC_PRIVATE + ACC_FINAL, "j", "I", null, Integer.valueOf(213));
 		fv.visitEnd();
 		}
 		{
@@ -107,10 +107,11 @@ public class ModifiersTest extends AbstractASMBackendTest {
 		mv.visitEnd();
 		}
 		{
-			if (targetCompiler == TargetCompiler.eclipse)
+			if (targetCompiler == TargetCompiler.eclipse) {
 				mv = cw.visitMethod(ACC_PRIVATE + ACC_NATIVE, "g", "()V", null, null);
-			else
+			} else {
 				mv = cw.visitMethod(ACC_PRIVATE + ACC_NATIVE + ACC_STRICT, "g", "()V", null, null);
+			}
 		mv.visitEnd();
 		}
 		cw.visitEnd();

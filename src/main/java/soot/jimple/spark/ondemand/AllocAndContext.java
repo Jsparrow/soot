@@ -36,11 +36,13 @@ public class AllocAndContext {
     this.context = context;
   }
 
-  public String toString() {
-    return alloc + ", context " + context;
+  @Override
+public String toString() {
+    return new StringBuilder().append(alloc).append(", context ").append(context).toString();
   }
 
-  public int hashCode() {
+  @Override
+public int hashCode() {
     final int PRIME = 31;
     int result = 1;
     result = PRIME * result + alloc.hashCode();
@@ -48,7 +50,8 @@ public class AllocAndContext {
     return result;
   }
 
-  public boolean equals(Object obj) {
+  @Override
+public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }

@@ -43,8 +43,9 @@ public class MediumPriorityQueueTest {
 	@Before
 	public void initUniverse() {
 		universe1 = new Integer[MediumPriorityQueue.MAX_CAPACITY-63];
-		for (int j = 0; j < universe1.length; j++)
+		for (int j = 0; j < universe1.length; j++) {
 			universe1[j] = j;
+		}
 		
 		clone = Arrays.copyOf(universe1, universe1.length);
 	}
@@ -79,15 +80,17 @@ public class MediumPriorityQueueTest {
 		q = PriorityQueue.of(universe1);
 		
 		int i = 0;
-		while (!q.isEmpty())
+		while (!q.isEmpty()) {
 			assertEquals(universe1[i++], q.poll());
+		}
 	}	
 
 	@Test
 	public void testPoll2() {
 		q = PriorityQueue.noneOf(universe1);
-		for (int i=0;i<universe1.length;i+=3)
+		for (int i=0;i<universe1.length;i+=3) {
 			q.add(universe1[i]);
+		}
 
 		int i = -3;
 		while (!q.isEmpty()) {
@@ -101,8 +104,9 @@ public class MediumPriorityQueueTest {
 	public void testPeekPollAll() {
 		q = PriorityQueue.of(universe1);
 		
-		while (!q.isEmpty())
+		while (!q.isEmpty()) {
 			assertEquals(q.peek(), q.poll());
+		}
 	}	
 	
 	
@@ -131,13 +135,15 @@ public class MediumPriorityQueueTest {
 		assertTrue(q.contains(z));
 		assertTrue(q.add(x));
 		
-		for (Integer i : universe1)
-			assertEquals((i == z || i == x), q.contains(i));
+		for (Integer i : universe1) {
+			assertEquals((i.equals(z) || i.equals(x)), q.contains(i));
+		}
 		
 		assertTrue(q.remove(z));		
 		
-		for (Integer i : universe1)
-			assertEquals(i == x, q.contains(i));
+		for (Integer i : universe1) {
+			assertEquals(i.equals(x), q.contains(i));
+		}
 		
 		assertEquals(x, q.peek());
 		assertEquals(x, q.poll());
@@ -161,8 +167,9 @@ public class MediumPriorityQueueTest {
 		assertTrue(q.isEmpty());
 		assertNull(q.peek());
 		assertNull(q.poll());
-		for (Integer i : universe1) 
+		for (Integer i : universe1) {
 			assertFalse(q.contains(i));
+		}
 	}	
 
 	@Test(expected=NoSuchElementException.class)
@@ -259,7 +266,9 @@ public class MediumPriorityQueueTest {
 		assertFalse(q.contains(universe1[hole]));
 		int j = 0;
 		for (Integer i : q) {
-			if (j==hole)j++;
+			if (j==hole) {
+				j++;
+			}
 			assertEquals(universe1[j++], i);
 		}
 	}

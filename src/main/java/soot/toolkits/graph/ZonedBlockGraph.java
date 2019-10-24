@@ -95,7 +95,8 @@ public class ZonedBlockGraph extends BlockGraph {
    *
    * @return the {@link Set} of {@link Unit}s in <tt>unitGraph</tt> which are block leaders.
    */
-  protected Set<Unit> computeLeaders(UnitGraph unitGraph) {
+  @Override
+protected Set<Unit> computeLeaders(UnitGraph unitGraph) {
     Body body = unitGraph.getBody();
     if (body != mBody) {
       throw new RuntimeException("ZonedBlockGraph.computeLeaders() called with a UnitGraph that doesn't match its mBody.");

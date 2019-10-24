@@ -53,26 +53,25 @@ public class PegCallGraphToDot {
    */
 
   public static boolean isBrief = false;
-  private static final Map<Object, String> listNodeName = new HashMap<Object, String>();
+  private static final Map<Object, String> listNodeName = new HashMap<>();
 
   /* in one page or several pages of 8.5x11 */
   public static boolean onepage = true;
-
-  public PegCallGraphToDot(DirectedGraph graph, boolean onepage, String name) {
-
-    PegCallGraphToDot.onepage = onepage;
-    toDotFile(name, graph, "PegCallGraph");
-
-  }
-
-  /*
+/*
    * public PegToDotFile(PegGraph graph, boolean onepage, String name) { this.onepage = onepage; toDotFile(name,
    * graph,"Simple graph"); }
    */
 
   private static int nodecount = 0;
 
-  /**
+public PegCallGraphToDot(DirectedGraph graph, boolean onepage, String name) {
+
+    PegCallGraphToDot.onepage = onepage;
+    toDotFile(name, graph, "PegCallGraph");
+
+  }
+
+/**
    * Generates a dot format file for a DirectedGraph
    *
    * @param methodname,
@@ -105,7 +104,7 @@ public class PegCallGraphToDot {
         Object node = nodesIt.next();
 
         if (node instanceof List) {
-          String listName = "list" + (new Integer(sequence++)).toString();
+          String listName = "list" + (Integer.valueOf(sequence++)).toString();
           String nodeName = makeNodeName(getNodeOrder(nodeindex, listName));
           listNodeName.put(node, listName);
           // System.out.println("put node: "+node +"into listNodeName");
@@ -171,18 +170,18 @@ public class PegCallGraphToDot {
     listNodeName.clear();
   }
 
-  private static int getNodeOrder(Hashtable<Object, Integer> nodeindex, Object node) {
+private static int getNodeOrder(Hashtable<Object, Integer> nodeindex, Object node) {
 
     Integer index = nodeindex.get(node);
     if (index == null) {
-      index = new Integer(nodecount++);
+      index = Integer.valueOf(nodecount++);
       nodeindex.put(node, index);
     }
     // System.out.println("order is:"+index.intValue());
     return index.intValue();
   }
 
-  private static String makeNodeName(int index) {
+private static String makeNodeName(int index) {
     return "N" + index;
   }
 }

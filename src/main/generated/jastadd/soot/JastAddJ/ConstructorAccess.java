@@ -18,16 +18,99 @@ import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
 import soot.coffi.CoffiMethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @production ConstructorAccess : {@link Access} ::= <span class="component">&lt;ID:String&gt;</span> <span class="component">Arg:{@link Expr}*</span>;
  * @ast node
  * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/java.ast:21
  */
-public class ConstructorAccess extends Access implements Cloneable {
+public class ConstructorAccess extends Access {
+  private static final Logger logger = LoggerFactory.getLogger(ConstructorAccess.class);
+/**
+   * @ast method 
+   * @aspect InnerClasses
+   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:469
+   */
+  
+
+  // add val$name as arguments to the constructor
+  protected boolean addEnclosingVariables = true;
+/**
+   * @apilevel internal
+   * @ast method 
+   * 
+   */
+  
   /**
+   * @apilevel internal
+   */
+  protected String tokenString_ID;
+/**
+   * @ast method 
+   * 
+   */
+  
+  public int IDstart;
+/**
+   * @ast method 
+   * 
+   */
+  
+  public int IDend;
+/**
+   * @apilevel internal
+   */
+  protected boolean decls_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected SimpleSet decls_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean decl_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected ConstructorDecl decl_value;
+/**
+   * @apilevel internal
+   */
+  protected boolean type_computed = false;
+/**
+   * @apilevel internal
+   */
+  protected TypeDecl type_value;
+/**
+   * @ast method 
+   * 
+   */
+  public ConstructorAccess() {
+
+
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public ConstructorAccess(String p0, List<Expr> p1) {
+    setID(p0);
+    setChild(p1, 0);
+  }
+/**
+   * @ast method 
+   * 
+   */
+  public ConstructorAccess(beaver.Symbol p0, List<Expr> p1) {
+    setID(p0);
+    setChild(p1, 0);
+  }
+/**
    * @apilevel low-level
    */
-  public void flushCache() {
+  @Override
+public void flushCache() {
     super.flushCache();
     decls_computed = false;
     decls_value = null;
@@ -36,16 +119,18 @@ public class ConstructorAccess extends Access implements Cloneable {
     type_computed = false;
     type_value = null;
   }
-  /**
+/**
    * @apilevel internal
    */
-  public void flushCollectionCache() {
+  @Override
+public void flushCollectionCache() {
     super.flushCollectionCache();
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ConstructorAccess clone() throws CloneNotSupportedException {
     ConstructorAccess node = (ConstructorAccess)super.clone();
     node.decls_computed = false;
@@ -58,29 +143,33 @@ public class ConstructorAccess extends Access implements Cloneable {
     node.is$Final(false);
     return node;
   }
-  /**
+/**
    * @apilevel internal
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ConstructorAccess copy() {
     try {
       ConstructorAccess node = (ConstructorAccess) clone();
       node.parent = null;
-      if(children != null)
-        node.children = (ASTNode[]) children.clone();
+      if(children != null) {
+		node.children = (ASTNode[]) children.clone();
+	}
       return node;
     } catch (CloneNotSupportedException e) {
-      throw new Error("Error: clone not supported for " +
+      logger.error(e.getMessage(), e);
+	throw new Error("Error: clone not supported for " +
         getClass().getName());
     }
   }
-  /**
+/**
    * Create a deep copy of the AST subtree at this node.
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public ConstructorAccess fullCopy() {
     ConstructorAccess tree = (ConstructorAccess) copy();
     if (children != null) {
@@ -94,53 +183,61 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
     return tree;
   }
-  /**
+/**
    * @ast method 
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:111
    */
-  public void exceptionHandling() {
+  @Override
+public void exceptionHandling() {
     for(int i = 0; i < decl().getNumException(); i++) {
       TypeDecl exceptionType = decl().getException(i).type();
-      if(!handlesException(exceptionType))
-        error("" + this + " may throw uncaught exception " + exceptionType.fullName());
+      if(!handlesException(exceptionType)) {
+		error(new StringBuilder().append("").append(this).append(" may throw uncaught exception ").append(exceptionType.fullName()).toString());
+	}
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:272
    */
-  protected boolean reachedException(TypeDecl catchType) {
+  @Override
+protected boolean reachedException(TypeDecl catchType) {
     for(int i = 0; i < decl().getNumException(); i++) {
       TypeDecl exceptionType = decl().getException(i).type();
-      if(catchType.mayCatch(exceptionType))
-        return true;
+      if(catchType.mayCatch(exceptionType)) {
+		return true;
+	}
     }
     return super.reachedException(catchType);
   }
-  /**
+/**
    * @ast method 
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:117
    */
-  public void nameCheck() {
+  @Override
+public void nameCheck() {
     super.nameCheck();
-    if(decls().isEmpty())
-      error("no constructor named " + this);
-    if(decls().size() > 1 && validArgs()) {
-      error("several most specific constructors for " + this);
-      for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
+    if(decls().isEmpty()) {
+		error("no constructor named " + this);
+	}
+    if (!(decls().size() > 1 && validArgs())) {
+		return;
+	}
+	error("several most specific constructors for " + this);
+	for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
         error("         " + ((ConstructorDecl)iter.next()).signature());
       }
-    }
   }
-  /**
+/**
    * @ast method 
    * @aspect PrettyPrint
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/PrettyPrint.jadd:470
    */
-  public void toString(StringBuffer s) {
+  @Override
+public void toString(StringBuffer s) {
     s.append(name());
     s.append("(");
     if(getNumArg() > 0) {
@@ -152,44 +249,40 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
     s.append(")");
   }
-  /**
+/**
    * @ast method 
    * @aspect Annotations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Annotations.jrag:355
    */
-  public void checkModifiers() {
+  @Override
+public void checkModifiers() {
     if(decl().isDeprecated() &&
       !withinDeprecatedAnnotation() &&
       hostType().topLevelType() != decl().hostType().topLevelType() &&
-      !withinSuppressWarnings("deprecation"))
-        warning(decl().signature() + " in " + decl().hostType().typeName() + " has been deprecated");
+      !withinSuppressWarnings("deprecation")) {
+		warning(new StringBuilder().append(decl().signature()).append(" in ").append(decl().hostType().typeName()).append(" has been deprecated").toString());
+	}
   }
-  /**
+/**
    * @ast method 
    * @aspect Enums
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/Enums.jrag:171
    */
-  protected void transformEnumConstructors() {
+  @Override
+protected void transformEnumConstructors() {
     super.transformEnumConstructors();
     getArgList().insertChild(new VarAccess("@p0"),0);
     getArgList().insertChild(new VarAccess("@p1"),1);
   }
-  /**
-   * @ast method 
-   * @aspect InnerClasses
-   * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:469
-   */
-  
-
-  // add val$name as arguments to the constructor
-  protected boolean addEnclosingVariables = true;
-  /**
+/**
    * @ast method 
    * @aspect InnerClasses
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/InnerClasses.jrag:470
    */
   public void addEnclosingVariables() {
-    if(!addEnclosingVariables) return;
+    if(!addEnclosingVariables) {
+		return;
+	}
     addEnclosingVariables = false;
     decl().addEnclosingVariables();
     for(Iterator iter = decl().hostType().enclosingVariables().iterator(); iter.hasNext(); ) {
@@ -197,7 +290,7 @@ public class ConstructorAccess extends Access implements Cloneable {
       getArgList().add(new VarAccess("val$" + v.name()));
     }
   }
-  /**
+/**
    * @ast method 
    * @aspect Transformations
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Backend/Transformations.jrag:138
@@ -211,25 +304,17 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
     super.transformation();
   }
-  /**
+/**
    * @ast method 
    * @aspect EmitJimpleRefinements
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/SootJastAddJ/EmitJimpleRefinements.jrag:235
    */
-  public void collectTypesToSignatures(Collection<Type> set) {
+  @Override
+public void collectTypesToSignatures(Collection<Type> set) {
 	 super.collectTypesToSignatures(set);
    addDependencyIfNeeded(set, decl().erasedConstructor().hostType());
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public ConstructorAccess() {
-    super();
-
-
-  }
-  /**
+/**
    * Initializes the child array to the correct size.
    * Initializes List and Opt nta children.
    * @apilevel internal
@@ -237,43 +322,30 @@ public class ConstructorAccess extends Access implements Cloneable {
    * @ast method 
    * 
    */
-  public void init$Children() {
+  @Override
+public void init$Children() {
     children = new ASTNode[1];
     setChild(new List(), 0);
   }
-  /**
-   * @ast method 
-   * 
-   */
-  public ConstructorAccess(String p0, List<Expr> p1) {
-    setID(p0);
-    setChild(p1, 0);
-  }
-  /**
-   * @ast method 
-   * 
-   */
-  public ConstructorAccess(beaver.Symbol p0, List<Expr> p1) {
-    setID(p0);
-    setChild(p1, 0);
-  }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
    */
-  protected int numChildren() {
+  @Override
+protected int numChildren() {
     return 1;
   }
-  /**
+/**
    * @apilevel internal
    * @ast method 
    * 
    */
-  public boolean mayHaveRewrite() {
+  @Override
+public boolean mayHaveRewrite() {
     return false;
   }
-  /**
+/**
    * Replaces the lexeme ID.
    * @param value The new value for the lexeme ID.
    * @apilevel high-level
@@ -283,42 +355,21 @@ public class ConstructorAccess extends Access implements Cloneable {
   public void setID(String value) {
     tokenString_ID = value;
   }
-  /**
-   * @apilevel internal
-   * @ast method 
-   * 
-   */
-  
-  /**
-   * @apilevel internal
-   */
-  protected String tokenString_ID;
-  /**
-   * @ast method 
-   * 
-   */
-  
-  public int IDstart;
-  /**
-   * @ast method 
-   * 
-   */
-  
-  public int IDend;
-  /**
+/**
    * JastAdd-internal setter for lexeme ID using the Beaver parser.
    * @apilevel internal
    * @ast method 
    * 
    */
   public void setID(beaver.Symbol symbol) {
-    if(symbol.value != null && !(symbol.value instanceof String))
-      throw new UnsupportedOperationException("setID is only valid for String lexemes");
+    if(symbol.value != null && !(symbol.value instanceof String)) {
+		throw new UnsupportedOperationException("setID is only valid for String lexemes");
+	}
     tokenString_ID = (String)symbol.value;
     IDstart = symbol.getStart();
     IDend = symbol.getEnd();
   }
-  /**
+/**
    * Retrieves the value for the lexeme ID.
    * @return The value for the lexeme ID.
    * @apilevel high-level
@@ -328,7 +379,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public String getID() {
     return tokenString_ID != null ? tokenString_ID : "";
   }
-  /**
+/**
    * Replaces the Arg list.
    * @param list The new list node to be used as the Arg list.
    * @apilevel high-level
@@ -338,7 +389,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public void setArgList(List<Expr> list) {
     setChild(list, 0);
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * @return Number of children in the Arg list.
    * @apilevel high-level
@@ -348,7 +399,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public int getNumArg() {
     return getArgList().getNumChild();
   }
-  /**
+/**
    * Retrieves the number of children in the Arg list.
    * Calling this method will not trigger rewrites..
    * @return Number of children in the Arg list.
@@ -359,7 +410,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public int getNumArgNoTransform() {
     return getArgListNoTransform().getNumChildNoTransform();
   }
-  /**
+/**
    * Retrieves the element at index {@code i} in the Arg list..
    * @param i Index of the element to return.
    * @return The element at position {@code i} in the Arg list.
@@ -371,7 +422,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public Expr getArg(int i) {
     return (Expr)getArgList().getChild(i);
   }
-  /**
+/**
    * Append an element to the Arg list.
    * @param node The element to append to the Arg list.
    * @apilevel high-level
@@ -382,7 +433,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     List<Expr> list = (parent == null || state == null) ? getArgListNoTransform() : getArgList();
     list.addChild(node);
   }
-  /**
+/**
    * @apilevel low-level
    * @ast method 
    * 
@@ -391,7 +442,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     List<Expr> list = getArgListNoTransform();
     list.addChild(node);
   }
-  /**
+/**
    * Replaces the Arg list element at index {@code i} with the new node {@code node}.
    * @param node The new node to replace the old list element.
    * @param i The list index of the node to be replaced.
@@ -403,7 +454,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     List<Expr> list = getArgList();
     list.setChild(node, i);
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -413,7 +464,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public List<Expr> getArgs() {
     return getArgList();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -424,7 +475,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public List<Expr> getArgsNoTransform() {
     return getArgListNoTransform();
   }
-  /**
+/**
    * Retrieves the Arg list.
    * @return The node representing the Arg list.
    * @apilevel high-level
@@ -437,7 +488,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     list.getNumChild();
     return list;
   }
-  /**
+/**
    * Retrieves the Arg list.
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @return The node representing the Arg list.
@@ -449,37 +500,42 @@ public class ConstructorAccess extends Access implements Cloneable {
   public List<Expr> getArgListNoTransform() {
     return (List<Expr>)getChildNoTransform(0);
   }
-  /**
+/**
    * @ast method 
    * @aspect VariableArityParametersCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/VariableArityParametersCodegen.jrag:57
    */
-    public void transformation() {
+    @Override
+	public void transformation() {
     if(decl().isVariableArity() && !invokesVariableArityAsArray()) {
       // arguments to normal parameters
       List list = new List();
-      for(int i = 0; i < decl().getNumParameter() - 1; i++)
-        list.add(getArg(i).fullCopy());
+      for(int i = 0; i < decl().getNumParameter() - 1; i++) {
+		list.add(getArg(i).fullCopy());
+	}
       // arguments to variable arity parameters
       List last = new List();
-      for(int i = decl().getNumParameter() - 1; i < getNumArg(); i++)
-        last.add(getArg(i).fullCopy());
+      for(int i = decl().getNumParameter() - 1; i < getNumArg(); i++) {
+		last.add(getArg(i).fullCopy());
+	}
       // build an array holding arguments
       Access typeAccess = decl().lastParameter().type().elementType().createQualifiedAccess();
-      for(int i = 0; i < decl().lastParameter().type().dimension(); i++)
-        typeAccess = new ArrayTypeAccess(typeAccess);
+      for(int i = 0; i < decl().lastParameter().type().dimension(); i++) {
+		typeAccess = new ArrayTypeAccess(typeAccess);
+	}
       list.add(new ArrayCreationExpr(typeAccess, new Opt(new ArrayInit(last))));
       // replace argument list with augemented argument list
       setArgList(list);
     }
     refined_Transformations_ConstructorAccess_transformation();
   }
-  /**
+/**
    * @ast method 
    * @aspect GenericsCodegen
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddExtensions/Jimple1.5Backend/GenericsCodegen.jrag:216
    */
-    public soot.Value eval(Body b) {
+    @Override
+	public soot.Value eval(Body b) {
     b.setLine(this);
     ConstructorDecl c = decl().erasedConstructor();
     // this
@@ -488,10 +544,11 @@ public class ConstructorAccess extends Access implements Cloneable {
     int index = 0;
     ArrayList list = new ArrayList();
     // this$0
-    if(c.needsEnclosing())
-      list.add(asImmediate(b,
-        b.newParameterRef(hostType().enclosingType().getSootType(), index++, this)
-      ));
+    if(c.needsEnclosing()) {
+		list.add(asImmediate(b,
+		    b.newParameterRef(hostType().enclosingType().getSootType(), index++, this)
+		  ));
+	}
     if(c.needsSuperEnclosing()) {
       TypeDecl superClass = ((ClassDecl)hostType()).superclass();
       list.add(asImmediate(b,
@@ -500,65 +557,60 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
     // args
     for(int i = 0; i < getNumArg(); i++)
-      list.add(asImmediate(b, 
-         getArg(i).type().emitCastTo(b, getArg(i), c.getParameter(i).type()))); // MethodInvocationConversion
+	 {
+		list.add(asImmediate(b, 
+		     getArg(i).type().emitCastTo(b, getArg(i), c.getParameter(i).type()))); // MethodInvocationConversion
+	}
 
-    if(decl().isPrivate() && decl().hostType() != hostType()) {
-      list.add(asImmediate(b, soot.jimple.NullConstant.v()));
-      b.add(
+    if (!(decl().isPrivate() && decl().hostType() != hostType())) {
+		return b.newSpecialInvokeExpr(base, c.sootRef(), list, this);
+	}
+	list.add(asImmediate(b, soot.jimple.NullConstant.v()));
+	b.add(
         b.newInvokeStmt(
           b.newSpecialInvokeExpr(base, decl().erasedConstructor().createAccessor().sootRef(), list, this),
           this
         )
       );
-      return base;
-    }
-    else {
-      return b.newSpecialInvokeExpr(base, c.sootRef(), list, this);
-    }
+	return base;
   }
-  /**
+/**
    * @attribute syn
    * @aspect DA
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:235
    */
-  public boolean isDAafter(Variable v) {
+  @Override
+public boolean isDAafter(Variable v) {
     ASTNode$State state = state();
     try {  return decl().isDAafter(v);  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect DU
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/DefiniteAssignment.jrag:694
    */
-  public boolean isDUafter(Variable v) {
+  @Override
+public boolean isDUafter(Variable v) {
     ASTNode$State state = state();
     try {  return decl().isDUafter(v);  }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:50
    */
-  public boolean applicableAndAccessible(ConstructorDecl decl) {
+  @Override
+public boolean applicableAndAccessible(ConstructorDecl decl) {
     ASTNode$State state = state();
     try {  return decl.applicable(getArgList()) && decl.accessibleFrom(hostType());  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean decls_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected SimpleSet decls_value;
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:74
@@ -572,24 +624,18 @@ public class ConstructorAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     decls_value = decls_compute();
-      if(isFinal && num == state().boundariesCrossed) decls_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		decls_computed = true;
+	}
     return decls_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private SimpleSet decls_compute() {
     return chooseConstructor(lookupConstructor(), getArgList());
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean decl_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected ConstructorDecl decl_value;
-  /**
+/**
    * @attribute syn
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:65
@@ -603,19 +649,22 @@ public class ConstructorAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     decl_value = decl_compute();
-      if(isFinal && num == state().boundariesCrossed) decl_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		decl_computed = true;
+	}
     return decl_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private ConstructorDecl decl_compute() {
     SimpleSet decls = decls();
-    if(decls.size() == 1)
-      return (ConstructorDecl)decls.iterator().next();
+    if(decls.size() == 1) {
+		return (ConstructorDecl)decls.iterator().next();
+	}
     return unknownConstructor();
   }
-  /**
+/**
    * @attribute syn
    * @aspect NameCheck
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/NameCheck.jrag:129
@@ -623,15 +672,17 @@ public class ConstructorAccess extends Access implements Cloneable {
   public boolean validArgs() {
     ASTNode$State state = state();
     try {
-    for(int i = 0; i < getNumArg(); i++)
-      if(getArg(i).type().isUnknown())
-        return false;
+    for(int i = 0; i < getNumArg(); i++) {
+		if(getArg(i).type().isUnknown()) {
+			return false;
+		}
+	}
     return true;
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect Names
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/QualifiedNames.jrag:19
@@ -642,31 +693,25 @@ public class ConstructorAccess extends Access implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect SyntacticClassification
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:56
    */
-  public NameType predNameType() {
+  @Override
+public NameType predNameType() {
     ASTNode$State state = state();
     try {  return NameType.AMBIGUOUS_NAME;  }
     finally {
     }
   }
-  /**
-   * @apilevel internal
-   */
-  protected boolean type_computed = false;
-  /**
-   * @apilevel internal
-   */
-  protected TypeDecl type_value;
-  /**
+/**
    * @attribute syn
    * @aspect TypeAnalysis
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeAnalysis.jrag:285
    */
-  @SuppressWarnings({"unchecked", "cast"})
+  @Override
+@SuppressWarnings({"unchecked", "cast"})
   public TypeDecl type() {
     if(type_computed) {
       return type_value;
@@ -675,14 +720,16 @@ public class ConstructorAccess extends Access implements Cloneable {
   int num = state.boundariesCrossed;
   boolean isFinal = this.is$Final();
     type_value = type_compute();
-      if(isFinal && num == state().boundariesCrossed) type_computed = true;
+      if(isFinal && num == state().boundariesCrossed) {
+		type_computed = true;
+	}
     return type_value;
   }
-  /**
+/**
    * @apilevel internal
    */
   private TypeDecl type_compute() {  return decl().type();  }
-  /**
+/**
    * @attribute syn
    * @aspect MethodSignature15
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/MethodSignature.jrag:326
@@ -693,7 +740,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     finally {
     }
   }
-  /**
+/**
    * @attribute syn
    * @aspect VariableArityParameters
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.5Frontend/VariableArityParameters.jrag:47
@@ -701,16 +748,18 @@ public class ConstructorAccess extends Access implements Cloneable {
   public boolean invokesVariableArityAsArray() {
     ASTNode$State state = state();
     try {
-    if(!decl().isVariableArity())
-      return false;
-    if(arity() != decl().arity())
-      return false;
+    if(!decl().isVariableArity()) {
+		return false;
+	}
+    if(arity() != decl().arity()) {
+		return false;
+	}
     return getArg(getNumArg()-1).type().methodInvocationConversionTo(decl().lastParameter().type());
   }
     finally {
     }
   }
-  /**
+/**
    * @attribute inh
    * @aspect ExceptionHandling
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/ExceptionHandling.jrag:44
@@ -721,7 +770,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     boolean handlesException_TypeDecl_value = getParent().Define_boolean_handlesException(this, null, exceptionType);
     return handlesException_TypeDecl_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:14
@@ -732,7 +781,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     Collection lookupConstructor_value = getParent().Define_Collection_lookupConstructor(this, null);
     return lookupConstructor_value;
   }
-  /**
+/**
    * @attribute inh
    * @aspect ConstructScope
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupConstructor.jrag:71
@@ -743,11 +792,12 @@ public class ConstructorAccess extends Access implements Cloneable {
     ConstructorDecl unknownConstructor_value = getParent().Define_ConstructorDecl_unknownConstructor(this, null);
     return unknownConstructor_value;
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupMethod.jrag:29
    * @apilevel internal
    */
-  public Collection Define_Collection_lookupMethod(ASTNode caller, ASTNode child, String name) {
+  @Override
+public Collection Define_Collection_lookupMethod(ASTNode caller, ASTNode child, String name) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().lookupMethod(name);
@@ -755,11 +805,12 @@ public class ConstructorAccess extends Access implements Cloneable {
     else {      return getParent().Define_Collection_lookupMethod(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:88
    * @apilevel internal
    */
-  public boolean Define_boolean_hasPackage(ASTNode caller, ASTNode child, String packageName) {
+  @Override
+public boolean Define_boolean_hasPackage(ASTNode caller, ASTNode child, String packageName) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().hasPackage(packageName);
@@ -767,11 +818,12 @@ public class ConstructorAccess extends Access implements Cloneable {
     else {      return getParent().Define_boolean_hasPackage(this, caller, packageName);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupType.jrag:254
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupType(ASTNode caller, ASTNode child, String name) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().lookupType(name);
@@ -779,11 +831,12 @@ public class ConstructorAccess extends Access implements Cloneable {
     else {      return getParent().Define_SimpleSet_lookupType(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/LookupVariable.jrag:133
    * @apilevel internal
    */
-  public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
+  @Override
+public SimpleSet Define_SimpleSet_lookupVariable(ASTNode caller, ASTNode child, String name) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return unqualifiedScope().lookupVariable(name);
@@ -791,11 +844,12 @@ public class ConstructorAccess extends Access implements Cloneable {
     else {      return getParent().Define_SimpleSet_lookupVariable(this, caller, name);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/SyntacticClassification.jrag:121
    * @apilevel internal
    */
-  public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
+  @Override
+public NameType Define_NameType_nameType(ASTNode caller, ASTNode child) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return NameType.EXPRESSION_NAME;
@@ -803,21 +857,23 @@ public class ConstructorAccess extends Access implements Cloneable {
     else {      return getParent().Define_NameType_nameType(this, caller);
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:18
    * @apilevel internal
    */
-  public String Define_String_methodHost(ASTNode caller, ASTNode child) {
+  @Override
+public String Define_String_methodHost(ASTNode caller, ASTNode child) {
      {
       int childIndex = this.getIndexOfChild(caller);
       return unqualifiedScope().methodHost();
     }
   }
-  /**
+/**
    * @declaredat /Users/eric/Documents/workspaces/clara-soot/JastAddJ/Java1.4Frontend/TypeHierarchyCheck.jrag:130
    * @apilevel internal
    */
-  public boolean Define_boolean_inExplicitConstructorInvocation(ASTNode caller, ASTNode child) {
+  @Override
+public boolean Define_boolean_inExplicitConstructorInvocation(ASTNode caller, ASTNode child) {
     if(caller == getArgListNoTransform())  {
     int childIndex = caller.getIndexOfChild(child);
     return true;
@@ -825,10 +881,11 @@ public class ConstructorAccess extends Access implements Cloneable {
     else {      return getParent().Define_boolean_inExplicitConstructorInvocation(this, caller);
     }
   }
-  /**
+/**
    * @apilevel internal
    */
-  public ASTNode rewriteTo() {
+  @Override
+public ASTNode rewriteTo() {
     return super.rewriteTo();
   }
 }

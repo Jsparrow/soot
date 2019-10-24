@@ -31,7 +31,8 @@ public class GAssignStmt extends JAssignStmt {
     super(Grimp.v().newVariableBox(variable), Grimp.v().newRValueBox(rvalue));
   }
 
-  public Object clone() {
+  @Override
+public Object clone() {
     return new GAssignStmt(Grimp.cloneIfNecessary(getLeftOp()), Grimp.cloneIfNecessary(getRightOp()));
   }
 }

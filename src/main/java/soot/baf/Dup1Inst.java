@@ -25,5 +25,5 @@ package soot.baf;
 import soot.Type;
 
 public interface Dup1Inst extends DupInst {
-  public Type getOp1Type();
+  Type getOp1Type();
 }

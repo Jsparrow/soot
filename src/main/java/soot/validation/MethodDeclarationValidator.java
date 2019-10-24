@@ -44,19 +44,17 @@ public enum MethodDeclarationValidator implements ClassValidator {
   @Override
   public void validate(SootClass sc, List<ValidationException> exceptions) {
     if (sc.isConcrete()) {
-      for (SootMethod sm : sc.getMethods()) {
-        for (Type tp : sm.getParameterTypes()) {
-          if (tp == null) {
-            exceptions.add(new ValidationException(sm, "Null parameter types are invalid"));
-          }
-          if (tp instanceof VoidType) {
-            exceptions.add(new ValidationException(sm, "Void parameter types are invalid"));
-          }
-          if (!tp.isAllowedInFinalCode()) {
-            exceptions.add(new ValidationException(sm, "Parameter type not allowed in final code"));
-          }
-        }
-      }
+      sc.getMethods().forEach(sm -> sm.getParameterTypes().forEach(tp -> {
+		if (tp == null) {
+			exceptions.add(new ValidationException(sm, "Null parameter types are invalid"));
+		}
+		if (tp instanceof VoidType) {
+			exceptions.add(new ValidationException(sm, "Void parameter types are invalid"));
+		}
+		if (!tp.isAllowedInFinalCode()) {
+			exceptions.add(new ValidationException(sm, "Parameter type not allowed in final code"));
+		}
+	}));
     }
   }
 

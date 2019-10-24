@@ -36,15 +36,18 @@ public class SingletonList<E> extends java.util.AbstractList<E> {
     this.o = o;
   }
 
-  public int size() {
+  @Override
+public int size() {
     return 1;
   }
 
-  public boolean contains(Object other) {
+  @Override
+public boolean contains(Object other) {
     return other.equals(o);
   }
 
-  public E get(int index) {
+  @Override
+public E get(int index) {
     if (index != 0) {
       throw new IndexOutOfBoundsException("Singleton list; index = " + index);
     }

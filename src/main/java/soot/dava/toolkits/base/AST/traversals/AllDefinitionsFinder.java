@@ -34,7 +34,7 @@ import soot.jimple.DefinitionStmt;
  */
 
 public class AllDefinitionsFinder extends DepthFirstAdapter {
-  ArrayList<DefinitionStmt> allDefs = new ArrayList<DefinitionStmt>();
+  ArrayList<DefinitionStmt> allDefs = new ArrayList<>();
 
   public AllDefinitionsFinder() {
 
@@ -44,7 +44,8 @@ public class AllDefinitionsFinder extends DepthFirstAdapter {
     super(verbose);
   }
 
-  public void inDefinitionStmt(DefinitionStmt s) {
+  @Override
+public void inDefinitionStmt(DefinitionStmt s) {
     allDefs.add(s);
   }
 

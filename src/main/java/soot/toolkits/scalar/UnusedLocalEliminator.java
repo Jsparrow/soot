@@ -58,7 +58,7 @@ public class UnusedLocalEliminator extends BodyTransformer {
   @Override
   protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
     if (Options.v().verbose()) {
-      logger.debug("[" + body.getMethod().getName() + "] Eliminating unused locals...");
+      logger.debug(new StringBuilder().append("[").append(body.getMethod().getName()).append("] Eliminating unused locals...").toString());
     }
 
     int i = 0;
@@ -74,24 +74,22 @@ public class UnusedLocalEliminator extends BodyTransformer {
     BitSet usedLocals = new BitSet(n);
 
     // Traverse statements noting all the uses and defs
-    for (Unit s : body.getUnits()) {
-      for (ValueBox vb : s.getUseBoxes()) {
-        Value v = vb.getValue();
-        if (v instanceof Local) {
+	body.getUnits().forEach(s -> {
+      s.getUseBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+		if (v instanceof Local) {
           Local l = (Local) v;
           assert locals.contains(l);
           usedLocals.set(l.getNumber());
         }
-      }
-      for (ValueBox vb : s.getDefBoxes()) {
-        Value v = vb.getValue();
-        if (v instanceof Local) {
+	});
+      s.getDefBoxes().stream().map(ValueBox::getValue).forEach(v -> {
+		if (v instanceof Local) {
           Local l = (Local) v;
           assert locals.contains(l);
           usedLocals.set(l.getNumber());
         }
-      }
-    }
+	});
+    });
 
     // Remove all locals that are unused.
     Iterator<Local> localIt = locals.iterator();

@@ -31,11 +31,13 @@ import java.util.AbstractList;
  */
 @Deprecated
 public class EmptyList<E> extends AbstractList<E> {
-  public E get(int index) {
+  @Override
+public E get(int index) {
     throw new IndexOutOfBoundsException();
   }
 
-  public int size() {
+  @Override
+public int size() {
     return 0;
   }
 }
